@@ -48,6 +48,7 @@ import com.machiav3lli.backup.THEME_LIGHT
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.items.ActionResult
+import com.machiav3lli.backup.preferences.pref_blackTheme
 import com.machiav3lli.backup.ui.compose.theme.ApricotOrange
 import com.machiav3lli.backup.ui.compose.theme.ArcticCyan
 import com.machiav3lli.backup.ui.compose.theme.AzureBlue
@@ -77,6 +78,8 @@ fun Context.setCustomTheme() {
         theme.applyAccentStyle()
         theme.applySecondaryStyle()
     } // TODO allow fine control on using custom accent/secondary colors?
+    if (pref_blackTheme.value && isNightMode())
+        theme.applyStyle(R.style.Black, true)
 }
 
 fun Context.setLanguage(): Configuration {
@@ -94,12 +97,14 @@ fun Context.setLanguage(): Configuration {
     return config
 }
 
+//TODO hg42 at least one of the following Save buttons was reported as not doing anything
+
 fun Activity.showActionResult(result: ActionResult, saveMethod: DialogInterface.OnClickListener) =
     runOnUiThread {
         val builder = AlertDialog.Builder(this)
             .setPositiveButton(R.string.dialogOK, null)
         if (!result.succeeded) {
-            builder.setNegativeButton(R.string.dialogSave, saveMethod)
+            builder.setNegativeButton(R.string.dialogSave, saveMethod)      //TODO hg42 either this
             builder.setTitle(R.string.errorDialogTitle)
                 .setMessage(LogsHandler.handleErrorMessages(this, result.message))
             builder.show()
@@ -114,7 +119,7 @@ fun Activity.showError(message: String?) = runOnUiThread {
             .setMessage(message)
             .setPositiveButton(R.string.dialogOK, null)
             .setNegativeButton(R.string.dialogSave) { _: DialogInterface?, _: Int ->
-                LogsHandler.logErrors(message ?: "ERROR")
+                LogsHandler.logErrors(message ?: "ERROR")           //TODO hg42 or that
             }
             .show()
     }
@@ -128,7 +133,7 @@ fun Activity.showFatalUiWarning(message: String) = showWarning(
 fun Activity.showWarning(
     title: String,
     message: String,
-    callback: DialogInterface.OnClickListener?
+    callback: DialogInterface.OnClickListener?,
 ) = runOnUiThread {
     AlertDialog.Builder(this)
         .setTitle(title)
@@ -140,61 +145,64 @@ fun Activity.showWarning(
 
 fun getThemeStyleX(theme: Int) = when (theme) {
     THEME_LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
-    THEME_DARK -> AppCompatDelegate.MODE_NIGHT_YES
-    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+    THEME_DARK  -> AppCompatDelegate.MODE_NIGHT_YES
+    else        -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 }
+
+fun Context.isNightMode() =
+    resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
 fun Resources.Theme.applyAccentStyle() = applyStyle(
     when (stylePrimary) {
-        1 -> R.style.Accent1
-        2 -> R.style.Accent2
-        3 -> R.style.Accent3
-        4 -> R.style.Accent4
-        5 -> R.style.Accent5
-        6 -> R.style.Accent6
-        7 -> R.style.Accent7
-        8 -> R.style.Accent8
+        1    -> R.style.Accent1
+        2    -> R.style.Accent2
+        3    -> R.style.Accent3
+        4    -> R.style.Accent4
+        5    -> R.style.Accent5
+        6    -> R.style.Accent6
+        7    -> R.style.Accent7
+        8    -> R.style.Accent8
         else -> R.style.Accent0
     }, true
 )
 
 val primaryColor
     get() = when (stylePrimary) {
-        1 -> FinePurple
-        2 -> CalmIndigo
-        3 -> Turquoise
-        4 -> BoldGreen
-        5 -> ChartreuseLime
-        6 -> ThunderYellow
-        7 -> ApricotOrange
-        8 -> PumpkinPerano
+        1    -> FinePurple
+        2    -> CalmIndigo
+        3    -> Turquoise
+        4    -> BoldGreen
+        5    -> ChartreuseLime
+        6    -> ThunderYellow
+        7    -> ApricotOrange
+        8    -> PumpkinPerano
         else -> RedComet
     }
 
 fun Resources.Theme.applySecondaryStyle() = applyStyle(
     when (styleSecondary) {
-        1 -> R.style.Secondary1
-        2 -> R.style.Secondary2
-        3 -> R.style.Secondary3
-        4 -> R.style.Secondary4
-        5 -> R.style.Secondary5
-        6 -> R.style.Secondary6
-        7 -> R.style.Secondary7
-        8 -> R.style.Secondary8
+        1    -> R.style.Secondary1
+        2    -> R.style.Secondary2
+        3    -> R.style.Secondary3
+        4    -> R.style.Secondary4
+        5    -> R.style.Secondary5
+        6    -> R.style.Secondary6
+        7    -> R.style.Secondary7
+        8    -> R.style.Secondary8
         else -> R.style.Secondary0
     }, true
 )
 
 val secondaryColor
     get() = when (styleSecondary) {
-        1 -> OceanTeal
-        2 -> Limette
-        3 -> TigerAmber
-        4 -> LavaOrange
-        5 -> FlamingoPink
-        6 -> Slate
-        7 -> AzureBlue
-        8 -> Mint
+        1    -> OceanTeal
+        2    -> Limette
+        3    -> TigerAmber
+        4    -> LavaOrange
+        5    -> FlamingoPink
+        6    -> Slate
+        7    -> AzureBlue
+        8    -> Mint
         else -> ArcticCyan
     }
 
@@ -214,7 +222,7 @@ fun <T> LazyListScope.gridItems(
     val itemsCount = items.count()
     val rows = when {
         itemsCount >= 1 -> 1 + (itemsCount - 1) / columns
-        else -> 0
+        else            -> 0
     }
     items(rows, key = { it.hashCode() }) { rowIndex ->
         Row(
@@ -259,7 +267,7 @@ fun SnackbarHostState.show(
     coroutineScope: CoroutineScope,
     message: String,
     actionText: String? = null,
-    onAction: () -> Unit = {}
+    onAction: () -> Unit = {},
 ) {
     coroutineScope.launch {
         showSnackbar(message = message, actionLabel = actionText, withDismissAction = true).apply {

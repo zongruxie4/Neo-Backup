@@ -46,10 +46,10 @@ android {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
         targetSdk = 32
-        versionCode = 8208
-        versionName = "8.2.5"
+        versionCode = 8302
+        versionName = "8.3.1"
         buildConfigField("int", "MAJOR", "8")
-        buildConfigField("int", "MINOR", "2")
+        buildConfigField("int", "MINOR", "3")
 
         testApplicationId = "${applicationId}.tests"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -122,7 +122,6 @@ android {
 }
 
 dependencies {
-    //implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$vKotlin")
     implementation(kotlin("stdlib", vKotlin))
     implementation(kotlin("reflect", vKotlin))
 
@@ -130,7 +129,7 @@ dependencies {
     implementation("androidx.room:room-runtime:$vRoom")
     implementation("androidx.room:room-ktx:$vRoom")
     kapt("androidx.room:room-compiler:$vRoom")
-    implementation("androidx.work:work-runtime-ktx:2.8.0-rc01")
+    implementation("androidx.work:work-runtime-ktx:2.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha04")
@@ -140,12 +139,10 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("com.github.topjohnwu.libsu:core:$vLibsu")
     implementation("com.github.topjohnwu.libsu:io:$vLibsu")
-    //implementation("com.github.topjohnwu.libsu:busybox:$libsu")
     implementation("de.voize:semver4k:4.1.0")
-    //implementation("com.github.tony19:named-regexp:0.2.6") // regex named groups
 
     // UI
-    implementation("com.google.android.material:material:1.8.0-rc01")
+    implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.preference:preference-ktx:1.2.0")
 
     // Compose

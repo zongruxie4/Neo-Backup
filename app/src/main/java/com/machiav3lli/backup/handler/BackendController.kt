@@ -24,17 +24,21 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Process
+import androidx.compose.runtime.mutableStateOf
 import com.machiav3lli.backup.BACKUP_INSTANCE_PROPERTIES_INDIR
 import com.machiav3lli.backup.BACKUP_INSTANCE_REGEX_PATTERN
 import com.machiav3lli.backup.BACKUP_PACKAGE_FOLDER_REGEX_PATTERN
 import com.machiav3lli.backup.BACKUP_SPECIAL_FILE_REGEX_PATTERN
 import com.machiav3lli.backup.BACKUP_SPECIAL_FOLDER_REGEX_PATTERN
+import com.machiav3lli.backup.ERROR_PREFIX
 import com.machiav3lli.backup.IGNORED_PERMISSIONS
 import com.machiav3lli.backup.MAIN_FILTER_SYSTEM
 import com.machiav3lli.backup.MAIN_FILTER_USER
 import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.OABX.Companion.addInfoLogText
 import com.machiav3lli.backup.OABX.Companion.hitBusy
 import com.machiav3lli.backup.OABX.Companion.setBackups
+import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.actions.BaseAppAction.Companion.ignoredPackages
 import com.machiav3lli.backup.dbs.entity.AppInfo
@@ -47,10 +51,12 @@ import com.machiav3lli.backup.items.Package.Companion.invalidateBackupCacheForPa
 import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.preferences.pref_backupSuspendApps
 import com.machiav3lli.backup.preferences.pref_earlyEmptyBackups
+import com.machiav3lli.backup.preferences.pref_findBackupsLocksFlows
 import com.machiav3lli.backup.traceBackupsScan
 import com.machiav3lli.backup.traceBackupsScanAll
-import com.machiav3lli.backup.traceDebug
 import com.machiav3lli.backup.traceTiming
+import com.machiav3lli.backup.utils.FileUtils.ensureBackups
+import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
@@ -59,23 +65,16 @@ import com.machiav3lli.backup.utils.TraceUtils.logNanoTiming
 import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.utils.getInstalledPackageInfosWithPermissions
 import com.machiav3lli.backup.utils.specialBackupsEnabled
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import java.io.IOException
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
@@ -107,9 +106,7 @@ fun checkThreadStats() {
     }
 }
 
-val numCores = Runtime.getRuntime().availableProcessors()
-
-val pool = when (1) {
+val scanPool = when (1) {
 
     // force hang for recursive scanning
     0    -> Executors.newFixedThreadPool(1).asCoroutineDispatcher()
@@ -123,7 +120,7 @@ val pool = when (1) {
     // creates many threads (~65)
     else -> Dispatchers.IO
 
-    //TODO hg42 it's still not clear, if non-recursive scanning prevents hanging
+    //TODO hg42 it's still not 100% clear, if queue based scanning prevents hanging
 }
 
 suspend fun scanBackups(
@@ -132,7 +129,7 @@ suspend fun scanBackups(
     backupRoot: StorageFile = OABX.context.getBackupRoot(),
     level: Int = 0,
     forceTrace: Boolean = false,
-    cleanup: Boolean = false,
+    damagedOp: String? = null,
     onPropsFile: suspend (StorageFile) -> Unit,
 ) {
     if (level == 0 && packageName.isEmpty() && traceTiming.pref.value) {
@@ -140,34 +137,147 @@ suspend fun scanBackups(
         traceTiming { "threads max: ${maxThreads.get()} (before)" }
     }
 
-    val queueProps = false
-
-    fun formatBackupFile(file: StorageFile) = "${file.path?.replace(backupRoot.path ?: "", "")}"
+    fun formatBackupFile(file: StorageFile) =
+        file.path?.removePrefix(backupRoot.path ?: "")?.removePrefix("/") ?: ""
 
     fun traceBackupsScanPackage(lazyText: () -> String) {
         if (forceTrace) {
-            if (packageName.isNotEmpty())
+            if (packageName.isEmpty())
                 TraceUtils.trace("[BackupsScanAll] ${lazyText()}")
             else
                 TraceUtils.trace("[BackupsScan] ${lazyText()}")
         } else {
-            if (packageName.isNotEmpty())
-                traceBackupsScan(lazyText)
-            else
+            if (packageName.isEmpty())
                 traceBackupsScanAll(lazyText)
+            else
+                traceBackupsScan(lazyText)
         }
     }
 
-    val files = ConcurrentLinkedQueue<StorageFile>()
-    val propsFiles = ConcurrentLinkedQueue<StorageFile>()
+    val suspicious = AtomicInteger(0)
 
-    files.addAll(directory.listFiles())
+    fun logSuspicious(file: StorageFile, reason: String) {
+        formatBackupFile(file)
+                .replace(ERROR_PREFIX, "")
+                .let { relPath ->
+                    val message = "? $relPath ($reason)"
+                    addInfoLogText(message)
+                    traceBackupsScanAll { message }
+                }
+    }
 
-    suspend fun processFile(file:  StorageFile, collector: FlowCollector<StorageFile>? = null): Unit {
+    fun renameDamagedToERROR(file: StorageFile, reason: String) {
+        if (damagedOp == "ren") {
+            runCatching {
+                hitBusy()
+                val newName = "$ERROR_PREFIX${file.name}"
+                file.renameTo(newName)
+                suspicious.getAndIncrement()
+                logSuspicious(file, reason)
+            }
+        } else if (damagedOp == null) {
+            suspicious.getAndIncrement()
+            logSuspicious(file, reason)
+        }
+    }
 
-        checkThreadStats()
+    fun onErrorPrefix(file: StorageFile) {
+        runCatching {
+            file.name?.let { name ->
+                if (name.startsWith(ERROR_PREFIX)) {
+                    hitBusy()
+                    when(damagedOp) {
+                        "undo" -> {
+                            val newName = name.removePrefix(ERROR_PREFIX)
+                            if (file.renameTo(newName)) {
+                                suspicious.getAndIncrement()
+                                logSuspicious(file, "undo")
+                            }
+                        }
+                        "del" -> {
+                            if (file.deleteRecursive()) {
+                                suspicious.getAndIncrement()
+                                logSuspicious(file, "delete")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    val files = ConcurrentLinkedDeque<StorageFile>()
+
+    suspend fun handleProps(
+        file: StorageFile,
+        path: String?,
+        name: String?,
+        onPropsFile: suspend (StorageFile) -> Unit,
+        renamer: (() -> Unit)? = null,
+    ) {
+        hitBusy()
+        try {
+            beginNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}onPropsFile")
+            onPropsFile(file)
+            endNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}onPropsFile")
+        } catch (_: Throwable) {
+            if (renamer != null)
+                renamer()
+            else {
+                name?.let {
+                    if (!it.contains(regexSpecialFile))
+                        renameDamagedToERROR(file, "damaged")
+                }
+            }
+        }
+    }
+
+    fun handleDirectory(file: StorageFile, collector: FlowCollector<StorageFile>? = null): Boolean {
 
         hitBusy()
+
+        beginNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}listFiles")
+        var list = file.listFiles()
+        endNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}listFiles")
+
+        if (list.isEmpty())
+            return false
+
+        // all files for undo or del, otherwise filter
+        if (damagedOp in listOf("ren", null)) {
+            // queue at front of queue (depth first)
+            // filter out dir matching dir.properties
+            val props = list.mapNotNull { it.name }.filter { it.endsWith(".$PROP_NAME") ?: false }
+            val propDirs = props.map { it.removeSuffix(".$PROP_NAME") }
+
+            if (damagedOp == "ren") {
+                list.filter { it.name in propDirs }.forEach { dir ->
+                    runCatching {   // in case it's not a directory etc.
+                        if (dir.listFiles().isEmpty())
+                            renameDamagedToERROR(dir, "empty-inst-dir")
+                    }
+                }
+            }
+
+            list = list.filterNot { it.name in propDirs }
+        }
+
+        // if matching directories are filtered out, we can sort normally,
+        // so we sort reverted and push to front one by one
+        list.sortedByDescending { it.name }.forEach {
+            files.offerFirst(it)
+        }
+
+        return true
+    }
+
+    handleDirectory(directory)    // top level directory
+
+    suspend fun processFile(
+        file: StorageFile,
+    ): Unit {
+
+        checkThreadStats()
 
         val name = file.name ?: ""
         val path = file.path ?: ""
@@ -177,6 +287,17 @@ suspend fun scanBackups(
                     formatBackupFile(file)
                 } file"
             }
+
+        if (damagedOp in listOf("undo", "del")) {
+            // undo for each file
+            onErrorPrefix(file)
+            // scan all files
+            if (file.isDirectory)
+                handleDirectory(file)
+            // do nothing else
+            return
+        }
+
         if (name.contains(regexPackageFolder) ||
             name.contains(regexBackupInstance)                      // backup
         ) {
@@ -186,8 +307,8 @@ suspend fun scanBackups(
                         formatBackupFile(file)
                     } backup"
                 }
-            if (path.contains(packageName)) {
-                if (name.contains(regexBackupInstance)                  // instance
+            if (path.contains(packageName)) {                           // single scan: pkg matches
+                if (name.contains(regexBackupInstance)                  // or any instance
                 ) {
                     traceBackupsScanPackage {
                         ":::${"|:::".repeat(level)}i     ${
@@ -202,83 +323,60 @@ suspend fun scanBackups(
                                 formatBackupFile(file)
                             } ++++++++++++++++++++ props ok"
                         }
-                        try {
-                            if (queueProps) {
-                                propsFiles.add(file)
-                            } else {
-                                beginNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}onPropsFile")
-                                onPropsFile(file)
-                                endNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}onPropsFile")
-                            }
-                        } catch (_: Throwable) {
-                            if (!name.contains(regexSpecialFile))
-                                runCatching {
-                                    if (cleanup) file.renameTo(".ERROR.${file.name}")
-                                }
-                        }
+                        handleProps(file, path, name, onPropsFile)
                     } else {
                         if (!name.contains(regexSpecialFolder) &&
                             file.isDirectory                                // instance dir
                         ) {
-                            if (false) { //TODO hg42  && "${file.name}.${PROP_NAME}" !in names) {             // no dir.properties
-                                if (name.contains(regexPackageFolder)) {
-                                    try {
-                                        file.findFile(BACKUP_INSTANCE_PROPERTIES_INDIR)  // indir props
-                                            ?.let {
-                                                traceBackupsScanPackage {
-                                                    ":::${"|:::".repeat(level)}>     ${
-                                                        formatBackupFile(it)
-                                                    } ++++++++++++++++++++ indir props ok"
-                                                }
-                                                try {
-                                                    if (queueProps) {
-                                                        propsFiles.add(it)
-                                                    } else {
-                                                        beginNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}onPropsFile")
-                                                        onPropsFile(it)
-                                                        endNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}onPropsFile")
-                                                    }
-                                                } catch (_: Throwable) {
-                                                    // rename the dir, because the backup is damaged
-                                                    runCatching {
-                                                        file.name?.let { name ->
-                                                            if (!name.contains(
-                                                                    regexSpecialFolder
-                                                                )
-                                                            ) {
-                                                                if (cleanup) file.renameTo(".ERROR.${file.name}")
-                                                            }
+                            // directories are filtered out for existing properties,
+                            // so if it's an instance directory it's solo -> error
+                            if (name.contains(regexPackageFolder)) {
+                                // in case of flatStructure there could be a backup.properties inside
+                                // TODO hg42 change so that this can be seen by the directory name
+                                try {
+                                    file.findFile(BACKUP_INSTANCE_PROPERTIES_INDIR)  // indir props
+                                        ?.let {
+                                            traceBackupsScanPackage {
+                                                ":::${"|:::".repeat(level)}>     ${
+                                                    formatBackupFile(it)
+                                                } ++++++++++++++++++++ indir props ok"
+                                            }
+                                            handleProps(it, it.path, it.name, onPropsFile) {
+                                                runCatching {
+                                                    file.name?.let { name ->
+                                                        if (!name.contains(
+                                                                regexSpecialFolder
+                                                            )
+                                                        ) {
+                                                            renameDamagedToERROR(
+                                                                file,
+                                                                "damaged"
+                                                            )
                                                         }
                                                     }
                                                 }
-                                            } ?: run { // rename the dir, no dir.properties
-                                            if (cleanup) file.renameTo(".ERROR.${file.name}")
-                                        }
-                                    } catch (_: Throwable) { // rename the dir, no dir.properties
-                                        if (cleanup) file.renameTo(".ERROR.${file.name}")
+                                            }
+                                        } ?: run {
+                                        renameDamagedToERROR(file, "no-props")
                                     }
-                                } else {
-                                    if (cleanup) file.renameTo(".ERROR.${file.name}")
+                                } catch (_: Throwable) {
+                                    renameDamagedToERROR(file, "no-props")
                                 }
+                            } else {
+                                renameDamagedToERROR(file, "no-props")
                             }
                         }
                     }
-                } else {
+                } else {                                            // no instance
                     if (file.isPropertyFile &&
-                        !name.contains(regexSpecialFile)                // classic props
+                        !name.contains(regexSpecialFile)                // non-instance props (???)
                     ) {
                         traceBackupsScanPackage {
                             ":::${"|:::".repeat(level)}> ${
                                 formatBackupFile(file)
-                            } ++++++++++++++++++++ props ok"
+                            } ++++++++++++++++++++ special props ok"
                         }
-                        if (queueProps) {
-                            propsFiles.add(file)
-                        } else {
-                            beginNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}onPropsFile")
-                            onPropsFile(file)
-                            endNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}onPropsFile")
-                        }
+                        handleProps(file, path, name, onPropsFile)
                     } else {
                         if (file.isDirectory) {
                             traceBackupsScanPackage {
@@ -286,10 +384,8 @@ suspend fun scanBackups(
                                     formatBackupFile(file)
                                 } //////////////////// dir ok"
                             }
-                            file.listFiles().forEach {
-                                collector?.run { emit(it) } ?: files.offer(it)
-                            }
-                            traceDebug { "queue: $files" }
+                            if (handleDirectory(file).not())
+                                renameDamagedToERROR(file, "empty-dir")
                         }
                     }
                 }
@@ -304,82 +400,69 @@ suspend fun scanBackups(
                             formatBackupFile(file)
                         } /\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ folder ok"
                     }
-                file.listFiles().forEach {
-                    collector?.run { emit(it) } ?: files.offer(it)
-                }
+                if (handleDirectory(file).not())
+                    renameDamagedToERROR(file, "empty-folder")
             }
         }
     }
 
-    val scope = CoroutineScope(pool)
-    when (1) {
-
-        0 -> files.parallelStream()
-            .forEach { runBlocking { processFile(it) } }                // best,  8 threads, may hang
-        // may hang for recursive scanning because threads are limited
-
-        0 -> files.stream().parallel()
-            .forEach { runBlocking { processFile(it) } }                // best,  8 threads, may hang
-        // may hang for recursive scanning because threads are limited
-
-        0 -> runBlocking {
-            files.asFlow().onEach { processFile(it) }.flowOn(pool).collect {}
-        }                                                               // slow,  7 threads with IO,
-        // most used once, one used 900 times
-
-        0 -> runBlocking {
-            files.asFlow().collect { launch(pool) { processFile(it) } }
-        }                                                               // best, 63 threads with IO
-
-        0 -> files.asFlow().onEach { processFile(it) }
-            .collect {}                                                 // slow,  1 thread with IO
-
-        0 -> files.asFlow().map { scope.launch(pool) { processFile(it) } }
-            .collect { it.join() }                                      // slow, 19 threads with IO
-
-        0 -> files.map { scope.launch(pool) { processFile(it) } }
-            .joinAll()                                                  // best, 66 threads with IO
-
-        0 -> runBlocking {
-            files.forEach { launch(pool) { processFile(it) } }
-        }                                                               // best, 63 threads with IO
-
-        0 -> runBlocking {
-            files.iterator().forEach { launch(pool) { processFile(it) } }
-        }                                                               // best, 65 threads with IO
-
-        1 -> runBlocking {
+    var total = 0
+    while (files.isNotEmpty()) {
+        if (packageName.isEmpty())
+            traceBackupsScanPackage { "queue filled with ${files.size}" }
+        runBlocking { // joins jobs, so launched jobs that queue files are finished, before checking the queue
+            var count = 0
             val filesFlow = flow {
-                while (
-                    files.isNotEmpty() ||
-                    run {
-                        //TODO hg42 seems to be necessary, because the items are added via launch
-                        //  (which in turn is necessary to be fast)
-                        //  though it is not totally clear why it happens, the launch reasoning
-                        //  seems only to be valid if it's the last package
-                        //  how can we do this better?
-                        //  I tried to emit the directory files directly to this flow,
-                        //  but doesn't seem to work with processFile
-                        //  probably the FlowCollector must be given to processFile
-                        delay(250)
-                        files.isNotEmpty()
-                    }
-                ) {
+                while (files.isNotEmpty()) {
                     val file = files.remove()
+                    count++
+                    total++
                     emit(file)
                 }
+                if (packageName.isEmpty())
+                    traceBackupsScanPackage { "queue empty after $count" }
             }
             filesFlow.collect {
-                launch(pool) {
+                launch(scanPool) {
                     processFile(it)
                 }
             }
-        }                                                               // best, 65 threads with IO
+        }
     }
+    if (packageName.isEmpty()) {
+        traceBackupsScanPackage { "queue total ----> $total" }
+        if (suspicious.get() > 0)
+            addInfoLogText(
+                "${
+                    if (damagedOp == "ren")
+                        "renamed"
+                    else if (damagedOp == "del")
+                        "deleted"
+                    else if (damagedOp == "undo")
+                        "undo"
+                    else
+                        "suspicious"
+                }: ${suspicious.get()}"
+            )
+    }
+}
+
+val backupsLocked = mutableStateOf(false)
+fun beginBackupsLock() {
+    backupsLocked.value = true
+}
+
+fun endBackupsLock() {
+    backupsLocked.value = false
+}
+
+fun isBackupsLocked(): Boolean {
+    return backupsLocked.value
 }
 
 fun Context.findBackups(
     packageName: String = "",
+    damagedOp: String? = null,
     forceTrace: Boolean = false,
 ): Map<String, List<Backup>> {
 
@@ -387,27 +470,31 @@ fun Context.findBackups(
 
     var installedNames: List<String> = emptyList()
 
-    if (packageName.isEmpty()) {
-        OABX.beginBusy("findBackups")
-
-        // preset installed packages with empty backups lists
-        // this prevents scanning them again when a package needs it's backups later
-        // doing it here also avoids setting all packages to empty lists when findbackups fails
-        // so there is a chance that scanning for backups of a single package will work later
-
-        //val installedPackages = getInstalledPackageList()   // too slow (2-3 sec)
-        val installedPackages = packageManager.getInstalledPackageInfosWithPermissions()
-        val specialInfo = SpecialInfo.getSpecialPackages(this)
-        installedNames =
-            installedPackages.map { it.packageName } + specialInfo.map { it.packageName }
-
-        if (pref_earlyEmptyBackups.value)
-            OABX.emptyBackupsForAllPackages(installedNames)
-
-        clearThreadStats()
-    }
-
     try {
+        if (packageName.isEmpty()) {
+
+            if (pref_findBackupsLocksFlows.value)
+                beginBackupsLock()
+
+            OABX.beginBusy("findBackups")
+
+            // preset installed packages with empty backups lists
+            // this prevents scanning them again when a package needs it's backups later
+            // doing it here also avoids setting all packages to empty lists when findbackups fails
+            // so there is a chance that scanning for backups of a single package will work later
+
+            //val installedPackages = getInstalledPackageList()   // too slow (2-3 sec)
+            val installedPackages = packageManager.getInstalledPackageInfosWithPermissions()
+            val specialInfo = SpecialInfo.getSpecialPackages(this)
+            installedNames =
+                installedPackages.map { it.packageName } + specialInfo.map { it.packageName }
+
+            if (pref_earlyEmptyBackups.value)
+                OABX.emptyBackupsForAllPackages(installedNames)
+
+            clearThreadStats()
+        }
+
         invalidateBackupCacheForPackage(packageName)
 
         val backupRoot = getBackupRoot()
@@ -417,13 +504,19 @@ fun Context.findBackups(
         when (1) {
             1 -> {
                 runBlocking {
-                    scanBackups(backupRoot, packageName, forceTrace = forceTrace) { propsFile ->
+                    scanBackups(
+                        backupRoot,
+                        packageName,
+                        damagedOp = damagedOp,
+                        forceTrace = forceTrace
+                    ) { propsFile ->
                         count.getAndIncrement()
                         Backup.createFrom(propsFile)
                             ?.let {
-                                traceDebug { "put ${it.packageName}/${it.backupDate}" }
+                                //traceDebug { "put ${it.packageName}/${it.backupDate}" }
                                 synchronized(backupsMap) {
-                                    backupsMap.getOrPut(it.packageName) { mutableListOf() }.add(it)
+                                    backupsMap.getOrPut(it.packageName) { mutableListOf() }
+                                        .add(it)
                                 }
                             }
                             ?: run {
@@ -434,9 +527,12 @@ fun Context.findBackups(
             }
         }
 
-        traceDebug { "-----------------------------------------> backups: $count" }
+        //traceDebug { "-----------------------------------------> backups: $count" }
 
         if (packageName.isEmpty()) {
+
+            if (pref_findBackupsLocksFlows.value)
+                endBackupsLock()
 
             setBackups(backupsMap)
 
@@ -460,8 +556,12 @@ fun Context.findBackups(
         logException(e, backTrace = true)
     } finally {
         if (packageName.isEmpty()) {
+
+            if (pref_findBackupsLocksFlows.value)
+                endBackupsLock()
+
             val time = OABX.endBusy("findBackups")
-            OABX.addInfoText("findBackups: ${"%.3f".format(time / 1E9)} sec")
+            OABX.addInfoLogText("findBackups: ${"%.3f".format(time / 1E9)} sec")
 
             if (traceTiming.pref.value) {
                 logNanoTiming("scanBackups.", "scanBackups")
@@ -515,7 +615,7 @@ fun Context.getInstalledPackageList(): MutableList<Package> { // only used in Sc
                 }
                 .toMutableList()
 
-            //if (!OABX.appsSuspendedChecked) { //TODO move somewhere else
+            //if (!OABX.appsSuspendedChecked) { //TODO hg42 move somewhere else
             //    packageList.filter { appPackage ->
             //        0 != (OABX.activity?.packageManager
             //            ?.getPackageInfo(appPackage.packageName, 0)
@@ -551,7 +651,7 @@ fun Context.getInstalledPackageList(): MutableList<Package> { // only used in Sc
             //}.toMutableList()
         }
 
-        OABX.addInfoText(
+        OABX.addInfoLogText(
             "getPackageList: ${(time / 1000 + 0.5).toInt()} sec"
         )
     } catch (e: Throwable) {
@@ -612,7 +712,7 @@ fun List<AppInfo>.toPackageList(
         }
 
     } catch (e: Throwable) {
-        LogsHandler.unhandledException(e)
+        LogsHandler.unexpectedException(e)
     } finally {
         OABX.endBusy("toPackageList")
     }
@@ -655,7 +755,7 @@ fun Context.updateAppTables() {
         }
 
 
-        val backupsMap = findBackups()
+        val backupsMap = ensureBackups()
         val backups = backupsMap.values.flatten()
 
         val specialPackages = SpecialInfo.getSpecialPackages(this)
@@ -705,7 +805,7 @@ fun Context.updateAppTables() {
         logException(e, backTrace = true)
     } finally {
         val time = OABX.endBusy("updateAppTables")
-        OABX.addInfoText("updateAppTables: ${"%.3f".format(time / 1E9)} sec")
+        OABX.addInfoLogText("updateAppTables: ${"%.3f".format(time / 1E9)} sec")
     }
 }
 
@@ -714,14 +814,19 @@ fun Context.getPackageStorageStats(
     packageName: String,
     storageUuid: UUID = packageManager.getApplicationInfo(packageName, 0).storageUuid,
 ): StorageStats? {
-    val storageStatsManager = getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager
+    val storageStatsManager =
+        getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager
     return try {
-        storageStatsManager.queryStatsForPackage(storageUuid, packageName, Process.myUserHandle())
+        storageStatsManager.queryStatsForPackage(
+            storageUuid,
+            packageName,
+            Process.myUserHandle()
+        )
     } catch (e: IOException) {
         Timber.e("Could not retrieve storage stats of $packageName: $e")
         null
     } catch (e: Throwable) {
-        LogsHandler.unhandledException(e, packageName)
+        LogsHandler.unexpectedException(e, packageName)
         null
     }
 }

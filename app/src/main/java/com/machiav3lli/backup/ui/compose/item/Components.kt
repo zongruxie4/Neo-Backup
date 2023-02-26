@@ -5,6 +5,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.expandVertically
@@ -59,11 +64,14 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -96,6 +104,7 @@ import com.machiav3lli.backup.MODE_DATA_DE
 import com.machiav3lli.backup.MODE_DATA_EXT
 import com.machiav3lli.backup.MODE_DATA_MEDIA
 import com.machiav3lli.backup.MODE_DATA_OBB
+import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.SPECIAL_FILTER_ALL
 import com.machiav3lli.backup.SPECIAL_FILTER_DISABLED
@@ -104,10 +113,13 @@ import com.machiav3lli.backup.SPECIAL_FILTER_OLD
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.items.Package
+import com.machiav3lli.backup.preferences.pref_busyIconScale
+import com.machiav3lli.backup.preferences.pref_busyIconTurnTime
 import com.machiav3lli.backup.preferences.pref_hideBackupLabels
 import com.machiav3lli.backup.traceDebug
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowSquareOut
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Checks
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CircleWavyWarning
@@ -214,26 +226,101 @@ fun PackageIcon(
     endNanoTimer("pkgIcon.rCAIP")
 }
 
-private var painterCache = mutableMapOf<Any, Painter>()         //TODO hg42 move somewhere else
+@Composable
+fun RefreshButton(
+    modifier: Modifier = Modifier,
+    size: Dp = ICON_SIZE_SMALL,
+    tint: Color = MaterialTheme.colorScheme.onBackground,
+    hideIfNotBusy: Boolean = false,
+    onClick: () -> Unit = {},
+) {
+    val isBusy by remember { OABX.busy }
 
-fun clearIconCache() {                                  //TODO hg42 move somewhere else
-    synchronized(painterCache) {
-        painterCache.clear()
+    if (hideIfNotBusy && isBusy.not())
+        return
+
+    val (angle, scale) = if (isBusy) {
+        val infiniteTransition = rememberInfiniteTransition()
+
+        // Animate from 0f to 1f
+        val animationProgress by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = pref_busyIconTurnTime.value,
+                    easing = LinearEasing
+                )
+            )
+        )
+        val angle = 360f * animationProgress
+        val scale = 0.01f * pref_busyIconScale.value
+        angle to scale
+    } else {
+        0f to 1f
     }
+
+    RoundButton(
+        description = stringResource(id = R.string.refresh),
+        icon = Phosphor.ArrowsClockwise,
+        size = size,
+        tint = if (isBusy) Color.Red else tint,
+        modifier = modifier
+            .scale(scale)
+            .rotate(angle),
+        onClick = onClick
+    )
 }
 
-fun limitIconCache(pkgs: List<Package>) {
-    (painterCache.keys - pkgs.map { it.iconData }).forEach {
-        if (it !is Int) {
-            traceDebug { "icon remove $it" }
-            synchronized(painterCache) {
-                painterCache.remove(it)
-            }
+object IconCache {
+
+    private var painterCache = mutableMapOf<Any, Painter>()
+
+    fun getIcon(key: Any): Painter? {
+        return synchronized(painterCache) {
+            painterCache.get(key)
         }
     }
-}
 
-fun sizeOfIconCache() = painterCache.size               //TODO hg42 move somewhere else
+    fun putIcon(key: Any, painter: Painter) {
+        //traceDebug { "icon put $key" }
+        synchronized(painterCache) {
+            painterCache.put(key, painter)
+        }
+    }
+
+    fun removeIcon(key: Any) {
+        traceDebug { "icon remove $key" }
+        synchronized(painterCache) {
+            painterCache.remove(key)
+        }
+    }
+
+    fun clear() {
+        synchronized(painterCache) {
+            painterCache.clear()
+        }
+    }
+
+    fun dropAllButUsed(pkgs: List<Package>) {
+        val used = pkgs.map { it.iconData }
+        beginNanoTimer("limitIconCache")
+        val keys = synchronized(painterCache) { painterCache.keys }
+        (keys - used).forEach {
+            if (it !is Int) {
+                removeIcon(it)
+            }
+        }
+        endNanoTimer("limitIconCache")
+    }
+
+    val size: Int
+        get() {
+            return synchronized(painterCache) {
+                painterCache.size
+            }
+        }
+}
 
 @Composable
 fun cachedAsyncImagePainter(
@@ -242,23 +329,23 @@ fun cachedAsyncImagePainter(
     altPainter: Painter? = null,
 ): Painter {
     beginNanoTimer("rmbrCachedAIP")
-    var painter = synchronized(painterCache) { painterCache.get(model) }
+    var painter = IconCache.getIcon(model)
     if (painter == null) {
         beginNanoTimer("rmbrAIP")
+        val request =
+            ImageRequest.Builder(LocalContext.current)
+                .data(model)
+                .size(Size.ORIGINAL)
+                .build()
         val rememberedPainter =
             rememberAsyncImagePainter(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(model)
-                    .size(Size.ORIGINAL)
-                    .build(),
+                model = request,
                 imageLoader = imageLoader,
                 onState = {
                     if (it !is AsyncImagePainter.State.Loading)
                         it.painter?.let {
-                            synchronized(painterCache) { painterCache.put(model, it) }
-                        } //?: run {
-                    //    altPainter?.let { synchronized(painterCache) { painterCache.put(model, it) } }
-                    //}
+                            IconCache.putIcon(model, it)
+                        }
                 }
             )
         endNanoTimer("rmbrAIP")

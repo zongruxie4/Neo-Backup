@@ -25,37 +25,41 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.OABX.Companion.getBackups
 import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Blocklist
+import com.machiav3lli.backup.handler.isBackupsLocked
 import com.machiav3lli.backup.handler.toPackageList
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.Package.Companion.invalidateCacheForPackage
-import com.machiav3lli.backup.preferences.pref_flowsWaitForStartup
 import com.machiav3lli.backup.traceBackups
 import com.machiav3lli.backup.traceFlows
 import com.machiav3lli.backup.ui.compose.MutableComposableFlow
-import com.machiav3lli.backup.ui.compose.item.limitIconCache
+import com.machiav3lli.backup.ui.compose.item.IconCache
+import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.formatSortedBackups
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.sortFilterModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import timber.log.Timber
 import kotlin.reflect.*
 
@@ -64,9 +68,7 @@ class MainViewModel(
     private val appContext: Application,
 ) : AndroidViewModel(appContext) {
 
-    init {
-        // do this before the flows start
-    }
+    init { Timber.w("==================== ${classAndId(this)}") }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS
 
@@ -156,10 +158,11 @@ class MainViewModel(
                 }"
             }
 
-            val pkgs = p.toPackageList(appContext, emptyList(), b)
-            //val pkgs = p.toPackageList(appContext, emptyList(), getBackups())     //TODO hg42 always use the current packages instead of slow turna around from db?
+            //TODO hg42 use the current backups instead of slow turn around from db
+            //val pkgs = p.toPackageList(appContext, emptyList(), b)
+            val pkgs = p.toPackageList(appContext, emptyList(), getBackups())
 
-            limitIconCache(pkgs)
+            IconCache.dropAllButUsed(pkgs.drop(0))
 
             traceFlows { "***** packages ->> ${pkgs.size}" }
             pkgs
@@ -217,7 +220,7 @@ class MainViewModel(
             "searchQuery"
         )
 
-    var modelSortFilter =
+    val modelSortFilter =
         //------------------------------------------------------------------------------------------ modelSortFilter
         MutableComposableFlow(
             sortFilterModel,
@@ -230,24 +233,28 @@ class MainViewModel(
         //========================================================================================== filteredList
         combine(notBlockedList, modelSortFilter.flow, searchQuery.flow) { p, f, s ->
 
-            traceFlows { "******************** filtering - list: ${p.size} filter: $f" }
+            var list = emptyList<Package>()
 
-            if (pref_flowsWaitForStartup.value)
-                while (OABX.startup /* || OABX.isBusy */) {
-                    traceFlows { "*** filtering waiting for end of startup" }
-                    delay(500)
-                }
+            if (isBackupsLocked()) {
 
-            val list = p
-                .filter { item: Package ->
-                    s.isEmpty() || (
-                            listOf(item.packageName, item.packageLabel)
-                                .any { it.contains(s, ignoreCase = true) }
-                            )
-                }
-                .applyFilter(f, OABX.main!!)
+                traceFlows { "******************** filtering - locked" }
 
-            traceFlows { "***** filtered ->> ${list.size}" }
+            } else {
+
+                traceFlows { "******************** filtering - list: ${p.size} filter: $f" }
+
+                list = p
+                    .filter { item: Package ->
+                        s.isEmpty() || (
+                                listOf(item.packageName, item.packageLabel)
+                                    .any { it.contains(s, ignoreCase = true) }
+                                )
+                    }
+                    .applyFilter(f, OABX.main!!)
+
+                traceFlows { "***** filtered ->> ${list.size}" }
+            }
+
             list
         }
             // if the filter changes we can drop the older filters
@@ -263,13 +270,9 @@ class MainViewModel(
     val updatedPackages =
         //------------------------------------------------------------------------------------------ updatedPackages
         notBlockedList
+            .filterNot { isBackupsLocked() }
             .trace { "updatePackages? ..." }
             .mapLatest {
-                if (pref_flowsWaitForStartup.value)
-                    while (OABX.startup /* || OABX.isBusy */) {
-                        traceFlows { "*** updatePackages waiting for end of startup" }
-                        delay(500)
-                    }
                 it.filter(Package::isUpdated).toMutableList()
             }
             .trace {
@@ -284,6 +287,23 @@ class MainViewModel(
                 SharingStarted.Eagerly,
                 emptyList()
             )
+
+    //---------------------------------------------------------------------------------------------- retriggerFlowsForUI
+
+    fun retriggerFlowsForUI() {
+        traceFlows { "******************** retriggerFlowsForUI" }
+        runBlocking {
+            val saved = searchQuery.value
+            // in case same value isn't triggering
+            val retrigger = saved + "<RETRIGGERING>"
+            searchQuery.value = retrigger
+            // wait until we really get that value
+            while(searchQuery.value != retrigger)
+                yield()
+            // now switch back
+            searchQuery.value = saved
+        }
+    }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS end
 

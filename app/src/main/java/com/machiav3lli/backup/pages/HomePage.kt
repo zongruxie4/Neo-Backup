@@ -54,6 +54,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BatchDialogFragment
 import com.machiav3lli.backup.fragments.AppSheet
 import com.machiav3lli.backup.items.Package
+import com.machiav3lli.backup.preferences.pref_menuButtonAlwaysVisible
 import com.machiav3lli.backup.traceCompose
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
@@ -62,9 +63,9 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.List
 import com.machiav3lli.backup.ui.compose.item.ActionButton
 import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.item.ExpandingFadingVisibility
+import com.machiav3lli.backup.ui.compose.item.IconCache
 import com.machiav3lli.backup.ui.compose.item.MainPackageContextMenu
 import com.machiav3lli.backup.ui.compose.item.cachedAsyncImagePainter
-import com.machiav3lli.backup.ui.compose.item.sizeOfIconCache
 import com.machiav3lli.backup.ui.compose.recycler.HomePackageRecycler
 import com.machiav3lli.backup.ui.compose.recycler.UpdatedPackageRecycler
 import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer
@@ -75,21 +76,33 @@ import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 fun HomePage() {
     // TODO include tags in search
     val main = OABX.main!!
+    val viewModel = main.viewModel
     var appSheet: AppSheet? = null
 
-    val filteredList by main.viewModel.filteredList.collectAsState(emptyList())
-    val updatedPackages by main.viewModel.updatedPackages.collectAsState(emptyList())
-    val updaterVisible by remember(updatedPackages) { mutableStateOf(updatedPackages.isNotEmpty()) }
+    val filteredList by viewModel.filteredList.collectAsState(emptyList())
+    val updatedPackages by viewModel.updatedPackages.collectAsState(emptyList())
+    val updaterVisible = updatedPackages.isNotEmpty()  // recompose is already triggered above
     var updaterExpanded by remember { mutableStateOf(false) }
-    val selection = main.viewModel.selection
-    val selected = selection.filter { it.value }
+    val selection = viewModel.selection
+    val nSelected = selection.filter { it.value }.keys.size
     var menuPackage by remember { mutableStateOf<Package?>(null) }
-    val menuExpanded = main.viewModel.menuExpanded
+    val menuExpanded = viewModel.menuExpanded
+    val menuButtonAlwaysVisible = pref_menuButtonAlwaysVisible.value
 
-    traceCompose { "HomePage f=${filteredList.size} u=${updatedPackages.size} m=${menuExpanded}" }
+    traceCompose {
+        "HomePage filtered=${
+            filteredList.size
+        } updated=${
+            updatedPackages.size
+        }->${
+            if (updaterVisible) "visible" else "hidden"
+        } menu=${
+            menuExpanded.value
+        } always=${menuButtonAlwaysVisible}"
+    }
 
     // prefetch icons
-    if (filteredList.size > sizeOfIconCache()) {    // includes empty cache and empty filteredList
+    if (filteredList.size > IconCache.size) {    // includes empty cache and empty filteredList
         beginNanoTimer("prefetchIcons")
         filteredList.forEach { pkg ->
             cachedAsyncImagePainter(model = pkg.iconData)
@@ -99,16 +112,14 @@ fun HomePage() {
 
     val batchConfirmListener = object : BatchDialogFragment.ConfirmListener {
         override fun onConfirmed(selectedPackages: List<String?>, selectedModes: List<Int>) {
-            main.startBatchAction(true, selectedPackages, selectedModes) {
-                it.removeObserver(this)
-            }
+            main.startBatchAction(true, selectedPackages, selectedModes)
         }
     }
 
     Scaffold(
         containerColor = Color.Transparent,
         floatingActionButton = {
-            if (selected.isNotEmpty() || updaterVisible) {
+            if (nSelected > 0 || updaterVisible || menuButtonAlwaysVisible) {
                 Row(
                     modifier = Modifier.padding(start = 28.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -204,9 +215,11 @@ fun HomePage() {
                             }
                         )
                     }
-                    if ((!updaterVisible || !updaterExpanded) && selected.isNotEmpty()) {
+                    if (! (updaterVisible && updaterExpanded) &&
+                        (nSelected > 0 || menuButtonAlwaysVisible)
+                    ) {
                         ExtendedFloatingActionButton(
-                            text = { Text(text = selected.size.toString()) },
+                            text = { Text(text = nSelected.toString()) },
                             icon = {
                                 Icon(
                                     imageVector = Phosphor.List,

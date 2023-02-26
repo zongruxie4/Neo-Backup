@@ -1,174 +1,141 @@
 CHANGELOG
 =========
 
-next version
+8.3.1 (21.02.2023) +80 Commits & +10 Translations
+------------
+
+#### Function
+
+- Add: busy to renameDamagedToERROR etc.
+- Add: DevTools openBackupDir (works only with SAF capable file managers, so only Files/DocumentsUI)
+- Add: Dev-Prefs: autoLogUnInstallBroadcast, toolbarOpacity, prettyJson
+- Add: maxJobs to change the default (changing needs real kill + restart),
+- Add: killThisApp (app is killed, alarms are kept, unlike force-close)
+- Add: Stopping schedule service on finished
+- Fix: renameDamagedToERROR missing some important damages
+- Fix: hidden Lucky Patcher issue (please test, we don't use it)
+- Fix: missing empty line after log header
+- Fix: all backups running at once
+- Fix: Phh su + inherited+enforcing, directly check if su has --mount-master (github issue #562)
+- Update: Pretty print properties files
+- Update: improves prevention of duplicate schedules handling (should no more trigger detection)
+- Update: Scan depth first in findBackups (= add directory contents at front of queue)
+- Update: Remove all xxx dir for xxx.properties before queueing directory content in findbackups
+- Update: terminal button log/rel to extract lines that are related to NB from logcat
+    - currently machiav3lli.backup + NeoBackup, also used in SUPPORT. Note, log/app is PID related,
+      so only from the running NB, not from the one before, if it was restarted)
+- Remove: finishWork -> simplification
+
+#### UI
+
+- Add: New app icon
+- Add: busy handling + refresh (indicator) button to Logs tab
+- Update: Revamp NavBar & SearchBar
+- Update: Another option for busy background with grey fade
+- Update: Allow BottomSheet to extend over StatusBar
+- Update: Icon & theme colors
+- Update: Cleaner splash icon
+- Remove: Overriding background color in light theme
+
+#### UX
+
+- Add: Rotating refresh button (turn time and scale in devsettings/adv)
+- Add: search field in DevTools/devsett, searches all settings, but only key names, not the label
+- Add: support infos for mount master etc.
+- Fix: renameDamagedToERROR + undoDamagedToERROR blocking the UI
+- Fix: a delete/rename backup glitch
+- Fix: progress notifications
+- Fix: missing refresh of packages on start
+
+8.3.0 (30.01.2023) +350 Commits & +60 Translations
 ------------
 
 #### Usability / UX
 
-- add confirmation to context menu "add to blocklist"
-- the busy progress bar was replaced by a more calm background animation
-- improved list speed and cached/prefetched icons
-- improved list loading speed (for details see Function section)
-- option to hide the backup data type icons for faster scrolling
-    - &rarr; `advanced/devsettings/advanced/hideBackupLabels`
+- Add: `hideBackupLabels`, `menuButtonAlwaysVisible` developer options
+- Add: Confirmation to context menu "add to blocklist"
+- Add: Context menu item "Deselect Not Visible"
+- Add: Enable backup/restore in context menu
+- Add: Button to run schedule in Schedule item
+- Fix: Duplicate entries in LogPage
+- Fix: Remove and dismiss AppSheet of uninstalled package with no backups
+- Update: Revamp the backend for faster reading and loading of the apps' list
+- Update: More informative log file format
+- Update: Replace busy progress bar by a more background animation
 
 #### UI
 
-- fix duplicate entries in LogPage
+- Add: Context menu floating button
+- Add: Info on who's the build is signed by in HelpSheet
+- Add: Separate Black theme preference
+- Fix: Grey out app icon when uninstalled
+- Update: Improve background theming
+- Update: Actions buttons layout
+- Update: ScheduleSheet bottom layout
 
 #### Function
 
-- duplicated schedules should be solved
-    - it's not easy to test all situations and takes one day for each test under real world conditions
-    - detects if the schedule to be started is already running at three stages
-    - automatically saves a log (if autoLogSuspicious is enabled)
-- fix thread safety (@hg42: on my extensions)
-- use parallel processing where appropriate (e.g. it greatly improves list loading)
-- fix searching a second time for backups of packages that don't have backups
-- busy (indicator) logic reimplemented (the former logic could hang the app in some cases)
-
-- add an experimental flatStructure scheme, where
-
-    `the.package.name/YYYY-MM-DD-hh-mm-ss-mmm-user_x*`
-    
-    is substituted by
-
-    `the.package.name@YYYY-MM-DD-hh-mm-ss-mmm-user_x*`
-
-    so all backups are stored flat in the backup folder.
-
-    You find flatStructure in
-
-    - &rarr; `advanced/devsettings/alternatives`
-
-    It is not enabled by default, because it may still change it's format and the last word isn't spoken, maybe official in 9.0 or even dropped, there are also some possible alternatives.
-
-    Theoretically, this should result in faster scanning because it reduces the number of directory scans, and it actually worked.
-
-    flatStructure might be especially helpful, if you are using remote backup locations.
-
-    However, current measurements are more like it doesn't matter much, because the parallel processing
-    changed the game and remote access seems to focus more on file reading (properties files) instead of directory scanning.
-    Though this might be heavily dependent on the remote file service. In my (@hg42) tests it was ssh on local network using extRact (which uses rclone). 
-
-    Note: it uses `@` as separator instead of the former `-`
-
-- the backups are now scanned differently, which allows to
-    - collect backups from subfolders (experimental, don't rely on it, though it's easy to chnage it back)
-    - backups that were renamed (e.g. by bug + SAF design problem)
-    - handle different backups schemes
-    
-    **Note: all backups found are handled by housekeeping. If you used renaming backups to protect them (which was never supported inside the backup location, because it disturbs file management), they may now be subject to housekeeping, so save them elsewhere.** 
-
-    The different variants of backups are marked (in AppSheet), basically by
-
-    - replacing `the.package.name` by `📦` and
-    - removing the `YYYY-MM-DD-hh-mm-ss-mmm-user_x` part
-  
-    so it looks like this:
-    
-    - *nothing shown*
-    
-        a "standard" flat backup
-    
-        &rarr; `the.package.name@YYYY-MM-DD-hh-mm-ss-mmm-user_x`
-    
-    - **`somefolder/`**
-    
-        a flat backup, but in a folder
-    
-        &rarr; `somefolder/the.package.name@YYYY-MM-DD-hh-mm-ss-mmm-user_x`
-    
-    - **`📦-`**
-    
-        a flat backup with the former "-" separator
-    
-        &rarr; `the.package.name-YYYY-MM-DD-hh-mm-ss-mmm-user_x`
-    
-    - **`📦/`**
-    
-        classic backup with package folder
-    
-        &rarr; `the.package.name/YYYY-MM-DD-hh-mm-ss-mmm-user_x`
-    
-    - **`somefolder/📦/`**
-    
-        the same inside a folder
-    
-        &rarr; `somefolder/the.package.name/YYYY-MM-DD-hh-mm-ss-mmm-user_x`
-    
-    - **`pre%📦%suf/`**
-    
-        the same with "pre%" before the package name and "%suf" after it
-    
-        &rarr; `pre%the.package.name%suf/YYYY-MM-DD-hh-mm-ss-mmm-user_x`
-    
-    - **`📦 (1)/`**
-    
-        a package folder with a duplicate created (falsely) by SAF problem
-    
-        &rarr; `the.package.name (1)/YYYY-MM-DD-hh-mm-ss-mmm-user_x`
-    
-
-#### Troubleshooting
-
-- DevTools: for trouble shooting / power users that have showInfoLogBar enabled:
-    - long press on Title will show the DevTools popup for faster access to dev settings, log, terminal and other tools
-- DevTools: add log autoscroll
-- option to autosave a log if an unexpected exception happens, even if it is catched later, so we get better info from the inner circles  
-    - &rarr; `advanced/devsettings/logging/autoLogExceptions`
-- option to autosave a support log after each schedule, because it's difficult to do this manually
-    - &rarr; `advanced/devsettings/logging/autoLogAfterSchedule`
-- option to autosave a support log on suspicious events, e.g. duplicate schedules
-    - situations that are not necessarily an error, only "interesting" sometimes to have a look at
-    - &rarr; `advanced/devsettings/logging/autoLogSuspicious`
-- `SUPPORT` button in the terminal, that can create the interesting infos as a new log item and opens share menu in one go
-- `share` button saves the text in the terminal and opens share menu 
-    - if you want to review it, cancel the menu and goto the "View the log" tool instead, you can still share from there
-
-
+- Add: Database accessor on OABX
+- Add: An experimental flatStructure scheme (read more in [developer notes document](NOTES.md))
+- Add: DevTools for advanced users (read more in [developer notes document](NOTES.md))
+- Fix: Run only numCores threads in parallel on menu actions
+- Fix: Duplicated schedules
+- Fix: Blocking other parts until full scan is ready
+- Fix: Thread safety for parallel processes
+- Fix: Duplicate searching time for backups of packages that don't have backups
+- Fix: Failing backup after cleaning up the backup list
+- Update: Use parallel processing where appropriate
+- Update: Speedy cached/prefetched icons
+- Update: Organize dev options in groups
 
 8.2.5 (03.12.2022) +15 Commits & +20 Translations
 ------------------
 
 #### Function
+
 - Fix: Schedules ignoring specials in blocklists
 - Fix: Running schedules twice
 - Add: Fake schedules
 - Add: More tracing prefs
 
 #### UI
+
 - Fix: Add space to info chips
 
 8.2.4 (25.11.2022) +10 Commits
 ------------------
 
 #### Function
+
 - Fix: BlockLists in schedules
 - Fix: Repetitive running schedules
 - Update: Default disable tracing
 
 #### UI
+
 - Fix: Restore full height of terminal
 
 #### Usability/UX
+
 - Update: Separate service prefs into backup and restore ones
 
 8.2.3 (25.11.2022) +25 Commits
 ------------------
 
 #### Function
+
 - Fix: Note & Tags in AppSheet
 - Fix: Log not updated when deleting items
 - Update: Separate PrefGroups for logging and tracing
 
 #### UI
+
 - Fix: Schedule filters
 - Fix: Height calculation of LogItem/TerminalText, button colors
 - Update: Revamp Chips layout
 
 #### Usability/UX
+
 - Add: Batch settings Sheet
 - Add: Tooltips to check all buttons in Batch
 
@@ -176,19 +143,23 @@ next version
 ------------------
 
 #### Function
+
 - Fix: Schedules handling
 
 #### UI
+
 - Add: System theme based icon
 
 8.2.1 (18.11.2022) +290 Commits
 ------------------
 
 #### Function
+
 - Add: Persisting backups
 - Add: Dev Prefs: restoreKillApps, pref_refreshOnStart, pref_logToSystemLogcat
 - Add: Dev Prefs: Trace options
-- Add: Terminal for support (retrieving infos by buttons, e.g. toybox versions, su version, text can be saved to Log)
+- Add: Terminal for support (retrieving infos by buttons, e.g. toybox versions, su version, text can
+  be saved to Log)
 - Fix: Support of non-magisk SU implementations (`su 0` now is the only feature su needs to have)
 - Fix: Bug in `ls -l` of statically linked toybox variants (e.g. toybox-ext Magisk module)
 - Fix: Handling of `ls -l` numeric user ids output (xxx_cache group adds 10000 if numeric)
@@ -213,6 +184,7 @@ next version
 - Update: Replace AppInfo of uninstalled packages that left backups
 
 #### UI
+
 - Add: Missing buttons to legend on HelpSheet
 - Add: Save button to error dialogs
 - Fix: Share button on Logs works now
@@ -227,6 +199,7 @@ next version
 - Update: Make StatusBar transparent
 
 #### Usability/UX
+
 - Add: Tooltips to AppSheet action buttons
 - Add: Save/Load context menu selections
 - Fix: Dependent preferences should now work flawless
@@ -240,6 +213,7 @@ next version
 
 8.2.0 (22.10.2022) +150 Commits
 ------------------
+
 - Add: Support for themed icon on A13
 - Add: Option to backup no_backup files
 - Add: Option for multiline InfoChips Pref
@@ -274,6 +248,7 @@ next version
 
 8.1.3 (20.09.2022) +50 Commits
 ------------------
+
 - Update: Migrate navigation fully to Compose
 - Update: Convert AppInfo to chips
 - Update: Layouts of BackupItem, Welcome Page, Permissions Page and AppSheet
@@ -289,6 +264,7 @@ next version
 
 8.1.2 (12.09.2022) +30 Commits
 ------------------
+
 - Fix: Wrong default for pmSuspend (@hg42)
 - Fix: Disabled app's text color in app sheet (@hg42)
 - Fix: List item selection
@@ -299,6 +275,7 @@ next version
 
 8.1.1 (07.08.2022) +65 Commits
 ------------------
+
 - Fix: Sheets scrolling
 - Fix: Clumsy updates button on devices with low dpi
 - Fix: Restrict process pausing detection
@@ -310,6 +287,7 @@ next version
 
 8.1.0 (23.07.2022) +300 Commits
 ------------------
+
 - Add: Dynamic color support (aka Material You)
 - Add: Backup size (applies only to new backups)
 - Add: Tags & Note
@@ -340,24 +318,31 @@ next version
 
 8.0.2 (29.04.2022) 2 Commits
 ------------------
+
 - Fix: Auto-updating AppSheet package
 
 8.0.1 (29.04.2022) 2 Commits
 ------------------
+
 - Fix: Showing uninstalled apps
 
 8.0.0 (29.04.2022, a hot-fix for the unintended release of an alpha on F-Droid) +700 Commits
 ------------------
-NEW BACKUP STRUCTURE: Older backups (v6-v7) are experimentally supported. It's nevertheless preferred to use a new backup directory for a cleaner experience.
+NEW BACKUP STRUCTURE: Older backups (v6-v7) are experimentally supported. It's nevertheless
+preferred to use a new backup directory for a cleaner experience.
 NEW FILTER FORMAT: Requires resetting sort/filter manually.
+
 #### UI
+
 - Update: Migrate fragments & sheets to Compose and update UI
 - Add: Auto update list on external install/uninstall
 - Removed: Tags & Notes disabled for now
 - Update: Improve the app restart on theme/language change
 - Fix: Welcome fragment scrolling view
 - Update: Place state text under actions in AppSheet
+
 #### Function
+
 - Add: Backup & restore permissions
 - Update: Refactor batch actions (@hgx42)
 - Add: Made the compression level configurable (@pizze)
@@ -376,7 +361,9 @@ NEW FILTER FORMAT: Requires resetting sort/filter manually.
 - Fix: Messed up scheduling after rebooting device
 - Add: Simple switch where to place the Wifi config file (@pizze)
 - Add: Retry mechanism to detect when PackageManager is not ready after installing an APK (@pizze)
+
 #### Usability/UX
+
 - Add: Backend's lazy loading (half-baked)
 - Add: Loading toasts for refresh.
 - Update: Improve UX for search, scrolling & AppSheet
@@ -388,7 +375,9 @@ NEW FILTER FORMAT: Requires resetting sort/filter manually.
 ------------------
 BACKUPS HAS NEW VARIABLE: making new backups incompatible with old versions of OABX
 SCHEDULES REVAMPED: schedules will be deleted on update and old exports aren't usable
+
 #### UI
+
 * Add: Theming engine
 * Add: Transition animations
 * Add: Elevation/shadows to UI (viewable in light theme)
@@ -397,7 +386,9 @@ SCHEDULES REVAMPED: schedules will be deleted on update and old exports aren't u
 * Update: Replace the snackbar with a simple text on top of activity and appsheet
 * Fix: Crashing on changing theme
 * Fix: Sort/Filter and Blocklist buttons colliding with lower dpi
+
 #### Function
+
 * Add: Media files backup
 * Add: Randomized IV for the Cipher
 * Update: TargetSDK 30
@@ -408,7 +399,9 @@ SCHEDULES REVAMPED: schedules will be deleted on update and old exports aren't u
 * Fix: Improved exception handling with TarUtils (@hg42)
 * Fix: Firefox restore (@hg42)
 * Fix: Including uninstalled apps in scheduled backups
+
 #### Usability/UX
+
 * Add: Extras [Note and Tags]
 * Add: Blocklist shortcut to all navigation fragments
 * Add: Animated placeholders while loading apps' list
@@ -417,7 +410,8 @@ SCHEDULES REVAMPED: schedules will be deleted on update and old exports aren't u
 * Add: Backup all updated apps button
 * Add: Support for countries' specific locales
 * Add languages: Chinese(traditional/Taiwan), Portuguese(Brazil), Lithuanian.
-* Update translations: Chinese(simplified), Vietnamese, Ukrainian, Russian, Arabic, German, French, Polish, Norwegian, Italian, Swedish.
+* Update translations: Chinese(simplified), Vietnamese, Ukrainian, Russian, Arabic, German, French,
+  Polish, Norwegian, Italian, Swedish.
 * Update: Automate locals generation
 * Update: Revamp app's navigation (Activities and Fragments)
 * Update: Revamp filters and modes
@@ -430,6 +424,7 @@ SCHEDULES REVAMPED: schedules will be deleted on update and old exports aren't u
 
 6.0.1 (03.06.2021)
 ------------------
+
 * Fixed: Exclude system apps checkbox in the schedule sheet
 * Fixed: Import the val of exclude system apps on schedules' import
 * Added: Vietnamese, Hindi & Ukrainian
@@ -453,11 +448,13 @@ CLEAR DATA NEEDED
 * Fixed: Don't schedule when disabled
 * Fixed: Crash when scheduled list of apps is empty
 * Fixed: Schedules not firing on time
-* Fixed: Delayed notifications of some restored apps (exclude the push notifications' ID from backups)
+* Fixed: Delayed notifications of some restored apps (exclude the push notifications' ID from
+  backups)
 * Fixed: Backup instance folder left untouched after backup failing
 * Fixed: Hiding device lock option when there's no lock
 * Added: Catalan language
-* Updated translation: Arabic, Spanish, Indonesian, Polish, Russian, Japanese, Chinese, Dutch, French
+* Updated translation: Arabic, Spanish, Indonesian, Polish, Russian, Japanese, Chinese, Dutch,
+  French
 
 5.1.0 (18.03.2021)
 ------------------
@@ -474,7 +471,8 @@ CLEAR DATA NEEDED
 * Fixed: Scheduling backups
 * Fixed: Log items sdk release name
 * Fixed: Crash on batch actions with nothing checked
-* Updated Translations: Norwegian, German, Chinese, Spanish, Polish, Indonesian, Malayalam, French, Turkish, Arabic
+* Updated Translations: Norwegian, German, Chinese, Spanish, Polish, Indonesian, Malayalam, French,
+  Turkish, Arabic
 * A ton of other small fixes
 
 5.0.2 (24.02.2021)
@@ -493,14 +491,17 @@ CLEAR DATA NEEDED
 * Fixed: Failed backups with files with names with double spaces (@jakeler)
 * Fixed: STOP-CONT log messages (@hg42)
 * Updated: Gradle & Dependencies
-* Updated translations: Polish, Portuguese, Chinese, Greek, German, French, Norwegian, Dutch, Spanish, Italian, Indonesian, Japanese, Russian
+* Updated translations: Polish, Portuguese, Chinese, Greek, German, French, Norwegian, Dutch,
+  Spanish, Italian, Indonesian, Japanese, Russian
 * Clean up
 
 5.0.0 (03.01.2021)
 ------------------
 
-MIRGATED TO KOTLIN, NEW ENCRYPTION ALGORITHM: clean install & doesn't support restore of previous encrypted backups.
-SCHEDULED ACTIONS CAN ONLY LAST 10 MINUTES (SYSTEM CONSTRAINT): so partition your group of apps. will be fixed in next minor releases.
+MIRGATED TO KOTLIN, NEW ENCRYPTION ALGORITHM: clean install & doesn't support restore of previous
+encrypted backups.
+SCHEDULED ACTIONS CAN ONLY LAST 10 MINUTES (SYSTEM CONSTRAINT): so partition your group of apps.
+will be fixed in next minor releases.
 
 * Added: Individual modes for apps in batch action dialog
 * Added: Launchable apps filter
@@ -573,7 +574,8 @@ SCHEDULED ACTIONS CAN ONLY LAST 10 MINUTES (SYSTEM CONSTRAINT): so partition you
 * Removed: Toasts on batch actions
 * Removed: Usage of Wakelocks
 * Removed: HandleMessages
-* Updated Translations: Estonian, Indonesian, Hindi, Greek, Italian, Norwegian, Russian, Chinese, German, French, Spanish, Dutch, Arabic, Polish, Portuguese
+* Updated Translations: Estonian, Indonesian, Hindi, Greek, Italian, Norwegian, Russian, Chinese,
+  German, French, Spanish, Dutch, Arabic, Polish, Portuguese
 
 4.0.0 (02.11.2020)
 ------------------
@@ -588,7 +590,8 @@ SCHEDULED ACTIONS CAN ONLY LAST 10 MINUTES (SYSTEM CONSTRAINT): so partition you
 * Added: More clear messages informing user about running processes
 * Added: Arabic, Bosnian and Malayalam
 * Updated: Tags system
-* Updated: Use STOP/CONT to make sure no background processes ruin the backup (Credits @hg42 & @tiefkuehlpizze)
+* Updated: Use STOP/CONT to make sure no background processes ruin the backup (Credits @hg42 &
+  @tiefkuehlpizze)
 * Updated: Restructure Schedules
 * Updated: Backups directory is /OABackupX now
 * Updated: Backup Structure (Credits @tiefkuehlpizze)
@@ -686,7 +689,8 @@ SCHEDULED ACTIONS CAN ONLY LAST 10 MINUTES (SYSTEM CONSTRAINT): so partition you
 * updated: Search supports Package Name
 * fixed: cache not found/ Symlinks errors
 * added: OBB support(needs more testing)
-* added languages: Italian, Chinese, Turkish, Polish (Credits @Urnyx05 @tuchit @scrubjay55 @Antyradek)
+* added languages: Italian, Chinese, Turkish, Polish (Credits @Urnyx05 @tuchit @scrubjay55
+  @Antyradek)
 * other: UI and performance tweaks
 
 1.2.0 (10.06.2020)
@@ -875,9 +879,12 @@ SCHEDULED ACTIONS CAN ONLY LAST 10 MINUTES (SYSTEM CONSTRAINT): so partition you
 -------------------
 
 * initial X release
-* restructured and cleaned the app: adding Bottombar-based navigation and Sort and Filter FAB(for now: only the basic filters)
+* restructured and cleaned the app: adding Bottombar-based navigation and Sort and Filter FAB(for
+  now: only the basic filters)
 * rewritten Batch-(Activity, Adapter and Sorter) and most the layouts
 * partially rewritten Main-(Activity and Sorter)
 * completed the German translation
-* had to shut the preferences out for now: to solve the compatibility issues, I have to fully restructure and rewrite the preferences and that'll be one of the next steps(fix priority high).
-* other drawback: setting a toolbar on some activities(scheduler, help and tools) is causing a crash, so they have to do with no toolbar for now(fix priority minimal).
+* had to shut the preferences out for now: to solve the compatibility issues, I have to fully
+  restructure and rewrite the preferences and that'll be one of the next steps(fix priority high).
+* other drawback: setting a toolbar on some activities(scheduler, help and tools) is causing a
+  crash, so they have to do with no toolbar for now(fix priority minimal).

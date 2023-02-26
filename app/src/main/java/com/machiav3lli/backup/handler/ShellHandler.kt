@@ -20,14 +20,15 @@ package com.machiav3lli.backup.handler
 //import com.google.code.regexp.Pattern
 import android.os.Environment.DIRECTORY_DOCUMENTS
 import androidx.core.text.isDigitsOnly
-import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.addErrorCommand
+import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.handler.ShellHandler.FileInfo.Companion.utilBoxInfo
+import com.machiav3lli.backup.traceDebug
 import com.machiav3lli.backup.utils.BUFFER_SIZE
 import com.machiav3lli.backup.utils.FileUtils.translatePosixPermissionToMode
 import com.topjohnwu.superuser.Shell
-import com.topjohnwu.superuser.Shell.ROOT_MOUNT_MASTER
+import com.topjohnwu.superuser.ShellUtils
 import com.topjohnwu.superuser.io.SuRandomAccessFile
 import de.voize.semver4k.Semver
 import kotlinx.coroutines.Dispatchers
@@ -87,7 +88,7 @@ class ShellHandler {
                             bugs["unSpec"] = true
                             score =
                                 score.mod(1_00_00_00_0)  //TODO hg42 fatal? when can this happen?
-                            LogsHandler.unhandledException(e)
+                            LogsHandler.unexpectedException(e)
                         }
                     }
                 }
@@ -139,12 +140,11 @@ class ShellHandler {
     }
 
     init {
-        Shell.enableVerboseLogging = BuildConfig.DEBUG
+        Shell.enableVerboseLogging = isDebug
         Shell.setDefaultBuilder(shellDefaultBuilder())
-        Shell.getShell()
+        needFreshShell(startup = true)
 
-        Timber.i("is root         = ${Shell.isAppGrantedRoot()}")
-        Timber.i("is mount-master = $isMountMaster")
+        suInfo().forEach { Timber.i(it) }
 
         utilBoxes = mutableListOf<UtilBox>()
         try {
@@ -160,6 +160,7 @@ class ShellHandler {
                         } else {
                             ""
                         }
+                        Timber.d("utilBox OK: --------------> $box $boxVersion")
                         utilBoxes.add(UtilBox(name = box, version = boxVersion))
                     } else {
                         throw Exception() // goto catch
@@ -186,7 +187,7 @@ class ShellHandler {
                 }
             }
         } catch (e: Throwable) {
-            LogsHandler.unhandledException(e, "utilBox detection failed miserable")
+            LogsHandler.unexpectedException(e, "utilBox detection failed miserable")
         }
         OABX.lastErrorCommands.clear()  // ignore fails while searching for utilBox
 
@@ -353,6 +354,8 @@ class ShellHandler {
                             }"
                         else
                             box.reason
+                    }${
+                        if (box.name == utilBox.name) " (used)" else ""
                     }"
                 }
             }
@@ -544,7 +547,7 @@ class ShellHandler {
                         )
                     }
                 } catch (e: Throwable) {
-                    LogsHandler.unhandledException(e, filePath)
+                    LogsHandler.unexpectedException(e, filePath)
                 }
                 var linkName: String? = null
                 var fileSize: Long = 0
@@ -604,8 +607,6 @@ class ShellHandler {
             "toybox",
         )
 
-        val isMountMaster get() = Shell.getShell().status >= ROOT_MOUNT_MASTER
-
         var utilBoxes = mutableListOf<UtilBox>()
         var utilBox: UtilBox = UtilBox()
         val utilBoxQ get() = utilBox.quote()
@@ -618,12 +619,65 @@ class ShellHandler {
         val EXCLUDE_CACHE_FILE = "tar_EXCLUDE_CACHE"
         val EXCLUDE_FILE = "tar_EXCLUDE"
 
+        val isGrantedRoot get() = Shell.isAppGrantedRoot()
+        val hasRootShell get() = Shell.getShell().status >= Shell.ROOT_SHELL
+        val hasMountMaster get() = Shell.getShell().status >= Shell.ROOT_MOUNT_MASTER
+
+        val hasMountMasterOption: Boolean
+            get() {
+                // only return true if command does not choke on the option and exits with code 0
+                val ok = runCatching {
+                    ShellUtils.fastCmdResult("echo true | su --mount-master 0")
+                }.getOrNull() ?: false
+                //traceDebug { "detected mount master option = $ok" }
+                return ok
+            }
+
+        fun suInfo() =
+            listOf(
+                "app is granted root        = $isGrantedRoot",
+                "libsu shell status         = ${Shell.getShell().status} = ${
+                    when(Shell.getShell().status) {
+                        Shell.UNKNOWN -> "UNKNOWN"
+                        Shell.NON_ROOT_SHELL -> "NON_ROOT_SHELL"
+                        Shell.ROOT_SHELL -> "ROOT_SHELL"
+                        Shell.ROOT_MOUNT_MASTER -> "ROOT_MOUNT_MASTER"
+                        else -> "unknown code"
+                    }
+                }",
+                "libsu has root shell       = $hasRootShell",
+                "libsu has mount master     = $hasMountMaster",
+                "su has mount master option = $hasMountMasterOption",
+            )
+
         fun shellDefaultBuilder() =
             Shell.Builder.create()
                 .setFlags(Shell.FLAG_MOUNT_MASTER)
                 .setTimeout(20)
         //.setInitializers(BusyBoxInstaller::class.java)
 
+        fun needFreshShell(
+            builder: Shell.Builder = shellDefaultBuilder(),
+            startup: Boolean = false,
+        ): Shell {
+            val shellBefore = Shell.getCachedShell()
+            if (shellBefore != null) {
+                if (startup)
+                    Timber.e("ERROR: previous cached shell found, terminating it ($shellBefore)")
+                else
+                    traceDebug { "previous cached shell found, trying to terminate it ($shellBefore)" }
+                Shell.cmd("exit 77").exec()
+            }
+            Shell.cmd("true").exec()
+            val shellAfter = Shell.getShell()
+            if (shellBefore != null) {
+                if (shellAfter === shellBefore)
+                    Timber.e("ERROR: shell not refreshed! ($shellBefore vs $shellAfter)")
+                else
+                    traceDebug { "new shell created ($shellAfter)" }
+            }
+            return shellAfter
+        }
 
         interface RunnableShellCommand {
             fun runCommand(command: String): Shell.Job
@@ -777,12 +831,19 @@ class ShellHandler {
             return err.isNotEmpty() && err[0].contains("no such file or directory", true)
         }
 
-        val suCommand
-            get() =
-                if (isMountMaster)
-                    "su --mount-master 0"
-                else
-                    "su 0"
+        var suCommand: String = ""
+            get() {
+                if (field.isEmpty()) {
+                    // only set to true if command is executed and returns exit code 0
+                    field =
+                        if (hasMountMasterOption)
+                            "su --mount-master 0"
+                        else
+                            "su 0"
+                    Timber.i("using '$field' for streaming commands")
+                }
+                return field
+            }
 
         @Throws(IOException::class)
         fun quirkLibsuReadFileWorkaround(inputFile: FileInfo, output: OutputStream) {

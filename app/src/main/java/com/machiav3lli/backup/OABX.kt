@@ -25,6 +25,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.PowerManager
+import android.os.Process
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,31 +33,39 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
+import com.machiav3lli.backup.OABX.Companion.isDebug
+import com.machiav3lli.backup.OABX.Companion.isHg42
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.LogsHandler
-import com.machiav3lli.backup.handler.LogsHandler.Companion.unhandledException
+import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.findBackups
+import com.machiav3lli.backup.preferences.pref_busyHitTime
 import com.machiav3lli.backup.preferences.pref_cancelOnStart
+import com.machiav3lli.backup.preferences.pref_prettyJson
 import com.machiav3lli.backup.services.PackageUnInstalledReceiver
 import com.machiav3lli.backup.services.ScheduleService
 import com.machiav3lli.backup.ui.item.BooleanPref
 import com.machiav3lli.backup.ui.item.IntPref
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer
+import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.methodName
-import com.machiav3lli.backup.utils.scheduleAlarms
+import com.machiav3lli.backup.utils.scheduleAlarmsOnce
 import com.machiav3lli.backup.utils.styleTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.StringFormat
+import kotlinx.serialization.json.Json
 import timber.log.Timber
+import java.lang.Integer.max
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
@@ -78,7 +87,7 @@ val pref_maxLogLines = IntPref(
 
 val pref_maxLogCount = IntPref(
     key = "dev-log.maxLogCount",
-    summary = "maximum count of log files",
+    summary = "maximum count of log files (= entries on log page)",
     entries = ((1..9 step 1) + (10..100 step 10)).toList(),
     defaultValue = 20
 )
@@ -91,26 +100,26 @@ val pref_catchUncaughtException = BooleanPref(
 
 val pref_uncaughtExceptionsJumpToPreferences = BooleanPref(
     key = "dev-log.uncaughtExceptionsJumpToPreferences",
-    summary = "in case of unexpected crashes juimp to preferences (prevent loops if a preference causes this)",
+    summary = "in case of unexpected crashes jump to preferences (prevent loops if a preference causes this, and allows to change it, back button leaves the app)",
     defaultValue = false,
     enableIf = { pref_catchUncaughtException.value }
 )
 
 val pref_logToSystemLogcat = BooleanPref(
     key = "dev-log.logToSystemLogcat",
-    summary = "log to Android logcat, otherwise only internal",
+    summary = "log to Android logcat, otherwise only internal (internal doesn't help if the app is restarted)",
     defaultValue = false
 )
 
 val pref_autoLogExceptions = BooleanPref(
     key = "dev-log.autoLogExceptions",
-    summary = "create a log for each unexpected exception",
+    summary = "create a log for each unexpected exception (may disturb the timing of other operations, meant to detect catched but not expected exceptions, developers are probably intersted in these)",
     defaultValue = false
 )
 
 val pref_autoLogSuspicious = BooleanPref(
     key = "dev-log.autoLogSuspicious",
-    summary = "create a log for each unexpected exception",
+    summary = "create a log for some suspicious but partly expected situations, e.g. detection of duplicate schedules (don't use it regularly)",
     defaultValue = false
 )
 
@@ -120,12 +129,18 @@ val pref_autoLogAfterSchedule = BooleanPref(
     defaultValue = false
 )
 
+val pref_autoLogUnInstallBroadcast = BooleanPref(
+    key = "dev-log.autoLogUnInstallBroadcast",
+    summary = "create a log when a package is installed or uninstalled",
+    defaultValue = false
+)
+
 //---------------------------------------- developer settings - tracing
 
 val pref_trace = BooleanPref(
     key = "dev-trace.trace",
     summary = "global switch for all traceXXX options",
-    defaultValue = BuildConfig.DEBUG || BuildConfig.APPLICATION_ID.contains("hg42")
+    defaultValue = isDebug || isHg42
 )
 
 val traceSection = TraceUtils.TracePref(
@@ -184,7 +199,13 @@ val traceBackupsScanAll = TraceUtils.TracePref(
 
 val traceBackupProps = TraceUtils.TracePref(
     name = "BackupProps",
-    summary = "trace backup properties (json)",
+    summary = "trace backup properties (serialization format, e.g. json)",
+    default = false
+)
+
+val traceContextMenu = TraceUtils.TracePref(
+    name = "ContextMenu",
+    summary = "trace context menu actions and events",
     default = false
 )
 
@@ -208,6 +229,8 @@ class OABX : Application() {
     // TODO Add BroadcastReceiver for (UN)INSTALL_PACKAGE intents
 
     override fun onCreate() {
+
+        Timber.w("======================================== app ${classAndId(this)} PID=${Process.myPid()}")
 
         super.onCreate()
 
@@ -239,8 +262,8 @@ class OABX : Application() {
         work?.prune()
 
         MainScope().launch {
-            addInfoText("--> click title to keep infobox open")
-            addInfoText("--> long press title for dev tools")
+            addInfoLogText("--> click title to keep infobox open")
+            addInfoLogText("--> long press title for dev tools")
         }
 
         val startupMsg = "******************** startup" // ensure it's the same for begin/end
@@ -248,30 +271,55 @@ class OABX : Application() {
         if (startup)    // paranoid
             beginBusy(startupMsg)
 
-        scheduleAlarms()
-
         MainScope().launch(Dispatchers.IO) {
             var backupsMap: Map<String, List<Backup>> = emptyMap()
             try {
                 backupsMap = findBackups()
             } catch (e: Throwable) {
-                unhandledException(e)
+                unexpectedException(e)
             } finally {
-                traceBackupsScan { "*** --------------------> packages: ${backupsMap.keys.size} backups: ${backupsMap.values.flatten().size}" }
-                val time = endBusy(startupMsg)
-                addInfoText("startup: ${"%.3f".format(time / 1E9)} sec")
+
+                // catch exceptions to make each block independent
+
+                runCatching {
+                    traceBackupsScan { "*** --------------------> packages: ${backupsMap.keys.size} backups: ${backupsMap.values.flatten().size}" }
+                    val time = endBusy(startupMsg)
+                    addInfoLogText("startup: ${"%.3f".format(time / 1E9)} sec")
+                }
+
                 startup = false
+
+                runCatching {
+                    main?.viewModel?.retriggerFlowsForUI()
+                }
+                runCatching {
+                    if (isDebug) {
+                        //testOnStart()
+                    }
+                }
+                runCatching {
+                    delay(60_000)
+                    scheduleAlarmsOnce()
+                }
             }
         }
     }
 
     override fun onTerminate() {
+
+        // in case the app is terminated too early
+        scheduleAlarmsOnce()
+
         work = work?.release()
         appRef = WeakReference(null)
         super.onTerminate()
     }
 
     companion object {
+
+        val JsonPretty = Json { prettyPrint = true }    // create only once
+        val JsonDefault = Json.Default
+        val serializer: StringFormat get() = if (pref_prettyJson.value) JsonPretty else JsonDefault
 
         val lastLogMessages = ConcurrentLinkedQueue<String>()
         fun addLogMessage(message: String) {
@@ -282,24 +330,26 @@ class OABX : Application() {
             }
             lastLogMessages.add(message)
             val size = lastLogMessages.size
-            val nDelete = size-maxLogLines
+            val nDelete = size - maxLogLines
             if (nDelete > 0)
                 repeat(nDelete) {
                     lastLogMessages.remove()
                 }
         }
+
         var lastErrorPackage = ""
         var lastErrorCommands = ConcurrentLinkedQueue<String>()
         fun addErrorCommand(command: String) {
             val maxErrorCommands = 10
             lastErrorCommands.add(command)
             val size = lastErrorCommands.size
-            val nDelete = size-maxErrorCommands
+            val nDelete = size - maxErrorCommands
             if (nDelete > 0)
                 repeat(nDelete) {
                     lastErrorCommands.remove()
                 }
         }
+
         var logSections = mutableMapOf<String, Int>()
             .withDefault { 0 }     //TODO hg42 use AtomicInteger? but map is synchronized anyways
 
@@ -388,6 +438,7 @@ class OABX : Application() {
             }
             set(activity) {
                 activityRef = WeakReference(activity)
+                scheduleAlarmsOnce()        // if any activity is started
             }
 
         // main might be null
@@ -439,29 +490,40 @@ class OABX : Application() {
             return Build.VERSION.SDK_INT >= sdk
         }
 
+        val isRelease = BuildConfig.APPLICATION_ID.endsWith(".backup")
+        val isDebug = BuildConfig.DEBUG
+        val isNeo = BuildConfig.APPLICATION_ID.contains("neo")
+        val isHg42 = BuildConfig.APPLICATION_ID.contains("hg42")
+
         //------------------------------------------------------------------------------------------ infoText
 
-        var infoLines = mutableStateListOf<String>()
+        var infoLogLines = mutableStateListOf<String>()
 
-        val nInfoLines = 100
-        var showInfo by mutableStateOf(false)
+        val nInfoLogLines = 100
+        var showInfoLog by mutableStateOf(false)
 
-        fun clearInfoText() {
-            infoLines = mutableStateListOf()
+        fun clearInfoLogText() {
+            synchronized(infoLogLines) {
+                infoLogLines = mutableStateListOf()
+            }
         }
 
-        fun addInfoText(value: String) {
-            infoLines.add(value)
-            if (infoLines.size > nInfoLines)
-                infoLines.drop(1)
+        fun addInfoLogText(value: String) {
+            synchronized(infoLogLines) {
+                infoLogLines.add(value)
+                if (infoLogLines.size > nInfoLogLines)
+                    infoLogLines.drop(1)
+            }
         }
 
-        fun getInfoText(n: Int = nInfoLines, fill: String? = null): String {
-            val lines = infoLines.takeLast(n).toMutableList()
-            if (fill != null)
-                while (lines.size < n)
-                    lines.add(fill)
-            return lines.joinToString("\n")
+        fun getInfoLogText(n: Int = nInfoLogLines, fill: String? = null): String {
+            synchronized(infoLogLines) {
+                val lines = infoLogLines.takeLast(n).toMutableList()
+                if (fill != null)
+                    while (lines.size < n)
+                        lines.add(fill)
+                return lines.joinToString("\n")
+            }
         }
 
         //------------------------------------------------------------------------------------------ wakelock
@@ -513,7 +575,7 @@ class OABX : Application() {
                 logSections[section] = count + 1
                 //if (count == 0 && xxx)  logMessages.clear()           //TODO hg42
             }
-            traceSection { "*** ${"|---".repeat(count)}\\ $section" }
+            traceSection { """*** ${"|---".repeat(count)}\ $section""" }
             beginNanoTimer("section.$section")
         }
 
@@ -531,13 +593,13 @@ class OABX : Application() {
         //------------------------------------------------------------------------------------------ busy
 
         var busyCountDown = AtomicInteger(0)
-        val busyTick = 250L
+        val busyTick = 250
         var busy = mutableStateOf(false)
 
         init {
             CoroutineScope(Dispatchers.IO).launch {
                 while (true) {
-                    delay(busyTick)
+                    delay(busyTick.toLong())
                     busyCountDown.getAndUpdate {
                         if (it > 0) {
                             val new = it - 1
@@ -554,24 +616,24 @@ class OABX : Application() {
             }
         }
 
-        fun hitBusy(state: Boolean = false) {
-            //beginNanoTimer("busy.hitBusy")
-            busyCountDown.set((1000L / busyTick).toInt())
-            //endNanoTimer("busy.hitBusy")
+        fun hitBusy(time: Long = 0L) {
+            busyCountDown.set(
+                max(time.toInt(), pref_busyHitTime.value) / busyTick
+            )
         }
 
         fun beginBusy(name: String? = null) {
             traceBusy {
                 val label = name ?: methodName(1)
-                "*** \\ busy $label"
+                """*** \ busy $label"""
             }
-            hitBusy(true)
+            hitBusy()
             beginNanoTimer("busy.$name")
         }
 
         fun endBusy(name: String? = null): Long {
             val time = endNanoTimer("busy.$name")
-            hitBusy()
+            hitBusy(0)
             traceBusy {
                 val label = name ?: methodName(1)
                 "*** / busy $label ${"%.3f".format(time / 1E9)} sec"
@@ -588,7 +650,9 @@ class OABX : Application() {
         private var theBackupsMap = mutableMapOf<String, List<Backup>>()
 
         fun getBackups(): Map<String, List<Backup>> {
-            synchronized(theBackupsMap) { return theBackupsMap }
+            synchronized(theBackupsMap) {
+                return theBackupsMap
+            }
         }
 
         fun clearBackups(packageName: String? = null) {

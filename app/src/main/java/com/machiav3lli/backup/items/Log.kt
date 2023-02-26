@@ -17,31 +17,32 @@
  */
 package com.machiav3lli.backup.items
 
+import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.utils.LocalDateTimeSerializer
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.time.LocalDateTime
 
 @Serializable
 open class Log {
-    // TODO: hg42: add ${BuildConfig.APPLICATION_ID} ${BuildConfig.VERSION_NAME} useful for stacktraces ?
+    @OptIn(ExperimentalSerializationApi::class)
     @Serializable(with = LocalDateTimeSerializer::class)
-    var logDate: LocalDateTime
+    var logDate: LocalDateTime = LocalDateTime.parse("2020-01-01T00:00:00")
         private set
 
-    val deviceName: String?
+    var deviceName: String = ""
 
-    val sdkCodename: String?
+    var sdkCodename: String = ""
 
-    val cpuArch: String?
+    var cpuArch: String = ""
 
-    val logText: String?
+    var logText: String = ""
 
     constructor(text: String, date: LocalDateTime) {
         this.logDate = date
@@ -54,12 +55,11 @@ open class Log {
     constructor(logFile: StorageFile) {
         try {
             logFile.inputStream()!!.use { inputStream ->
-                val item = fromJson(inputStream.reader().readText())
-                this.logDate = item.logDate
-                this.deviceName = item.deviceName
-                this.sdkCodename = item.sdkCodename
-                this.cpuArch = item.cpuArch
-                this.logText = item.logText
+                val text = inputStream.reader().readText()
+                initFromSerialized(text) || initFromText(text) ||
+                        throw Backup.BrokenBackupException(
+                            "$logFile is neither ${OABX.serializer.javaClass.simpleName} nor text header format"
+                        )
             }
         } catch (e: FileNotFoundException) {
             throw Backup.BrokenBackupException(
@@ -72,8 +72,8 @@ open class Log {
                 e
             )
         } catch (e: Throwable) {
-            LogsHandler.unhandledException(e, logFile)
-            throw Backup.BrokenBackupException("Unable to process $logFile. [${e.javaClass.canonicalName}] $e")
+            LogsHandler.unexpectedException(e, logFile)
+            throw Backup.BrokenBackupException("Unable to process $logFile. (${e.javaClass.canonicalName}) $e")
         }
     }
 
@@ -92,9 +92,70 @@ open class Log {
         return logFile?.delete()
     }
 
-    fun toJSON() = Json.encodeToString(this)
+    fun initFromText(text: String): Boolean {
+        return try {
+            var valid = false
+            val lines = text.lines().toMutableList()
+            while (lines.isNotEmpty()) {
+                val line = lines.removeAt(0)
+                if (line.isBlank()) {
+                    this.logText = lines.joinToString("\n")
+                    lines.clear()
+                } else {
+                    try {
+                        val (field, value) = line.split(Regex(""":\s*"""), limit = 2)
+                        when (field) {
+                            "logDate"     -> {  // minimum data we need
+                                this.logDate = LocalDateTime.parse(value)
+                                valid = true
+                            }
+                            "deviceName"  -> {
+                                this.deviceName = value
+                            }
+                            "sdkCodename" -> {
+                                this.sdkCodename = value
+                            }
+                            "cpuArch"     -> {
+                                this.cpuArch = value
+                            }
+                        }
+                    } catch (e: Throwable) {
+                        if (valid) {
+                            // be tolerant, first non-header line, read remaining lines as text
+                            this.logText = lines.joinToString("\n")
+                            lines.clear()
+                        }
+                    }
+                }
+            }
+            valid
+        } catch (e: Throwable) {
+            LogsHandler.unexpectedException(e)
+            false
+        }
+    }
+
+    fun toText() = """
+        logDate: $logDate
+        deviceName: $deviceName
+        sdkCodename: $sdkCodename
+        cpuArch: $cpuArch
+    """.trimIndent() + "\n\n" + logText
+
+    fun initFromSerialized(text: String): Boolean {
+        return fromSerialized(text)?.let { item ->
+            this.logDate = item.logDate
+            this.deviceName = item.deviceName
+            this.sdkCodename = item.sdkCodename
+            this.cpuArch = item.cpuArch
+            this.logText = item.logText
+            true
+        } ?: false
+    }
+
+    fun toSerialized() = OABX.serializer.encodeToString(this)
 
     companion object {
-        fun fromJson(json: String) = Json.decodeFromString<Log>(json)
+        fun fromSerialized(serialized: String) = runCatching { OABX.serializer.decodeFromString<Log>(serialized) }.getOrNull()
     }
 }

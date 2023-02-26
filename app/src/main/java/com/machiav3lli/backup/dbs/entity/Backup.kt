@@ -39,7 +39,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -183,54 +182,54 @@ data class Backup constructor(
     )
 
     override fun toString(): String = "Backup{" +
-                                      "backupDate=" + backupDate +
-                                      ", hasApk=" + hasApk +
-                                      ", hasAppData=" + hasAppData +
-                                      ", hasDevicesProtectedData=" + hasDevicesProtectedData +
-                                      ", hasExternalData=" + hasExternalData +
-                                      ", hasObbData=" + hasObbData +
-                                      ", hasMediaData=" + hasMediaData +
-                                      ", compressionType='" + compressionType + '\'' +
-                                      ", cipherType='" + cipherType + '\'' +
-                                      ", iv='" + iv + '\'' +
-                                      ", cpuArch='" + cpuArch + '\'' +
-                                      ", backupVersionCode='" + backupVersionCode + '\'' +
-                                      ", size=" + size +
-                                      ", permissions='" + permissions + '\'' +
-                                      ", persistent='" + persistent + '\'' +
-                                      '}'
+            "backupDate=" + backupDate +
+            ", hasApk=" + hasApk +
+            ", hasAppData=" + hasAppData +
+            ", hasDevicesProtectedData=" + hasDevicesProtectedData +
+            ", hasExternalData=" + hasExternalData +
+            ", hasObbData=" + hasObbData +
+            ", hasMediaData=" + hasMediaData +
+            ", compressionType='" + compressionType + '\'' +
+            ", cipherType='" + cipherType + '\'' +
+            ", iv='" + iv + '\'' +
+            ", cpuArch='" + cpuArch + '\'' +
+            ", backupVersionCode='" + backupVersionCode + '\'' +
+            ", size=" + size +
+            ", permissions='" + permissions + '\'' +
+            ", persistent='" + persistent + '\'' +
+            '}'
 
     override fun equals(other: Any?): Boolean = when {
         this === other -> true
         javaClass != other?.javaClass
-        || other !is Backup
-        || backupVersionCode != other.backupVersionCode
-        || packageName != other.packageName
-        || packageLabel != other.packageLabel
-        || versionName != other.versionName
-        || versionCode != other.versionCode
-        || profileId != other.profileId
-        || sourceDir != other.sourceDir
-        || !splitSourceDirs.contentEquals(other.splitSourceDirs)
-        || isSystem != other.isSystem
-        || backupDate != other.backupDate
-        || hasApk != other.hasApk
-        || hasAppData != other.hasAppData
-        || hasDevicesProtectedData != other.hasDevicesProtectedData
-        || hasExternalData != other.hasExternalData
-        || hasObbData != other.hasObbData
-        || hasMediaData != other.hasMediaData
-        || compressionType != other.compressionType
-        || cipherType != other.cipherType
-        || iv != null && other.iv == null
-        || iv != null && !iv.contentEquals(other.iv)
-        || iv == null && other.iv != null
-        || cpuArch != other.cpuArch
-        || isEncrypted != other.isEncrypted
-        || permissions != other.permissions
-        || persistent != other.persistent
-        || file?.path != other.file?.path
-        || dir?.path != other.dir?.path
+                || other !is Backup
+                || backupVersionCode != other.backupVersionCode
+                || packageName != other.packageName
+                || packageLabel != other.packageLabel
+                || versionName != other.versionName
+                || versionCode != other.versionCode
+                || profileId != other.profileId
+                || sourceDir != other.sourceDir
+                || !splitSourceDirs.contentEquals(other.splitSourceDirs)
+                || isSystem != other.isSystem
+                || backupDate != other.backupDate
+                || hasApk != other.hasApk
+                || hasAppData != other.hasAppData
+                || hasDevicesProtectedData != other.hasDevicesProtectedData
+                || hasExternalData != other.hasExternalData
+                || hasObbData != other.hasObbData
+                || hasMediaData != other.hasMediaData
+                || compressionType != other.compressionType
+                || cipherType != other.cipherType
+                || iv != null && other.iv == null
+                || iv != null && !iv.contentEquals(other.iv)
+                || iv == null && other.iv != null
+                || cpuArch != other.cpuArch
+                || isEncrypted != other.isEncrypted
+                || permissions != other.permissions
+                || persistent != other.persistent
+                || file?.path != other.file?.path
+                || dir?.path != other.dir?.path
                        -> false
         else           -> true
     }
@@ -264,7 +263,7 @@ data class Backup constructor(
         return result
     }
 
-    fun toJSON() = Json.encodeToString(this)
+    fun toSerialized() = OABX.serializer.encodeToString(this)
 
     class BrokenBackupException @JvmOverloads internal constructor(
         message: String?,
@@ -282,9 +281,7 @@ data class Backup constructor(
             val baseName = file?.name?.removeSuffix(".$PROP_NAME")
             baseName?.let { dirName ->
                 file?.parent?.let { parent ->
-                    parent.findFile(dirName)?.let {
-                        it
-                    }
+                    parent.findFile(dirName)
                 }
             }
         }
@@ -292,33 +289,31 @@ data class Backup constructor(
     val tag: String
         get() {
             val pkg = "📦" // "📁"
-            return dir?.path?.let {
-                it
-                    .replace(OABX.context.getBackupRoot()?.path ?: "", "")
-                    .replace(packageName, pkg)
-                    .replace(Regex("""($pkg@)?$BACKUP_INSTANCE_REGEX_PATTERN"""), "")
-                    .replace(Regex("""[-:\s]+"""), "-")
-                    .replace(Regex("""/+"""), "/")
-                    .replace(Regex("""[-]+$"""), "-")
-                    .replace(Regex("""^[-/]+"""), "")
-
-            } + if (dir?.name == BACKUP_INSTANCE_PROPERTIES_INDIR) "🔹" else ""
+            return (dir?.path
+                ?.replace(OABX.context.getBackupRoot().path ?: "", "")
+                ?.replace(packageName, pkg)
+                ?.replace(Regex("""($pkg@)?$BACKUP_INSTANCE_REGEX_PATTERN"""), "")
+                ?.replace(Regex("""[-:\s]+"""), "-")
+                ?.replace(Regex("""/+"""), "/")
+                ?.replace(Regex("""[-]+$"""), "-")
+                ?.replace(Regex("""^[-/]+"""), "")
+                ?: "") + if (file?.name == BACKUP_INSTANCE_PROPERTIES_INDIR) "🔹" else ""
         }
 
     companion object {
 
-        fun fromJson(json: String): Backup {
-            traceBackupProps { "backup json: $json" }
-            return Json.decodeFromString(json)
+        fun fromSerialized(serialized: String): Backup {
+            traceBackupProps { "backup: $serialized" }
+            return OABX.serializer.decodeFromString(serialized)
         }
 
         fun createFrom(propertiesFile: StorageFile): Backup? {
-            var json = ""
+            var serialized = ""
             try {
 
-                json = propertiesFile.readText()
+                serialized = propertiesFile.readText()
 
-                val backup = fromJson(json)
+                val backup = fromSerialized(serialized)
 
                 var dir: StorageFile? = null
 
@@ -333,7 +328,7 @@ data class Backup constructor(
                 logException(e, "Cannot read ${propertiesFile.path}", backTrace = false)
                 return null
             } catch (e: Throwable) {
-                logException(e, "file: ${propertiesFile.path} =\n$json", backTrace = false)
+                logException(e, "file: ${propertiesFile.path} =\n$serialized", backTrace = false)
                 return null
             }
         }

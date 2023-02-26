@@ -132,10 +132,10 @@ class AppSheetViewModel(
     }
 
     fun getUsers(): Array<String> {
-        return shellCommands.getUsers()?.toTypedArray() ?: arrayOf()
+        return shellCommands.getUsers().toTypedArray()
     }
 
-    fun deleteBackup(backup: Backup) {
+    fun deleteBackup(backup: Backup) {              //TODO hg42 launchDeleteBackup ?
         viewModelScope.launch {
             delete(backup)
         }
@@ -144,7 +144,7 @@ class AppSheetViewModel(
     private suspend fun delete(backup: Backup) {
         withContext(Dispatchers.IO) {
             thePackage.value?.let { pkg ->
-                deleteBackup(backup)
+                pkg.deleteBackup(backup)
                 if (!pkg.isInstalled && pkg.backupList.isEmpty()) {
                     database.appInfoDao.deleteAllOf(pkg.packageName)
                     dismissNow.value = true

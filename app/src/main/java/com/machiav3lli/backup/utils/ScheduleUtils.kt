@@ -27,12 +27,13 @@ import android.os.Build
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.ISO_DATE_TIME_FORMAT
 import com.machiav3lli.backup.ISO_DATE_TIME_FORMAT_MIN
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.getString
+import com.machiav3lli.backup.OABX.Companion.isDebug
+import com.machiav3lli.backup.OABX.Companion.isHg42
 import com.machiav3lli.backup.OABX.Companion.runningSchedules
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
@@ -48,10 +49,8 @@ import com.machiav3lli.backup.services.AlarmReceiver
 import com.machiav3lli.backup.services.ScheduleService
 import com.machiav3lli.backup.traceSchedule
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.LocalTime
 import java.util.concurrent.TimeUnit
@@ -70,34 +69,38 @@ fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
         c[Calendar.MINUTE] = (c[Calendar.MINUTE] / fakeMin + 1) * fakeMin % 60
         c[Calendar.SECOND] = 0
         c[Calendar.MILLISECOND] = 0
+        var nIncrements = 0
         repeat(limitIncrements) {
             if (c.timeInMillis > now + minTimeFromNow)
                 return@repeat
-            //traceSchedule { "increment $it * $fakeMin min" }
             c.add(Calendar.MINUTE, fakeMin)
+            nIncrements++
         }
+        traceSchedule { "added $nIncrements * ${schedule.interval} min" }
     } else {
         c[Calendar.HOUR_OF_DAY] = schedule.timeHour
         c[Calendar.MINUTE] = schedule.timeMinute
         c[Calendar.SECOND] = 0
         c[Calendar.MILLISECOND] = 0
+        var nIncrements = 0
         repeat(limitIncrements) {
             if (c.timeInMillis > now + minTimeFromNow)
                 return@repeat
-            traceSchedule { "increment $it * ${schedule.interval} days" }
             c.add(Calendar.DAY_OF_MONTH, schedule.interval)
+            nIncrements++
         }
+        traceSchedule { "added $nIncrements * ${schedule.interval} days" }
     }
 
     traceSchedule {
-        "calculateTimeToRun: now: ${
+        "calculateTimeToRun: next: ${
+            ISO_DATE_TIME_FORMAT.format(c.timeInMillis)
+        } now: ${
             ISO_DATE_TIME_FORMAT.format(now)
         } placed: ${
             ISO_DATE_TIME_FORMAT.format(schedule.timePlaced)
         } interval: ${
             schedule.interval
-        } next: ${
-            ISO_DATE_TIME_FORMAT.format(c.timeInMillis)
         }"
     }
     return c.timeInMillis
@@ -176,10 +179,11 @@ fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean
                         val message =
                             "**************************************** timeLeft < 1 min -> set schedule $schedule"
                         traceSchedule { message }
-                        if (BuildConfig.DEBUG || BuildConfig.APPLICATION_ID.contains("hg42") || pref_autoLogSuspicious.value)
+                        if (isDebug || isHg42 || pref_autoLogSuspicious.value)
                             textLog(
                                 listOf(
-                                    message
+                                    message,
+                                    ""
                                 ) + onErrorInfo()
                             )
                     }
@@ -191,7 +195,9 @@ fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean
                     } else {
                         true
                     }
+
                 val pendingIntent = createPendingIntent(context, scheduleId)
+
                 if (hasPermission && pref_useAlarmClock.value) {
                     traceSchedule { "alarmManager.setAlarmClock $schedule" }
                     alarmManager.setAlarmClock(
@@ -216,9 +222,9 @@ fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean
                     }
                 }
                 traceSchedule {
-                    "schedule starting in: ${
+                    "schedule $scheduleId starting in: ${
                         TimeUnit.MILLISECONDS.toMinutes(schedule.timeToRun - System.currentTimeMillis())
-                    } minutes"
+                    } minutes name=${schedule.name}"
                 }
             } else
                 traceSchedule { "schedule is disabled. Nothing to schedule!" }
@@ -236,18 +242,30 @@ fun cancelAlarm(context: Context, scheduleId: Long) {
     traceSchedule { "cancelled schedule with id: $scheduleId" }
 }
 
-fun scheduleAlarms() {
-    CoroutineScope(Dispatchers.Default).launch {
+var alarmsHaveBeenScheduled = false
+
+fun scheduleAlarmsOnce() {
+
+    // schedule alarms only once
+    // whichever event comes first:
+    //   any activity started
+    //   after all current schedules are queued
+    //   the app is terminated (too early)
+    //   on a timeout
+
+    if (alarmsHaveBeenScheduled)
+        return
+    alarmsHaveBeenScheduled = true
+
+    Thread {
         val scheduleDao = OABX.db.scheduleDao
         traceSchedule { "scheduleAlarms" }
         scheduleDao.all
             .forEach {
                 // do not set or cancel schedules that are just going to be started
                 // (on boot or fresh start from an alarm)
-                // setting this same minute as alarm time will start it immediately
-                //TODO is that documented?
-                //TODO is there a better way to test?
-                val scheduleAlreadyRuns = runningSchedules[it.id] != null
+                // setting a past time as alarm will start it immediately
+                val scheduleAlreadyRuns = runningSchedules[it.id] == true
                 if (scheduleAlreadyRuns) {
                     traceSchedule { "schedule is already started" }
                 } else {
@@ -260,7 +278,7 @@ fun scheduleAlarms() {
                     }
                 }
             }
-    }
+    }.start()
 }
 
 fun createPendingIntent(context: Context, scheduleId: Long): PendingIntent {

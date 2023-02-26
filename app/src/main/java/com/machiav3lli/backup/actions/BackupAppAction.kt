@@ -75,7 +75,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         var ok = false
         val fakeSeconds = pref_fakeBackupSeconds.value
         try {
-            Timber.i("Backing up: ${app.packageName} [${app.packageLabel}]")
+            Timber.i("Backing up: ${app.packageName} (${app.packageLabel})")
             //invalidateCacheForPackage(app.packageName)    //TODO hg42 ???
             work?.setOperation("pre")
 
@@ -123,7 +123,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                     false
                 )
             } catch (e: Throwable) {
-                LogsHandler.unhandledException(e, app)
+                LogsHandler.unexpectedException(e, app)
                 // Usually, this should never happen, but just in case...
                 val realException: Exception =
                     BackupFailedException(STORAGE_LOCATION_INACCESSIBLE, e)
@@ -197,7 +197,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 if (isEncryptionEnabled()) {
                     backupBuilder.setCipherType(CIPHER_ALGORITHM)
                 }
-                StorageFile.cacheInvalidate(backupInstanceDir)
+                StorageFile.invalidateCache(backupInstanceDir)
                 val backupSize = backupInstanceDir.listFiles().sumOf { it.size }
                 backupBuilder.setSize(backupSize)
 
@@ -244,13 +244,13 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         //propertiesFile.parent?.let { dir ->       //TODO WECH
         //    propertiesFile.name?.let { name ->
         //        dir.createFile(name)
-        //        propertiesFile.writeText(backup.toJSON())
+        //        propertiesFile.writeText(backup.toSerialized())
         //        Timber.i("Wrote $propertiesFile file for backup: $backup")
         //        return true
         //    }
         //}
         propertiesFile.createFile()?.let { it ->
-            it.writeText(backup.toJSON())
+            it.writeText(backup.toSerialized())
             Timber.i("Wrote $it for backup: $backup")
             return true
         }
@@ -281,7 +281,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         if (iv != null && password.isNotEmpty() && isEncryptionEnabled()) {
             outStream = outStream.encryptStream(password, getCryptoSalt(), iv)
         }
-
+        
         if (shouldCompress) {
             val compressionLevel = getCompressionLevel()
             val gzipParams = GzipParameters()
@@ -316,13 +316,13 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
 
     @Throws(BackupFailedException::class)
     protected open fun backupPackage(app: Package, backupInstanceDir: StorageFile) {
-        Timber.i("[${app.packageName}] Backup package apks")
+        Timber.i("<${app.packageName}> Backup package apks")
         var apksToBackup = arrayOf(app.apkPath)
         if (app.apkSplits.isEmpty()) {
-            Timber.d("[${app.packageName}] The app is a normal apk")
+            Timber.d("<${app.packageName}> The app is a normal apk")
         } else {
             apksToBackup += app.apkSplits.drop(0)
-            Timber.d("[${app.packageName}] Package is split into ${apksToBackup.size} apks")
+            Timber.d("<${app.packageName}> Package is split into ${apksToBackup.size} apks")
         }
         Timber.d(
             "[%s] Backing up package (%d apks: %s)",
@@ -338,7 +338,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 Timber.e("$app: Could not backup apk $apk: $e")
                 throw BackupFailedException("Could not backup apk $apk", e)
             } catch (e: Throwable) {
-                LogsHandler.unhandledException(e, app)
+                LogsHandler.unexpectedException(e, app)
                 throw BackupFailedException("Could not backup apk $apk", e)
             }
         }
@@ -358,7 +358,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         } catch (e: ShellCommandFailedException) {
             throw BackupFailedException("Could not list contents of $sourcePath", e)
         } catch (e: Throwable) {
-            LogsHandler.unhandledException(e, sourcePath)
+            LogsHandler.unexpectedException(e, sourcePath)
             throw BackupFailedException("Could not list contents of $sourcePath", e)
         }
     }
@@ -395,7 +395,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             throw BackupFailedException(message, e)
         } catch (e: Throwable) {
             val message = "${e.javaClass.canonicalName} occurred on $dataType backup: $e"
-            LogsHandler.unhandledException(e, message)
+            LogsHandler.unexpectedException(e, message)
             throw BackupFailedException(message, e)
         }
         return true
@@ -481,6 +481,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             //---------- instead look at error output and ignore some of the messages
             if (code != 0)
                 Timber.i("tar returns: code $code: $err") // at least log the full error
+
             val errLines = err
                 .split("\n")
                 .filterNot { line ->
@@ -488,16 +489,29 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                             || line.contains("tar: unknown file type") // e.g. socket 140000
                             || line.contains("tar: had errors") // summary at the end
                 }
+
+            // Ignoring the error code looks problematic, but it was checked.
+            // It's not like it should, but the world isn't perfect.
+            // 1. The unknown file type is a known thing and is about sockets or in general files that
+            //    cannot be added to an archive or unsupported by tar.
+            //    You know, tar is able to pack the most of all archivers.
+            // 2. The "had errors" was added in this commit of toybox tar:
+            //    https://github.com/landley/toybox/commit/3b71ff9d7e4cab52b9d421bc8daf2bdd7810731d
+            //    it is additional to the real error messages.
+            //    If any error was found, this message is added as a summary at the end.
+
+            // so if there are remaining lines *and* the code is non-zero, we throw an exception
             if (errLines.isNotEmpty()) {
                 val errFiltered = errLines.joinToString("\n")
                 Timber.i(errFiltered)
                 if (code != 0)
                     throw ScriptException(errFiltered)
             }
+
             result = true
         } catch (e: Throwable) {
             val message = "${e.javaClass.canonicalName} occurred on $dataType backup: $e"
-            LogsHandler.unhandledException(e, message)
+            LogsHandler.unexpectedException(e, message)
             throw BackupFailedException(message, e)
         } finally {
             Timber.d("Done compressing. Closing $backupFilename")

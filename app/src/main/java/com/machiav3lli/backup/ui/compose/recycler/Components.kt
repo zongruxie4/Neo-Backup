@@ -11,10 +11,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,6 +43,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
@@ -48,14 +55,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
+import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.busyBackground
+import com.machiav3lli.backup.preferences.pref_busyFadeTime
+import com.machiav3lli.backup.preferences.pref_busyLaserBackground
+import com.machiav3lli.backup.preferences.pref_busyTurnTime
+import com.machiav3lli.backup.preferences.pref_versionOpacity
 import com.machiav3lli.backup.ui.compose.item.ActionChip
 import com.machiav3lli.backup.ui.compose.item.ButtonIcon
 import com.machiav3lli.backup.ui.item.ChipItem
+import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.sin
 
 @Composable
 fun <T : Any> VerticalItemList(
@@ -98,6 +114,14 @@ fun <T : Any> VerticalItemList(
                             itemKey?.invoke(it) ?: index
                         }
                     )
+                    item {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)  // workaround for floating buttons hiding the elements
+                            // unfortunately the sizes are private
+                        )
+                    }
                 }
             }
         }
@@ -277,20 +301,82 @@ fun MultiSelectableChipGroup(
     }
 }
 
+fun Modifier.angledGradientBackground(colors: List<Color>, degrees: Float, factor: Float = 1f) =
+    this.then(
+        drawBehind {
+
+            val (w, h) = size
+            val dim = max(w, h) * factor
+
+            val degreesNormalised = (degrees % 360).let { if (it < 0) it + 360 else it }
+
+            val alpha = (degreesNormalised * PI / 180).toFloat()
+
+            val centerOffsetX = cos(alpha) * dim / 2
+            val centerOffsetY = sin(alpha) * dim / 2
+
+            drawRect(
+                brush = Brush.linearGradient(
+                    colors = colors,
+                    // negative here so that 0 degrees is left -> right
+                    // and 90 degrees is top -> bottom
+                    start = Offset(center.x - centerOffsetX, center.y - centerOffsetY),
+                    end = Offset(center.x + centerOffsetX, center.y + centerOffsetY)
+                ),
+                size = size
+            )
+        }
+    )
+
+fun Modifier.busyBackground(
+    angle: Float,
+    color0: Color,
+    color1: Color,
+    color2: Color,
+): Modifier {
+    val factor = 0.2f
+    return this
+        .angledGradientBackground(
+            listOf(
+                color0,
+                color0,
+                color1,
+                color1,
+                color0,
+                color0,
+                color0,
+                color0,
+                color0,
+            ), angle, factor
+        )
+        .angledGradientBackground(
+            listOf(
+                color0,
+                color0,
+                color2,
+                color2,
+                color0,
+                color0,
+                color0,
+                color0,
+                color0,
+            ), angle * 1.5f, factor
+        )
+}
+
 @Composable
-fun BusyBackground(
-    busy: State<Boolean>? = null,
+fun BusyBackgroundAnimated(
+    busy: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val isBusy by remember { busy ?: OABX.busy }
     val rounds = 12
     val color0 = Color.Transparent
-    val color1 = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-    val color2 = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)
+    val color1 = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+    val color2 = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f)
 
-    val inTime = 2000
-    val outTime = 2000
-    val turnTime = 20000
+    val inTime = pref_busyFadeTime.value
+    val outTime = pref_busyFadeTime.value
+    val turnTime = pref_busyTurnTime.value
 
     Box(
         modifier = Modifier
@@ -298,13 +384,14 @@ fun BusyBackground(
         contentAlignment = Alignment.Center
     ) {
         AnimatedVisibility(
-            visible = isBusy,
+            visible = busy,
             enter = fadeIn(tween(inTime)),
             exit = fadeOut(tween(outTime)),
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            var angle by rememberSaveable { mutableStateOf(70f) }
+            //var angle by rememberSaveable { mutableStateOf(70f) }
+            var angle by rememberSaveable { mutableStateOf(System.currentTimeMillis() % turnTime * 360f / turnTime) }
             LaunchedEffect(true) {
                 withContext(Dispatchers.IO) {
                     animate(
@@ -330,12 +417,71 @@ fun BusyBackground(
     }
 }
 
+@Composable
+fun BusyBackgroundColor(
+    busy: Boolean,
+    content: @Composable () -> Unit,
+) {
+    val inTime = pref_busyFadeTime.value
+    val outTime = pref_busyFadeTime.value
+
+    AnimatedVisibility(
+        visible = busy,
+        enter = fadeIn(tween(inTime)),
+        exit = fadeOut(tween(outTime)),
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Color.Gray.copy(alpha = 0.3f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+        }
+    }
+
+    content()
+}
+
+@Composable
+fun BusyBackground(
+    busy: State<Boolean>? = null,
+    content: @Composable () -> Unit,
+) {
+    val isBusy by remember { busy ?: OABX.busy }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        if (pref_busyLaserBackground.value)
+            BusyBackgroundAnimated(busy = isBusy, content = content)
+        else
+            BusyBackgroundColor(busy = isBusy, content = content)
+
+        if (pref_versionOpacity.value > 0)
+            Text(
+                text = "${BuildConfig.VERSION_NAME} $applicationIssuer",
+                fontSize = 8.sp,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = pref_versionOpacity.value/100f),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.TopStart)
+                    .padding(16.dp, 0.dp, 0.dp, 0.dp)
+            )
+    }
+}
+
 @Preview
 @Composable
 fun BusyBackgroundPreview() {
     val busy = remember { mutableStateOf(true) }
     var progress by remember { mutableStateOf(true) }
-    Box {
+    Column {
         Row {
             ActionChip(text = "busy ${busy.value}", positive = busy.value) {
                 busy.value = !busy.value

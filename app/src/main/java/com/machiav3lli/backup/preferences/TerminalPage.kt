@@ -19,6 +19,7 @@ package com.machiav3lli.backup.preferences
 
 import android.os.Process
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -75,9 +76,14 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.LogsHandler.Companion.share
+import com.machiav3lli.backup.handler.ShellHandler.Companion.needFreshShell
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
+import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRootPipeOutCollectErr
+import com.machiav3lli.backup.handler.ShellHandler.Companion.suCommand
+import com.machiav3lli.backup.handler.ShellHandler.Companion.suInfo
 import com.machiav3lli.backup.handler.ShellHandler.Companion.utilBox
 import com.machiav3lli.backup.handler.ShellHandler.FileInfo.Companion.utilBoxInfo
 import com.machiav3lli.backup.handler.findBackups
@@ -93,27 +99,38 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUp
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Equals
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Play
+import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.ifThen
 import com.machiav3lli.backup.ui.compose.isAtBottom
 import com.machiav3lli.backup.ui.compose.isAtTop
 import com.machiav3lli.backup.ui.compose.item.RoundButton
+import com.machiav3lli.backup.ui.item.LaunchPref
 import com.machiav3lli.backup.ui.item.Pref
-import com.machiav3lli.backup.utils.SystemUtils.getApplicationIssuer
+import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import com.machiav3lli.backup.utils.TraceUtils.listNanoTiming
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 
 
 //var terminalShell = shellDefaultBuilder().build()
 
-fun shell(command: String): List<String> {
+fun shell(command: String, silent: Boolean = false): List<String> {
     try {
         //val env = "EPKG=\"${OABX.lastErrorPackage}\" ECMD=\"${OABX.lastErrorCommand}\""
         //val result = runAsRoot("$env $command")
         val result = runAsRoot(command)
-        return listOf(
-            "--- # $command${if (!result.isSuccess) " -> ${result.code}" else " -> ok"}"
-        ) + result.err.map { "? $it" } + result.out
+        val lines = mutableListOf<String>()
+        if (!silent)
+            lines += listOf(
+                "--- # $command${if (!result.isSuccess) " -> ${result.code}" else " -> ok"}"
+            )
+        lines += result.err.map { "? $it" }
+        lines += result.out
+        return lines
     } catch (e: Throwable) {
         return listOf(
             "--- # $command -> ERROR",
@@ -124,20 +141,25 @@ fun shell(command: String): List<String> {
     }
 }
 
-fun info(): List<String> {
+fun appInfo(): List<String> {
     return listOf(
-        "------ info",
+        "------ application",
         BuildConfig.APPLICATION_ID,
         BuildConfig.VERSION_NAME,
-        OABX.context.getApplicationIssuer()?.let { "signed by $it" } ?: "",
-        "------ shell utility box"
-    ).filterNotNull() + utilBoxInfo()
+        applicationIssuer?.let { "signed by $it" } ?: "",
+    )
 }
 
-fun envInfo() =
-    info() +
+fun baseInfo(): List<String> {
+    return appInfo() +
+            listOf("------ superuser") +
+            suInfo() +
+            listOf("------ shell utility box") + utilBoxInfo()
+}
+
+fun extendedInfo() =
+    baseInfo() +
             shell("su --help") +
-            shell("echo ${utilBox.name}") +
             shell("${utilBox.name} --version") +
             shell("${utilBox.name} --help")
 
@@ -148,17 +170,26 @@ fun logInt() =
 val maxLogcat = "-t 100000"
 
 fun logApp() =
-    shell("logcat -d ${maxLogcat} --pid=${Process.myPid()} | grep -v SHELLOUT:")
+    listOf("--- logcat app") +
+            shell("logcat -d ${maxLogcat} --pid=${Process.myPid()} | grep -v SHELLOUT:")
+
+fun logRel() =
+    listOf("--- logcat related") +
+            shell("logcat -d ${maxLogcat} | grep -v SHELLOUT: | grep -E '(machiav3lli.backup|NeoBackup>)'")
 
 fun logSys() =
-    shell("logcat -d ${maxLogcat} | grep -v SHELLOUT:")
+    listOf("--- logcat system") +
+            shell("logcat -d ${maxLogcat} | grep -v SHELLOUT:")
 
 fun dumpPrefs() =
     listOf("------ preferences") +
             Pref.preferences.map {
                 val (group, prefs) = it
                 prefs.map {
-                    if (it.private)
+                    if (it.private ||
+                        it is LaunchPref ||
+                        it.group == "kill"
+                    )
                         null
                     else
                         "${it.group}.${it.key} = ${it}"
@@ -177,17 +208,36 @@ fun dumpTiming() =
     listOf("------ timing") +
             listNanoTiming()
 
+fun accessTest1(title: String, directory: String, comment: String) =
+    listOf("--- $title") +
+            shell("echo \"$directory/*\"", silent = true) +
+            shell("echo \"$(ls $directory/ | wc -l) $comment\"", silent = true) +
+            shell("ls -dAlZ $directory", silent = true) +
+            run {
+                val stringStream = ByteArrayOutputStream()
+                runAsRootPipeOutCollectErr(
+                    stringStream,
+                    "echo \"$(ls $directory/ | wc -l) $comment - not using libsu\""
+                )
+                runAsRootPipeOutCollectErr(stringStream, "ls -dAlZ $directory")
+                stringStream.toString().lines().filterNot { it.isEmpty() }
+            }
+
 fun accessTest() =
     listOf("------ access") +
-            listOf("- data") +
-            shell("echo \"\$(ls \$ANDROID_DATA/user/0/ | wc -l) packages\"") +
-            shell("ls -dAlZ \$ANDROID_DATA/user/0/") +
-            listOf("- apk") +
-            shell("echo \"$(ls \$ANDROID_DATA/app/ | wc -l) packages\"") +
-            shell("ls -dAlZ \$ANDROID_DATA/app/") +
-            listOf("- misc") +
-            shell("echo \"\$(ls -l \$ANDROID_DATA/misc/ | wc -l) misc data\"") +
-            shell("ls -dAlZ \$ANDROID_DATA/misc/")
+            listOf("not using libsu: echo some command | $suCommand (used for streaming in backup/restore)") +
+            accessTest1("system app", "\$ANDROID_ASSETS", "packages (system app)") +
+            accessTest1("user app", "\$ANDROID_DATA/app", "packages (user app)") +
+            accessTest1("data", "\$ANDROID_DATA/user/0", "packages (data)") +
+            accessTest1(
+                "device protected",
+                "\$ANDROID_DATA/user_de/0",
+                "packages (device protected)"
+            ) +
+            accessTest1("external", "\$EXTERNAL_STORAGE/Android/data", "packages (external)") +
+            accessTest1("obb", "\$EXTERNAL_STORAGE/Android/obb", "packages (obb)") +
+            accessTest1("media", "\$EXTERNAL_STORAGE/Android/media", "packages (media)") +
+            accessTest1("misc", "\$ANDROID_DATA/misc", "misc data")
 
 fun threadsInfo(): List<String> {
     val threads =
@@ -225,29 +275,9 @@ fun onErrorInfo(): List<String> {
         val logs = logInt() + logApp()
         val lines =
             listOf("=== onError log", "") +
-                    info() +
+                    baseInfo() +
                     dumpPrefs() +
                     dumpEnv() +
-                    lastErrorPkg() +
-                    lastErrorCommand() +
-                    logs
-        return lines
-    } finally {
-    }
-}
-
-fun supportInfo(): List<String> {
-    try {
-        val logs = logInt() + logApp()
-        val lines =
-            listOf("=== support log", "") +
-                    envInfo() +
-                    dumpPrefs() +
-                    dumpEnv() +
-                    dumpAlarms() +
-                    dumpTiming() +
-                    accessTest() +
-                    threadsInfo() +
                     lastErrorPkg() +
                     lastErrorCommand() +
                     logs
@@ -270,12 +300,41 @@ fun textLogShare(lines: List<String>) {
     }
 }
 
+fun supportInfo(title: String = ""): List<String> {
+    try {
+        val logs = logInt() + logRel()
+        val lines =
+            listOf("=== ${if (title.isEmpty()) "support log" else title}", "") +
+                    extendedInfo() +
+                    dumpPrefs() +
+                    dumpEnv() +
+                    dumpAlarms() +
+                    dumpTiming() +
+                    accessTest() +
+                    threadsInfo() +
+                    lastErrorPkg() +
+                    lastErrorCommand() +
+                    logs
+        return lines
+    } finally {
+    }
+}
+
+fun supportLog(title: String = "") {
+    textLog(supportInfo(title))
+}
+
 fun supportInfoLogShare() {
     textLogShare(supportInfo())
 }
 
 @Composable
-fun TerminalButton(name: String, important: Boolean = false, action: () -> Unit) {
+fun TerminalButton(
+    name: String,
+    modifier: Modifier = Modifier,
+    important: Boolean = false,
+    action: () -> Unit,
+) {
     val color = if (important)
         MaterialTheme.colorScheme.primaryContainer
     else
@@ -286,15 +345,16 @@ fun TerminalButton(name: String, important: Boolean = false, action: () -> Unit)
         MaterialTheme.colorScheme.onSurfaceVariant
     SmallFloatingActionButton(
         modifier = Modifier
+            .padding(2.dp, 0.dp)
             .wrapContentWidth()
             .wrapContentHeight()
-            .padding(2.dp, 0.dp),
+            .then(modifier),
         containerColor = color,
         onClick = action
     ) {
         Text(
             modifier = Modifier
-                .padding(2.dp, 0.dp),
+                .padding(8.dp, 0.dp),
             text = name,
             color = textColor
         )
@@ -313,27 +373,40 @@ fun TerminalPage() {
     val padding = 4.dp
 
     fun launch(todo: () -> Unit) {
-        scope.launch {
+        scope.launch(Dispatchers.Default) {
             todo()
         }
     }
 
-    fun append(lines: List<String>) {
+    fun produce(produceLines: () -> List<String>) {
         launch {
+            val hittingBusy = CoroutineScope(Dispatchers.Default)
+            hittingBusy.launch {
+                while(true) {
+                    delay(50)
+                    OABX.hitBusy(50)
+                }
+            }
+
             runCatching {
                 focusManager.clearFocus()
             }
+
+            val lines = produceLines()
+
             output.addAll(lines)
+
+            hittingBusy.cancel()
         }
     }
 
     fun run(command: String) {
-        append(shell(command))
+        produce { shell(command) }
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            shell("exit")
+            needFreshShell()
         }
     }
 
@@ -352,10 +425,16 @@ fun TerminalPage() {
                 singleLine = false,
                 placeholder = { Text(text = "shell command", color = Color.Gray) },
                 trailingIcon = {
-                    RoundButton(icon = Phosphor.Play) {
-                        command.removeSuffix("\n")
-                        run(command)
-                        command = ""
+                    Row {
+                        if (command.isNotEmpty())
+                            RoundButton(icon = Phosphor.X) {
+                                command = ""
+                            }
+                        RoundButton(icon = Phosphor.Play) {
+                            command.removeSuffix("\n")
+                            run(command)
+                            command = ""
+                        }
                     }
                 },
                 keyboardOptions = KeyboardOptions(
@@ -388,17 +467,18 @@ fun TerminalPage() {
                 Spacer(Modifier.width(8.dp))
                 TerminalButton("clear", important = true) { output.clear() }
                 Spacer(Modifier.width(8.dp))
-                TerminalButton("log/int") { append(logInt()) }
-                TerminalButton("log/app") { append(logApp()) }
-                TerminalButton("log/all") { append(logSys()) }
-                TerminalButton("info") { append(envInfo()) }
-                TerminalButton("prefs") { append(dumpPrefs()) }
-                TerminalButton("env") { append(dumpEnv()) }
-                TerminalButton("alarms") { append(dumpAlarms()) }
-                TerminalButton("timing") { append(dumpTiming()) }
-                TerminalButton("threads") { append(threadsInfo()) }
-                TerminalButton("access") { append(accessTest()) }
-                TerminalButton("errInfo") { append(lastErrorPkg() + lastErrorCommand()) }
+                TerminalButton("log/int") { produce { logInt() } }
+                TerminalButton("log/app") { produce { logApp() } }
+                TerminalButton("log/rel") { produce { logRel() } }
+                TerminalButton("log/all") { produce { logSys() } }
+                TerminalButton("info") { produce { extendedInfo() } }
+                TerminalButton("prefs") { produce { dumpPrefs() } }
+                TerminalButton("env") { produce { dumpEnv() } }
+                TerminalButton("alarms") { produce { dumpAlarms() } }
+                TerminalButton("timing") { produce { dumpTiming() } }
+                TerminalButton("threads") { produce { threadsInfo() } }
+                TerminalButton("access") { produce { accessTest() } }
+                TerminalButton("errInfo") { produce { lastErrorPkg() + lastErrorCommand() } }
                 TerminalButton("err->cmd") {
                     command =
                         if (OABX.lastErrorCommands.isNotEmpty())
@@ -407,7 +487,7 @@ fun TerminalPage() {
                             "no error command"
                 }
                 TerminalButton("findBackups") { OABX.context.findBackups(forceTrace = true) }
-                if (BuildConfig.DEBUG) {
+                if (isDebug) {
                 }
             }
         }
@@ -458,6 +538,8 @@ fun TerminalText(
 
     autoScroll = listState.isAtBottom()
 
+    val lines = text.filter { it.contains(search, ignoreCase = true) }
+
     Box(
         modifier = modifier
             .ifThen(limitLines == 0) { Modifier.fillMaxHeight() }
@@ -488,33 +570,31 @@ fun TerminalText(
                     verticalArrangement = Arrangement.spacedBy(lineSpacing),
                     state = listState
                 ) {
-                    items(text) {
-                        if (it.contains(search, ignoreCase = true)) {
-                            val color =
-                                when {
-                                    it.contains("error", ignoreCase = true) -> Color(1f, 0f, 0f)
-                                    it.contains("warning", ignoreCase = true) -> Color(1f, 0.5f, 0f)
-                                    it.contains("***") -> Color(0f, 1f, 1f)
-                                    it.startsWith("===") -> Color(1f, 1f, 0f)
-                                    it.startsWith("---") -> Color(
-                                        0.8f,
-                                        0.8f,
-                                        0f
-                                    )
-                                    else -> Color.White
-                                }
-                            Text(
-                                if (it == "") " " else it,     //TODO hg42 workaround
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = fontSize,
-                                lineHeight = lineHeightSp,
-                                softWrap = wrap,
-                                color = color,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(0.dp)
-                            )
-                        }
+                    items(lines) {
+                        val color =
+                            when {
+                                it.contains("error", ignoreCase = true) -> Color(1f, 0f, 0f)
+                                it.contains("warning", ignoreCase = true) -> Color(1f, 0.5f, 0f)
+                                it.contains("***") -> Color(0f, 1f, 1f)
+                                it.startsWith("===") -> Color(1f, 1f, 0f)
+                                it.startsWith("---") -> Color(
+                                    0.8f,
+                                    0.8f,
+                                    0f
+                                )
+                                else -> Color.White
+                            }
+                        Text(
+                            if (it == "") " " else it,     //TODO hg42 workaround
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = fontSize,
+                            lineHeight = lineHeightSp,
+                            softWrap = wrap,
+                            color = color,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(0.dp)
+                        )
                     }
                 }
             }
@@ -556,13 +636,24 @@ fun TerminalText(
                     lineHeight = lineHeightSp * searchFontFactor
                 ),
                 trailingIcon = {
-                    Icon(
-                        imageVector = Phosphor.MagnifyingGlass,
-                        contentDescription = "search",
-                        modifier = Modifier.size(ICON_SIZE_SMALL)
-                        //tint = tint,
-                        //contentDescription = description
-                    )
+                    if (search.isEmpty())
+                        Icon(
+                            imageVector = Phosphor.MagnifyingGlass,
+                            contentDescription = "search",
+                            modifier = Modifier.size(ICON_SIZE_SMALL)
+                            //tint = tint,
+                            //contentDescription = description
+                        )
+                    else
+                        Icon(
+                            imageVector = Phosphor.X,
+                            contentDescription = "search",
+                            modifier = Modifier
+                                .size(ICON_SIZE_SMALL)
+                                .clickable { search = "" }
+                            //tint = tint,
+                            //contentDescription = description,
+                        )
                 },
                 keyboardOptions = KeyboardOptions(
                     autoCorrect = false,
@@ -598,16 +689,6 @@ fun TerminalText(
     }
 }
 
-
-@Preview
-@Composable
-fun Preview_Terminal() {
-
-    Box(modifier = Modifier.height(600.dp)) {
-        TerminalPage()
-    }
-}
-
 @Preview
 @Composable
 fun Preview_TerminalText() {
@@ -640,10 +721,24 @@ fun Preview_TerminalText() {
     Box(
         modifier = Modifier
             //.height(500.dp)
+            //.width(500.dp)
             .padding(0.dp)
             .background(color = Color(0.2f, 0.2f, 0.3f))
     ) {
         TerminalText(text, limitLines = 20, scrollOnAdd = false)
+    }
+}
+
+@Preview
+@Composable
+fun Preview_Terminal() {
+
+    Box(
+        modifier = Modifier
+            .height(500.dp)
+        //.width(500.dp)
+    ) {
+        TerminalPage()
     }
 }
 

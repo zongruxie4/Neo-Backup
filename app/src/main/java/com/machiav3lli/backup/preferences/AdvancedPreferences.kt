@@ -16,7 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
+import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.OABX.Companion.busyTick
+import com.machiav3lli.backup.OABX.Companion.isDebug
+import com.machiav3lli.backup.OABX.Companion.isRelease
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.preferences.ui.PrefsExpandableGroupHeader
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
@@ -36,6 +41,7 @@ import com.machiav3lli.backup.ui.item.IntPref
 import com.machiav3lli.backup.ui.item.LaunchPref
 import com.machiav3lli.backup.ui.item.Pref
 import com.machiav3lli.backup.ui.item.StringPref
+import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.sortFilterModel
 
 
@@ -53,7 +59,10 @@ fun DevPrefGroups() {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        PrefsGroupCollapsed(prefs = devUserOptions, heading = "advanced users (for those who know)")
+        PrefsGroupCollapsed(
+            prefs = devUserOptions,
+            heading = "advanced users (for those who know)"
+        )
         PrefsGroupCollapsed(prefs = devHackOptions, heading = "workarounds (hacks)")
         PrefsGroupCollapsed(prefs = devLogOptions, heading = "logging")
         PrefsGroupCollapsed(prefs = devTraceOptions, heading = "tracing")
@@ -97,15 +106,15 @@ fun AdvancedPrefsPage() {
             }
             item {
                 //Box {  // hg42: use Box as workaround for weird animation behavior  //TODO hg42 seems to be fixed now? //TODO wech
-                    AnimatedVisibility(
-                        visible = expanded,
-                        //enter = EnterTransition.None,
-                        //exit = ExitTransition.None
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        DevPrefGroups()
-                    }
+                AnimatedVisibility(
+                    visible = expanded,
+                    //enter = EnterTransition.None,
+                    //exit = ExitTransition.None
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    DevPrefGroups()
+                }
                 //}
             }
         }
@@ -113,6 +122,40 @@ fun AdvancedPrefsPage() {
 }
 
 //---------------------------------------- developer settings - advanced users
+
+val pref_maxJobs = IntPref(
+    key = "dev-adv.maxJobs",
+    summary = "maximum number of jobs run concurrently (0 = default = numCores)[needs restart]",
+    entries = (0..10 * numCores).toList(),
+    defaultValue = 0
+)
+
+val pref_busyIconTurnTime = IntPref(
+    key = "dev-adv.busyIconTurnTime",
+    summary = "time for one rotation of busy icon (ms)",
+    entries = (1000..10000 step 500).toList(),
+    defaultValue = 4000
+)
+
+val pref_busyIconScale = IntPref(
+    key = "dev-adv.busyIconScale",
+    summary = "busy icon scaling (%)",
+    entries = (100..200 step 10).toList(),
+    defaultValue = 150
+)
+
+val pref_busyFadeTime = IntPref(
+    key = "dev-adv.busyFadeTime",
+    summary = "time to fade busy color (ms)",
+    entries = (0..5000 step 250).toList(),
+    defaultValue = 2000
+)
+
+val pref_menuButtonAlwaysVisible = BooleanPref(
+    key = "dev-adv.menuButtonAlwaysVisible",
+    summary = "also show context menu button when selection is empty",
+    defaultValue = false
+)
 
 val pref_hideBackupLabels = BooleanPref(
     key = "dev-adv.hideBackupLabels",
@@ -245,15 +288,56 @@ val pref_refreshAppInfoTimeout = IntPref(
 
 //---------------------------------------- developer settings - implementation alternatives
 
-val pref_earlyEmptyBackups = BooleanPref(
-    key = "dev-alt.earlyEmptyBackups",
+val pref_prettyJson = BooleanPref(
+    key = "dev-alt.prettyJson",
+    summary = "create human readable json files. Note they should be compatible in both directions",
+    defaultValue = true
+)
+
+val pref_findBackupsLocksFlows = BooleanPref(
+    key = "dev-alt.lockFlowsWhileFindbackups",
     summary = "empty backup lists for installed packages early, to prevent single scanning",
     defaultValue = true
 )
 
-val pref_flowsWaitForStartup = BooleanPref(
-    key = "dev-alt.flowsWaitForStartup",
-    summary = "database/filter flows do not start before full scan for backups is finished",
+val pref_busyTurnTime = IntPref(
+    key = "dev-alt.busyTurnTime",
+    summary = "time the animated busy bars need for one rotation (ms)",
+    entries = (500..50000 step 500).toList(),
+    defaultValue = 50000
+)
+
+val pref_busyLaserBackground = BooleanPref(
+    key = "dev-alt.busyLaserBackground",
+    summary = "Use animated laser as busy background",
+    defaultValue = true
+)
+
+val pref_toolbarOpacity = IntPref(
+    key = "dev-alt.toolbarOpacity",
+    summary = "opacity of toolbars [percent]",
+    entries = (0..100 step 5).toList(),
+    defaultValue = 100
+)
+
+val pref_versionOpacity = IntPref(
+    key = "dev-alt.versionOpacity",
+    summary = "opacity of version [percent]",
+    entries = ((0..9 step 1) + (10..100 step 5)).toList(),
+    defaultValue = if (isRelease) 0 else 1
+    // invisible but can be seen when zooming
+)
+
+val pref_busyHitTime = IntPref(
+    key = "dev-alt.busyHitTime",
+    summary = "time being busy after hitting the watchdog (ms)",
+    entries = (busyTick..4000 step busyTick).toList(),
+    defaultValue = 2000
+)
+
+val pref_earlyEmptyBackups = BooleanPref(
+    key = "dev-alt.earlyEmptyBackups",
+    summary = "empty backup lists for installed packages early, to prevent single scanning",
     defaultValue = true
 )
 
@@ -264,7 +348,10 @@ val pref_flatStructure = BooleanPref(
 )
 
 val pref_propertiesInDir = BooleanPref(
-    key = "dev-alt.propertiesInDir",
+    key = if (isDebug)
+        "dev-alt.propertiesInDir"         //TODO hg42 available for testing
+    else
+        "dev-alt--off.propertiesInDir",   //TODO hg42 currently not working in scanner
     summary = "store the properties inside the backup directory",
     defaultValue = false
 )
@@ -301,23 +388,31 @@ val pref_useExpedited = BooleanPref(
 
 //---------------------------------------- developer settings - faking
 
-val pref_fakeSchedups = IntPref(
-    key = "dev-fake.fakeSchedups",
-    summary = "count of equal schedules run at once, 1 = do not fake",
-    entries = (1..9).toList(),
-    defaultValue = 1
+val pref_killThisApp = LaunchPref(
+    key = "dev-fake.killThisApp",
+    summary = "terminate app, service and process, but leave the schedules(=alarms) intact (in contrast to force-close, where alarms are removed from the system)"
+) {
+    OABX.activity?.let { ActivityCompat.finishAffinity(it) }
+    System.exit(0)
+}
+
+val pref_fakeScheduleDups = IntPref(
+    key = "dev-fake.fakeScheduleDups",
+    summary = "count of additional equal schedules to run at once, 0 = do not fake [for testing only]",
+    entries = (0..9).toList(),
+    defaultValue = 0
 )
 
 val pref_fakeBackupSeconds = IntPref(
     key = "dev-fake.fakeBackupSeconds",
-    summary = "[seconds] time for faked backups, 0 = do not fake",
+    summary = "[seconds] time for faked backups, 0 = do not fake [for testing only]",
     entries = ((0..9 step 1) + (10..55 step 5) + (60..1200 step 60)).toList(),
     defaultValue = 0
 )
 
 val pref_fakeScheduleMin = IntPref(
     key = "dev-fake.fakeScheduleMin",
-    summary = "[minute] run each enabled schedule every x min",
+    summary = "[minute] run each enabled schedule every x min [for testing only]",
     entries = (listOf(0) + (3..9 step 1) + (10..60 step 5)).toList(),
     defaultValue = 0
 )

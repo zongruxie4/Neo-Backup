@@ -20,6 +20,8 @@ import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.PREFS_LANGUAGES_DEFAULT
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.THEME_DYNAMIC
+import com.machiav3lli.backup.THEME_SYSTEM
 import com.machiav3lli.backup.accentColorItems
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.EnumDialogUI
@@ -85,7 +87,7 @@ fun UserPrefsPage() {
                         val flags = it.flags and (
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION or
                                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                                 )
+                                )
                         context.contentResolver.takePersistableUriPermission(uri, flags)
                         Timber.i("setting uri $uri")
                         backupDir = setBackupDir(uri)
@@ -151,7 +153,8 @@ val pref_appTheme = EnumPref(
     icon = Phosphor.Swatches,
     iconTint = ColorSpecial,
     entries = themeItems,
-    defaultValue = 2
+    defaultValue = if (OABX.minSDK(31)) THEME_DYNAMIC
+    else THEME_SYSTEM
 )
 
 val pref_appAccentColor = EnumPref(
@@ -169,7 +172,15 @@ val pref_appSecondaryColor = EnumPref(
     icon = Phosphor.EyedropperSample,
     //iconTint = MaterialTheme.colorScheme.secondary,
     entries = secondaryColorItems,
-    defaultValue = 0
+    defaultValue = 3
+)
+
+val pref_blackTheme = BooleanPref(
+    key = "user.blackTheme",
+    titleId = R.string.prefs_theme_black,
+    summaryId = R.string.prefs_theme_black_summary,
+    icon = Phosphor.Swatches,
+    defaultValue = false,
 )
 
 val pref_pathBackupFolder = StringPref(

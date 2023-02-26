@@ -20,11 +20,10 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.classAddress
-import com.machiav3lli.backup.preferences.pref_fakeSchedups
+import com.machiav3lli.backup.preferences.pref_fakeScheduleDups
 import com.machiav3lli.backup.preferences.pref_maxRetriesPerPackage
 import com.machiav3lli.backup.services.CommandReceiver
 import com.machiav3lli.backup.tasks.AppActionWork
-import com.machiav3lli.backup.tasks.FinishWork
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -61,13 +60,6 @@ class WorkHandler(appContext: Context) {
         ).observeForever {
             onProgress(this, it)
         }
-
-        // observe FinishWork
-        manager.getWorkInfosByTagLiveData(
-            FinishWork::class.qualifiedName!!
-        ).observeForever {
-            onFinish(this, it)
-        }
     }
 
     fun release(): WorkHandler? {
@@ -84,7 +76,10 @@ class WorkHandler(appContext: Context) {
         prune()
     }
 
-    val endDelay = 200L //500L //10000L
+    val endDelay = 0L
+    //val endDelay = 200L
+    //val endDelay = 500L
+    //val endDelay = 10000L
 
     fun endBatches() {
         Timber.d("%%%%% ALL PRUNE")
@@ -97,27 +92,28 @@ class WorkHandler(appContext: Context) {
                 if (batch.nFinished > 1 || batch.isCanceled) {
                     val now = System.currentTimeMillis()
                     if (now - batch.startTime > longAgo) {
-                        Timber.d("%%%%% $it removing...\\")
+                        Timber.d("""%%%%% $it removing...\""")
                         batchesKnown.remove(it)
-                        Timber.d("%%%%% $it removed..../")
+                        Timber.d("""%%%%% $it removed..../""")
                     }
                 }
             }
         }
         batchPackageVars = mutableMapOf()
 
-        OABX.setProgress()
+        //OABX.setProgress()
 
         Thread.sleep(endDelay)
 
         Timber.d("%%%%% ALL DONE")
-        OABX.wakelock(false) // now everything is done
 
         OABX.service?.let {
-            traceBold { "%%%%% ------------------------------------------ service stopping...\\" }
+            traceBold { """%%%%% ------------------------------------------ service stopping...\""" }
             it.stopSelf()
-            traceBold { "%%%%% ------------------------------------------ service stopped.../" }
+            traceBold { """%%%%% ------------------------------------------ service stopped.../""" }
         }
+
+        OABX.wakelock(false)
     }
 
     fun beginBatch(batchName: String) {
@@ -162,7 +158,7 @@ class WorkHandler(appContext: Context) {
         fun getBatchName(name: String, startTime: Long): String {
             return if (startTime == 0L)
                 name
-            else if (pref_fakeSchedups.value > 1)
+            else if (pref_fakeScheduleDups.value > 0)
                 "$name @ ${
                     SimpleDateFormat("EEE HH:mm:ss:SSS", Locale.getDefault()).format(startTime)
                 }"
@@ -386,7 +382,7 @@ class WorkHandler(appContext: Context) {
 
                 val batch: BatchState = batchesKnown[batchName]!!
 
-                if (batch.nFinished <= 2) {
+                if (batch.nFinished <= 0) {
 
                     workState.run {
                         val processed = succeeded + failed
@@ -519,9 +515,9 @@ class WorkHandler(appContext: Context) {
                                     .setProgress(workCount, processed, false)
                                     .setColor(
                                         if (failed == 0)
-                                            0x66FF66
+                                            0x009900
                                         else
-                                            0xFF6666
+                                            0x990000
                                     )
                         }
 
@@ -553,13 +549,5 @@ class WorkHandler(appContext: Context) {
                 }
             }
         }
-    }
-
-    fun onFinish(handler: WorkHandler, work: MutableList<WorkInfo>? = null) {
-        // may be the state changed in between
-        onProgress(
-            handler,
-            null
-        ) // don't forward "work", because it's FinishWork not AppActionWork!
     }
 }

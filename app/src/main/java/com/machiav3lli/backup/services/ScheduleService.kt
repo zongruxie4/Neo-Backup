@@ -25,13 +25,13 @@ import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.Process
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Observer
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import com.machiav3lli.backup.ACTION_CANCEL
 import com.machiav3lli.backup.ACTION_SCHEDULE
-import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.beginLogSection
@@ -43,15 +43,15 @@ import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.showNotification
 import com.machiav3lli.backup.pref_autoLogAfterSchedule
 import com.machiav3lli.backup.pref_autoLogSuspicious
-import com.machiav3lli.backup.preferences.pref_fakeSchedups
+import com.machiav3lli.backup.preferences.pref_fakeScheduleDups
 import com.machiav3lli.backup.preferences.pref_useForegroundInService
 import com.machiav3lli.backup.preferences.supportInfo
 import com.machiav3lli.backup.preferences.textLog
 import com.machiav3lli.backup.tasks.AppActionWork
-import com.machiav3lli.backup.tasks.FinishWork
 import com.machiav3lli.backup.tasks.ScheduledActionTask
 import com.machiav3lli.backup.traceSchedule
 import com.machiav3lli.backup.utils.scheduleAlarm
+import com.machiav3lli.backup.utils.scheduleAlarmsOnce
 import timber.log.Timber
 
 open class ScheduleService : Service() {
@@ -97,13 +97,13 @@ open class ScheduleService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val scheduleId = intent?.getLongExtra("scheduleId", -1L) ?: -1L
-        val name = intent?.getStringExtra("name") ?: "NoName@Service"
+        val name = intent?.getStringExtra("name") ?: ""
 
         OABX.wakelock(true)
 
         traceSchedule {
             var message =
-                "%%%%% ############################################################ ScheduleService starting for scheduleId=$scheduleId name=$name"
+                "%%%%% ############################################################ ScheduleService startId=$startId PID=${Process.myPid()} starting for id=$scheduleId name='$name'"
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 message += " ui=$isUiContext"
             }
@@ -116,7 +116,7 @@ open class ScheduleService : Service() {
         if (intent != null) {
             when (val action = intent.action) {
                 ACTION_CANCEL   -> {
-                    traceSchedule { "action $action" }
+                    traceSchedule { "id=$scheduleId name='$name' action=$action" }
                     OABX.work.cancel(name)
                     OABX.wakelock(false)
                     traceSchedule { "%%%%% service stop" }
@@ -124,13 +124,13 @@ open class ScheduleService : Service() {
                 }
                 ACTION_SCHEDULE -> {
                     // scheduleId already read from extras
-                    traceSchedule { "action $action" }
+                    traceSchedule { "id=$scheduleId name='$name' action=$action" }
                 }
                 null            -> {
                     // no action = standard action, simply continue with extra data
                 }
                 else            -> {
-                    traceSchedule { "action $action unknown, ignored" }
+                    traceSchedule { "id=$scheduleId name='$name' action=$action unknown, ignored" }
                     //OABX.wakelock(false)
                     //return START_NOT_STICKY
                     // or
@@ -139,12 +139,27 @@ open class ScheduleService : Service() {
             }
         }
 
-        if (runningSchedules[scheduleId] == null) {
+        if (scheduleId >= 0) {
 
-            if (scheduleId >= 0) {
+            if (runningSchedules[scheduleId] == null) {
 
-                repeat(pref_fakeSchedups.value) { count ->
+                runningSchedules[scheduleId] = false
+
+                repeat(1 + pref_fakeScheduleDups.value) { count ->
+
                     val now = System.currentTimeMillis()
+
+                    // hg42:
+                    // while it looks reasonable to re-schedule after the job is done,
+                    // it seems to be less problematic to re-schedule *before* doing the job.
+                    // that's because rescheduling would not happen, when
+                    // * not all exceptions catched and jumoing out of the batch
+                    // * the job doesn't finish and just hangs around
+                    // the re-schedule is also more exact
+                    //TODO hg42 it would probably be even better to use
+                    //  the current timeToRun of this schedule as timePlaced in the calculation
+                    scheduleAlarm(OABX.context, scheduleId, true)
+
                     scheduledActionTask = object : ScheduledActionTask(baseContext, scheduleId) {
                         override fun onPostExecute(result: Triple<String, List<String>, Int>?) {
                             val name = result?.first ?: "NoName@Task"
@@ -152,18 +167,8 @@ open class ScheduleService : Service() {
                             val mode = result?.third ?: MODE_UNSET
                             var errors = ""
                             var resultsSuccess = true
-                            var counter = 0
-
-                            // hg42:
-                            // while it looks reasonable to re-schedule after the job is done,
-                            // it seems to be less problematic to re-schedule *before* doing the job.
-                            // that's because rescheduling would not happen, when
-                            // * not all exceptions catched and jumoing out of the batch
-                            // * the job doesn't finish and just hangs around
-                            // the re-schedule is also more exact
-                            //TODO hg42 it would probably be even better to use
-                            //  the current timeToRun of this schedule as timePlaced in the calculation
-                            scheduleAlarm(context, scheduleId, true)
+                            var finished = 0
+                            var queued = 0
 
                             if (selectedItems.isEmpty()) {
                                 showNotification(
@@ -203,13 +208,13 @@ open class ScheduleService : Service() {
 
                                     val oneTimeWorkLiveData = OABX.work.manager
                                         .getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
-                                    oneTimeWorkLiveData.observeForever(object : Observer<WorkInfo> {
+                                    oneTimeWorkLiveData.observeForever(object : Observer<WorkInfo> {    //TODO WECH hg42
                                         override fun onChanged(t: WorkInfo?) {
                                             if (t?.state == WorkInfo.State.SUCCEEDED ||
                                                 t?.state == WorkInfo.State.FAILED ||
                                                 t?.state == WorkInfo.State.CANCELLED
                                             ) {
-                                                counter += 1
+                                                finished += 1
                                                 val succeeded =
                                                     t.outputData.getBoolean("succeeded", false)
                                                 val packageLabel =
@@ -217,7 +222,7 @@ open class ScheduleService : Service() {
                                                         ?: ""
                                                 val error = t.outputData.getString("error")
                                                     ?: ""
-                                                if (error.isNotEmpty()) errors =
+                                                if (error.isNotEmpty()) errors =     //TODO hg42 add to WorkHandler
                                                     "$errors$packageLabel: ${
                                                         LogsHandler.handleErrorMessages(
                                                             this@ScheduleService,
@@ -226,40 +231,18 @@ open class ScheduleService : Service() {
                                                     }\n"
                                                 resultsSuccess = resultsSuccess && succeeded
                                                 oneTimeWorkLiveData.removeObserver(this)
+                                                if (finished >= queued)
+                                                    endSchedule(scheduleId, name, "all jobs finished", intent)
                                             }
                                         }
                                     })
                                 }
 
-                                val finishWorkRequest =
-                                    FinishWork.Request(resultsSuccess, true, batchName)
-
-                                val finishWorkLiveData = OABX.work.manager
-                                    .getWorkInfoByIdLiveData(finishWorkRequest.id)
-                                finishWorkLiveData.observeForever(object : Observer<WorkInfo> {
-                                    override fun onChanged(t: WorkInfo?) {
-                                        if (t == null ||
-                                            t?.state == WorkInfo.State.SUCCEEDED ||
-                                            t?.state == WorkInfo.State.FAILED ||
-                                            t?.state == WorkInfo.State.CANCELLED
-                                        ) {
-                                            traceSchedule {
-                                                "work manager changed to state ${t?.state?.name}"
-                                            }
-                                            //scheduleAlarm(context, scheduleId, true)
-                                            OABX.main?.refreshPackages()
-                                            finishWorkLiveData.removeObserver(this)
-                                            //stopService(intent)
-                                            endSchedule(scheduleId, name, "finish work", intent)
-                                        }
-                                    }
-                                })
-
                                 if (worksList.isNotEmpty()) {
+                                    queued = worksList.size
                                     if (beginSchedule(scheduleId, name, "queueing work")) {
                                         OABX.work.manager
                                             .beginWith(worksList)
-                                            .then(finishWorkRequest)
                                             .enqueue()
                                     } else {
                                         endSchedule(scheduleId, name, "duplicate detected", intent)
@@ -272,39 +255,43 @@ open class ScheduleService : Service() {
                             super.onPostExecute(result)
                         }
                     }
-                    traceSchedule { "starting schedule $scheduleId ($count)" }
+                    traceSchedule { "starting task for schedule $scheduleId${if (count > 0) " (dup $count)" else ""}" }
                     scheduledActionTask.execute()
                 }
+            } else {
+                val message =
+                    "duplicate schedule detected: $scheduleId $name (as designed, ignored)"
+                Timber.w(message)
+                if (pref_autoLogSuspicious.value)
+                    textLog(
+                        listOf(
+                            message,
+                            "--- autoLogAfterSchedule $scheduleId $name"
+                        ) + supportInfo()
+                    )
             }
-        } else {
-            val message = "duplicate schedule detected: $scheduleId $name"
-            Timber.w(message)
-            if (BuildConfig.DEBUG || BuildConfig.APPLICATION_ID.contains("hg42") || pref_autoLogSuspicious.value)
-                textLog(
-                    listOf(
-                        message,
-                        "--- autoLogAfterSchedule $scheduleId $name"
-                    ) + supportInfo()
-                )
         }
+
+        scheduleAlarmsOnce()
 
         OABX.wakelock(false)
         return START_NOT_STICKY
     }
 
     fun beginSchedule(scheduleId: Long, name: String, details: String = ""): Boolean {
-        return if (runningSchedules[scheduleId] == null) {
+        return if (runningSchedules[scheduleId] != true) {
             runningSchedules[scheduleId] = true
             beginLogSection("schedule $name")
             true
         } else {
-            val message = "duplicate schedule detected: $scheduleId $name $details (late)"
+            val message =
+                "duplicate schedule detected: id=$scheduleId name='$name' (late, ignored) $details"
             Timber.w(message)
-            if (BuildConfig.DEBUG || BuildConfig.APPLICATION_ID.contains("hg42") || pref_autoLogSuspicious.value)
+            if (pref_autoLogSuspicious.value)
                 textLog(
                     listOf(
                         message,
-                        "--- autoLogAfterSchedule $scheduleId $name $details"
+                        "--- autoLogAfterSchedule $scheduleId $name${if (details.isEmpty()) "" else " ($details)"}"
                     ) + supportInfo()
                 )
             false
@@ -317,7 +304,7 @@ open class ScheduleService : Service() {
             if (pref_autoLogAfterSchedule.value) {
                 textLog(
                     listOf(
-                        "--- autoLogAfterSchedule $name $details"
+                        "--- autoLogAfterSchedule $name${if (details.isEmpty()) "" else " ($details)"}"
                     ) + supportInfo()
                 )
             }
@@ -327,7 +314,7 @@ open class ScheduleService : Service() {
             //    stopService(intent)
             //    stopSelf()
         } else
-            traceSchedule { "duplicate schedule end detected: $scheduleId $name $details $intent" }
+            traceSchedule { "duplicate schedule end: id=$scheduleId name='$name'${if (details.isEmpty()) "" else " ($details)"} $intent" }
     }
 
     private fun createForegroundInfo() {
