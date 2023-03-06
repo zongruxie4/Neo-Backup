@@ -24,6 +24,7 @@ import com.machiav3lli.backup.utils.suRecursiveCopyFilesToDocument
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.collections.component1
@@ -148,6 +149,13 @@ private fun closeQuietly(closeable: AutoCloseable?) {
     }
 }
 
+fun uriFromFile(file: File): Uri =
+    FileProvider.getUriForFile(
+        OABX.context,
+        "${OABX.context.packageName}.provider",
+        file
+    )
+
 
 // TODO MAYBE migrate at some point to FuckSAF
 // TODO hg42 or one of those https://github.com/topics/storage-access-framework?l=kotlin
@@ -161,6 +169,9 @@ private fun closeQuietly(closeable: AutoCloseable?) {
 // TODO hg42 so we probably need a conversion function
 // TODO hg42   or caching the relation
 // TODO hg42   or having a second implementation for some objects (that may be added later)
+
+class FileDuplicationException(message: String) : IOException(message)
+class FileDuplicationHandlingException(message: String, cause: Throwable) : IOException(message, cause)
 
 open class StorageFile {
 
@@ -177,9 +188,7 @@ open class StorageFile {
                     _uri = p.findUri(n)
                     _uri
                 }
-            } ?: FileProvider.getUriForFile(
-                context, "${context.applicationContext.packageName}.provider", f
-            )
+            } ?: uriFromFile(f)
         } ?: Uri.fromFile(file?.absoluteFile)
 
     data class DocumentInfo(
@@ -252,7 +261,8 @@ open class StorageFile {
                 }
             }
         } catch (e: Throwable) {
-            unexpectedException(e, "$this")
+            //logException(e, "$this")
+            // ignore, file is not there
         } finally {
             //cursor?.let { closeQuietly(it) }
             cursor?.close()
@@ -373,7 +383,7 @@ open class StorageFile {
         get() {
             if (field == null) {
                 field = file?.name ?: run {
-                    _uri?.lastPathSegment
+                    _uri?.lastPathSegment?.substringAfterLast("/")
                 }
             }
             return field
@@ -461,14 +471,19 @@ open class StorageFile {
                 }
             } ?: run {
                 if (mimeType == MIME_TYPE_DIR) {
-                    val found = findFile(displayName)
-                    found ?: StorageFile(
-                        this,
-                        createFile(context, _uri!!, mimeType, displayName),
-                        //context,
-                        displayName
-                    )
+                    // if the directory already exists, just use it
+                    findFile(displayName)
+                    // otherwise a new one
+                        ?: StorageFile(
+                            this,
+                            createFile(context, _uri!!, mimeType, displayName),
+                            //context,
+                            displayName
+                        )
                 } else {
+                    // if the file already exists, delete it, because we want to start it again
+                    findFile(displayName)?.delete()
+                    // allways use the new one
                     StorageFile(
                         this,
                         createFile(context, _uri!!, mimeType, displayName),
@@ -476,16 +491,53 @@ open class StorageFile {
                         displayName
                     )
                 }
-
             }
-        if (newFile.name != displayName) {  // just in case the first find didn't work
-            Timber.w("SAF file duplication: $displayName -> ${newFile.name}")
-            if (mimeType == MIME_TYPE_DIR) {
+        if ((newFile.path?.endsWith(displayName) ?: true).not()) {
+            // should now be paranoid
+            // it would mean, the first findFile didn't work (note, it was missing, so stay safe here)
+            var message =
+                "(SAF) file duplication: '$displayName' is not last part of '${newFile.path}'"
+            try {
                 val found = findFile(displayName)
-                found?.let {
-                    newFile.delete()
-                    newFile = it
+                if (mimeType == MIME_TYPE_DIR) {
+                    found?.let {
+                        // the directory (probably) exists
+                        message += ", delete ${newFile.path}, use ${it.path}"
+                        if (newFile.exists()) // do it safe, rumors are, it would delete the parent !!!
+                            newFile.delete()
+                        // use the found directory
+                        newFile = it
+                    } ?: run {
+                        // wow, even more paranoid
+                        // SAF added a new duplicate, but the wanted name doesn't exist !!!
+                        // so why would it create a duplicate?
+                        // but one has already seen horses puking
+                        message += ", $displayName DOES NOT EXIST, rename new directory"
+                        newFile.renameTo(displayName)
+                    }
+                } else {
+                    // the file (probably) exists
+                    found?.let {
+                        message += ", delete ${it.path}"
+                        try {
+                            it.delete()
+                        } catch (e: Throwable) {
+                            unexpectedException(
+                                e,
+                                "file duplication happened, but original file cannot be deleted"
+                            )
+                        }
+                    }
+                    message += ", rename new file"
+                    newFile.renameTo(displayName)
                 }
+                throw FileDuplicationException(message)
+            } catch (e: FileDuplicationException) {
+                unexpectedException(e)
+            } catch (e: Throwable) {
+                unexpectedException(
+                    FileDuplicationHandlingException(message, e)
+                )
             }
         }
         // creates a subobject inside this

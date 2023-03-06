@@ -34,7 +34,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +48,13 @@ import com.machiav3lli.backup.OABX.Companion.endBusy
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.pref_autoLogAfterSchedule
+import com.machiav3lli.backup.pref_autoLogExceptions
+import com.machiav3lli.backup.pref_autoLogSuspicious
+import com.machiav3lli.backup.pref_catchUncaughtException
+import com.machiav3lli.backup.pref_logToSystemLogcat
+import com.machiav3lli.backup.pref_maxLogLines
+import com.machiav3lli.backup.pref_trace
 import com.machiav3lli.backup.preferences.DevPrefGroups
 import com.machiav3lli.backup.preferences.LogsPage
 import com.machiav3lli.backup.preferences.TerminalButton
@@ -68,6 +74,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+
+var devToolsTab = mutableStateOf("devsett")
+
+val devToolsTabs = listOf<Pair<String, @Composable () -> Unit>>(
+    "logs" to { DevLogsTab() },
+    "" to {},
+    "log" to { DevLogTab() },
+    "infolog" to { DevInfoLogTab() },
+    "" to {},
+    "tools" to { DevToolsTab() },
+    "term" to { TerminalPage() },
+    "" to {},
+    "devsett" to { DevSettingsTab() },
+    "" to {},
+    "SUPPORT" to { DevSupportTab() },
+)
 
 @Composable
 fun DevInfoLogTab() {
@@ -190,6 +213,7 @@ val pref_renameDamagedToERROR = LaunchPref(
     MainScope().launch(Dispatchers.IO) {
         beginBusy("renameDamagedToERROR")
         OABX.context.findBackups(damagedOp = "ren")
+        devToolsTab.value = "infolog"
         endBusy("renameDamagedToERROR")
     }
 }
@@ -201,6 +225,7 @@ val pref_undoDamagedToERROR = LaunchPref(
     MainScope().launch(Dispatchers.IO) {
         beginBusy("undoDamagedToERROR")
         OABX.context.findBackups(damagedOp = "undo")
+        devToolsTab.value = "infolog"
         endBusy("undoDamagedToERROR")
     }
 }
@@ -212,6 +237,7 @@ val pref_deleteERROR = LaunchPref(
     MainScope().launch(Dispatchers.IO) {
         beginBusy("deleteERROR")
         OABX.context.findBackups(damagedOp = "del")
+        devToolsTab.value = "infolog"
         endBusy("deleteERROR")
     }
 }
@@ -343,6 +369,22 @@ fun DevToolsTab() {
     }
 }
 
+val pref_prepareSupport = LaunchPref(
+    key = "dev-support.prepareSupport",
+    summary = "prepare settings for usual support purposes"
+) {
+    Pref.preferences["dev-trace"]?.forEach {
+        Pref.setPrefFlag(it.key, it.defaultValue as Boolean)
+    }
+    pref_trace.value = true
+    pref_maxLogLines.value = 20_000
+    pref_logToSystemLogcat.value = true
+    pref_catchUncaughtException.value = true
+    pref_autoLogExceptions.value = true
+    pref_autoLogSuspicious.value = true
+    pref_autoLogAfterSchedule.value = true
+}
+
 val pref_shareSupportLog = LaunchPref(
     key = "dev-support.shareSupportLog",
     summary = "create and share a support log"
@@ -350,6 +392,22 @@ val pref_shareSupportLog = LaunchPref(
     MainScope().launch {
         supportInfoLogShare()
     }
+}
+
+val pref_afterSupport = LaunchPref(
+    key = "dev-support.afterSupport",
+    summary = "set settings to normal"
+) {
+    Pref.preferences["dev-trace"]?.forEach {
+        Pref.setPrefFlag(it.key, it.defaultValue as Boolean)
+    }
+    pref_trace.value = true
+    pref_maxLogLines.apply { value = defaultValue as Int }
+    pref_logToSystemLogcat.apply { value = defaultValue as Boolean }
+    pref_catchUncaughtException.apply { value = defaultValue as Boolean }
+    pref_autoLogExceptions.apply { value = defaultValue as Boolean }
+    pref_autoLogSuspicious.apply { value = defaultValue as Boolean }
+    pref_autoLogAfterSchedule.apply { value = defaultValue as Boolean }
 }
 
 @Composable
@@ -372,7 +430,7 @@ fun DevSupportTab() {
 fun DevTools(
     expanded: MutableState<Boolean>,
 ) {
-    var tab by rememberSaveable { mutableStateOf("devsett") }
+    var tab by devToolsTab
     val tempShowInfo = remember { mutableStateOf(false) }
     val showInfo = OABX.showInfoLog || tempShowInfo.value
 
@@ -437,20 +495,6 @@ fun DevTools(
                 }
             }
 
-            val tabs = listOf<Pair<String, @Composable () -> Unit>>(
-                "logs" to { DevLogsTab() },
-                "" to {},
-                "log" to { DevLogTab() },
-                "infolog" to { DevInfoLogTab() },
-                "" to {},
-                "tools" to { DevToolsTab() },
-                "term" to { TerminalPage() },
-                "" to {},
-                "devsett" to { DevSettingsTab() },
-                "" to {},
-                "SUPPORT" to { DevSupportTab() },
-            )
-
             FlowRow(modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp, 0.dp, 8.dp, 4.dp)
@@ -459,7 +503,7 @@ fun DevTools(
                     onLongClick = { tab = "devsett" }
                 )
             ) {
-                tabs.forEach {
+                devToolsTabs.forEach {
                     if (it.first.isEmpty())
                         Spacer(modifier = Modifier.width(8.dp))
                     else
@@ -467,7 +511,7 @@ fun DevTools(
                 }
             }
 
-            tabs.find { it.first == tab }?.let {
+            devToolsTabs.find { it.first == tab }?.let {
                 it.second()
             }
         }

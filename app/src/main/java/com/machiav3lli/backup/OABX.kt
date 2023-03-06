@@ -82,7 +82,7 @@ val pref_maxLogLines = IntPref(
             (2000..5000 step 1000) +
             (5000..20000 step 5000)
             ).toList(),
-    defaultValue = 50
+    defaultValue = 2000
 )
 
 val pref_maxLogCount = IntPref(
@@ -179,6 +179,24 @@ val traceTiming = TraceUtils.TracePrefBold(
     summary = "show code segment timers"
 )
 
+val traceContextMenu = TraceUtils.TracePref(
+    name = "ContextMenu",
+    summary = "trace context menu actions and events",
+    default = true
+)
+
+val traceCompose = TraceUtils.TracePref(
+    name = "Compose",
+    summary = "trace recomposition of UI elements",
+    default = true
+)
+
+val traceDebug = TraceUtils.TracePref(
+    name = "Debug",
+    summary = "trace for debugging purposes (for devs)",
+    default = false
+)
+
 val traceBackups = TraceUtils.TracePref(
     name = "Backups",
     summary = "trace backups",
@@ -197,27 +215,9 @@ val traceBackupsScanAll = TraceUtils.TracePref(
     default = false
 )
 
-val traceBackupProps = TraceUtils.TracePref(
-    name = "BackupProps",
-    summary = "trace backup properties (serialization format, e.g. json)",
-    default = false
-)
-
-val traceContextMenu = TraceUtils.TracePref(
-    name = "ContextMenu",
-    summary = "trace context menu actions and events",
-    default = false
-)
-
-val traceCompose = TraceUtils.TracePref(
-    name = "Compose",
-    summary = "trace recomposition of UI elements",
-    default = false
-)
-
-val traceDebug = TraceUtils.TracePref(
-    name = "Debug",
-    summary = "trace for debugging purposes (for devs)",
+val traceSerialize = TraceUtils.TracePref(
+    name = "Serialize",
+    summary = "trace json or yaml conversions",
     default = false
 )
 
@@ -402,16 +402,16 @@ class OABX : Application() {
                 }
 
                 override fun createStackElementTag(element: StackTraceElement): String {
-                    if (element.methodName.startsWith("trace"))
-                        return "NeoBackup>"
-                    else
-                        return "NeoBackup>${
+                    var tag = "${
                             super.createStackElementTag(element)
-                        }:${
-                            element.lineNumber
-                        }::${
-                            element.methodName
-                        }"
+                    }:${
+                    element.lineNumber
+                    }::${
+                    element.methodName
+                    }"
+                    if (tag.contains("TraceUtils"))
+                        tag = ""
+                    return "NeoBackup>$tag"
                 }
             })
         }
