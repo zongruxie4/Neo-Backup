@@ -32,7 +32,7 @@ import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Blocklist
-import com.machiav3lli.backup.handler.isBackupsLocked
+import com.machiav3lli.backup.handler.isPackageFlowsLocked
 import com.machiav3lli.backup.handler.toPackageList
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.Package.Companion.invalidateCacheForPackage
@@ -83,6 +83,16 @@ class MainViewModel(
     //   so, as long as items come in faster than processing time, there won't be results, in short:
     //   if f_in > f_proc, then there is no output at all
     //   this is much like processing on idle only
+
+    val schedules =
+        //------------------------------------------------------------------------------------------ blocklist
+        db.scheduleDao.allFlow
+            .trace { "*** schedules <<- ${it.size}" }
+            .stateIn(
+                viewModelScope + Dispatchers.IO,
+                SharingStarted.Eagerly,
+                emptyList()
+            )
 
     val blocklist =
         //------------------------------------------------------------------------------------------ blocklist
@@ -150,17 +160,19 @@ class MainViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val packageList =
         //========================================================================================== packageList
-        combine(db.appInfoDao.allFlow, backupsMapDb) { p, b ->
+        combine(db.appInfoDao.allFlow, backupsMapDb) { appinfos, backups ->
 
             traceFlows {
-                "******************** packages-db: ${p.size} backups-db: ${
-                    b.map { it.value.size }.sum()
+                "******************** packages-db: ${appinfos.size} backups-db: ${
+                    backups.map { it.value.size }.sum()
                 }"
             }
 
-            //TODO hg42 use the current backups instead of slow turn around from db
-            //val pkgs = p.toPackageList(appContext, emptyList(), b)
-            val pkgs = p.toPackageList(appContext, emptyList(), getBackups())
+            // use the current backups instead of slow and async turn around from db
+            // but keep backups in combine, because it signals changes of the backups
+            //TODO hg42 might be done differently later
+            //val appinfos = appinfos.toPackageList(appContext, emptyList(), backups)
+            val pkgs = appinfos.toPackageList(appContext, emptyList(), getBackups())
 
             IconCache.dropAllButUsed(pkgs.drop(0))
 
@@ -190,16 +202,16 @@ class MainViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val notBlockedList =
         //========================================================================================== notBlockedList
-        combine(packageList, blocklist) { p, b ->
+        combine(packageList, blocklist) { pkgs, blocked ->
 
             traceFlows {
-                "******************** blocking - list: ${p.size} block: ${
-                    b.joinToString(",")
+                "******************** blocking - list: ${pkgs.size} block: ${
+                    blocked.joinToString(",")
                 }"
             }
 
-            val block = b.map { it.packageName }
-            val list = p.filterNot { block.contains(it.packageName) }
+            val block = blocked.map { it.packageName }
+            val list = pkgs.filterNot { block.contains(it.packageName) }
 
             traceFlows { "***** blocked ->> ${list.size}" }
             list
@@ -231,26 +243,26 @@ class MainViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val filteredList =
         //========================================================================================== filteredList
-        combine(notBlockedList, modelSortFilter.flow, searchQuery.flow) { p, f, s ->
+        combine(notBlockedList, modelSortFilter.flow, searchQuery.flow) { pkgs, filter, search ->
 
             var list = emptyList<Package>()
 
-            if (isBackupsLocked()) {
+            if (isPackageFlowsLocked()) {
 
                 traceFlows { "******************** filtering - locked" }
 
             } else {
 
-                traceFlows { "******************** filtering - list: ${p.size} filter: $f" }
+                traceFlows { "******************** filtering - list: ${pkgs.size} filter: $filter" }
 
-                list = p
+                list = pkgs
                     .filter { item: Package ->
-                        s.isEmpty() || (
+                        search.isEmpty() || (
                                 listOf(item.packageName, item.packageLabel)
-                                    .any { it.contains(s, ignoreCase = true) }
+                                    .any { it.contains(search, ignoreCase = true) }
                                 )
                     }
-                    .applyFilter(f, OABX.main!!)
+                    .applyFilter(filter, OABX.main!!)
 
                 traceFlows { "***** filtered ->> ${list.size}" }
             }
@@ -270,7 +282,7 @@ class MainViewModel(
     val updatedPackages =
         //------------------------------------------------------------------------------------------ updatedPackages
         notBlockedList
-            .filterNot { isBackupsLocked() }
+            .filterNot { isPackageFlowsLocked() }
             .trace { "updatePackages? ..." }
             .mapLatest {
                 it.filter(Package::isUpdated).toMutableList()
@@ -399,6 +411,8 @@ class MainViewModel(
             insertIntoBlocklistDB(newList)
         }
     }
+
+    fun getBlocklist() = blocklist.value.mapNotNull { it.packageName }
 
     private suspend fun insertIntoBlocklistDB(newList: Set<String>) =
         withContext(Dispatchers.IO) {

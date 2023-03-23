@@ -47,7 +47,8 @@ import java.util.concurrent.TimeUnit
 
 
 const val verKnown = "0.8.0 - 0.8.7"
-const val verBugDotDotDir = "0.8.3 - 0.8.6"
+const val verBugDotDotDirHang = "0.8.3 - 0.8.6"
+const val verBugDotDotDirExtract = "0.8.0 - 0.8.0"  //TODO hg42 more versions?
 
 class ShellHandler {
 
@@ -65,13 +66,29 @@ class ShellHandler {
         val semver: Semver
 
         companion object {
+
+            fun UtilBox.fatalBug(reason: String) {
+                score = score.mod(1_00_00_00_0)
+            }
+            fun UtilBox.haveWorkaround(reason: String) {
+            }
+
             val bugDetectors = mapOf<String, (String, UtilBox) -> Unit>(
-                "DotDotDir" to { name, box ->
+                "DotDotDirExtract" to { name, box ->
                     box.apply {
                         //TODO hg42 should use a real "feature" test instead of version (but it hangs)
-                        if (semver.satisfies(verBugDotDotDir)) {
+                        if (semver.satisfies(verBugDotDotDirExtract)) {
                             bugs[name] = true
-                            // workaround: ignore directories of this kind
+                            haveWorkaround("tar only ignores ..dir on extraction")
+                        }
+                    }
+                },
+                "DotDotDirHang" to { name, box ->
+                    box.apply {
+                        //TODO hg42 should use a real "feature" test instead of version (but it hangs)
+                        if (semver.satisfies(verBugDotDotDirHang)) {
+                            bugs[name] = true
+                            haveWorkaround("we ignore directories of this kind")
                         }
                     }
                 },
@@ -82,13 +99,11 @@ class ShellHandler {
                             val (attr, n, user, group, tail) = line.split(" ", limit = 5)
                             if (user.isDigitsOnly() || group.isDigitsOnly()) {
                                 bugs[name] = true
-                                //score = score.mod(1_00_00_00_0)  // fatal
-                                // not fatal, becasue we have a workaround
+                                haveWorkaround("now works numerically")
                             }
                         } catch (e: Throwable) {
                             bugs["unSpec"] = true
-                            score =
-                                score.mod(1_00_00_00_0)  //TODO hg42 fatal? when can this happen?
+                            fatalBug("failed 'ls -ld /'") //TODO hg42 fatal? when can this happen?
                             LogsHandler.unexpectedException(e)
                         }
                     }
@@ -117,9 +132,11 @@ class ShellHandler {
                 if (name.contains("ext")) {
                     score += 2
                 }
-                if (name.contains("local")) {
-                    score += 10_00_00_00_0
+                if (name.contains("local")) {   // prefer this over all others
+                    score += 100_00_00_00_0
                 }
+
+                score += 1_00_00_00_0
 
                 if (semver.satisfies(verKnown)) {
                     isKnownVersion = true
@@ -129,7 +146,7 @@ class ShellHandler {
                 bugDetectors.forEach { it.value(it.key, this) }
 
                 if (!hasBugs()) {
-                    score += 200_00_00_00_0
+                    score += 10_00_00_00_0
                 }
             }
         }
@@ -137,7 +154,7 @@ class ShellHandler {
         fun quote() = quote(name)
 
         fun hasBugs() = bugs.isNotEmpty()
-        fun hasBug(name: String) = bugs[name] == true
+        fun hasBug(name: String) = bugs[name] != null
     }
 
     init {

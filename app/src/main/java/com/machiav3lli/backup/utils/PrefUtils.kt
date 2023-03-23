@@ -40,6 +40,7 @@ import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.PREFS_LANGUAGES_DEFAULT
@@ -173,11 +174,7 @@ val Context.isStorageDirSetAndOk: Boolean
     }
 
 fun Activity.requireStorageLocation(activityResultLauncher: ActivityResultLauncher<Intent>) {
-    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-        .addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
+    val intent = BACKUP_DIRECTORY_INTENT
     try {
         activityResultLauncher.launch(intent)
     } catch (e: ActivityNotFoundException) {
@@ -300,15 +297,15 @@ val Context.checkSMSMMSPermission: Boolean
         }
         return if (mode == AppOpsManager.MODE_DEFAULT) {
             (checkCallingOrSelfPermission(Manifest.permission.READ_SMS) ==
-             PackageManager.PERMISSION_GRANTED &&
-             checkCallingOrSelfPermission(Manifest.permission.SEND_SMS) ==
-             PackageManager.PERMISSION_GRANTED &&
-             checkCallingOrSelfPermission(Manifest.permission.RECEIVE_SMS) ==
-             PackageManager.PERMISSION_GRANTED &&
-             checkCallingOrSelfPermission(Manifest.permission.RECEIVE_MMS) ==
-             PackageManager.PERMISSION_GRANTED &&
-             checkCallingOrSelfPermission(Manifest.permission.RECEIVE_WAP_PUSH) ==
-             PackageManager.PERMISSION_GRANTED)
+                    PackageManager.PERMISSION_GRANTED &&
+                    checkCallingOrSelfPermission(Manifest.permission.SEND_SMS) ==
+                    PackageManager.PERMISSION_GRANTED &&
+                    checkCallingOrSelfPermission(Manifest.permission.RECEIVE_SMS) ==
+                    PackageManager.PERMISSION_GRANTED &&
+                    checkCallingOrSelfPermission(Manifest.permission.RECEIVE_MMS) ==
+                    PackageManager.PERMISSION_GRANTED &&
+                    checkCallingOrSelfPermission(Manifest.permission.RECEIVE_WAP_PUSH) ==
+                    PackageManager.PERMISSION_GRANTED)
         } else {
             mode == AppOpsManager.MODE_ALLOWED
         }
@@ -350,9 +347,9 @@ val Context.checkCallLogsPermission: Boolean
         }
         return if (mode == AppOpsManager.MODE_DEFAULT) {
             (checkCallingOrSelfPermission(Manifest.permission.READ_CALL_LOG) ==
-             PackageManager.PERMISSION_GRANTED &&
-             checkCallingOrSelfPermission(Manifest.permission.WRITE_CALL_LOG) ==
-             PackageManager.PERMISSION_GRANTED)
+                    PackageManager.PERMISSION_GRANTED &&
+                    checkCallingOrSelfPermission(Manifest.permission.WRITE_CALL_LOG) ==
+                    PackageManager.PERMISSION_GRANTED)
         } else {
             mode == AppOpsManager.MODE_ALLOWED
         }
@@ -425,7 +422,7 @@ val Context.checkUsageStatsPermission: Boolean
 
 fun Context.checkBatteryOptimization(powerManager: PowerManager)
         : Boolean = persist_ignoreBatteryOptimization.value
-                    || powerManager.isIgnoringBatteryOptimizations(packageName)
+        || powerManager.isIgnoringBatteryOptimizations(packageName)
 
 
 val isBackupDeviceProtectedData: Boolean
@@ -522,9 +519,9 @@ fun Context.getLocaleOfCode(localeCode: String): Locale = when {
 
 fun Context.getLanguageList() =
     mapOf(PREFS_LANGUAGES_DEFAULT to resources.getString(R.string.prefs_language_system)) +
-    BuildConfig.DETECTED_LOCALES
-        .sorted()
-        .associateWith { translateLocale(getLocaleOfCode(it)) }
+            BuildConfig.DETECTED_LOCALES
+                .sorted()
+                .associateWith { translateLocale(getLocaleOfCode(it)) }
 
 private fun translateLocale(locale: Locale): String {
     val country = locale.getDisplayCountry(locale)
@@ -533,3 +530,4 @@ private fun translateLocale(locale: Locale): String {
             + (if (country.isNotEmpty() && country.compareTo(language, true) != 0)
         "($country)" else ""))
 }
+

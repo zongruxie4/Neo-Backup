@@ -21,20 +21,19 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
-    kotlin("plugin.serialization").version("1.8.0")
+    kotlin("plugin.serialization").version("1.8.10")
 }
 
-val vKotlin = "1.8.0"
-val vComposeCompiler = "1.4.0"
-
-val vCompose = "1.3.1"
+val vKotlin = "1.8.10"
+val vComposeCompiler = "1.4.3"
+val vCompose = "1.4.0-rc01"
+val vKotlinSerialization = "1.5.0"
 val vRoom = "2.5.0"
 val vNavigation = "2.5.3"
 val vAccompanist = "0.28.0"
 val vLibsu = "5.0.4"
 //val vIconics = "5.3.4"
 
-val vJunitJupiter = "5.9.2"
 val vAndroidxTest = "1.5.0"
 val vAndroidxTestExt = "1.1.5"
 
@@ -46,8 +45,8 @@ android {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
         targetSdk = 32
-        versionCode = 8302
-        versionName = "8.3.1"
+        versionCode = 8304
+        versionName = "8.3.2-alpha02"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
 
@@ -78,12 +77,10 @@ android {
         }
         named("debug") {
             applicationIdSuffix = ".debug"
-            //versionNameSuffix = "-alpha01"
             isMinifyEnabled = false
         }
         create("neo") {
             applicationIdSuffix = ".neo"
-            //versionNameSuffix = "-alpha01"
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -130,12 +127,15 @@ dependencies {
     implementation("androidx.room:room-ktx:$vRoom")
     kapt("androidx.room:room-compiler:$vRoom")
     implementation("androidx.work:work-runtime-ktx:2.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
-    implementation("androidx.security:security-crypto-ktx:1.1.0-alpha04")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$vKotlinSerialization")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$vKotlinSerialization")
+    implementation("com.charleskorn.kaml:kaml:0.53.0")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.0")
+    implementation("androidx.security:security-crypto-ktx:1.1.0-alpha05")
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
     implementation("org.apache.commons:commons-compress:1.22")
-    implementation("commons-io:commons-io:2.11.0")      // attention, there is an old 2003 version, that looks like newer
+    implementation("commons-io:commons-io:2.11.0")      // attention, there is an old 20030203.000550 version, that looks higher
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("com.github.topjohnwu.libsu:core:$vLibsu")
     implementation("com.github.topjohnwu.libsu:io:$vLibsu")
@@ -160,7 +160,6 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:$vAccompanist")
 
     // Testing
-    androidTestImplementation("org.junit.jupiter:junit-jupiter:$vJunitJupiter")
     androidTestImplementation("androidx.test:runner:$vAndroidxTest")
     implementation("androidx.test:rules:$vAndroidxTest")
     implementation("androidx.test.ext:junit-ktx:$vAndroidxTestExt")
@@ -169,7 +168,7 @@ dependencies {
     //androidTestImplementation("androidx.ui:ui-test:$vCompose")
     // Test rules and transitive dependencies:
     androidTestImplementation("androidx.compose.ui:ui-test:$vCompose")
-    //androidTestImplementation("androidx.compose.ui:ui-test-junit4:$vCompose")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$vCompose")
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation("androidx.compose.ui:ui-test-manifest:$vCompose")
 }
@@ -195,7 +194,7 @@ tasks.preBuild.dependsOn("detectAndroidLocals")
 
 // tells all test tasks to use Gradle's built-in JUnit 5 support
 tasks.withType<Test> {
-    useJUnit()
+    useJUnit()          // we still use junit4
     //useTestNG()
     //useJUnitPlatform()
 }

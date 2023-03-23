@@ -25,7 +25,12 @@ import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,16 +50,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
+import androidx.navigation.NavHostController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import com.machiav3lli.backup.ALT_MODE_APK
+import com.machiav3lli.backup.ALT_MODE_BOTH
+import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.addInfoLogText
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.classAddress
 import com.machiav3lli.backup.dialogs.PackagesListDialogFragment
 import com.machiav3lli.backup.fragments.BatchPrefsSheet
 import com.machiav3lli.backup.fragments.SortFilterSheet
@@ -63,6 +73,7 @@ import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.updateAppTables
 import com.machiav3lli.backup.pref_catchUncaughtException
 import com.machiav3lli.backup.pref_uncaughtExceptionsJumpToPreferences
+import com.machiav3lli.backup.preferences.persist_beenWelcomed
 import com.machiav3lli.backup.preferences.persist_skippedEncryptionCounter
 import com.machiav3lli.backup.preferences.pref_blackTheme
 import com.machiav3lli.backup.tasks.AppActionWork
@@ -83,6 +94,7 @@ import com.machiav3lli.backup.ui.compose.theme.AppTheme
 import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
+import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.utils.getDefaultSharedPreferences
 import com.machiav3lli.backup.utils.isEncryptionEnabled
 import com.machiav3lli.backup.utils.setCustomTheme
@@ -100,6 +112,7 @@ import kotlin.system.exitProcess
 class MainActivityX : BaseActivity() {
 
     private val crScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
+    private lateinit var navController: NavHostController
 
     val viewModel by viewModels<MainViewModel> {
         MainViewModel.Factory(OABX.db, application)
@@ -184,15 +197,12 @@ class MainActivityX : BaseActivity() {
 
         Shell.getShell()
 
-        if (freshStart) {
-            runOnUiThread { showEncryptionDialog() }
-            //refreshPackages()
-        }
+
 
         setContent {
             AppTheme {
                 val pagerState = rememberPagerState()
-                val navController = rememberAnimatedNavController()
+                navController = rememberAnimatedNavController()
                 val pages = listOf(
                     NavItem.Home,
                     NavItem.Backup,
@@ -200,6 +210,17 @@ class MainActivityX : BaseActivity() {
                     NavItem.Scheduler,
                 )
                 val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }   //TODO hg42 remove remember ???
+                var barVisible by remember { mutableStateOf(true) }
+
+                navController.addOnDestinationChangedListener { _, destination, _ ->
+                    barVisible = destination.route == NavItem.Main.destination
+                    if (destination.route == NavItem.Main.destination && freshStart) {
+                        traceBold { "******************** freshStart && Main ********************" }
+                        freshStart = false
+                        refreshPackagesAndBackups()
+                        runOnUiThread { showEncryptionDialog() }
+                    }
+                }
 
                 var query by rememberSaveable { mutableStateOf(viewModel.searchQuery.value) }
                 //val query by viewModel.searchQuery.flow.collectAsState(viewModel.searchQuery.initial)  // doesn't work with rotate (not saveable)...
@@ -208,21 +229,6 @@ class MainActivityX : BaseActivity() {
                 Timber.d("compose: query = '$query'")
 
                 Timber.d("search: ${viewModel.searchQuery.value} filter: ${viewModel.modelSortFilter.value}")
-
-                if (freshStart) {
-                    freshStart = false
-                    LaunchedEffect(viewModel) {
-                        traceBold { "******************** freshStart LaunchedEffect(viewModel) ********************" }
-                        // this isn't necessary with MutableStateFlow under the hood
-                        // keeping the compile conditions, even if they are always false if using MutableComposableStateFlow
-                        //if (viewModel.searchQuery is MutableComposableSharedFlow<*>)
-                        //    viewModel.searchQuery.value = ""
-                        //if (viewModel.modelSortFilter is MutableComposableSharedFlow<*>)
-                        //    viewModel.modelSortFilter.value = OABX.context.sortFilterModel
-
-                        refreshPackages()
-                    }
-                }
 
                 LaunchedEffect(key1 = pref_blackTheme.value) {
                     getDefaultSharedPreferences()
@@ -239,8 +245,8 @@ class MainActivityX : BaseActivity() {
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onBackground,
                         topBar = {
-                            if (currentPage.destination == NavItem.Scheduler.destination)
-                                TopBar(
+                            when {
+                                currentPage.destination == NavItem.Scheduler.destination -> TopBar(
                                     title = stringResource(id = currentPage.title)
                                 ) {
 
@@ -249,9 +255,7 @@ class MainActivityX : BaseActivity() {
                                         description = stringResource(id = R.string.sched_blocklist)
                                     ) {
                                         GlobalScope.launch(Dispatchers.IO) {
-                                            val blocklistedPackages = viewModel.blocklist.value
-                                                .mapNotNull { it.packageName }
-
+                                            val blocklistedPackages = viewModel.getBlocklist()
                                             PackagesListDialogFragment(
                                                 blocklistedPackages,
                                                 MAIN_FILTER_DEFAULT,
@@ -269,72 +273,91 @@ class MainActivityX : BaseActivity() {
                                         icon = Phosphor.GearSix
                                     ) { navController.navigate(NavItem.Settings.destination) }
                                 }
-                            else Column() {
-                                TopBar(title = stringResource(id = currentPage.title)) {
-                                    ExpandableSearchAction(
-                                        expanded = searchExpanded,
-                                        query = query,
-                                        onQueryChanged = { newQuery ->
-                                            //if (newQuery != query)  // empty string doesn't work...
-                                            query = newQuery
-                                            viewModel.searchQuery.value = query
-                                        },
-                                        onClose = {
-                                            query = ""
-                                            viewModel.searchQuery.value = ""
-                                        }
-                                    )
-
-                                    RefreshButton() { refreshPackagesAndBackups() }
-                                    RoundButton(
-                                        description = stringResource(id = R.string.prefs_title),
-                                        icon = Phosphor.GearSix
-                                    ) { navController.navigate(NavItem.Settings.destination) }
-                                }
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    ActionChip(
-                                        icon = Phosphor.Prohibit,
-                                        textId = R.string.sched_blocklist,
-                                        positive = false,
-                                    ) {
-                                        GlobalScope.launch(Dispatchers.IO) {
-                                            val blocklistedPackages = viewModel.blocklist.value
-                                                .mapNotNull { it.packageName }
-
-                                            PackagesListDialogFragment(
-                                                blocklistedPackages,
-                                                MAIN_FILTER_DEFAULT,
-                                                true
-                                            ) { newList: Set<String> ->
-                                                viewModel.setBlocklist(newList)
-                                            }.show(
-                                                context.supportFragmentManager,
-                                                "BLOCKLIST_DIALOG"
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    ActionChip(
-                                        icon = Phosphor.FunnelSimple,
-                                        textId = R.string.sort_and_filter,
-                                        positive = true,
-                                    ) {
-                                        sheetSortFilter = SortFilterSheet()
-                                        sheetSortFilter.showNow(
-                                            supportFragmentManager,
-                                            "SORTFILTER_SHEET"
+                                barVisible                                               -> Column() {
+                                    TopBar(title = stringResource(id = currentPage.title)) {
+                                        ExpandableSearchAction(
+                                            expanded = searchExpanded,
+                                            query = query,
+                                            onQueryChanged = { newQuery ->
+                                                //if (newQuery != query)  // empty string doesn't work...
+                                                query = newQuery
+                                                viewModel.searchQuery.value = query
+                                            },
+                                            onClose = {
+                                                query = ""
+                                                viewModel.searchQuery.value = ""
+                                            }
                                         )
+
+                                        RefreshButton() { refreshPackagesAndBackups() }
+                                        RoundButton(
+                                            description = stringResource(id = R.string.prefs_title),
+                                            icon = Phosphor.GearSix
+                                        ) { navController.navigate(NavItem.Settings.destination) }
+                                    }
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        ActionChip(
+                                            icon = Phosphor.Prohibit,
+                                            textId = R.string.sched_blocklist,
+                                            positive = false,
+                                        ) {
+                                            GlobalScope.launch(Dispatchers.IO) {
+                                                val blocklistedPackages = viewModel.getBlocklist()
+
+                                                PackagesListDialogFragment(
+                                                    blocklistedPackages,
+                                                    MAIN_FILTER_DEFAULT,
+                                                    true
+                                                ) { newList: Set<String> ->
+                                                    viewModel.setBlocklist(newList)
+                                                }.show(
+                                                    context.supportFragmentManager,
+                                                    "BLOCKLIST_DIALOG"
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.weight(1f))
+                                        ActionChip(
+                                            icon = Phosphor.FunnelSimple,
+                                            textId = R.string.sort_and_filter,
+                                            positive = true,
+                                        ) {
+                                            sheetSortFilter = SortFilterSheet()
+                                            sheetSortFilter.showNow(
+                                                supportFragmentManager,
+                                                "SORTFILTER_SHEET"
+                                            )
+                                        }
                                     }
                                 }
+                                else                                                     ->
+                                    TopBar(title = stringResource(id = R.string.app_name)) {}
                             }
                         },
                         bottomBar = {
-                            PagerNavBar(pageItems = pages, pagerState = pagerState)
+                            AnimatedVisibility(
+                                barVisible,
+                                enter = slideInVertically { height -> height } + fadeIn(),
+                                exit = slideOutVertically { height -> height } + fadeOut(),
+                            ) {
+                                PagerNavBar(pageItems = pages, pagerState = pagerState)
+                            }
                         }
                     ) { paddingValues ->
+                        LaunchedEffect(key1 = viewModel) {
+                            if (intent.extras != null) {
+                                val destination =
+                                    intent.extras!!.getString(
+                                        classAddress(".fragmentNumber"),
+                                        NavItem.Welcome.destination
+                                    )
+                                moveTo(destination)
+                            }
+                        }
+
                         MainNavHost(
                             modifier = Modifier
                                 .padding(paddingValues),
@@ -434,6 +457,11 @@ class MainActivityX : BaseActivity() {
     fun dismissSnackBar() {
     }
 
+    fun moveTo(destination: String) {
+        persist_beenWelcomed.value = destination != NavItem.Welcome.destination
+        navController.navigate(destination)
+    }
+
     fun showBatchPrefsSheet(backupBoolean: Boolean) {
         sheetBatchPrefs = BatchPrefsSheet(backupBoolean)
         sheetBatchPrefs.showNow(
@@ -478,29 +506,30 @@ class MainActivityX : BaseActivity() {
 
             val oneTimeWorkRequest =
                 AppActionWork.Request(
-                    packageName,
-                    mode,
-                    backupBoolean,
-                    notificationId,
-                    batchName,
-                    true
+                    packageName = packageName,
+                    mode = mode,
+                    backupBoolean = backupBoolean,
+                    notificationId = notificationId,
+                    batchName = batchName,
+                    immediate = true
                 )
             worksList.add(oneTimeWorkRequest)
 
             val oneTimeWorkLiveData = WorkManager.getInstance(OABX.context)
                 .getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
             oneTimeWorkLiveData.observeForever(object : Observer<WorkInfo> {    //TODO WECH hg42
-                override fun onChanged(t: WorkInfo?) {
-                    if (t?.state == WorkInfo.State.SUCCEEDED) {
+                override fun onChanged(t: WorkInfo) {
+                    if (t.state == WorkInfo.State.SUCCEEDED) {
                         counter += 1
 
                         val (succeeded, packageLabel, error) = AppActionWork.getOutput(t)
-                        if (error.isNotEmpty()) errors = "$errors$packageLabel: ${      //TODO hg42 add to WorkHandler
-                            LogsHandler.handleErrorMessages(
-                                OABX.context,
-                                error
-                            )
-                        }\n"
+                        if (error.isNotEmpty()) errors =
+                            "$errors$packageLabel: ${      //TODO hg42 add to WorkHandler
+                                LogsHandler.handleErrorMessages(
+                                    OABX.context,
+                                    error
+                                )
+                            }\n"
 
                         resultsSuccess = resultsSuccess and succeeded
                         oneTimeWorkLiveData.removeObserver(this)
@@ -513,6 +542,75 @@ class MainActivityX : BaseActivity() {
             WorkManager.getInstance(OABX.context)
                 .beginWith(worksList)
                 .enqueue()
+        }
+    }
+
+    fun startBatchRestoreAction(
+        packages: List<String>,
+        selectedApk: Map<String, Int>,
+        selectedData: Map<String, Int>,
+    ) {
+        val now = System.currentTimeMillis()
+        val notificationId = now.toInt()
+        val batchType = getString(R.string.restore)
+        val batchName = WorkHandler.getBatchName(batchType, now)
+
+        val selectedItems = buildList {
+            packages.forEach { pn ->
+                when {
+                    selectedApk[pn] == selectedData[pn] && selectedApk[pn] != null -> add(
+                        Triple(pn, selectedApk[pn]!!, altModeToMode(ALT_MODE_BOTH, false))
+                    )
+                    else                                                           -> {
+                        if ((selectedApk[pn] ?: -1) != -1) add(
+                            Triple(pn, selectedApk[pn]!!, altModeToMode(ALT_MODE_APK, false))
+                        )
+                        if ((selectedData[pn] ?: -1) != -1) add(
+                            Triple(pn, selectedData[pn]!!, altModeToMode(ALT_MODE_DATA, false))
+                        )
+                    }
+                }
+            }
+        }
+
+        var errors = ""
+        var resultsSuccess = true
+        var counter = 0
+        val worksList: MutableList<OneTimeWorkRequest> = mutableListOf()
+        OABX.work.beginBatch(batchName)
+        selectedItems.forEach { (packageName, bi, mode) ->
+            val oneTimeWorkRequest = AppActionWork.Request(
+                packageName = packageName,
+                mode = mode,
+                backupBoolean = false,
+                backupIndex = bi,
+                notificationId = notificationId,
+                batchName = batchName,
+                immediate = true,
+            )
+            worksList.add(oneTimeWorkRequest)
+
+            val oneTimeWorkLiveData = WorkManager.getInstance(OABX.context)
+                .getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
+            oneTimeWorkLiveData.observeForever(object : Observer<WorkInfo> {
+                override fun onChanged(t: WorkInfo) {
+                    if (t.state == WorkInfo.State.SUCCEEDED) {
+                        counter += 1
+
+                        val (succeeded, packageLabel, error) = AppActionWork.getOutput(t)
+                        if (error.isNotEmpty()) errors =
+                            "$errors$packageLabel: ${
+                                LogsHandler.handleErrorMessages(
+                                    OABX.context,
+                                    error
+                                )
+                            }\n"
+
+                        resultsSuccess = resultsSuccess and succeeded
+                        oneTimeWorkLiveData.removeObserver(this)
+                    }
+                }
+            })
         }
     }
 }

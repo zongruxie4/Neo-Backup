@@ -1,6 +1,41 @@
 CHANGELOG
 =========
 
+8.3.2 (XX.XX.2023) +80 Commits & +10 Translations
+------------
+
+#### Function
+
+- Add: Experimental export/import preferences (in DevTools/tools/)
+- Add: Singular backups restore (atomic restoration)
+- Add: AppInfo+schedule database dumps to terminal
+- Add: Selinux status to support log
+- Fix: Refreshing package & backup on launch
+- Fix: Cache excluded even if it's enabled
+- Fix: File duplication with SAF (file! not directory), redesiged/hardened duplicate protection (to
+  be tested more)
+- Fix: Deleted file/directory sometimes not recognized as deleted (to be tested more)
+- Fix: File stream not closed
+- Fix: Missing uninstalled packages with backups after startup
+- Update: /data/local/toybox is now prioritized over others
+- Update: Integrate Intro into Splash & Main
+- Update: Use nsenter to run commands in the global mount namespace
+- Remove: IntroActivity
+
+#### UI
+
+- Add: Version text for screenshots and other purposes (preference versionOpacity)
+- Fix: Help sheet & Welcome page transparent backgrounds
+
+#### UX
+
+- Add: Singular backups restore layout
+- Add: Get/Put selections from/to Schedule custom/block lists
+- Add: Long press on title always opens DevTools
+- Add: Option in root missing dialog to share a support log
+- Fix: Close context menu if choosing "no"
+- Update: Get/Put replaces Load/Save in context menu
+
 8.3.1 (21.02.2023) +80 Commits & +10 Translations
 ------------
 

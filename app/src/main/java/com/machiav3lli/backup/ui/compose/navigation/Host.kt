@@ -17,13 +17,13 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
-import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.activities.PrefsActivityX
 import com.machiav3lli.backup.pages.PermissionsPage
 import com.machiav3lli.backup.pages.WelcomePage
 import com.machiav3lli.backup.preferences.ExportsPage
 import com.machiav3lli.backup.preferences.LogsPage
 import com.machiav3lli.backup.preferences.TerminalPage
+import com.machiav3lli.backup.preferences.persist_beenWelcomed
 import com.machiav3lli.backup.viewmodels.ExportsViewModel
 import com.machiav3lli.backup.viewmodels.LogViewModel
 
@@ -38,8 +38,15 @@ fun MainNavHost(
     AnimatedNavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = NavItem.Main.destination
+        startDestination = if (persist_beenWelcomed.value) NavItem.Permissions.destination
+        else NavItem.Welcome.destination
     ) {
+        slideDownComposable(NavItem.Welcome.destination) {
+            WelcomePage()
+        }
+        composable(route = NavItem.Permissions.destination) {
+            PermissionsPage()
+        }
         slideUpComposable(NavItem.Main.destination) {
             SlidePager(
                 pagerState = pagerState,
@@ -67,48 +74,23 @@ fun PrefsNavHost(
         navController = navController,
         startDestination = NavItem.Settings.destination
     ) {
-        slideUpComposable(NavItem.Settings.destination) {
+        slideDownComposable(NavItem.Settings.destination) {
             SlidePager(
                 pageItems = pages,
                 pagerState = pagerState,
                 navController = navController,
             )
         }
-        slideDownComposable(NavItem.Exports.destination) {
+        slideUpComposable(NavItem.Exports.destination) {
             val viewModel = viewModels.find { it is ExportsViewModel } as ExportsViewModel
             ExportsPage(viewModel)
         }
-        slideDownComposable(NavItem.Logs.destination) {
+        slideUpComposable(NavItem.Logs.destination) {
             val viewModel = viewModels.find { it is LogViewModel } as LogViewModel
             LogsPage(viewModel)
         }
         slideUpComposable(NavItem.Terminal.destination) {
             TerminalPage()
-        }
-    }
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun IntroNavHost(
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    beenWelcomed: Boolean,
-) {
-    AnimatedNavHost(
-        modifier = modifier,
-        navController = navController,
-        startDestination = if (beenWelcomed) NavItem.Permissions.destination
-        else NavItem.Welcome.destination
-    ) {
-        slideDownComposable(NavItem.Welcome.destination) {
-            WelcomePage()
-        }
-        slideUpComposable(route = NavItem.Permissions.destination) {
-            PermissionsPage()
-        }
-        activity(NavItem.Main.destination) {
-            this.activityClass = MainActivityX::class
         }
     }
 }
@@ -154,5 +136,3 @@ fun NavGraphBuilder.fadeComposable(
         composable(it)
     }
 }
-
-

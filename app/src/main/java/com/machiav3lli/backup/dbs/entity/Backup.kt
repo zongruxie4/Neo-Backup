@@ -32,13 +32,10 @@ import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.grantedPermissions
 import com.machiav3lli.backup.items.StorageFile
-import com.machiav3lli.backup.traceSerialize
 import com.machiav3lli.backup.utils.LocalDateTimeSerializer
 import com.machiav3lli.backup.utils.getBackupRoot
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -169,6 +166,9 @@ data class Backup constructor(
     val isEncrypted: Boolean
         get() = cipherType != null && cipherType?.isNotEmpty() == true
 
+    val hasData: Boolean
+        get() = hasAppData || hasExternalData || hasDevicesProtectedData || hasMediaData || hasObbData
+
     fun toAppInfo() = AppInfo(
         packageName,
         packageLabel,
@@ -263,7 +263,7 @@ data class Backup constructor(
         return result
     }
 
-    fun toSerialized() = OABX.serializer.encodeToString(this)
+    fun toSerialized() = OABX.toSerialized(OABX.propsSerializer, this)
 
     class BrokenBackupException @JvmOverloads internal constructor(
         message: String?,
@@ -302,10 +302,7 @@ data class Backup constructor(
 
     companion object {
 
-        fun fromSerialized(serialized: String): Backup {
-            traceSerialize { "backup: $serialized" }
-            return OABX.serializer.decodeFromString(serialized)
-        }
+        fun fromSerialized(serialized: String) = OABX.fromSerialized<Backup>(serialized)
 
         fun createFrom(propertiesFile: StorageFile): Backup? {
             var serialized = ""
@@ -314,6 +311,10 @@ data class Backup constructor(
                 serialized = propertiesFile.readText()
 
                 val backup = fromSerialized(serialized)
+
+                //TODO bug: list serialization (jsonPretty, yaml) adds a space in front of each value
+                // found older multiline json and yaml without the bug, so it was introduced lately (by lib versions)
+                backup.permissions = backup.permissions.map { it.trim() } //TODO workaround
 
                 var dir: StorageFile? = null
 

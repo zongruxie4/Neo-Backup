@@ -31,12 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -48,7 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.dbs.entity.PackageInfo
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Eye
 import com.machiav3lli.backup.ui.compose.icons.phosphor.EyeSlash
 import com.machiav3lli.backup.ui.compose.item.ActionButton
@@ -59,12 +62,11 @@ import com.machiav3lli.backup.ui.item.ListPref
 import com.machiav3lli.backup.ui.item.StringPref
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BaseDialog(
     openDialogCustom: MutableState<Boolean>,
     modifier: Modifier = Modifier,
-    dialogUI: @Composable (() -> Unit)
+    dialogUI: @Composable (() -> Unit),
 ) {
     Dialog(
         onDismissRequest = { openDialogCustom.value = false },
@@ -76,15 +78,16 @@ fun BaseDialog(
 
 @Composable
 fun ActionsDialogUI(
-    mainText: String,
+    titleText: String,
+    messageText: String,
     openDialogCustom: MutableState<Boolean>,
     primaryText: String,
+    primaryIcon: ImageVector? = null,
     primaryAction: (() -> Unit) = {},
     secondaryText: String = "",
-    secondaryAction: (() -> Unit)? = null
+    secondaryIcon: ImageVector? = null,
+    secondaryAction: (() -> Unit)? = null,
 ) {
-    val context = LocalContext.current
-
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier.padding(8.dp),
@@ -96,7 +99,8 @@ fun ActionsDialogUI(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = mainText, style = MaterialTheme.typography.titleLarge)
+            Text(text = titleText, style = MaterialTheme.typography.titleLarge)
+            Text(text = messageText, style = MaterialTheme.typography.bodyMedium)
 
             Row(
                 Modifier.fillMaxWidth()
@@ -105,14 +109,21 @@ fun ActionsDialogUI(
                     openDialogCustom.value = false
                 }
                 Spacer(Modifier.weight(1f))
-                if (secondaryAction != null) {
-                    ElevatedActionButton(text = secondaryText, positive = false) {
+                if (secondaryAction != null && secondaryText.isNotEmpty()) {
+                    ElevatedActionButton(
+                        text = secondaryText,
+                        icon = secondaryIcon,
+                        positive = false
+                    ) {
                         secondaryAction()
                         openDialogCustom.value = false
                     }
                     Spacer(Modifier.requiredWidth(8.dp))
                 }
-                ElevatedActionButton(text = primaryText) {
+                ElevatedActionButton(
+                    text = primaryText,
+                    icon = primaryIcon,
+                ) {
                     primaryAction()
                     openDialogCustom.value = false
                 }
@@ -122,10 +133,53 @@ fun ActionsDialogUI(
 }
 
 @Composable
+fun BatchActionDialogUI(
+    backupBoolean: Boolean,
+    selectedPackages: List<PackageInfo>,
+    selectedApk: Map<String, Int>,
+    selectedData: Map<String, Int>,
+    openDialogCustom: MutableState<Boolean>,
+    primaryAction: (() -> Unit) = {},
+) {
+    val message = StringBuilder()
+    selectedPackages.forEach { pi ->
+        message.append("${pi.packageLabel}")
+        message.append(
+            ": ${
+                stringResource(
+                    id = when {
+                        selectedApk[pi.packageName] != null && selectedData[pi.packageName] != null -> R.string.handleBoth
+                        selectedApk[pi.packageName] != null                                         -> R.string.handleApk
+                        selectedData[pi.packageName] != null                                        -> R.string.handleData
+                        else                                                                        -> R.string.errorDialogTitle
+                    }
+                )
+            }\n"
+        )
+    }
+
+    ActionsDialogUI(
+        titleText = stringResource(
+            id = if (backupBoolean) R.string.backupConfirmation
+            else R.string.restoreConfirmation
+        ),
+        messageText = message.toString().trim { it <= ' ' },
+        openDialogCustom = openDialogCustom,
+        primaryText = stringResource(
+            id = if (backupBoolean) R.string.backup
+            else R.string.restore
+        ),
+        primaryIcon = if (backupBoolean) Phosphor.ArchiveTray
+        else Phosphor.ClockCounterClockwise,
+        primaryAction = primaryAction,
+    )
+}
+
+@Composable
 fun EnumDialogUI(
     pref: EnumPref,
     openDialogCustom: MutableState<Boolean>,
-    onChanged: (() -> Unit) = {}
+    onChanged: (() -> Unit) = {},
 ) {
     val context = LocalContext.current
     var selected by remember { mutableStateOf(pref.value) }
@@ -183,7 +237,7 @@ fun EnumDialogUI(
 fun ListDialogUI(
     pref: ListPref,
     openDialogCustom: MutableState<Boolean>,
-    onChanged: (() -> Unit) = {}
+    onChanged: (() -> Unit) = {},
 ) {
     val context = LocalContext.current
     var selected by remember { mutableStateOf(pref.value) }
@@ -246,7 +300,7 @@ fun StringDialogUI(
     isPrivate: Boolean = false,
     confirm: Boolean = false,
     openDialogCustom: MutableState<Boolean>,
-    onChanged: (() -> Unit) = {}
+    onChanged: (() -> Unit) = {},
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current

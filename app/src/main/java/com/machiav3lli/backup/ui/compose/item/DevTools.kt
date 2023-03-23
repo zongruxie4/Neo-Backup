@@ -40,13 +40,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
+import com.machiav3lli.backup.ADMIN_PREFIX
 import com.machiav3lli.backup.ERROR_PREFIX
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.beginBusy
 import com.machiav3lli.backup.OABX.Companion.endBusy
+import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.findBackups
+import com.machiav3lli.backup.handler.updateAppTables
 import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.pref_autoLogAfterSchedule
 import com.machiav3lli.backup.pref_autoLogExceptions
@@ -68,6 +71,10 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.item.LaunchPref
 import com.machiav3lli.backup.ui.item.Pref
+import com.machiav3lli.backup.ui.item.Pref.Companion.preferencesFromSerialized
+import com.machiav3lli.backup.ui.item.Pref.Companion.preferencesToSerialized
+import com.machiav3lli.backup.utils.FileUtils
+import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.viewmodels.LogViewModel
 import kotlinx.coroutines.Dispatchers
@@ -76,9 +83,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-var devToolsTab = mutableStateOf("devsett")
+var devToolsTab = mutableStateOf("")
 
-val devToolsTabs = listOf<Pair<String, @Composable () -> Unit>>(
+val devToolsTabs = listOf<Pair<String, @Composable () -> Any>>(
     "logs" to { DevLogsTab() },
     "" to {},
     "log" to { DevLogTab() },
@@ -90,7 +97,13 @@ val devToolsTabs = listOf<Pair<String, @Composable () -> Unit>>(
     "devsett" to { DevSettingsTab() },
     "" to {},
     "SUPPORT" to { DevSupportTab() },
-)
+) + if (isDebug) listOf<Pair<String, @Composable () -> Any>>(
+    "" to {},
+    "invBackupLoc" to { FileUtils.invalidateBackupLocation() ; devToolsTab.value = "" },
+    "updateAppTables" to { OABX.context.updateAppTables() ; devToolsTab.value = "" },
+    "findBackups" to { OABX.context.findBackups() ; devToolsTab.value = "" },
+) else emptyList()
+
 
 @Composable
 fun DevInfoLogTab() {
@@ -242,6 +255,58 @@ val pref_deleteERROR = LaunchPref(
     }
 }
 
+val prefsbackupFilename = "${ADMIN_PREFIX}app.preferences"
+
+val pref_savePreferences = LaunchPref(
+    key = "dev-tool.savePreferences",
+    summary = "save preferences to $prefsbackupFilename"
+) {
+    MainScope().launch(Dispatchers.IO) {
+        val serialized = preferencesToSerialized()
+        if (serialized.isNotEmpty()) {
+            runCatching {
+                val backupRoot = OABX.context.getBackupRoot()
+                StorageFile(backupRoot, prefsbackupFilename).let {
+                    it.overwriteText(serialized)
+                    OABX.addInfoLogText("saved ${it.name}")
+                }
+            }
+        }
+    }
+}
+
+val pref_loadPreferences = LaunchPref(
+    key = "dev-tool.loadPreferences",
+    summary = "load preferences from $prefsbackupFilename"
+) {
+    MainScope().launch(Dispatchers.IO) {
+        runCatching {
+            val backupRoot = OABX.context.getBackupRoot()
+            backupRoot.findFile(prefsbackupFilename)?.let {
+                val serialized = it.readText()
+                preferencesFromSerialized(serialized)
+                OABX.addInfoLogText("loaded ${it.name}")
+            }
+        }
+    }
+}
+
+fun testOnStart() {
+    if (isDebug) {
+        if (1==0)
+            MainScope().launch(Dispatchers.Main) {
+                trace { "############################################################ testOnStart: waiting..." }
+                delay(3000)
+                trace { "############################################################ testOnStart: running..." }
+
+                //openFileManager(OABX.context.getBackupRoot())
+
+                //pref_savePreferences.onClick()
+                trace { "############################################################ testOnStart: end." }
+            }
+    }
+}
+
 fun openFileManager(folder: StorageFile) {
     folder.uri?.let { uri ->
         MainScope().launch(Dispatchers.Default) {
@@ -339,13 +404,6 @@ fun openFileManager(folder: StorageFile) {
     }
 }
 
-fun testOnStart() {
-    MainScope().launch(Dispatchers.Main) {
-        delay(3000)
-        //openFileManager(OABX.context.getBackupRoot())
-    }
-}
-
 val pref_openBackupDir = LaunchPref(
     key = "dev-tool.openBackupDir",
     summary = "open backup directory in associated app"
@@ -377,6 +435,7 @@ val pref_prepareSupport = LaunchPref(
         Pref.setPrefFlag(it.key, it.defaultValue as Boolean)
     }
     pref_trace.value = true
+    traceDebug.pref.value = true
     pref_maxLogLines.value = 20_000
     pref_logToSystemLogcat.value = true
     pref_catchUncaughtException.value = true
@@ -430,6 +489,9 @@ fun DevSupportTab() {
 fun DevTools(
     expanded: MutableState<Boolean>,
 ) {
+    if (devToolsTab.value.isEmpty())
+        devToolsTab.value = "devsett"
+
     var tab by devToolsTab
     val tempShowInfo = remember { mutableStateOf(false) }
     val showInfo = OABX.showInfoLog || tempShowInfo.value
@@ -451,7 +513,7 @@ fun DevTools(
                 .padding(8.dp, 4.dp, 8.dp, 0.dp)
                 .combinedClickable(
                     onClick = { expanded.value = false },
-                    onLongClick = { tab = "devsett" }
+                    onLongClick = { tab = "" }
                 )
             ) {
                 Box(
@@ -500,7 +562,7 @@ fun DevTools(
                 .padding(8.dp, 0.dp, 8.dp, 4.dp)
                 .combinedClickable(
                     onClick = { expanded.value = false },
-                    onLongClick = { tab = "devsett" }
+                    onLongClick = { tab = "" }
                 )
             ) {
                 devToolsTabs.forEach {

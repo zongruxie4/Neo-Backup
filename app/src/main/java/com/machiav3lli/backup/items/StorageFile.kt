@@ -14,13 +14,11 @@ import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.handler.ShellCommands
-import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.preferences.pref_allowShadowingDefault
 import com.machiav3lli.backup.preferences.pref_cacheFileLists
 import com.machiav3lli.backup.preferences.pref_cacheUris
 import com.machiav3lli.backup.preferences.pref_shadowRootFile
 import com.machiav3lli.backup.traceDebug
-import com.machiav3lli.backup.utils.suRecursiveCopyFilesToDocument
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -375,7 +373,7 @@ open class StorageFile {
         parent.file?.let {
             file = RootFile(parent.file, subPath)
         } ?: run {
-            initializeFromUri(parent, Uri.withAppendedPath(parent._uri, subPath))
+            initializeFromUri(parent, Uri.withAppendedPath(parent.uri, subPath))
         }
     }
 
@@ -383,7 +381,7 @@ open class StorageFile {
         get() {
             if (field == null) {
                 field = file?.name ?: run {
-                    _uri?.lastPathSegment?.substringAfterLast("/")
+                    uri?.lastPathSegment?.substringAfterLast("/")
                 }
             }
             return field
@@ -393,7 +391,7 @@ open class StorageFile {
         }
 
     val path: String?
-        get() = file?.path ?: _uri?.path
+        get() = file?.path ?: uri?.path
 
     override fun toString(): String {
         return path ?: "null"
@@ -411,7 +409,7 @@ open class StorageFile {
 
     fun exists(): Boolean =
         file?.exists()
-            ?: !documentInfo?.id.isNullOrEmpty()
+            ?: ((documentInfo?.id?.isNotEmpty()) ?: false)
 
     val size: Long
         get() = (
@@ -422,13 +420,14 @@ open class StorageFile {
                 )
 
     fun inputStream(): InputStream? {
-        return file?.inputStream() ?: _uri?.let { uri ->
+        return file?.inputStream() ?: uri?.let { uri ->
             context.contentResolver?.openInputStream(uri)
         }
     }
 
     fun outputStream(): OutputStream? {
-        return file?.outputStream() ?: _uri?.let { uri ->
+        documentInfo = null
+        return file?.outputStream() ?: uri?.let { uri ->
             context.contentResolver?.openOutputStream(uri, "w")
         }
     }
@@ -476,17 +475,17 @@ open class StorageFile {
                     // otherwise a new one
                         ?: StorageFile(
                             this,
-                            createFile(context, _uri!!, mimeType, displayName),
+                            createFile(context, uri!!, mimeType, displayName),
                             //context,
                             displayName
                         )
                 } else {
                     // if the file already exists, delete it, because we want to start it again
                     findFile(displayName)?.delete()
-                    // allways use the new one
+                    // always use the new one
                     StorageFile(
                         this,
-                        createFile(context, _uri!!, mimeType, displayName),
+                        createFile(context, uri!!, mimeType, displayName),
                         //context,
                         displayName
                     )
@@ -545,20 +544,20 @@ open class StorageFile {
         return newFile
     }
 
-    fun delete(): Boolean {     // only empty directories by design, that's a task for deleteRecursive
+    fun delete(): Boolean { // delete only empty directories, full is a task for deleteRecursive
         traceDebug { "########## delete $path" }
         val ok = try {
             file?.delete()
                 ?: run {
                     // don't delete if any file inside
-                    if (listFiles(maxFiles = 1, useCache = false).isEmpty())
-                        DocumentsContract.deleteDocument(context.contentResolver, _uri!!)
-                    else
+                    if (isDirectory && listFiles(maxFiles = 1, useCache = false).isNotEmpty())
                         false
+                    else
+                        DocumentsContract.deleteDocument(context.contentResolver, _uri!!)
                 }
         } catch (e: FileNotFoundException) {
             false
-        } catch (e: IllegalArgumentException) { // can also happen with FileNotFoundException
+        } catch (e: IllegalArgumentException) { // can also happen with file not found
             false
         } catch (e: Throwable) {
             logException(e, path, backTrace = false)
@@ -567,6 +566,7 @@ open class StorageFile {
         if (ok)
         // removes this, so need to change parent
             parent?.path?.let { cacheFilesRemove(it, this) }
+        documentInfo = null
         return ok
     }
 
@@ -581,7 +581,7 @@ open class StorageFile {
         } ?: try {
             val result =
                 context.let { context ->
-                    _uri?.let { uri ->
+                    uri?.let { uri ->
                         DocumentsContract.renameDocument(
                             context.contentResolver, uri, displayName
                         )
@@ -604,8 +604,9 @@ open class StorageFile {
         return try {
             file?.readText()
                 ?: run {
-                    inputStream()?.reader()?.readText()
-                        ?: ""
+                    inputStream()?.reader()?.use {
+                        it.readText()
+                    } ?: ""
                 }
         } catch (e: FileNotFoundException) {
             logException(e, path, backTrace = false)
@@ -617,7 +618,7 @@ open class StorageFile {
     }
 
     fun writeText(text: String): Boolean {
-        return try {
+        val ok = try {
             outputStream()?.writer()?.use {
                 it.write(text)
                 parent?.path?.let { cacheFilesAdd(it, this) }
@@ -627,6 +628,8 @@ open class StorageFile {
             logException(e, path, backTrace = false)
             false
         }
+        documentInfo = null
+        return ok
     }
 
     fun overwriteText(text: String): Boolean {
@@ -660,9 +663,9 @@ open class StorageFile {
                 val found = StorageFile(this, displayName)
                 return if (found.exists()) found else null
             }
-            for (file in listFiles()) {
-                if (displayName == file.name) {
-                    return file
+            for (f in listFiles()) {
+                if (displayName == f.name) {
+                    return f
                 }
             }
         } catch (_: FileNotFoundException) {
@@ -671,10 +674,6 @@ open class StorageFile {
             logException(e, path, backTrace = false)
         }
         return null
-    }
-
-    fun recursiveCopyFiles(files: List<ShellHandler.FileInfo>) {
-        suRecursiveCopyFilesToDocument(context, files, _uri!!)
     }
 
     @Throws(FileNotFoundException::class)
@@ -702,10 +701,13 @@ open class StorageFile {
                     context.contentResolver?.let { resolver ->
                         val childrenUri = try {
                             DocumentsContract.buildChildDocumentsUriUsingTree(
-                                this._uri,
-                                DocumentsContract.getDocumentId(this._uri)
+                                this.uri,
+                                DocumentsContract.getDocumentId(this.uri)
                             )
                         } catch (e: IllegalArgumentException) {
+                            this.uri
+                            //return listOf()
+                        } ?: run {
                             return listOf()
                         }
                         var cursor: Cursor? = null
@@ -724,7 +726,7 @@ open class StorageFile {
                                     val docInfo = retrieveDocumentInfo(cursor)
                                     documentUri =
                                         DocumentsContract.buildDocumentUriUsingTree(
-                                            this._uri,
+                                            this.uri,
                                             docInfo.id
                                         )
                                     val file =

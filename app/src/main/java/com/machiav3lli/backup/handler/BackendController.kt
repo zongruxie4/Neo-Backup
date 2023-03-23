@@ -51,7 +51,8 @@ import com.machiav3lli.backup.items.Package.Companion.invalidateBackupCacheForPa
 import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.preferences.pref_backupSuspendApps
 import com.machiav3lli.backup.preferences.pref_earlyEmptyBackups
-import com.machiav3lli.backup.preferences.pref_findBackupsLocksFlows
+import com.machiav3lli.backup.preferences.pref_lockFlowsWhileFindBackups
+import com.machiav3lli.backup.preferences.pref_lockFlowsWhileStartup
 import com.machiav3lli.backup.traceBackupsScan
 import com.machiav3lli.backup.traceBackupsScanAll
 import com.machiav3lli.backup.traceTiming
@@ -143,9 +144,9 @@ suspend fun scanBackups(
     fun traceBackupsScanPackage(lazyText: () -> String) {
         if (forceTrace) {
             if (packageName.isEmpty())
-                TraceUtils.trace("[BackupsScanAll] ${lazyText()}")
+                TraceUtils.traceImpl("[BackupsScanAll] ${lazyText()}")
             else
-                TraceUtils.trace("[BackupsScan] ${lazyText()}")
+                TraceUtils.traceImpl("[BackupsScan] ${lazyText()}")
         } else {
             if (packageName.isEmpty())
                 traceBackupsScanAll(lazyText)
@@ -447,17 +448,19 @@ suspend fun scanBackups(
     }
 }
 
-val backupsLocked = mutableStateOf(false)
-fun beginBackupsLock() {
-    backupsLocked.value = true
+private val packageFlowsLocked = mutableStateOf(pref_lockFlowsWhileStartup.value)    // locked from start
+
+fun beginPackageFlowsLock() {
+    packageFlowsLocked.value = true
 }
 
-fun endBackupsLock() {
-    backupsLocked.value = false
+fun endPackageFlowsLock() {
+    packageFlowsLocked.value = false
+    OABX.context.updateAppTables()
 }
 
-fun isBackupsLocked(): Boolean {
-    return backupsLocked.value
+fun isPackageFlowsLocked(): Boolean {
+    return packageFlowsLocked.value
 }
 
 fun Context.findBackups(
@@ -473,8 +476,8 @@ fun Context.findBackups(
     try {
         if (packageName.isEmpty()) {
 
-            if (pref_findBackupsLocksFlows.value)
-                beginBackupsLock()
+            if (pref_lockFlowsWhileFindBackups.value)
+                beginPackageFlowsLock()
 
             OABX.beginBusy("findBackups")
 
@@ -483,11 +486,12 @@ fun Context.findBackups(
             // doing it here also avoids setting all packages to empty lists when findbackups fails
             // so there is a chance that scanning for backups of a single package will work later
 
-            //val installedPackages = getInstalledPackageList()   // too slow (2-3 sec)
+            //val installedPackages = getInstalledPackageList()   // would scan for backups
+            // so do the same without creating a Package for each
             val installedPackages = packageManager.getInstalledPackageInfosWithPermissions()
-            val specialInfo = SpecialInfo.getSpecialPackages(this)
+            val specialInfos = SpecialInfo.getSpecialInfos(this)  //TODO hg42 these probably scan for backups
             installedNames =
-                installedPackages.map { it.packageName } + specialInfo.map { it.packageName }
+                installedPackages.map { it.packageName } + specialInfos.map { it.packageName }
 
             if (pref_earlyEmptyBackups.value)
                 OABX.emptyBackupsForAllPackages(installedNames)
@@ -531,8 +535,10 @@ fun Context.findBackups(
 
         if (packageName.isEmpty()) {
 
-            if (pref_findBackupsLocksFlows.value)
-                endBackupsLock()
+            if (pref_lockFlowsWhileFindBackups.value)
+                endPackageFlowsLock()
+
+            traceBackupsScan { "*** --------------------> findBackups: packages: ${backupsMap.keys.size} backups: ${backupsMap.values.flatten().size}" }
 
             setBackups(backupsMap)
 
@@ -557,8 +563,8 @@ fun Context.findBackups(
     } finally {
         if (packageName.isEmpty()) {
 
-            if (pref_findBackupsLocksFlows.value)
-                endBackupsLock()
+            if (pref_lockFlowsWhileFindBackups.value)
+                endPackageFlowsLock()
 
             val time = OABX.endBusy("findBackups")
             OABX.addInfoLogText("findBackups: ${"%.3f".format(time / 1E9)} sec")
@@ -638,8 +644,8 @@ fun Context.getInstalledPackageList(): MutableList<Package> { // only used in Sc
             // This would mean, that no package info is available – neither from backup.properties
             // nor from PackageManager.
             if (includeSpecial) {
-                SpecialInfo.getSpecialPackages(this).forEach {
-                    packageList.add(it)
+                SpecialInfo.getSpecialInfos(this).forEach {
+                    packageList.add(Package(it))
                 }
             }
 
@@ -699,13 +705,13 @@ fun List<AppInfo>.toPackageList(
         // discover the backup directory and run in a special case where no the directory is empty.
         // This would mean, that no package info is available – neither from backup.properties
         // nor from PackageManager.
-        // TODO show special packages directly wihtout restarting NB
+        // TODO show special packages directly without restarting NB
         //val specialList = mutableListOf<String>()
         if (includeSpecial) {
-            SpecialInfo.getSpecialPackages(context).forEach {
+            SpecialInfo.getSpecialInfos(context).forEach {
                 if (!blockList.contains(it.packageName)) {
                     //it.updateBackupList(backupsMap[it.packageName].orEmpty())
-                    packageList.add(it)
+                    packageList.add(Package(it))
                 }
                 //specialList.add(it.packageName)
             }
@@ -758,8 +764,8 @@ fun Context.updateAppTables() {
         val backupsMap = ensureBackups()
         val backups = backupsMap.values.flatten()
 
-        val specialPackages = SpecialInfo.getSpecialPackages(this)
-        val specialNames = specialPackages.map { it.packageName }.toSet()
+        val specialInfos = SpecialInfo.getSpecialInfos(this)
+        val specialNames = specialInfos.map { it.packageName }.toSet()
 
         val uninstalledPackagesWithBackup =
             try {
@@ -831,8 +837,10 @@ fun Context.getPackageStorageStats(
     }
 }
 
-fun Context.getSpecial(packageName: String) = SpecialInfo.getSpecialPackages(this)
-    .find { it.packageName == packageName }
+fun Context.getSpecial(packageName: String) =
+    SpecialInfo.getSpecialInfos(this)
+        .find { it.packageName == packageName }
+        ?.let { Package(it) }
 
 val PackageInfo.grantedPermissions: List<String>
     get() = requestedPermissions?.filterIndexed { index, perm ->
