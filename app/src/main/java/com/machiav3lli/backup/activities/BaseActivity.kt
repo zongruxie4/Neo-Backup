@@ -18,12 +18,52 @@
 package com.machiav3lli.backup.activities
 
 import android.content.Context
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.machiav3lli.backup.ContextWrapperX.Companion.wrap
+import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.utils.TraceUtils
+import com.machiav3lli.backup.utils.setCustomTheme
+import timber.log.Timber
 
 abstract class BaseActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(wrap(newBase))
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+
+        OABX.addActivity(this)
+
+        setCustomTheme()
+
+        super.onCreate(savedInstanceState)
+
+        Timber.w(
+            "======================================== create ${
+                TraceUtils.classAndId(this)
+            }"
+        )
+    }
+
+    override fun onResume() {
+        Timber.w(
+            "---------------------------------------- resume ${
+                TraceUtils.classAndId(this)
+            }"
+        )
+        OABX.addActivity(this)
+        super.onResume()
+    }
+
+    override fun onDestroy() {
+        Timber.w(
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ destroy ${
+                TraceUtils.classAndId(this)
+            }"
+        )
+        OABX.removeActivity(this)
+        super.onDestroy()
     }
 }

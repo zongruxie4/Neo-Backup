@@ -72,17 +72,17 @@ fun ServicePrefsPage() {
         if (openDialog.value) {
             BaseDialog(openDialogCustom = openDialog) {
                 when (dialogsPref) {
-                    is PasswordPref -> StringDialogUI(
+                    is PasswordPref -> StringDialogUI(              //TODO hg42 encapsulate in pref
                         pref = dialogsPref as PasswordPref,
                         isPrivate = true,
                         confirm = true,
                         openDialogCustom = openDialog
                     )
-                    is StringPref -> StringDialogUI(
+                    is StringPref -> StringDialogUI(                //TODO hg42 encapsulate in pref
                         pref = dialogsPref as StringPref,
                         openDialogCustom = openDialog
                     )
-                    is EnumPref -> EnumDialogUI(
+                    is EnumPref -> EnumDialogUI(                    //TODO hg42 encapsulate in pref
                         pref = dialogsPref as EnumPref,
                         openDialogCustom = openDialog
                     )
@@ -93,9 +93,9 @@ fun ServicePrefsPage() {
 }
 
 fun LazyListScope.ServicePrefGroups(onPrefDialog: (Pref) -> Unit) {
-    val generalServicePrefs = Pref.preferences["srv"] ?: listOf()
-    val backupServicePrefs = Pref.preferences["srv-bkp"] ?: listOf()
-    val restoreServicePrefs = Pref.preferences["srv-rst"] ?: listOf()
+    val generalServicePrefs = Pref.prefGroups["srv"] ?: listOf()
+    val backupServicePrefs = Pref.prefGroups["srv-bkp"] ?: listOf()
+    val restoreServicePrefs = Pref.prefGroups["srv-rst"] ?: listOf()
 
     item {
         PrefsGroup(

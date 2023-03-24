@@ -64,7 +64,7 @@ fun BasePreference(
     SideEffect {
         pref.enableIf?.run {
             prefChangeListeners.put(pref) {
-                isEnabled = pref.enableIf.invoke() ?: true
+                isEnabled = pref.enableIf.invoke()
             }
         }
     }
@@ -168,7 +168,7 @@ fun LaunchPreference(
         },
         index = index,
         groupSize = groupSize,
-        onClick = onClick
+        onClick = onClick,
     )
 }
 
@@ -194,7 +194,7 @@ fun EnumPreference(
         },
         index = index,
         groupSize = groupSize,
-        onClick = onClick
+        onClick = onClick,
     )
 }
 
@@ -221,7 +221,7 @@ fun ListPreference(
         },
         index = index,
         groupSize = groupSize,
-        onClick = onClick
+        onClick = onClick,
     )
 }
 
@@ -270,7 +270,7 @@ fun SwitchPreference(
                 },
                 enabled = isEnabled,
             )
-        }
+        },
     )
 }
 
@@ -318,7 +318,7 @@ fun CheckboxPreference(
                 },
                 enabled = isEnabled,
             )
-        }
+        },
     )
 }
 
@@ -330,12 +330,11 @@ fun SeekBarPreference(
     groupSize: Int = 1,
     onValueChange: ((Int) -> Unit) = {},
 ) {
-    val currentValue = pref.value
     var sliderPosition by remember {    //TODO hg42 remove remember ???
         mutableStateOf(
-            pref.entries.indexOfFirst { it == currentValue }.let {
+            pref.entries.indexOfFirst { it >= pref.value }.let {
                 if (it < 0)
-                    pref.entries.indexOfFirst { it == pref.defaultValue }
+                    pref.entries.indexOfFirst { it >= (pref.defaultValue as Int) }
                 else
                     it
             }.let {
@@ -388,6 +387,6 @@ fun SeekBarPreference(
                     modifier = Modifier.widthIn(min = 48.dp)
                 )
             }
-        }
+        },
     )
 }

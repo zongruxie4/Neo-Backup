@@ -228,7 +228,7 @@ val traceBackupsScanAll = TraceUtils.TracePref(
 
 val traceSerialize = TraceUtils.TracePref(
     name = "Serialize",
-    summary = "trace json or yaml conversions",
+    summary = "trace json/yaml/... conversions",
     default = false
 )
 
@@ -520,14 +520,44 @@ class OABX : Application() {
             }
 
         // activity might be null
-        var activityRef: WeakReference<Activity> = WeakReference(null)
-        var activity: Activity?
+        private var activityRefs = mutableListOf<WeakReference<Activity>>()
+        private var activityRef: WeakReference<Activity> = WeakReference(null)
+        val activity: Activity?
             get() {
                 return activityRef.get()
             }
-            set(activity) {
-                activityRef = WeakReference(activity)
-                scheduleAlarmsOnce()        // if any activity is started
+
+        fun addActivity(activity: Activity) {
+            activityRef = WeakReference(activity)
+            synchronized(activityRefs) {
+                traceDebug { "activities.add: ${activityRef.get()?.localClassName}" }
+                // remove activities of the same class
+                activityRef.get()?.localClassName.let { localClassName ->
+                    activityRefs.removeIf { it.get()?.localClassName == localClassName }
+                }
+                activityRefs.add(activityRef)
+                activityRefs.removeIf { it.get() == null }
+                traceDebug { "activities(add): ${activityRefs.map { it.get()?.localClassName }}" }
+            }
+
+            scheduleAlarmsOnce()        // if any activity is started
+        }
+
+        fun removeActivity(activity: Activity) {
+            synchronized(activityRefs) {
+                traceDebug { "activities.remove: ${activity.localClassName}" }
+                activityRefs.removeIf { it.get()?.localClassName == activity.localClassName }
+                activityRef = WeakReference(null)
+                activityRefs.removeIf { it.get() == null }
+                traceDebug { "activities(remove): ${activityRefs.map { it.get()?.localClassName }}" }
+            }
+        }
+
+        val activities: List<Activity>
+            get() {
+                synchronized(activityRefs) {
+                    return activityRefs.mapNotNull { it.get() }
+                }
             }
 
         // main might be null
@@ -556,17 +586,17 @@ class OABX : Application() {
                 dbRef = WeakReference(dbInstance)
             }
 
-        fun initShellHandler(): Boolean {
+        fun initShellHandler(): ShellHandler? {
             return try {
                 shellHandlerInstance = ShellHandler()
-                true
+                shellHandlerInstance
             } catch (e: ShellHandler.ShellCommandFailedException) {
-                false
+                null
             }
         }
 
-        // "Do not place Android context classes in static fields; this is a memory leak"
-        // but only if a context is assigned, this is only used by Preview (and maybe by Tests)
+        // lint: "Do not place Android context classes in static fields; this is a memory leak"
+        // but: only if a context is assigned, this is only used by Preview (and maybe by Tests)
         @SuppressLint("StaticFieldLeak")
         var fakeContext: Context? = null
         val context: Context get() = fakeContext ?: app.applicationContext
