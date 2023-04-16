@@ -84,7 +84,7 @@ const val ACTION_CRASH = "crash"
 const val NAV_MAIN = 0
 const val NAV_PREFS = 1
 
-const val PREFS_LANGUAGES_DEFAULT = "system"
+const val PREFS_LANGUAGES_SYSTEM = "system"
 const val EXTRA_PACKAGE_NAME = "packageName"
 const val EXTRA_BACKUP_BOOLEAN = "backupBoolean"
 const val EXTRA_SCHEDULE_ID = "scheduleId"
@@ -209,7 +209,6 @@ val mainSpecialFilterChipItems = schedSpecialFilterChipItems.plus(ChipItem.NotIn
 
 val IGNORED_PERMISSIONS = listOfNotNull(
     Manifest.permission.ACCESS_WIFI_STATE,
-    Manifest.permission.ACCESS_NETWORK_STATE,
     Manifest.permission.ACCESS_NETWORK_STATE,
     Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
     if (OABX.minSDK(28)) Manifest.permission.FOREGROUND_SERVICE else null,

@@ -60,7 +60,6 @@
     <string name="prefs_password_match_false">كلمة السر ليست متطابقة</string>
     <string name="prefs_password_match_true">كلمات المرور متطابقة</string>
     <string name="prefs_passwordconfirmation">التأكيد لكلمة سر التشفير</string>
-    <string name="prefs_password_summary">اتركها فارغة لتعطل التشفير</string>
     <string name="prefs_password">كلمة سر التشفير</string>
     <string name="prefs_encryption_summary">تمكين تشفير النسخ الاحتياطية للبيانات</string>
     <string name="prefs_encryption">التشفير</string>
@@ -380,4 +379,8 @@
     <string name="context_menu">قائمة السياق</string>
     <string name="prefs_theme_black">نسق أسود</string>
     <string name="prefs_theme_black_summary">يفرض خلفية سوداء عندما تكون على النسق الداكن</string>
+    <string name="prefs_singularbackuprestore">استعادة النسخ الاحتياطي المفرد</string>
+    <string name="prefs_singularbackuprestore_summary">استخدم تخطيط عنصر استعادة بديل يسمح باختيار نسخ احتياطية محددة للاستعادة.</string>
+    <string name="post_notifications_permission_title">نشر الإشعارات</string>
+    <string name="post_notifications_permission_message">يتطلب بدء تشغيل تطبيقات Android 13 هذا الإذن لتتمكن من نشر الإشعارات.</string>
 </resources>

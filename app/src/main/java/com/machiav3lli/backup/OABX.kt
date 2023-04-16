@@ -40,11 +40,10 @@ import com.machiav3lli.backup.OABX.Companion.isHg42
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.entity.Backup
+import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.handler.LogsHandler
-import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.WorkHandler
-import com.machiav3lli.backup.handler.endPackageFlowsLock
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.preferences.pref_busyHitTime
 import com.machiav3lli.backup.preferences.pref_cancelOnStart
@@ -54,7 +53,6 @@ import com.machiav3lli.backup.preferences.pref_useYamlProperties
 import com.machiav3lli.backup.preferences.pref_useYamlSchedules
 import com.machiav3lli.backup.services.PackageUnInstalledReceiver
 import com.machiav3lli.backup.services.ScheduleService
-import com.machiav3lli.backup.ui.compose.item.testOnStart
 import com.machiav3lli.backup.ui.item.BooleanPref
 import com.machiav3lli.backup.ui.item.IntPref
 import com.machiav3lli.backup.utils.TraceUtils
@@ -62,6 +60,7 @@ import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.methodName
+import com.machiav3lli.backup.utils.getInstalledPackageInfosWithPermissions
 import com.machiav3lli.backup.utils.scheduleAlarmsOnce
 import com.machiav3lli.backup.utils.styleTheme
 import kotlinx.coroutines.CoroutineScope
@@ -78,6 +77,7 @@ import kotlinx.serialization.modules.SerializersModule
 import timber.log.Timber
 import java.lang.Integer.max
 import java.lang.ref.WeakReference
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -208,6 +208,12 @@ val traceDebug = TraceUtils.TracePref(
     default = false
 )
 
+val traceWIP = TraceUtils.TracePrefExtreme(
+    name = "WIP",
+    summary = "trace for debugging purposes (for devs)",
+    default = false
+)
+
 val traceBackups = TraceUtils.TracePref(
     name = "Backups",
     summary = "trace backups",
@@ -252,9 +258,11 @@ class OABX : Application() {
                 .build()
         )
         appRef = WeakReference(this)
-        db = ODatabase.getInstance(applicationContext)
+
+        beginBusy(startupMsg)
 
         initShellHandler()
+        db = ODatabase.getInstance(applicationContext)
 
         val result = registerReceiver(
             PackageUnInstalledReceiver(),
@@ -275,46 +283,6 @@ class OABX : Application() {
         MainScope().launch {
             addInfoLogText("--> click title to keep infobox open")
             addInfoLogText("--> long press title for dev tools")
-        }
-
-        val startupMsg = "******************** startup" // ensure it's the same for begin/end
-
-        if (startup)    // paranoid
-            beginBusy(startupMsg)
-
-        MainScope().launch(Dispatchers.IO) {
-            try {
-
-                findBackups()
-
-            } catch (e: Throwable) {
-                unexpectedException(e)
-            } finally {
-
-                // always need to do these
-                // catch all exceptions to make each block independent, so an error does not stop the rest
-
-                runCatching {
-                    val time = endBusy(startupMsg)
-                    addInfoLogText("startup: ${"%.3f".format(time / 1E9)} sec")
-                }
-                runCatching {
-                    startup = false
-                    // always (re)start the flows, even if they were not locked
-                    endPackageFlowsLock()  // before removing this, ensure init value will always be false
-                    // if removing endPackageFlowsLock do this:
-                    //updateAppTables()
-                    // this is not necessary any more:
-                    //main?.viewModel?.retriggerFlowsForUI()
-                }
-                runCatching {
-                    testOnStart()
-                }
-                runCatching {
-                    delay(60_000)
-                    scheduleAlarmsOnce()
-                }
-            }
         }
     }
 
@@ -443,6 +411,7 @@ class OABX : Application() {
             .withDefault { 0 }     //TODO hg42 use AtomicInteger? but map is synchronized anyways
 
         var startup = true
+        val startupMsg = "******************** startup" // ensure it's the same for begin/end
 
         init {
 
@@ -530,14 +499,27 @@ class OABX : Application() {
         fun addActivity(activity: Activity) {
             activityRef = WeakReference(activity)
             synchronized(activityRefs) {
-                traceDebug { "activities.add: ${activityRef.get()?.localClassName}" }
+                traceDebug { "activities.add: ${classAndId(activity)}" }
                 // remove activities of the same class
-                activityRef.get()?.localClassName.let { localClassName ->
-                    activityRefs.removeIf { it.get()?.localClassName == localClassName }
-                }
+                //activityRef.get()?.localClassName.let { localClassName ->
+                //    activityRefs.removeIf { it.get()?.localClassName == localClassName }
+                //}
                 activityRefs.add(activityRef)
                 activityRefs.removeIf { it.get() == null }
-                traceDebug { "activities(add): ${activityRefs.map { it.get()?.localClassName }}" }
+                traceDebug { "activities(add): ${activityRefs.map { classAndId(it.get()) }}" }
+            }
+
+            scheduleAlarmsOnce()        // if any activity is started
+        }
+
+        fun resumeActivity(activity: Activity) {
+            activityRef = WeakReference(activity)
+            synchronized(activityRefs) {
+                traceDebug { "activities.res: ${classAndId(activity)}" }
+                activityRefs.removeIf { it.get() == activity }
+                activityRefs.add(activityRef)
+                activityRefs.removeIf { it.get() == null }
+                traceDebug { "activities(res): ${activityRefs.map { classAndId(it.get()) }}" }
             }
 
             scheduleAlarmsOnce()        // if any activity is started
@@ -545,11 +527,12 @@ class OABX : Application() {
 
         fun removeActivity(activity: Activity) {
             synchronized(activityRefs) {
-                traceDebug { "activities.remove: ${activity.localClassName}" }
-                activityRefs.removeIf { it.get()?.localClassName == activity.localClassName }
+                traceDebug { "activities.remove: ${classAndId(activity)}" }
+                //activityRefs.removeIf { it.get()?.localClassName == activity.localClassName }
+                activityRefs.removeIf { it.get() == activity }
                 activityRef = WeakReference(null)
                 activityRefs.removeIf { it.get() == null }
-                traceDebug { "activities(remove): ${activityRefs.map { it.get()?.localClassName }}" }
+                traceDebug { "activities(remove): ${activityRefs.map { classAndId(it.get()) }}" }
             }
         }
 
@@ -799,10 +782,14 @@ class OABX : Application() {
         fun getBackups(packageName: String): List<Backup> {
             synchronized(theBackupsMap) {       // could be synchronized for a shorter time
                 return theBackupsMap.getOrPut(packageName) {
-                    val backups =
-                        context.findBackups(packageName)  //TODO hg42 may also find glob *packageName* for now
-                    backups[packageName]
-                        ?: emptyList()  // so we need to take the correct package here
+                    if (startup) {
+                        emptyList()
+                    } else {
+                        val backups =
+                            context.findBackups(packageName)  //TODO hg42 may also find glob *packageName* for now
+                        backups[packageName]
+                            ?: emptyList()  // so we need to take the correct package here
+                    }
                 }.drop(0)  // copy
             }
         }
@@ -823,6 +810,15 @@ class OABX : Application() {
             packageNames.forEach {
                 putBackups(it, emptyList())
             }
+        }
+
+        fun emptyBackupsForAllPackages() {
+            val installedPackages = context.packageManager.getInstalledPackageInfosWithPermissions()
+            val specialInfos =
+                SpecialInfo.getSpecialInfos(context)  //TODO hg42 these probably scan for backups
+            val installedNames =
+                installedPackages.map { it.packageName } + specialInfos.map { it.packageName }
+            emptyBackupsForAllPackages(installedNames)
         }
     }
 }

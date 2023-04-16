@@ -108,7 +108,6 @@
     <string name="prefs_encryption">Šifrování</string>
     <string name="prefs_encryption_summary">Povolte pro šifrování záloh</string>
     <string name="prefs_password">Heslo šifrování</string>
-    <string name="prefs_password_summary">Ponechte prázdné pro zakázání šifrování</string>
     <string name="prefs_passwordconfirmation">Potvrzení hesla šifrování</string>
     <string name="prefs_password_match_true">Hesla se shodují</string>
     <string name="prefs_enablespecial_summary">Stále potřebuje intenzivní testování, může způsobit spouštěcí smyčky (boot loops). Zpětná vazba je vždy vítána.</string>
@@ -371,4 +370,8 @@
     <string name="context_menu">Kontextová nabídka</string>
     <string name="prefs_theme_black_summary">Vynutí černé pozadí při zapnutém tmavém motivu</string>
     <string name="prefs_theme_black">Černý motiv</string>
+    <string name="prefs_singularbackuprestore">Obnovení singulární zálohy</string>
+    <string name="post_notifications_permission_title">Posílání oznámení</string>
+    <string name="prefs_singularbackuprestore_summary">Použít alternativní rozložení položek pro obnovení, které umožňuje vybrat konkrétní zálohy pro obnovu.</string>
+    <string name="post_notifications_permission_message">Od Androidu 13 vyžadují aplikace toto oprávnění, aby mohly odesílat oznámení.</string>
 </resources>

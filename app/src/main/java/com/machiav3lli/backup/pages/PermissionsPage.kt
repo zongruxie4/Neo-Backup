@@ -17,12 +17,14 @@
  */
 package com.machiav3lli.backup.pages
 
+import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
@@ -38,7 +40,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -51,6 +52,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
@@ -75,7 +80,8 @@ import com.machiav3lli.backup.utils.requireStorageLocation
 import com.machiav3lli.backup.utils.setBackupDir
 import timber.log.Timber
 
-@OptIn(ExperimentalMaterial3Api::class)
+// TODO use rememberPermissionState to manage more permissions
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PermissionsPage() {
     val context = LocalContext.current
@@ -84,6 +90,10 @@ fun PermissionsPage() {
     val permissionsList = remember {
         mutableStateListOf<Pair<Permission, () -> Unit>>()
     }
+
+    val permissionStatePostNotifications = if (OABX.minSDK(Build.VERSION_CODES.TIRAMISU)) {
+        rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+    } else null
 
     val askForDirectory =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -122,6 +132,10 @@ fun PermissionsPage() {
                         add(Pair(Permission.CallLogs) { mainActivity.callLogsPermission })
                     if (!context.checkContactsPermission)
                         add(Pair(Permission.Contacts) { mainActivity.contactsPermission })
+                    if (permissionStatePostNotifications?.status?.isGranted == false)
+                        add(Pair(Permission.PostNotifications) {
+                            permissionStatePostNotifications.launchPermissionRequest()
+                        })
                 })
                 if (permissionsList.isEmpty()) mainActivity.moveTo(NavItem.Main.destination)
             }

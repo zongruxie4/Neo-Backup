@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,9 +42,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -54,6 +58,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Eye
 import com.machiav3lli.backup.ui.compose.icons.phosphor.EyeSlash
+import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.item.ActionButton
 import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.item.SelectableRow
@@ -88,6 +93,8 @@ fun ActionsDialogUI(
     secondaryIcon: ImageVector? = null,
     secondaryAction: (() -> Unit)? = null,
 ) {
+    val scrollState = rememberScrollState()
+
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier.padding(8.dp),
@@ -100,7 +107,14 @@ fun ActionsDialogUI(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(text = titleText, style = MaterialTheme.typography.titleLarge)
-            Text(text = messageText, style = MaterialTheme.typography.bodyMedium)
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+                    .fillMaxWidth()
+                    .weight(1f, false)
+            ) {
+                Text(text = messageText, style = MaterialTheme.typography.bodyMedium)
+            }
 
             Row(
                 Modifier.fillMaxWidth()
@@ -293,6 +307,9 @@ fun ListDialogUI(
     }
 }
 
+val RE_jumpChars = Regex("""[\t]""")
+val RE_finishChars = Regex("""[\n]""")
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StringDialogUI(
@@ -304,24 +321,56 @@ fun StringDialogUI(
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val textFieldFocusRequester = remember { FocusRequester() }
+    val mainFocusRequester = remember { FocusRequester() }
+    val confirmFocusRequester = remember { FocusRequester() }
+    var focusField by remember { mutableStateOf("main") }
 
-    LaunchedEffect(textFieldFocusRequester) {
-        delay(100)
-        textFieldFocusRequester.requestFocus()
-    }
-    var savedValue by remember { mutableStateOf(pref.value) }
-    var savedValueConfirm by remember { mutableStateOf("") }
+    var savedValue by remember { mutableStateOf(TextFieldValue(if (isPrivate) "" else pref.value)) }
+    var savedValueConfirm by remember { mutableStateOf(TextFieldValue("")) }
     var isEdited by remember { mutableStateOf(false) }
     var notMatching by remember { mutableStateOf(false) }
 
-    val textColor = if (isPrivate) {
-        if (savedValue != savedValueConfirm)
-            Color.Red
-        else
-            Color.Green
-    } else
-        MaterialTheme.colorScheme.onBackground
+    val textColor =
+        if (isPrivate) {
+            if (savedValue != savedValueConfirm)
+                Color.Red
+            else
+                Color.Green
+        } else
+            MaterialTheme.colorScheme.onBackground
+
+    fun submit() {
+        focusManager.clearFocus()
+        if (confirm && (savedValue != savedValueConfirm)) {
+            notMatching = true
+            focusField = "confirm"
+        } else {
+            if (pref.value != savedValue.text) {
+                pref.value = savedValue.text
+                onChanged()
+            }
+            openDialogCustom.value = false
+        }
+    }
+
+    LaunchedEffect(focusField) {
+        delay(100)
+        when (focusField) {
+            "main"    -> {
+                mainFocusRequester.requestFocus()
+                val end = savedValue.text.length
+                savedValue = TextFieldValue(savedValue.text, selection = TextRange(end, end))
+            }
+            "confirm" -> {
+                if (confirm) {
+                    confirmFocusRequester.requestFocus()
+                    val end = savedValueConfirm.text.length
+                    savedValueConfirm =
+                        TextFieldValue(savedValueConfirm.text, selection = TextRange(end, end))
+                }
+            }
+        }
+    }
 
     Card(
         shape = RoundedCornerShape(8.dp),
@@ -341,18 +390,28 @@ fun StringDialogUI(
             TextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(textFieldFocusRequester),
-                value = if (isEdited || !isPrivate) savedValue else "",
+                    .focusRequester(mainFocusRequester),
+                value = savedValue,
                 colors = TextFieldDefaults.textFieldColors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    textColor = textColor
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
                 ),
                 shape = MaterialTheme.shapes.medium,
                 singleLine = true,
                 onValueChange = {
                     isEdited = true
-                    savedValue = it
+                    if (it.text.contains(RE_finishChars)) {
+                        if (confirm)
+                            focusField = "confirm"
+                        else
+                            submit()
+                    } else if (it.text.contains(RE_jumpChars)) {
+                        if (confirm)
+                            focusField = "confirm"
+                    } else
+                        savedValue = it         // only save when no control char
                 },
                 visualTransformation = if (isPasswordVisible)
                     VisualTransformation.None
@@ -362,43 +421,54 @@ fun StringDialogUI(
                     imeAction = ImeAction.Done,
                     keyboardType = if (isPrivate) KeyboardType.Password else KeyboardType.Text
                 ),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                keyboardActions = KeyboardActions(onDone = {
+                    if (confirm)
+                        focusField = "confirm"
+                    else
+                        submit()
+                }),
                 trailingIcon = {
-                    if (isPrivate)
-                        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                    Row {
+                        if (isPrivate)
+                            IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                                Icon(
+                                    imageVector = if (isPasswordVisible) Phosphor.Eye else Phosphor.EyeSlash,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        IconButton(onClick = { savedValue = TextFieldValue("") }) {
                             Icon(
-                                imageVector = if (isPasswordVisible) Phosphor.EyeSlash else Phosphor.Eye,
+                                imageVector = Phosphor.X,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurface,
                             )
                         }
-                },
-                placeholder = {
-                    if (isPrivate && pref.value.isNotEmpty() and !isEdited) {
-                        if (isPasswordVisible)
-                            Text(pref.value)
-                        else
-                            Text("**********")
-                    } else if (!isPrivate) {
-                        Text(pref.value)
                     }
-                }
+                },
             )
-            if (isPrivate && confirm) {
+            if (confirm) {
                 TextField(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .focusRequester(confirmFocusRequester),
                     value = savedValueConfirm,
                     colors = TextFieldDefaults.textFieldColors(
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        textColor = textColor
+                        focusedTextColor = textColor,
+                        unfocusedTextColor = textColor,
                     ),
                     shape = MaterialTheme.shapes.medium,
                     singleLine = true,
                     onValueChange = {
                         isEdited = true
-                        savedValueConfirm = it
+                        if (it.text.contains(RE_finishChars))
+                            submit()
+                        else if (it.text.contains(RE_jumpChars))
+                            focusField = "main"
+                        else
+                            savedValueConfirm = it      // only save when no control char
                     },
                     visualTransformation = if (isPasswordVisible)
                         VisualTransformation.None
@@ -408,11 +478,33 @@ fun StringDialogUI(
                         imeAction = ImeAction.Done,
                         keyboardType = KeyboardType.Password
                     ),
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    keyboardActions = KeyboardActions(onDone = {
+                        submit()
+                    }),
+                    trailingIcon = {
+                        Row {
+                            if (isPrivate)
+                                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                                    Icon(
+                                        imageVector = if (isPasswordVisible) Phosphor.Eye else Phosphor.EyeSlash,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                }
+                            IconButton(onClick = { savedValueConfirm = TextFieldValue("") }) {
+                                Icon(
+                                    imageVector = Phosphor.X,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                    },
                 )
             }
             AnimatedVisibility(visible = notMatching) {
                 Text(
+                    //TODO could also be used with other than passwords (confirm != isPrivate)
                     text = stringResource(id = R.string.prefs_password_match_false),
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -425,15 +517,7 @@ fun StringDialogUI(
                 }
                 Spacer(Modifier.weight(1f))
                 ElevatedActionButton(text = stringResource(id = R.string.dialogSave)) {
-                    if (!confirm or (savedValue == savedValueConfirm)) {
-                        if (pref.value != savedValue) {
-                            pref.value = savedValue
-                            onChanged()
-                        }
-                        openDialogCustom.value = false
-                    } else {
-                        notMatching = true
-                    }
+                    submit()
                 }
             }
         }

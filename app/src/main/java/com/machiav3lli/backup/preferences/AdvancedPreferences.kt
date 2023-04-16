@@ -301,6 +301,12 @@ val pref_refreshAppInfoTimeout = IntPref(
 
 //---------------------------------------- developer settings - implementation alternatives
 
+val pref_restartAppOnLanguageChange = BooleanPref(
+    key = "dev-alt.restartAppOnLanguageChange",
+    summary = "create human readable yaml format for preferences",
+    defaultValue = false
+)
+
 val pref_useYamlPreferences = BooleanPref(
     key = "$debug-alt.useYamlPreferences",
     summary = "create human readable yaml format for preferences",
@@ -323,18 +329,6 @@ val pref_prettyJson = BooleanPref(
     key = "dev-alt.prettyJson",
     summary = "create human readable json files. Note they should be compatible in both directions",
     defaultValue = true
-)
-
-val pref_lockFlowsWhileFindBackups = BooleanPref(
-    key = "dev-alt.lockFlowsWhileFindBackups",
-    summary = "lock database machinery while scanning backups",
-    defaultValue = false
-)
-
-val pref_lockFlowsWhileStartup = BooleanPref(
-    key = "dev-alt.lockFlowsWhileStartup",
-    summary = "lock database machinery while scanning backups",
-    defaultValue = false
 )
 
 val pref_busyTurnTime = IntPref(

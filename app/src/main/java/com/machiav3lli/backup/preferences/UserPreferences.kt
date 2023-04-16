@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.PREFS_LANGUAGES_DEFAULT
+import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.THEME_DYNAMIC
 import com.machiav3lli.backup.THEME_SYSTEM
@@ -65,7 +65,6 @@ import com.machiav3lli.backup.utils.recreateActivities
 import com.machiav3lli.backup.utils.restartApp
 import com.machiav3lli.backup.utils.setBackupDir
 import com.machiav3lli.backup.utils.setCustomTheme
-import com.machiav3lli.backup.utils.setLanguage
 import timber.log.Timber
 
 @Composable
@@ -120,14 +119,16 @@ fun UserPrefsPage() {
             } else BaseDialog(openDialogCustom = openDialog) {
                 when (dialogsPref) {
                     pref_languages,
-                    -> ListDialogUI(                            //TODO hg42 encapsulate in pref
+                    -> ListDialogUI(
+                        //TODO hg42 encapsulate in pref
                         pref = dialogsPref as ListPref,
                         openDialogCustom = openDialog,
                     )
                     pref_appTheme,
                     pref_appAccentColor,
                     pref_appSecondaryColor,
-                    -> EnumDialogUI(                            //TODO hg42 encapsulate in pref
+                    -> EnumDialogUI(
+                        //TODO hg42 encapsulate in pref
                         pref = dialogsPref as EnumPref,
                         openDialogCustom = openDialog,
                     )
@@ -137,7 +138,7 @@ fun UserPrefsPage() {
     }
 }
 
-fun onThemeChanged() {
+fun onThemeChanged(pref: Pref) {
     OABX.context.setCustomTheme()
     OABX.context.recreateActivities()
 }
@@ -148,11 +149,15 @@ val pref_languages = ListPref(
     icon = Phosphor.Translate,
     iconTint = ColorOBB,
     entries = OABX.context.getLanguageList(),
-    defaultValue = PREFS_LANGUAGES_DEFAULT,
+    defaultValue = PREFS_LANGUAGES_SYSTEM,
     onChanged = {
-        OABX.context.setLanguage()
-        OABX.context.recreateActivities()
-        //OABX.context.restartApp()
+        val pref = it as ListPref
+        // does not work as expected, because restartApp doesn't really restart the whole app
+        //if (pref.value == PREFS_LANGUAGES_SYSTEM)
+        if (pref_restartAppOnLanguageChange.value)
+            OABX.context.restartApp()   // does not really restart the app, only recreates
+        else
+            OABX.context.recreateActivities()
     },
 )
 
@@ -175,10 +180,9 @@ val pref_appAccentColor = EnumPref(
     entries = accentColorItems,
     defaultValue = with(BuildConfig.APPLICATION_ID) {
         when {
-            contains("hg42") -> 8
-            contains(".neo")  -> 4
+            contains("hg42")  -> 8
             contains("debug") -> 4
-            else             -> 0
+            else              -> 0
         }
     },
     onChanged = ::onThemeChanged,
@@ -193,9 +197,8 @@ val pref_appSecondaryColor = EnumPref(
     defaultValue = with(BuildConfig.APPLICATION_ID) {
         when {
             contains(".rel")  -> 0
-            contains(".neo")  -> 1
-            contains("debug") -> 2
-            else              -> 4
+            contains("debug") -> 4
+            else              -> 3
         }
     },
     onChanged = ::onThemeChanged,

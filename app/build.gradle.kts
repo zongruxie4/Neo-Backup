@@ -21,17 +21,17 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
-    kotlin("plugin.serialization").version("1.8.10")
+    kotlin("plugin.serialization").version("1.8.20")
 }
 
-val vKotlin = "1.8.10"
-val vComposeCompiler = "1.4.3"
-val vCompose = "1.4.0-rc01"
+val vKotlin = "1.8.20"
+val vComposeCompiler = "1.4.5"
+val vCompose = "1.5.0-alpha02"
 val vKotlinSerialization = "1.5.0"
-val vRoom = "2.5.0"
+val vRoom = "2.5.1"
 val vNavigation = "2.5.3"
-val vAccompanist = "0.28.0"
-val vLibsu = "5.0.4"
+val vAccompanist = "0.30.1"
+val vLibsu = "5.0.5"
 //val vIconics = "5.3.4"
 
 val vAndroidxTest = "1.5.0"
@@ -44,9 +44,9 @@ android {
     defaultConfig {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
-        targetSdk = 32
-        versionCode = 8304
-        versionName = "8.3.2-alpha02"
+        targetSdk = 33
+        versionCode = 8305
+        versionName = "8.3.2-alpha03"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
 
@@ -126,15 +126,15 @@ dependencies {
     implementation("androidx.room:room-runtime:$vRoom")
     implementation("androidx.room:room-ktx:$vRoom")
     kapt("androidx.room:room-compiler:$vRoom")
-    implementation("androidx.work:work-runtime-ktx:2.8.0")
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$vKotlinSerialization")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$vKotlinSerialization")
     implementation("com.charleskorn.kaml:kaml:0.53.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha05")
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
-    implementation("org.apache.commons:commons-compress:1.22")
+    implementation("org.apache.commons:commons-compress:1.23.0")
     implementation("commons-io:commons-io:2.11.0")      // attention, there is an old 20030203.000550 version, that looks higher
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("com.github.topjohnwu.libsu:core:$vLibsu")
@@ -152,12 +152,12 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:$vCompose")
     implementation("androidx.compose.runtime:runtime-livedata:$vCompose")
     implementation("androidx.navigation:navigation-compose:$vNavigation")
-    implementation("io.coil-kt:coil-compose:2.2.2")
-    implementation("androidx.compose.material3:material3:1.0.1")
+    implementation("io.coil-kt:coil-compose:2.3.0")
+    implementation("androidx.compose.material3:material3:1.1.0-beta02")
     implementation("com.google.accompanist:accompanist-flowlayout:$vAccompanist")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$vAccompanist")
     implementation("com.google.accompanist:accompanist-navigation-animation:$vAccompanist")
-    implementation("com.google.accompanist:accompanist-pager:$vAccompanist")
+    implementation("com.google.accompanist:accompanist-permissions:$vAccompanist")
 
     // Testing
     androidTestImplementation("androidx.test:runner:$vAndroidxTest")

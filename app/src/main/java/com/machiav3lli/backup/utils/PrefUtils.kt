@@ -43,7 +43,7 @@ import androidx.security.crypto.MasterKey
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.PREFS_LANGUAGES_DEFAULT
+import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.PREFS_SHARED_PRIVATE
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.handler.ShellHandler
@@ -395,6 +395,13 @@ val Context.checkContactsPermission: Boolean
         }
     }
 
+val Context.postNotificationsPermission: Boolean
+    get() = if (OABX.minSDK(Build.VERSION_CODES.TIRAMISU)) {
+        checkCallingOrSelfPermission(
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    } else true
+
 val Context.checkUsageStatsPermission: Boolean
     get() {
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
@@ -518,7 +525,7 @@ fun Context.getLocaleOfCode(localeCode: String): Locale = when {
 }
 
 fun Context.getLanguageList() =
-    mapOf(PREFS_LANGUAGES_DEFAULT to resources.getString(R.string.prefs_language_system)) +
+    mapOf(PREFS_LANGUAGES_SYSTEM to resources.getString(R.string.prefs_language_system)) +
             BuildConfig.DETECTED_LOCALES
                 .sorted()
                 .associateWith { translateLocale(getLocaleOfCode(it)) }

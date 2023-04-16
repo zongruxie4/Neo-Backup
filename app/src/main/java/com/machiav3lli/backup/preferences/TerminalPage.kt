@@ -190,7 +190,7 @@ fun logSys() =
 fun dumpPrefs() =
     listOf("------ preferences") +
             publicPreferences(persist = true).map {
-                        "${it.group}.${it.key} = ${it}"
+                "${it.group}.${it.key} = ${it}"
             }
 
 fun dumpEnv() =
@@ -392,7 +392,6 @@ fun TerminalButton(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TerminalPage() {
     val output = remember { mutableStateListOf<String>() }
@@ -659,7 +658,8 @@ fun TerminalText(
                 singleLine = true,
                 //placeholder = { Text(text = "search", color = Color.Gray) },
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = overlayColor,
+                    focusedTextColor = overlayColor,
+                    unfocusedTextColor = overlayColor,
                     containerColor = Color.Transparent,
                     unfocusedTrailingIconColor = overlayColor,
                     focusedTrailingIconColor = overlayColor, //if (search.length > 0) Color.Transparent else overlayColor

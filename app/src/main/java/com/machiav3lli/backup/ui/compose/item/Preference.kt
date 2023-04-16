@@ -39,8 +39,10 @@ import com.machiav3lli.backup.ui.item.BooleanPref
 import com.machiav3lli.backup.ui.item.EnumPref
 import com.machiav3lli.backup.ui.item.IntPref
 import com.machiav3lli.backup.ui.item.ListPref
+import com.machiav3lli.backup.ui.item.PasswordPref
 import com.machiav3lli.backup.ui.item.Pref
 import com.machiav3lli.backup.ui.item.Pref.Companion.prefChangeListeners
+import com.machiav3lli.backup.ui.item.StringPref
 import kotlin.math.roundToInt
 
 @Composable
@@ -119,15 +121,21 @@ fun BasePreference(
                     style = MaterialTheme.typography.titleMedium,
                     fontSize = 16.sp
                 )
-                var summaryText = if (summaryId != -1) stringResource(id = summaryId) else ""
-                if (summaryText.isNotEmpty() && !summary.isNullOrEmpty())
-                    summaryText += " : "
-                summaryText += summary ?: ""
-                Text(
-                    text = summaryText,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                if (summary != null) {
+                    Text(
+                        text = summary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                if (summaryId != -1) {
+                    val summaryText = stringResource(id = summaryId)
+                    Text(
+                        text = summaryText,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
                 bottomWidget?.let { widget ->
                     Spacer(modifier = Modifier.requiredWidth(8.dp))
                     widget(isEnabled)
@@ -173,6 +181,66 @@ fun LaunchPreference(
 }
 
 @Composable
+fun StringPreference(
+    modifier: Modifier = Modifier,
+    pref: StringPref,
+    index: Int = 0,
+    groupSize: Int = 1,
+    onClick: (() -> Unit) = {},
+) {
+    BasePreference(
+        modifier = modifier,
+        pref = pref,
+        titleId = pref.titleId,
+        summaryId = pref.summaryId,
+        summary = pref.value,
+        icon = {
+            pref.icon?.let { icon ->
+                PrefIcon(
+                    icon = icon,
+                    text = stringResource(id = pref.titleId),
+                )
+            } ?: run {
+                Spacer(modifier = Modifier.requiredWidth(36.dp))
+            }
+        },
+        index = index,
+        groupSize = groupSize,
+        onClick = onClick,
+    )
+}
+
+@Composable
+fun PasswordPreference(
+    modifier: Modifier = Modifier,
+    pref: PasswordPref,
+    index: Int = 0,
+    groupSize: Int = 1,
+    onClick: (() -> Unit) = {},
+) {
+    BasePreference(
+        modifier = modifier,
+        pref = pref,
+        titleId = pref.titleId,
+        summaryId = pref.summaryId,
+        summary = if (pref.value.isNotEmpty()) "*****" else "-----",
+        icon = {
+            pref.icon?.let { icon ->
+                PrefIcon(
+                    icon = icon,
+                    text = stringResource(id = pref.titleId),
+                )
+            } ?: run {
+                Spacer(modifier = Modifier.requiredWidth(36.dp))
+            }
+        },
+        index = index,
+        groupSize = groupSize,
+        onClick = onClick,
+    )
+}
+
+@Composable
 fun EnumPreference(
     modifier: Modifier = Modifier,
     pref: EnumPref,
@@ -184,7 +252,8 @@ fun EnumPreference(
         modifier = modifier,
         pref = pref,
         titleId = pref.titleId,
-        summaryId = pref.entries[pref.value] ?: pref.summaryId,
+        summaryId = pref.summaryId,
+        summary = pref.entries[pref.value]?.let { stringResource(id = it) },
         icon = {
             if (pref.icon != null) PrefIcon(
                 icon = pref.icon,
@@ -323,6 +392,23 @@ fun CheckboxPreference(
 }
 
 @Composable
+fun BooleanPreference(
+    modifier: Modifier = Modifier,
+    pref: BooleanPref,
+    index: Int = 0,
+    groupSize: Int = 1,
+    onCheckedChange: ((Boolean) -> Unit) = {},
+) {
+    SwitchPreference(
+        modifier = modifier,
+        pref = pref,
+        index = index,
+        groupSize = groupSize,
+        onCheckedChange = onCheckedChange,
+    )
+}
+
+@Composable
 fun SeekBarPreference(
     modifier: Modifier = Modifier,
     pref: IntPref,
@@ -388,5 +474,22 @@ fun SeekBarPreference(
                 )
             }
         },
+    )
+}
+
+@Composable
+fun IntPreference(
+    modifier: Modifier = Modifier,
+    pref: IntPref,
+    index: Int = 0,
+    groupSize: Int = 1,
+    onValueChange: ((Int) -> Unit) = {},
+) {
+    SeekBarPreference(
+        modifier = modifier,
+        pref = pref,
+        index = index,
+        groupSize = groupSize,
+        onValueChange = onValueChange,
     )
 }

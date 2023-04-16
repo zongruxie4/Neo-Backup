@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -78,6 +77,7 @@ import com.machiav3lli.backup.utils.isBiometricLockEnabled
 import com.machiav3lli.backup.utils.isDeviceLockAvailable
 import com.machiav3lli.backup.utils.isDeviceLockEnabled
 import com.machiav3lli.backup.utils.isStorageDirSetAndOk
+import com.machiav3lli.backup.utils.postNotificationsPermission
 import com.topjohnwu.superuser.Shell
 import kotlin.system.exitProcess
 
@@ -97,7 +97,6 @@ fun SplashPreview() {
     OABX.fakeContext = null
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootMissing(activity: Activity? = null) {
     AppTheme {
@@ -152,7 +151,6 @@ fun RootMissing(activity: Activity? = null) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SplashPage() {
     AppTheme {
@@ -217,6 +215,7 @@ class SplashActivity : BaseActivity() {
                     checkCallLogsPermission &&
                     checkContactsPermission &&
                     checkUsageStatsPermission &&
+                    postNotificationsPermission &&
                     (persist_ignoreBatteryOptimization.value
                             || powerManager.isIgnoringBatteryOptimizations(packageName)
                             )           -> {
@@ -282,7 +281,6 @@ class SplashActivity : BaseActivity() {
         finish()
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun LockPage(mainIntent: Intent) {
         Scaffold(

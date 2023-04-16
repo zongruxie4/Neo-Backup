@@ -22,6 +22,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Looper
+import android.os.PowerManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -31,12 +32,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
@@ -55,14 +57,13 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
 import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.addInfoLogText
+import com.machiav3lli.backup.OABX.Companion.startup
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.classAddress
 import com.machiav3lli.backup.dialogs.PackagesListDialogFragment
@@ -70,10 +71,12 @@ import com.machiav3lli.backup.fragments.BatchPrefsSheet
 import com.machiav3lli.backup.fragments.SortFilterSheet
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.WorkHandler
+import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.handler.updateAppTables
 import com.machiav3lli.backup.pref_catchUncaughtException
 import com.machiav3lli.backup.pref_uncaughtExceptionsJumpToPreferences
 import com.machiav3lli.backup.preferences.persist_beenWelcomed
+import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
 import com.machiav3lli.backup.preferences.persist_skippedEncryptionCounter
 import com.machiav3lli.backup.preferences.pref_blackTheme
 import com.machiav3lli.backup.tasks.AppActionWork
@@ -95,8 +98,15 @@ import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
 import com.machiav3lli.backup.utils.altModeToMode
+import com.machiav3lli.backup.utils.checkCallLogsPermission
+import com.machiav3lli.backup.utils.checkContactsPermission
+import com.machiav3lli.backup.utils.checkSMSMMSPermission
+import com.machiav3lli.backup.utils.checkUsageStatsPermission
 import com.machiav3lli.backup.utils.getDefaultSharedPreferences
+import com.machiav3lli.backup.utils.hasStoragePermissions
 import com.machiav3lli.backup.utils.isEncryptionEnabled
+import com.machiav3lli.backup.utils.isStorageDirSetAndOk
+import com.machiav3lli.backup.utils.postNotificationsPermission
 import com.machiav3lli.backup.viewmodels.BatchViewModel
 import com.machiav3lli.backup.viewmodels.MainViewModel
 import com.machiav3lli.backup.viewmodels.SchedulerViewModel
@@ -104,6 +114,7 @@ import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.system.exitProcess
@@ -112,6 +123,7 @@ class MainActivityX : BaseActivity() {
 
     private val crScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
     private lateinit var navController: NavHostController
+    private lateinit var powerManager: PowerManager
 
     val viewModel by viewModels<MainViewModel> {
         MainViewModel.Factory(OABX.db, application)
@@ -130,8 +142,7 @@ class MainActivityX : BaseActivity() {
     private lateinit var sheetBatchPrefs: BatchPrefsSheet
 
     @OptIn(
-        ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-        ExperimentalPagerApi::class
+        ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
     )
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -193,6 +204,8 @@ class MainActivityX : BaseActivity() {
 
         Shell.getShell()
 
+        powerManager = this.getSystemService(POWER_SERVICE) as PowerManager
+
         setContent {
 
             AppTheme {
@@ -207,13 +220,21 @@ class MainActivityX : BaseActivity() {
                 val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }   //TODO hg42 remove remember ???
                 var barVisible by remember { mutableStateOf(true) }
 
-                navController.addOnDestinationChangedListener { _, destination, _ ->
-                    barVisible = destination.route == NavItem.Main.destination
-                    if (destination.route == NavItem.Main.destination && freshStart) {
-                        traceBold { "******************** freshStart && Main ********************" }
-                        freshStart = false
-                        //refreshPackagesAndBackups()
-                        runOnUiThread { showEncryptionDialog() }
+                LaunchedEffect(viewModel) {
+                    navController.addOnDestinationChangedListener { _, destination, _ ->
+                        barVisible = destination.route == NavItem.Main.destination
+                        if (destination.route == NavItem.Main.destination && freshStart) {
+                            freshStart = false
+                            traceBold { "******************** freshStart && Main ********************" }
+                            MainScope().launch(Dispatchers.IO) {
+                                runCatching { findBackups() }
+                                startup = false     // ensure backups are no more reported as empty
+                                runCatching { updateAppTables() }
+                                val time = OABX.endBusy(OABX.startupMsg)
+                                addInfoLogText("startup: ${"%.3f".format(time / 1E9)} sec")
+                            }
+                            runOnUiThread { showEncryptionDialog() }
+                        }
                     }
                 }
 
@@ -372,6 +393,19 @@ class MainActivityX : BaseActivity() {
     override fun onResume() {
         OABX.main = this
         super.onResume()
+        if (!(hasStoragePermissions && isStorageDirSetAndOk &&
+                    checkSMSMMSPermission &&
+                    checkCallLogsPermission &&
+                    checkContactsPermission &&
+                    checkUsageStatsPermission &&
+                    postNotificationsPermission &&
+                    (persist_ignoreBatteryOptimization.value
+                            || powerManager.isIgnoringBatteryOptimizations(packageName)
+                            )
+                    )
+            && this::navController.isInitialized
+            && !navController.currentDestination?.route?.equals(NavItem.Permissions.destination)!!
+        ) navController.navigate(NavItem.Permissions.destination)
     }
 
     override fun onPause() {
@@ -436,11 +470,13 @@ class MainActivityX : BaseActivity() {
     }
 
     fun refreshPackagesAndBackups() {
-        invalidateBackupLocation()
+        CoroutineScope(Dispatchers.IO).launch {
+            invalidateBackupLocation()
+        }
     }
 
     fun refreshPackages() {
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             updateAppTables()
         }
     }

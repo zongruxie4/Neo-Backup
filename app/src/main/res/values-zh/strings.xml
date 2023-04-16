@@ -93,7 +93,6 @@
     <string name="prefs_password">加密密码</string>
     <string name="prefs_externaldata">备份外部数据</string>
     <string name="prefs_deviceprotecteddata">备份设备保护区的数据</string>
-    <string name="prefs_password_summary">密码为空则不会加密</string>
     <string name="prefs_encryption_summary">启用以加密备份数据</string>
     <string name="prefs_excludecache_summary">数据备份时排除应用程序的缓存</string>
     <string name="prefs_acquirewakelock_summary">在批处理操作期间获取一个唤醒锁以防止睡眠。这将大大加快备份和还原的速度，但会消耗更多电量。</string>
@@ -370,4 +369,8 @@
     <string name="context_menu">关联菜单</string>
     <string name="prefs_theme_black">深色主题</string>
     <string name="prefs_theme_black_summary">使用深色主题时强制使用黑色背景</string>
+    <string name="prefs_singularbackuprestore">单一备份恢复</string>
+    <string name="prefs_singularbackuprestore_summary">使用允许选择要还原的特定备份的备用还原项布局。</string>
+    <string name="post_notifications_permission_message">启动 Android 13 应用需要此权限才能发布通知。</string>
+    <string name="post_notifications_permission_title">发布通知</string>
 </resources>
