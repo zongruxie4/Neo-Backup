@@ -17,7 +17,7 @@
  */
 package com.machiav3lli.backup.handler
 
-//import com.google.code.regexp.Pattern
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Environment.DIRECTORY_DOCUMENTS
 import androidx.core.text.isDigitsOnly
@@ -30,6 +30,7 @@ import com.machiav3lli.backup.utils.BUFFER_SIZE
 import com.machiav3lli.backup.utils.FileUtils.translatePosixPermissionToMode
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ShellUtils
+import com.topjohnwu.superuser.internal.MainShell
 import com.topjohnwu.superuser.io.SuRandomAccessFile
 import de.voize.semver4k.Semver
 import kotlinx.coroutines.Dispatchers
@@ -70,6 +71,7 @@ class ShellHandler {
             fun UtilBox.fatalBug(reason: String) {
                 score = score.mod(1_00_00_00_0)
             }
+
             fun UtilBox.haveWorkaround(reason: String) {
             }
 
@@ -271,12 +273,11 @@ class ShellHandler {
             else
                 runAsRoot("$utilBoxQ ls -bAll ${quote(path)}")
         val relativeParent = parent ?: ""
-        val result = shellResult.out
+        return shellResult.out
             .filter { it.isNotEmpty() }
             .filter { !it.startsWith("total") }
             .mapNotNull { FileInfo.fromLsOutput(it, null, path) }
             .toMutableList()
-        return result
     }
 
     /**
@@ -582,6 +583,7 @@ class ShellHandler {
                         filePath = nameAndLink[0]
                         linkName = nameAndLink[1]
                     }
+
                     'p'  -> type = FileType.NAMED_PIPE
                     's'  -> type = FileType.SOCKET
                     'b'  -> type = FileType.BLOCK_DEVICE
@@ -635,7 +637,8 @@ class ShellHandler {
             private set
         val SCRIPTS_SUBDIR = "scripts"
         val EXCLUDE_CACHE_FILE = "tar_EXCLUDE_CACHE"
-        val EXCLUDE_FILE = "tar_EXCLUDE"
+        val BACKUP_EXCLUDE_FILE = "tar_BACKUP_EXCLUDE"
+        val RESTORE_EXCLUDE_FILE = "tar_RESTORE_EXCLUDE"
 
         val isGrantedRoot get() = Shell.isAppGrantedRoot()
         val hasRootShell get() = Shell.getShell().status >= Shell.ROOT_SHELL
@@ -724,13 +727,14 @@ class ShellHandler {
 
         class ShRunnableShellCommand : RunnableShellCommand {
             override fun runCommand(command: String): Shell.Job {
-                return Shell.sh(command)
+                return Shell.cmd(command)
             }
         }
 
         class SuRunnableShellCommand : RunnableShellCommand {
+            @SuppressLint("RestrictedApi") // TODO re-evaluate this
             override fun runCommand(command: String): Shell.Job {
-                return Shell.su(command)
+                return MainShell.newJob(true, command)
             }
         }
 
@@ -875,7 +879,12 @@ class ShellHandler {
                 if (field.isEmpty()) {
                     // only set to true if command is executed and returns exit code 0
                     field = when {
-                        hasNsEnter           -> listOf("su", "-c", "nsenter --mount=/proc/1/ns/mnt sh")
+                        hasNsEnter           -> listOf(
+                            "su",
+                            "-c",
+                            "nsenter --mount=/proc/1/ns/mnt sh"
+                        )
+
                         hasMountMasterOption -> listOf("su", "--mount-master")
                         else                 -> listOf("su")
                     }

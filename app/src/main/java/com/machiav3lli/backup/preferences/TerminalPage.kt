@@ -43,7 +43,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -97,6 +96,7 @@ import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.items.UndeterminedStorageFile
 import com.machiav3lli.backup.items.uriFromFile
 import com.machiav3lli.backup.ui.compose.SelectionContainerX
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUDownLeft
@@ -393,6 +393,19 @@ fun TerminalButton(
 }
 
 @Composable
+fun SmallButton(
+    icon: ImageVector,
+    tint: Color = MaterialTheme.colorScheme.primary,
+    onClick: () -> Unit,
+) {
+    RoundButton(
+        icon = icon,
+        onClick = onClick,
+        tint = tint
+    )
+}
+
+@Composable
 fun TerminalPage() {
     val output = remember { mutableStateListOf<String>() }
     var command by remember { mutableStateOf("") }
@@ -443,10 +456,7 @@ fun TerminalPage() {
     Column(
         verticalArrangement = Arrangement.Top
     ) {
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-        ) {
+        Column {
             OutlinedTextField(modifier = Modifier
                 .padding(padding)
                 .fillMaxWidth(),
@@ -525,6 +535,8 @@ fun TerminalPage() {
         }
         Box(
             modifier = Modifier
+                .padding(vertical = 8.dp)
+                .blockBorder()
                 .weight(1f)
                 .fillMaxSize()
                 .padding(0.dp)
@@ -534,7 +546,6 @@ fun TerminalPage() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TerminalText(
     text: List<String>,
@@ -614,6 +625,7 @@ fun TerminalText(
                                     0.8f,
                                     0f
                                 )
+
                                 else -> Color.White
                             }
                         Text(
@@ -632,22 +644,12 @@ fun TerminalText(
             }
         }
 
-        val overlayColor = Color(1f, 0.5f, 1f, 1f)
-
-        @Composable
-        fun SmallButton(icon: ImageVector, tint: Color = overlayColor, onClick: () -> Unit) {
-            RoundButton(
-                icon = icon,
-                onClick = onClick,
-                tint = tint
-            )
-        }
-
         Row(
             modifier = Modifier
-                //.fillMaxWidth()
-                .background(color = Color.Transparent),
-            horizontalArrangement = Arrangement.End
+                .fillMaxWidth()
+                .background(color = MaterialTheme.colorScheme.surfaceVariant),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             //val focusManager = LocalFocusManager.current
 
@@ -657,12 +659,16 @@ fun TerminalText(
                 value = search,
                 singleLine = true,
                 //placeholder = { Text(text = "search", color = Color.Gray) },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedTextColor = overlayColor,
-                    unfocusedTextColor = overlayColor,
-                    containerColor = Color.Transparent,
-                    unfocusedTrailingIconColor = overlayColor,
-                    focusedTrailingIconColor = overlayColor, //if (search.length > 0) Color.Transparent else overlayColor
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedTrailingIconColor = MaterialTheme.colorScheme.primary,
+                    focusedTrailingIconColor = MaterialTheme.colorScheme.primary, //if (search.length > 0) Color.Transparent else overlayColor
                 ),
                 textStyle = TextStyle(
                     fontSize = fontSize * searchFontFactor,
@@ -705,15 +711,16 @@ fun TerminalText(
             SmallButton(icon = if (wrap) Phosphor.ArrowUDownLeft else Phosphor.Equals) {
                 wrap = !wrap
             }
+            // TODO move nav actions above the bar
             SmallButton(
                 icon = Phosphor.ArrowUp,
-                tint = if (listState.isAtTop()) Color.Transparent else overlayColor
+                tint = if (listState.isAtTop()) Color.Transparent else MaterialTheme.colorScheme.inversePrimary
             ) {
                 scope.launch { listState.scrollToItem(0) }
             }
             SmallButton(
                 icon = Phosphor.ArrowDown,
-                tint = if (listState.isAtBottom()) Color.Transparent else overlayColor
+                tint = if (listState.isAtBottom()) Color.Transparent else MaterialTheme.colorScheme.inversePrimary
             ) {
                 autoScroll = true
                 scope.launch { listState.scrollToItem(text.size) }

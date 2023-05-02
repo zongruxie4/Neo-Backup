@@ -36,15 +36,19 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -60,25 +64,28 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
-import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.addInfoLogText
 import com.machiav3lli.backup.OABX.Companion.startup
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.classAddress
-import com.machiav3lli.backup.dialogs.PackagesListDialogFragment
-import com.machiav3lli.backup.fragments.BatchPrefsSheet
-import com.machiav3lli.backup.fragments.SortFilterSheet
+import com.machiav3lli.backup.dialogs.BaseDialog
+import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.handler.LogsHandler
+import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.handler.updateAppTables
+import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.pref_catchUncaughtException
 import com.machiav3lli.backup.pref_uncaughtExceptionsJumpToPreferences
 import com.machiav3lli.backup.preferences.persist_beenWelcomed
 import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
 import com.machiav3lli.backup.preferences.persist_skippedEncryptionCounter
 import com.machiav3lli.backup.preferences.pref_blackTheme
+import com.machiav3lli.backup.sheets.AppSheet
+import com.machiav3lli.backup.sheets.BatchPrefsSheet
+import com.machiav3lli.backup.sheets.SortFilterSheet
 import com.machiav3lli.backup.tasks.AppActionWork
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FunnelSimple
@@ -89,11 +96,11 @@ import com.machiav3lli.backup.ui.compose.item.ExpandableSearchAction
 import com.machiav3lli.backup.ui.compose.item.RefreshButton
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TopBar
-import com.machiav3lli.backup.ui.compose.navigation.MainNavHost
-import com.machiav3lli.backup.ui.compose.navigation.NavItem
-import com.machiav3lli.backup.ui.compose.navigation.PagerNavBar
 import com.machiav3lli.backup.ui.compose.recycler.BusyBackground
 import com.machiav3lli.backup.ui.compose.theme.AppTheme
+import com.machiav3lli.backup.ui.navigation.MainNavHost
+import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.PagerNavBar
 import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
@@ -107,13 +114,13 @@ import com.machiav3lli.backup.utils.hasStoragePermissions
 import com.machiav3lli.backup.utils.isEncryptionEnabled
 import com.machiav3lli.backup.utils.isStorageDirSetAndOk
 import com.machiav3lli.backup.utils.postNotificationsPermission
+import com.machiav3lli.backup.viewmodels.AppSheetViewModel
 import com.machiav3lli.backup.viewmodels.BatchViewModel
 import com.machiav3lli.backup.viewmodels.MainViewModel
 import com.machiav3lli.backup.viewmodels.SchedulerViewModel
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -121,9 +128,13 @@ import kotlin.system.exitProcess
 
 class MainActivityX : BaseActivity() {
 
+    private val mScope: CoroutineScope = MainScope()
     private val crScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
     private lateinit var navController: NavHostController
     private lateinit var powerManager: PowerManager
+    lateinit var showBatchSheet: MutableState<Boolean>
+    lateinit var backupBatchSheet: MutableState<Boolean>
+    private lateinit var appSheetPackage: MutableState<Package?>
 
     val viewModel by viewModels<MainViewModel> {
         MainViewModel.Factory(OABX.db, application)
@@ -138,11 +149,9 @@ class MainActivityX : BaseActivity() {
         SchedulerViewModel.Factory(OABX.db.scheduleDao, application)
     }
 
-    private lateinit var sheetSortFilter: SortFilterSheet
-    private lateinit var sheetBatchPrefs: BatchPrefsSheet
-
     @OptIn(
         ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
+        ExperimentalMaterial3Api::class,
     )
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -209,6 +218,7 @@ class MainActivityX : BaseActivity() {
         setContent {
 
             AppTheme {
+                val scope = rememberCoroutineScope()
                 val pagerState = rememberPagerState()
                 navController = rememberAnimatedNavController()
                 val pages = listOf(
@@ -219,6 +229,22 @@ class MainActivityX : BaseActivity() {
                 )
                 val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }   //TODO hg42 remove remember ???
                 var barVisible by remember { mutableStateOf(true) }
+                val openBlocklist = remember { mutableStateOf(false) }
+                var showSortSheet by remember { mutableStateOf(false) }
+                val sortSheetState = rememberModalBottomSheetState(true)
+                showBatchSheet = remember { mutableStateOf(false) }
+                backupBatchSheet = remember { mutableStateOf(false) }
+                val batchSheetState = rememberModalBottomSheetState(true)
+                appSheetPackage = remember { mutableStateOf(null) }
+                val appSheetState = rememberModalBottomSheetState(true)
+                val appSheetVM = remember(appSheetPackage.value) {
+                    if (appSheetPackage.value != null) AppSheetViewModel(
+                        appSheetPackage.value,
+                        OABX.db,
+                        ShellCommands(),
+                        OABX.app,
+                    ) else null
+                }
 
                 LaunchedEffect(viewModel) {
                     navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -226,7 +252,7 @@ class MainActivityX : BaseActivity() {
                         if (destination.route == NavItem.Main.destination && freshStart) {
                             freshStart = false
                             traceBold { "******************** freshStart && Main ********************" }
-                            MainScope().launch(Dispatchers.IO) {
+                            mScope.launch(Dispatchers.IO) {
                                 runCatching { findBackups() }
                                 startup = false     // ensure backups are no more reported as empty
                                 runCatching { updateAppTables() }
@@ -270,25 +296,14 @@ class MainActivityX : BaseActivity() {
                                         icon = Phosphor.Prohibit,
                                         description = stringResource(id = R.string.sched_blocklist)
                                     ) {
-                                        GlobalScope.launch(Dispatchers.IO) {
-                                            val blocklistedPackages = viewModel.getBlocklist()
-                                            PackagesListDialogFragment(
-                                                blocklistedPackages,
-                                                MAIN_FILTER_DEFAULT,
-                                                true
-                                            ) { newList: Set<String> ->
-                                                viewModel.setBlocklist(newList)
-                                            }.show(
-                                                context.supportFragmentManager,
-                                                "BLOCKLIST_DIALOG"
-                                            )
-                                        }
+                                        openBlocklist.value = true
                                     }
                                     RoundButton(
                                         description = stringResource(id = R.string.prefs_title),
                                         icon = Phosphor.GearSix
                                     ) { navController.navigate(NavItem.Settings.destination) }
                                 }
+
                                 barVisible                                               -> Column() {
                                     TopBar(title = stringResource(id = currentPage.title)) {
                                         ExpandableSearchAction(
@@ -313,42 +328,29 @@ class MainActivityX : BaseActivity() {
                                     }
                                     Row(
                                         modifier = Modifier.padding(horizontal = 8.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         ActionChip(
+                                            modifier = Modifier.weight(1f),
                                             icon = Phosphor.Prohibit,
-                                            textId = R.string.sched_blocklist,
+                                            text = stringResource(id = R.string.sched_blocklist),
                                             positive = false,
+                                            fullWidth = true,
                                         ) {
-                                            GlobalScope.launch(Dispatchers.IO) {
-                                                val blocklistedPackages = viewModel.getBlocklist()
-
-                                                PackagesListDialogFragment(
-                                                    blocklistedPackages,
-                                                    MAIN_FILTER_DEFAULT,
-                                                    true
-                                                ) { newList: Set<String> ->
-                                                    viewModel.setBlocklist(newList)
-                                                }.show(
-                                                    context.supportFragmentManager,
-                                                    "BLOCKLIST_DIALOG"
-                                                )
-                                            }
+                                            openBlocklist.value = true
                                         }
-                                        Spacer(modifier = Modifier.weight(1f))
                                         ActionChip(
+                                            modifier = Modifier.weight(1f),
                                             icon = Phosphor.FunnelSimple,
-                                            textId = R.string.sort_and_filter,
+                                            text = stringResource(id = R.string.sort_and_filter),
                                             positive = true,
+                                            fullWidth = true,
                                         ) {
-                                            sheetSortFilter = SortFilterSheet()
-                                            sheetSortFilter.showNow(
-                                                supportFragmentManager,
-                                                "SORTFILTER_SHEET"
-                                            )
+                                            showSortSheet = true
                                         }
                                     }
                                 }
+
                                 else                                                     ->
                                     TopBar(title = stringResource(id = R.string.app_name)) {}
                             }
@@ -381,6 +383,67 @@ class MainActivityX : BaseActivity() {
                             pagerState,
                             pages
                         )
+
+                        if (showSortSheet) {
+                            ModalBottomSheet(
+                                sheetState = sortSheetState,
+                                containerColor = MaterialTheme.colorScheme.background,
+                                dragHandle = null,
+                                scrimColor = Color.Transparent,
+                                onDismissRequest = {
+                                    scope.launch { sortSheetState.hide() }
+                                    showSortSheet = false
+                                }
+                            ) {
+                                SortFilterSheet {
+                                    scope.launch { sortSheetState.hide() }
+                                    showSortSheet = false
+                                }
+                            }
+                        }
+
+                        if (showBatchSheet.value) {
+                            ModalBottomSheet(
+                                sheetState = batchSheetState,
+                                containerColor = MaterialTheme.colorScheme.background,
+                                dragHandle = null,
+                                scrimColor = Color.Transparent,
+                                onDismissRequest = {
+                                    scope.launch { batchSheetState.hide() }
+                                    showBatchSheet.value = false
+                                }
+                            ) {
+                                BatchPrefsSheet(backupBoolean = backupBatchSheet.value)
+                            }
+                        }
+                        if (appSheetPackage.value != null) {
+                            ModalBottomSheet(
+                                sheetState = appSheetState,
+                                containerColor = MaterialTheme.colorScheme.background,
+                                dragHandle = null,
+                                scrimColor = Color.Transparent,
+                                onDismissRequest = {
+                                    scope.launch { appSheetState.hide() }
+                                    appSheetPackage.value = null
+                                }
+                            ) {
+                                AppSheet(
+                                    appSheetVM!!,
+                                    appSheetPackage.value?.packageName ?: "",
+                                ) {
+                                    scope.launch { appSheetState.hide() }
+                                    appSheetPackage.value = null
+                                }
+                            }
+                        }
+                        if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
+                            GlobalBlockListDialogUI(
+                                currentBlocklist = viewModel.getBlocklist().toSet(),
+                                openDialogCustom = openBlocklist,
+                            ) { newSet ->
+                                viewModel.setBlocklist(newSet)
+                            }
+                        }
                     }
                 }
             }
@@ -465,23 +528,21 @@ class MainActivityX : BaseActivity() {
         }
     }
 
+    internal fun showAppSheet(packageValue: Package) {
+        appSheetPackage.value = packageValue
+    }
+
     fun updatePackage(packageName: String) {
         viewModel.updatePackage(packageName)
     }
 
-    fun refreshPackagesAndBackups() {
+    private fun refreshPackagesAndBackups() {
         CoroutineScope(Dispatchers.IO).launch {
             invalidateBackupLocation()
         }
     }
 
-    fun refreshPackages() {
-        CoroutineScope(Dispatchers.IO).launch {
-            updateAppTables()
-        }
-    }
-
-    fun showSnackBar(message: String) {
+    fun showSnackBar(message: String) { // TODO reimplement this?
     }
 
     fun dismissSnackBar() {
@@ -493,11 +554,8 @@ class MainActivityX : BaseActivity() {
     }
 
     fun showBatchPrefsSheet(backupBoolean: Boolean) {
-        sheetBatchPrefs = BatchPrefsSheet(backupBoolean)
-        sheetBatchPrefs.showNow(
-            supportFragmentManager,
-            "SORTFILTER_SHEET"
-        )
+        backupBatchSheet.value = backupBoolean
+        showBatchSheet.value = true
     }
 
     fun whileShowingSnackBar(message: String, todo: () -> Unit) {
@@ -512,7 +570,7 @@ class MainActivityX : BaseActivity() {
 
     fun startBatchAction(
         backupBoolean: Boolean,
-        selectedPackages: List<String?>,
+        selectedPackageNames: List<String?>,
         selectedModes: List<Int>,
     ) {
         val now = System.currentTimeMillis()
@@ -520,7 +578,7 @@ class MainActivityX : BaseActivity() {
         val batchType = getString(if (backupBoolean) R.string.backup else R.string.restore)
         val batchName = WorkHandler.getBatchName(batchType, now)
 
-        val selectedItems = selectedPackages
+        val selectedItems = selectedPackageNames
             .mapIndexed { i, packageName ->
                 if (packageName.isNullOrEmpty()) null
                 else Pair(packageName, selectedModes[i])
@@ -547,25 +605,30 @@ class MainActivityX : BaseActivity() {
 
             val oneTimeWorkLiveData = WorkManager.getInstance(OABX.context)
                 .getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
-            oneTimeWorkLiveData.observeForever(object : Observer<WorkInfo> {    //TODO WECH hg42
-                override fun onChanged(t: WorkInfo) {
-                    if (t.state == WorkInfo.State.SUCCEEDED) {
-                        counter += 1
+            oneTimeWorkLiveData.observeForever(
+                object : Observer<WorkInfo?> {    //TODO WECH hg42
+                    override fun onChanged(value: WorkInfo?) {
+                        when (value?.state) {
+                            WorkInfo.State.SUCCEEDED -> {
+                                counter += 1
 
-                        val (succeeded, packageLabel, error) = AppActionWork.getOutput(t)
-                        if (error.isNotEmpty()) errors =
-                            "$errors$packageLabel: ${      //TODO hg42 add to WorkHandler
-                                LogsHandler.handleErrorMessages(
-                                    OABX.context,
-                                    error
-                                )
-                            }\n"
+                                val (succeeded, packageLabel, error) = AppActionWork.getOutput(value)
+                                if (error.isNotEmpty()) errors =
+                                    "$errors$packageLabel: ${      //TODO hg42 add to WorkHandler
+                                        LogsHandler.handleErrorMessages(
+                                            OABX.context,
+                                            error
+                                        )
+                                    }\n"
 
-                        resultsSuccess = resultsSuccess and succeeded
-                        oneTimeWorkLiveData.removeObserver(this)
+                                resultsSuccess = resultsSuccess and succeeded
+                                oneTimeWorkLiveData.removeObserver(this)
+                            }
+                            else                     -> {}
+                        }
                     }
                 }
-            })
+            )
         }
 
         if (worksList.isNotEmpty()) {
@@ -576,7 +639,7 @@ class MainActivityX : BaseActivity() {
     }
 
     fun startBatchRestoreAction(
-        packages: List<String>,
+        selectedPackageNames: List<String>,
         selectedApk: Map<String, Int>,
         selectedData: Map<String, Int>,
     ) {
@@ -586,11 +649,12 @@ class MainActivityX : BaseActivity() {
         val batchName = WorkHandler.getBatchName(batchType, now)
 
         val selectedItems = buildList {
-            packages.forEach { pn ->
+            selectedPackageNames.forEach { pn ->
                 when {
                     selectedApk[pn] == selectedData[pn] && selectedApk[pn] != null -> add(
                         Triple(pn, selectedApk[pn]!!, altModeToMode(ALT_MODE_BOTH, false))
                     )
+
                     else                                                           -> {
                         if ((selectedApk[pn] ?: -1) != -1) add(
                             Triple(pn, selectedApk[pn]!!, altModeToMode(ALT_MODE_APK, false))
@@ -622,25 +686,30 @@ class MainActivityX : BaseActivity() {
 
             val oneTimeWorkLiveData = WorkManager.getInstance(OABX.context)
                 .getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
-            oneTimeWorkLiveData.observeForever(object : Observer<WorkInfo> {
-                override fun onChanged(t: WorkInfo) {
-                    if (t.state == WorkInfo.State.SUCCEEDED) {
-                        counter += 1
+            oneTimeWorkLiveData.observeForever(
+                object : Observer<WorkInfo?> {
+                    override fun onChanged(value: WorkInfo?) {
+                        when (value?.state) {
+                            WorkInfo.State.SUCCEEDED -> {
+                                counter += 1
 
-                        val (succeeded, packageLabel, error) = AppActionWork.getOutput(t)
-                        if (error.isNotEmpty()) errors =
-                            "$errors$packageLabel: ${
-                                LogsHandler.handleErrorMessages(
-                                    OABX.context,
-                                    error
-                                )
-                            }\n"
+                                val (succeeded, packageLabel, error) = AppActionWork.getOutput(value)
+                                if (error.isNotEmpty()) errors =
+                                    "$errors$packageLabel: ${
+                                        LogsHandler.handleErrorMessages(
+                                            OABX.context,
+                                            error
+                                        )
+                                    }\n"
 
-                        resultsSuccess = resultsSuccess and succeeded
-                        oneTimeWorkLiveData.removeObserver(this)
+                                resultsSuccess = resultsSuccess and succeeded
+                                oneTimeWorkLiveData.removeObserver(this)
+                            }
+                            else                     -> {}
+                        }
                     }
                 }
-            })
+            )
         }
     }
 }

@@ -49,12 +49,13 @@ import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.ALT_MODE_UNSET
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.dialogs.BatchDialogFragment
-import com.machiav3lli.backup.fragments.AppSheet
+import com.machiav3lli.backup.dialogs.BaseDialog
+import com.machiav3lli.backup.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_languages
 import com.machiav3lli.backup.preferences.pref_menuButtonAlwaysVisible
 import com.machiav3lli.backup.traceCompose
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CircleWavyWarning
@@ -73,9 +74,8 @@ import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 @Composable
 fun HomePage() {
     // TODO include tags in search
-    val main = OABX.main!!
-    val viewModel = main.viewModel
-    var appSheet: AppSheet? = null
+    val mActivity = OABX.main!!
+    val viewModel = mActivity.viewModel
 
     val filteredList by viewModel.filteredList.collectAsState(emptyList())
     val updatedPackages by viewModel.updatedPackages.collectAsState(emptyList())
@@ -86,6 +86,7 @@ fun HomePage() {
     var menuPackage by remember { mutableStateOf<Package?>(null) }
     val menuExpanded = viewModel.menuExpanded
     val menuButtonAlwaysVisible = pref_menuButtonAlwaysVisible.value
+    val openBatchDialog = remember { mutableStateOf(false) }
 
     traceCompose {
         "HomePage filtered=${
@@ -106,12 +107,6 @@ fun HomePage() {
             cachedAsyncImagePainter(model = pkg.iconData)
         }
         endNanoTimer("prefetchIcons")
-    }
-
-    val batchConfirmListener = object : BatchDialogFragment.ConfirmListener {
-        override fun onConfirmed(selectedPackages: List<String?>, selectedModes: List<Int>) {
-            main.startBatchAction(true, selectedPackages, selectedModes)
-        }
     }
 
     Scaffold(
@@ -145,33 +140,7 @@ fun HomePage() {
                                             modifier = Modifier.weight(1f),
                                             text = stringResource(id = R.string.backup_all_updated),
                                         ) {
-                                            val selectedList = updatedPackages
-                                                .map { it.packageInfo }
-                                                .toCollection(ArrayList())
-                                            val selectedListModes = updatedPackages
-                                                .map {
-                                                    it.latestBackup?.let { bp ->
-                                                        when {
-                                                            bp.hasApk && bp.hasAppData -> ALT_MODE_BOTH
-                                                            bp.hasApk                  -> ALT_MODE_APK
-                                                            bp.hasAppData              -> ALT_MODE_DATA
-                                                            else                       -> ALT_MODE_UNSET
-                                                        }
-                                                    } ?: ALT_MODE_BOTH  // no backup -> try all
-                                                }
-                                                .toCollection(ArrayList())
-                                            if (selectedList.isNotEmpty()) {
-                                                BatchDialogFragment(
-                                                    true,
-                                                    selectedList,
-                                                    selectedListModes,
-                                                    batchConfirmListener
-                                                )
-                                                    .show(
-                                                        main.supportFragmentManager,
-                                                        "DialogFragment"
-                                                    )
-                                            }
+                                            openBatchDialog.value = true
                                         }
                                         ElevatedActionButton(
                                             text = "",
@@ -184,12 +153,7 @@ fun HomePage() {
                                     UpdatedPackageRecycler(
                                         productsList = updatedPackages,
                                         onClick = { item ->
-                                            if (appSheet != null) appSheet?.dismissAllowingStateLoss()
-                                            appSheet = AppSheet(item.packageName)
-                                            appSheet?.showNow(
-                                                main.supportFragmentManager,
-                                                "Package ${item.packageName}"
-                                            )
+                                            mActivity.showAppSheet(item)
                                         }
                                     )
                                 }
@@ -213,7 +177,7 @@ fun HomePage() {
                             }
                         )
                     }
-                    if (! (updaterVisible && updaterExpanded) &&
+                    if (!(updaterVisible && updaterExpanded) &&
                         (nSelected > 0 || menuButtonAlwaysVisible)
                     ) {
                         ExtendedFloatingActionButton(
@@ -236,6 +200,7 @@ fun HomePage() {
 
         HomePackageRecycler(
             modifier = Modifier
+                .blockBorder()
                 .padding(paddingValues)
                 .fillMaxSize(),
             productsList = filteredList,
@@ -250,12 +215,7 @@ fun HomePage() {
             },
             onClick = { item ->
                 if (filteredList.none { selection[it.packageName] == true }) {
-                    if (appSheet != null) appSheet?.dismissAllowingStateLoss()
-                    appSheet = AppSheet(item.packageName)
-                    appSheet?.showNow(
-                        main.supportFragmentManager,
-                        "Package ${item.packageName}"
-                    )
+                    mActivity.showAppSheet(item)
                 } else {
                     selection[item.packageName] = selection[item.packageName] != true
                 }
@@ -274,13 +234,54 @@ fun HomePage() {
                     productsList = filteredList,
                     selection = selection,
                     openSheet = { item ->
-                        if (appSheet != null) appSheet?.dismissAllowingStateLoss()
-                        appSheet = AppSheet(item.packageName)
-                        appSheet?.showNow(
-                            main.supportFragmentManager,
-                            "Package ${item.packageName}"
-                        )
+                        mActivity.showAppSheet(item)
                     }
+                )
+            }
+        }
+        if (openBatchDialog.value) BaseDialog(openDialogCustom = openBatchDialog) {
+            val selectedList = updatedPackages
+                .map { it.packageInfo }
+                .toCollection(ArrayList())
+            val selectedApk = mutableMapOf<String, Int>()
+            val selectedData = mutableMapOf<String, Int>()
+            val selectedListModes = updatedPackages
+                .map {
+                    it.latestBackup?.let { bp ->
+                        when {
+                            bp.hasApk && bp.hasAppData -> {
+                                selectedApk[bp.packageName] = 1
+                                selectedData[bp.packageName] = 1
+                                ALT_MODE_BOTH
+                            }
+
+                            bp.hasApk                  -> {
+                                selectedApk[bp.packageName] = 1
+                                ALT_MODE_APK
+                            }
+
+                            bp.hasAppData              -> {
+                                selectedData[bp.packageName] = 1
+                                ALT_MODE_DATA
+                            }
+
+                            else                       -> ALT_MODE_UNSET
+                        }
+                    } ?: ALT_MODE_BOTH  // no backup -> try all
+                }
+                .toCollection(ArrayList())
+
+            BatchActionDialogUI(
+                backupBoolean = true,
+                selectedPackageInfos = selectedList,
+                selectedApk = selectedApk,
+                selectedData = selectedData,
+                openDialogCustom = openBatchDialog,
+            ) {
+                mActivity.startBatchAction(
+                    true,
+                    selectedPackageNames = selectedList.map { it.packageName },
+                    selectedModes = selectedListModes,
                 )
             }
         }

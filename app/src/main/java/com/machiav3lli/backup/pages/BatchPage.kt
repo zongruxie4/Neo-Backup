@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Scaffold
@@ -47,6 +46,7 @@ import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_singularBackupRestore
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.DiamondsFour
 import com.machiav3lli.backup.ui.compose.icons.phosphor.HardDrives
@@ -99,8 +99,9 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
         ) {
             BatchPackageRecycler(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
+                    .blockBorder()
+                    .weight(1f,true)
+                    .fillMaxSize(),
                 productsList = workList,
                 restore = !backupBoolean,
                 apkBackupCheckedList = viewModel.apkBackupCheckedList,
@@ -142,10 +143,11 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                     .size
             }
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp),
+                modifier = Modifier.padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                Spacer(modifier = Modifier.width(4.dp))
                 StateChip(
                     icon = Phosphor.DiamondsFour,
                     text = stringResource(id = R.string.all_apk),
@@ -161,6 +163,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                             .forEach {
                                 viewModel.apkBackupCheckedList[it] = 0
                             }
+
                         else         -> workList
                             .filter { backupBoolean || it.latestBackup?.hasApk == true }
                             .map(Package::packageName)
@@ -169,7 +172,6 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                             }
                     }
                 }
-                Spacer(modifier = Modifier.width(0.1.dp))
                 StateChip(
                     icon = Phosphor.HardDrives,
                     text = stringResource(id = R.string.all_data),
@@ -185,6 +187,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                             .forEach {
                                 viewModel.dataBackupCheckedList[it] = 0
                             }
+
                         else         -> workList
                             .filter { backupBoolean || it.latestBackup?.hasData == true }
                             .map(Package::packageName)
@@ -211,26 +214,26 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
         if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
             val selectedApk = viewModel.apkBackupCheckedList.filterValues { it != -1 }
             val selectedData = viewModel.dataBackupCheckedList.filterValues { it != -1 }
-            val selectedPackages = selectedApk.keys.plus(selectedData.keys).distinct()
+            val selectedPackageNames = selectedApk.keys.plus(selectedData.keys).distinct()
 
             BatchActionDialogUI(
                 backupBoolean = backupBoolean,
-                selectedPackages = filteredList
-                    .filter { it.packageName in selectedPackages }
+                selectedPackageInfos = filteredList
+                    .filter { it.packageName in selectedPackageNames }
                     .map(Package::packageInfo),
                 selectedApk = selectedApk,
                 selectedData = selectedData,
                 openDialogCustom = openDialog,
             ) {
                 if (pref_singularBackupRestore.value && !backupBoolean) main.startBatchRestoreAction(
-                    packages = selectedPackages,
+                    selectedPackageNames = selectedPackageNames,
                     selectedApk = selectedApk,
                     selectedData = selectedData,
                 )
                 else main.startBatchAction(
                     backupBoolean,
-                    selectedPackages = selectedPackages,
-                    selectedModes = selectedPackages.map { pn ->
+                    selectedPackageNames = selectedPackageNames,
+                    selectedModes = selectedPackageNames.map { pn ->
                         altModeToMode(
                             when {
                                 selectedData[pn] == 0 && selectedApk[pn] == 0 -> ALT_MODE_BOTH

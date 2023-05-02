@@ -15,11 +15,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.BuildConfig
+import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
-import com.machiav3lli.backup.dialogs.EnumDialogUI
-import com.machiav3lli.backup.dialogs.StringDialogUI
+import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
+import com.machiav3lli.backup.dialogs.StringPrefDialogUI
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FileZip
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FloppyDisk
@@ -59,7 +61,9 @@ fun ServicePrefsPage() {
 
     AppTheme {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .blockBorder()
+                .fillMaxSize(),
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -72,17 +76,19 @@ fun ServicePrefsPage() {
         if (openDialog.value) {
             BaseDialog(openDialogCustom = openDialog) {
                 when (dialogsPref) {
-                    is PasswordPref -> StringDialogUI(              //TODO hg42 encapsulate in pref
+                    is PasswordPref -> StringPrefDialogUI(              //TODO hg42 encapsulate in pref
                         pref = dialogsPref as PasswordPref,
                         isPrivate = true,
                         confirm = true,
                         openDialogCustom = openDialog
                     )
-                    is StringPref -> StringDialogUI(                //TODO hg42 encapsulate in pref
+
+                    is StringPref   -> StringPrefDialogUI(              //TODO hg42 encapsulate in pref
                         pref = dialogsPref as StringPref,
                         openDialogCustom = openDialog
                     )
-                    is EnumPref -> EnumDialogUI(                    //TODO hg42 encapsulate in pref
+
+                    is EnumPref     -> EnumPrefDialogUI(                //TODO hg42 encapsulate in pref
                         pref = dialogsPref as EnumPref,
                         openDialogCustom = openDialog
                     )
@@ -186,7 +192,8 @@ val pref_backupNoBackupData = BooleanPref(
     summaryId = R.string.prefs_nobackupdata_summary,
     icon = Phosphor.ProhibitInset,
     iconTint = ColorData,
-    defaultValue = false
+    defaultValue = false,
+    onChanged = { OABX.shellHandler!!.assets.updateExcludeFiles() },
 )
 
 val pref_restoreDeviceProtectedData = BooleanPref(
@@ -231,7 +238,8 @@ val pref_restoreNoBackupData = BooleanPref(
     summaryId = R.string.prefs_nobackupdata_rst_summary,
     icon = Phosphor.ProhibitInset,
     iconTint = ColorData,
-    defaultValue = false
+    defaultValue = false,
+    onChanged = { OABX.shellHandler!!.assets.updateExcludeFiles() },
 )
 
 val pref_restorePermissions = BooleanPref(

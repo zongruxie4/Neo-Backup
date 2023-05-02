@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +49,7 @@ fun MorphableTextField(
     expanded: Boolean = false,
     textAlignment: TextAlign? = null,
     onCancel: () -> Unit,
-    onSave: (String) -> Unit
+    onSave: (String) -> Unit,
 ) {
     val (expanded, onExpanded) = remember {
         mutableStateOf(expanded)
@@ -78,7 +77,7 @@ fun TextViewBlock(
     text: String?,
     modifier: Modifier = Modifier,
     textAlignment: TextAlign? = null,
-    onExpanded: (Boolean) -> Unit
+    onExpanded: (Boolean) -> Unit,
 ) {
     OutlinedCard(
         modifier = modifier
@@ -86,26 +85,26 @@ fun TextViewBlock(
         colors = CardDefaults.outlinedCardColors(
             containerColor = Color.Transparent
         ),
+        shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
     ) {
         Text(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 18.dp),
+                .padding(horizontal = 12.dp, vertical = 17.dp),
             text = text ?: " ",
             textAlign = textAlignment,
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextEditBlock(
     text: String?,
     modifier: Modifier = Modifier,
     onCancel: () -> Unit,
     onExpanded: (Boolean) -> Unit,
-    onSave: (String) -> Unit
+    onSave: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val textFieldFocusRequester = remember { FocusRequester() }
@@ -119,12 +118,12 @@ fun TextEditBlock(
     Row(
         modifier = modifier
             .background(
-                color = MaterialTheme.colorScheme.background,
-                shape = MaterialTheme.shapes.medium
+                color = Color.Transparent,
+                shape = MaterialTheme.shapes.large
             )
             .border(
                 BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.large
             ),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
@@ -147,11 +146,11 @@ fun TextEditBlock(
             modifier = Modifier
                 .weight(1f)
                 .focusRequester(textFieldFocusRequester),
-            colors = TextFieldDefaults.textFieldColors(
+            colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
             ),
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.large,
             singleLine = false,
             label = { Text(text = stringResource(id = R.string.edit_note)) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

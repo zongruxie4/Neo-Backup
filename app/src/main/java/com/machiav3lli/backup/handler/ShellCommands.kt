@@ -29,19 +29,21 @@ import com.machiav3lli.backup.utils.FileUtils
 import timber.log.Timber
 import java.io.File
 
-class ShellCommands(private var users: List<String>) {
+class ShellCommands {
     var multiuserEnabled: Boolean
+    private var users = emptyList<String>()
 
     init {
         try {
             users = getUsers()
         } catch (e: ShellActionFailedException) {
             users = arrayListOf()
-            var error =
+            val error =
                 when (val cause = e.cause) {
                     is ShellCommandFailedException ->
                         " : ${cause.shellResult.err.joinToString(" ")}"
-                    else -> ""
+
+                    else                           -> ""
                 }
             Timber.e("Could not load list of users: ${e}$error")
         }

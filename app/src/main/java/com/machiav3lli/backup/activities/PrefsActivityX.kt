@@ -30,12 +30,16 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,24 +47,24 @@ import androidx.compose.ui.res.stringResource
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.fragments.HelpSheet
+import com.machiav3lli.backup.sheets.HelpSheet
 import com.machiav3lli.backup.preferences.pref_blackTheme
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TopBar
-import com.machiav3lli.backup.ui.compose.navigation.NavItem
-import com.machiav3lli.backup.ui.compose.navigation.PagerNavBar
-import com.machiav3lli.backup.ui.compose.navigation.PrefsNavHost
+import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.PagerNavBar
+import com.machiav3lli.backup.ui.navigation.PrefsNavHost
 import com.machiav3lli.backup.ui.compose.recycler.BusyBackground
 import com.machiav3lli.backup.ui.compose.theme.AppTheme
 import com.machiav3lli.backup.utils.destinationToItem
 import com.machiav3lli.backup.utils.getDefaultSharedPreferences
 import com.machiav3lli.backup.viewmodels.ExportsViewModel
 import com.machiav3lli.backup.viewmodels.LogViewModel
+import kotlinx.coroutines.launch
 
 class PrefsActivityX : BaseActivity() {
-    private var helpSheet: HelpSheet? = null
     private val exportsViewModel: ExportsViewModel by viewModels {
         ExportsViewModel.Factory(OABX.db.scheduleDao, application)
     }
@@ -69,7 +73,9 @@ class PrefsActivityX : BaseActivity() {
     }
 
     @OptIn(
-        ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
+        ExperimentalAnimationApi::class,
+        ExperimentalFoundationApi::class,
+        ExperimentalMaterial3Api::class,
     )
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -77,6 +83,7 @@ class PrefsActivityX : BaseActivity() {
 
         setContent {
             AppTheme {
+                val scope = rememberCoroutineScope()
                 val pagerState = rememberPagerState()
                 val navController = rememberAnimatedNavController()
                 val pages = listOf(
@@ -87,6 +94,8 @@ class PrefsActivityX : BaseActivity() {
                 )
                 val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }
                 var barVisible by remember { mutableStateOf(true) }
+                var showHelpSheet by remember { mutableStateOf(false) }
+                val helpSheetState = rememberModalBottomSheetState(true)
 
                 navController.addOnDestinationChangedListener { _, destination, _ ->
                     barVisible = destination.route == NavItem.Settings.destination
@@ -119,9 +128,7 @@ class PrefsActivityX : BaseActivity() {
                                         icon = Phosphor.Info,
                                         description = stringResource(id = R.string.help),
                                     ) {
-                                        if (helpSheet != null && helpSheet!!.isVisible) helpSheet?.dismissAllowingStateLoss()
-                                        helpSheet = HelpSheet()
-                                        helpSheet!!.showNow(supportFragmentManager, "HELPSHEET")
+                                        showHelpSheet = true
                                     }
                                 }
                             }
@@ -146,6 +153,24 @@ class PrefsActivityX : BaseActivity() {
                                 logsViewModel,
                             )
                         )
+
+                        if (showHelpSheet) {
+                            ModalBottomSheet(
+                                sheetState = helpSheetState,
+                                containerColor = MaterialTheme.colorScheme.background,
+                                dragHandle = null,
+                                scrimColor = Color.Transparent,
+                                onDismissRequest = {
+                                    scope.launch { helpSheetState.hide() }
+                                    showHelpSheet = false
+                                }
+                            ) {
+                                HelpSheet {
+                                    scope.launch { helpSheetState.hide() }
+                                    showHelpSheet = false
+                                }
+                            }
+                        }
                     }
                 }
             }

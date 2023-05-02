@@ -27,6 +27,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.preferences.ui.PrefsExpandableGroupHeader
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.preferences.ui.PrefsGroupCollapsed
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
@@ -83,7 +84,9 @@ fun AdvancedPrefsPage() {
 
     AppTheme {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .blockBorder()
+                .fillMaxSize(),
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -344,13 +347,6 @@ val pref_busyLaserBackground = BooleanPref(
     defaultValue = true
 )
 
-val pref_toolbarOpacity = IntPref(
-    key = "dev-alt.toolbarOpacity",
-    summary = "opacity of toolbars [percent]",
-    entries = (0..100 step 5).toList(),
-    defaultValue = 100
-)
-
 val pref_versionOpacity = IntPref(
     key = "dev-alt.versionOpacity",
     summary = "opacity of version [percent]",
@@ -440,8 +436,8 @@ val pref_fakeBackupSeconds = IntPref(
 
 val pref_fakeScheduleMin = IntPref(
     key = "dev-fake.fakeScheduleMin",
-    summary = "[minute] run each enabled schedule every x min [for testing only]",
-    entries = (listOf(0) + (3..9 step 1) + (10..60 step 5)).toList(),
+    summary = "[minute] =1: day->hour, hour->minute, minutes->seconds  >1: run enabled schedules every x min [for testing only]",
+    entries = (listOf(0, 1) + (3..9 step 1) + (10..60 step 5)).toList(),
     defaultValue = 0
 )
 

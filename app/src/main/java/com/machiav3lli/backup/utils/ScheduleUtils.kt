@@ -64,7 +64,7 @@ fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
     val minTimeFromNow = TimeUnit.MINUTES.toMillis(1)
 
     val fakeMin = pref_fakeScheduleMin.value
-    if (fakeMin > 0) {
+    if (fakeMin > 1) {
         //c[Calendar.HOUR_OF_DAY] = schedule.timeHour
         c[Calendar.MINUTE] = (c[Calendar.MINUTE] / fakeMin + 1) * fakeMin % 60
         c[Calendar.SECOND] = 0
@@ -76,7 +76,20 @@ fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
             c.add(Calendar.MINUTE, fakeMin)
             nIncrements++
         }
-        traceSchedule { "added $nIncrements * ${schedule.interval} min" }
+        traceSchedule { "[${schedule.id}] added $nIncrements * ${schedule.interval} min" }
+    } else if (fakeMin == 1) {
+        //c[Calendar.HOUR_OF_DAY] = schedule.timeHour
+        c[Calendar.MINUTE] = schedule.timeHour
+        c[Calendar.SECOND] = schedule.timeMinute
+        c[Calendar.MILLISECOND] = 0
+        var nIncrements = 0
+        repeat(limitIncrements) {
+            if (c.timeInMillis > now + minTimeFromNow)
+                return@repeat
+            c.add(Calendar.HOUR, schedule.interval)
+            nIncrements++
+        }
+        traceSchedule { "[${schedule.id}] added $nIncrements * ${schedule.interval} min" }
     } else {
         c[Calendar.HOUR_OF_DAY] = schedule.timeHour
         c[Calendar.MINUTE] = schedule.timeMinute
@@ -89,11 +102,11 @@ fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
             c.add(Calendar.DAY_OF_MONTH, schedule.interval)
             nIncrements++
         }
-        traceSchedule { "added $nIncrements * ${schedule.interval} days" }
+        traceSchedule { "[${schedule.id}] added $nIncrements * ${schedule.interval} days" }
     }
 
     traceSchedule {
-        "calculateTimeToRun: next: ${
+        "[${schedule.id}] calculateTimeToRun: next: ${
             ISO_DATE_TIME_FORMAT.format(c.timeInMillis)
         } now: ${
             ISO_DATE_TIME_FORMAT.format(now)
@@ -168,7 +181,7 @@ fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean
                         timePlaced = now,
                         timeToRun = timeToRun
                     )
-                    traceSchedule { "re-scheduling $schedule" }
+                    traceSchedule { "[${schedule?.id}] re-scheduling $schedule" }
                     scheduleDao.update(schedule)
                 } else {
                     if (timeLeft <= TimeUnit.MINUTES.toMillis(1)) {
@@ -178,7 +191,7 @@ fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean
                         scheduleDao.update(schedule)
                         val message =
                             "timeLeft < 1 min -> set schedule $schedule"
-                        traceSchedule { "**************************************** $message" }
+                        traceSchedule { "[${schedule.id}] **************************************** $message" }
                         if (isDebug || isHg42 || pref_autoLogSuspicious.value)
                             textLog(
                                 listOf(
@@ -199,21 +212,21 @@ fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean
                 val pendingIntent = createPendingIntent(context, scheduleId)
 
                 if (hasPermission && pref_useAlarmClock.value) {
-                    traceSchedule { "alarmManager.setAlarmClock $schedule" }
+                    traceSchedule { "[${schedule.id}] alarmManager.setAlarmClock $schedule" }
                     alarmManager.setAlarmClock(
                         AlarmManager.AlarmClockInfo(schedule.timeToRun, null),
                         pendingIntent
                     )
                 } else {
                     if (hasPermission && pref_useExactAlarm.value) {
-                        traceSchedule { "alarmManager.setExactAndAllowWhileIdle $schedule" }
+                        traceSchedule { "[${schedule.id}] alarmManager.setExactAndAllowWhileIdle $schedule" }
                         alarmManager.setExactAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
                             schedule.timeToRun,
                             pendingIntent
                         )
                     } else {
-                        traceSchedule { "alarmManager.setAndAllowWhileIdle $schedule" }
+                        traceSchedule { "[${schedule.id}] alarmManager.setAndAllowWhileIdle $schedule" }
                         alarmManager.setAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
                             schedule.timeToRun,
@@ -222,15 +235,15 @@ fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean
                     }
                 }
                 traceSchedule {
-                    "schedule $scheduleId starting in: ${
+                    "[$scheduleId] schedule starting in: ${
                         TimeUnit.MILLISECONDS.toMinutes(schedule.timeToRun - System.currentTimeMillis())
                     } minutes name=${schedule.name}"
                 }
             } else
-                traceSchedule { "schedule is disabled. Nothing to schedule!" }
+                traceSchedule { "[$scheduleId] schedule is disabled. Nothing to schedule!" }
         }.start()
     } else {
-        Timber.e("got id: $scheduleId from $context")
+        Timber.e("[$scheduleId] got id from $context")
     }
 }
 
@@ -239,7 +252,7 @@ fun cancelAlarm(context: Context, scheduleId: Long) {
     val pendingIntent = createPendingIntent(context, scheduleId)
     alarmManager.cancel(pendingIntent)
     pendingIntent.cancel()
-    traceSchedule { "cancelled schedule with id: $scheduleId" }
+    traceSchedule { "[$scheduleId] cancelled schedule" }
 }
 
 var alarmsHaveBeenScheduled = false
@@ -267,14 +280,14 @@ fun scheduleAlarmsOnce() {
                 val scheduleAlreadyRuns = runningSchedules[it.id] == true
                 when {
                     scheduleAlreadyRuns -> {
-                        traceSchedule { "*** scheduleAlarms: ignore $it" }
+                        traceSchedule { "[${it.id}] *** scheduleAlarms: ignore $it" }
                     }
                     it.enabled          -> {
-                        traceSchedule { "*** scheduleAlarms: enable $it" }
+                        traceSchedule { "[${it.id}] *** scheduleAlarms: enable $it" }
                         scheduleAlarm(OABX.context, it.id, false)
                     }
                     else                -> {
-                        traceSchedule { "*** scheduleAlarms: cancel $it" }
+                        traceSchedule { "[${it.id}] *** scheduleAlarms: cancel $it" }
                         cancelAlarm(OABX.context, it.id)
                     }
                 }

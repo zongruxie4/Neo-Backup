@@ -5,22 +5,17 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -35,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -112,7 +108,6 @@ fun Confirmation(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextInput(
     text: String = "",
@@ -202,10 +197,12 @@ fun Selections(
                                 val newSelection = file.readText().lines()
                                 onAction(newSelection)
                             }
+
                             "put" -> {
                                 file.writeText(selection.joinToString("\n"))
                                 onAction(selection)
                             }
+
                             "del" -> {
                                 file.delete()
                                 onAction(selection)
@@ -240,6 +237,7 @@ fun Selections(
                                     val newSelection = schedule.customList.toList()
                                     onAction(newSelection)
                                 }
+
                                 "put" -> {
                                     Thread {
                                         scheduleDao.update(
@@ -267,6 +265,7 @@ fun Selections(
                                     val newSelection = schedule.blockList.toList()
                                     onAction(newSelection)
                                 }
+
                                 "put" -> {
                                     Thread {
                                         scheduleDao.update(
@@ -294,6 +293,7 @@ fun Selections(
                                     ?: emptyList()
                             onAction(newSelection)
                         }
+
                         "put" -> {
                             OABX.main?.viewModel?.setBlocklist(selection.toSet())
                             onAction(selection)
@@ -772,102 +772,80 @@ fun MainPackageItem(
     //traceCompose { "<${pkg.packageName}> MainPackageItemX ${pkg.packageInfo.icon} ${imageData.hashCode()}" }
     //traceCompose { "<${pkg.packageName}> MainPackageItemX" }
 
-    Card(
-        modifier = Modifier,
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
+    ListItem(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .combinedClickable(
+                onClick = { onAction(pkg) },
+                onLongClick = { onLongClick(pkg) }
+            ),
+        colors = ListItemDefaults.colors(
+            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+            else Color.Transparent,
         ),
-    ) {
-        Row(
-            modifier = Modifier
-                .combinedClickable(
-                    onClick = { onAction(pkg) },
-                    onLongClick = { onLongClick(pkg) }
-                )
-                .background(
-                    color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-                    else Color.Transparent
-                )
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        leadingContent = {
             PackageIcon(
                 item = pkg,
                 imageData = pkg.iconData,
                 imageLoader = imageLoader,
             )
+        },
+        headlineContent = {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = pkg.packageLabel,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1f),
+                    softWrap = true,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                beginNanoTimer("item.labels")
+                PackageLabels(item = pkg)
+                endNanoTimer("item.labels")
+            }
 
-            Column(
-                modifier = Modifier.wrapContentHeight()
-            ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
+        },
+        supportingContent = {
+            Row(modifier = Modifier.fillMaxWidth()) {
+
+                val hasBackups = pkg.hasBackups
+                val latestBackup = pkg.latestBackup
+                val nBackups = pkg.numberOfBackups
+
+                beginNanoTimer("item.package")
+                Text(
+                    text = pkg.packageName,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1f),
+                    softWrap = true,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                endNanoTimer("item.package")
+
+                beginNanoTimer("item.backups")
+                AnimatedVisibility(visible = hasBackups) {
                     Text(
-                        text = pkg.packageLabel,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .weight(1f),
-                        softWrap = true,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    beginNanoTimer("item.labels")
-                    PackageLabels(item = pkg)
-                    endNanoTimer("item.labels")
-                }
-
-                Row(modifier = Modifier.fillMaxWidth()) {
-
-                    val hasBackups = pkg.hasBackups
-                    val latestBackup = pkg.latestBackup
-                    val nBackups = pkg.numberOfBackups
-
-                    //traceCompose {
-                    //    "<${pkg.packageName}> MainPackageItem.backups ${
-                    //        TraceUtils.formatBackups(
-                    //            backups
-                    //        )
-                    //    } ${
-                    //        TraceUtils.formatBackups(
-                    //            backups
-                    //        )
-                    //    }"
-                    //}
-
-                    beginNanoTimer("item.package")
-                    Text(
-                        text = pkg.packageName,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .weight(1f),
-                        softWrap = true,
+                        text = (latestBackup?.backupDate?.getFormattedDate(
+                            false
+                        ) ?: "") + " • $nBackups",
+                        modifier = Modifier.align(Alignment.CenterVertically),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    endNanoTimer("item.package")
-
-                    beginNanoTimer("item.backups")
-                    AnimatedVisibility(visible = hasBackups) {
-                        Text(
-                            text = (latestBackup?.backupDate?.getFormattedDate(
-                                false
-                            ) ?: "") + " • $nBackups",
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    endNanoTimer("item.backups")
                 }
+                endNanoTimer("item.backups")
             }
-        }
-    }
+        },
+    )
 
     endNanoTimer("item")
     //endBusy("item")

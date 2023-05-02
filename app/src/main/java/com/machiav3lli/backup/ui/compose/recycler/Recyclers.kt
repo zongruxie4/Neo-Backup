@@ -5,12 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +23,7 @@ import com.machiav3lli.backup.preferences.pref_multilineInfoChips
 import com.machiav3lli.backup.preferences.pref_singularBackupRestore
 import com.machiav3lli.backup.ui.compose.item.BatchPackageItem
 import com.machiav3lli.backup.ui.compose.item.ExportedScheduleItem
+import com.machiav3lli.backup.ui.compose.item.InfoChip
 import com.machiav3lli.backup.ui.compose.item.LogItem
 import com.machiav3lli.backup.ui.compose.item.MainPackageItem
 import com.machiav3lli.backup.ui.compose.item.RestorePackageItem
@@ -164,7 +159,6 @@ fun LogRecycler(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoChipsBlock(
     modifier: Modifier = Modifier,
@@ -178,29 +172,7 @@ fun InfoChipsBlock(
             mainAxisAlignment = FlowMainAxisAlignment.Center
         ) {
             list.forEach { chip ->
-                SuggestionChip(
-                    icon = {
-                        if (chip.icon != null) Icon(
-                            imageVector = chip.icon,
-                            contentDescription = chip.text,
-                        )
-                    },
-                    border = SuggestionChipDefaults.suggestionChipBorder(
-                        borderColor = MaterialTheme.colorScheme.surface,
-                        borderWidth = 0.dp
-                    ),
-                    label = {
-                        Text(text = chip.text)
-                    },
-                    colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = chip.color ?: MaterialTheme.colorScheme.surface,
-                        labelColor = if (chip.color != null) MaterialTheme.colorScheme.background
-                        else MaterialTheme.colorScheme.onSurface,
-                        iconContentColor = if (chip.color != null) MaterialTheme.colorScheme.background
-                        else MaterialTheme.colorScheme.onSurface,
-                    ),
-                    onClick = {}
-                )
+                InfoChip(item = chip)
             }
         }
     else LazyRow(
@@ -209,29 +181,7 @@ fun InfoChipsBlock(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(list) { chip ->
-            SuggestionChip(
-                icon = {
-                    if (chip.icon != null) Icon(
-                        imageVector = chip.icon,
-                        contentDescription = chip.text,
-                    )
-                },
-                border = SuggestionChipDefaults.suggestionChipBorder(
-                    borderColor = MaterialTheme.colorScheme.surface,
-                    borderWidth = 0.dp
-                ),
-                label = {
-                    Text(text = chip.text)
-                },
-                colors = SuggestionChipDefaults.suggestionChipColors(
-                    containerColor = chip.color ?: MaterialTheme.colorScheme.surface,
-                    labelColor = if (chip.color != null) MaterialTheme.colorScheme.background
-                    else MaterialTheme.colorScheme.onSurface,
-                    iconContentColor = if (chip.color != null) MaterialTheme.colorScheme.background
-                    else MaterialTheme.colorScheme.onSurface,
-                ),
-                onClick = {}
-            )
+            InfoChip(item = chip)
         }
     }
 }

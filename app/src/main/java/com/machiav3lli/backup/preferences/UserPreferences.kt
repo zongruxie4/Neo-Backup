@@ -25,11 +25,12 @@ import com.machiav3lli.backup.THEME_DYNAMIC
 import com.machiav3lli.backup.THEME_SYSTEM
 import com.machiav3lli.backup.accentColorItems
 import com.machiav3lli.backup.dialogs.BaseDialog
-import com.machiav3lli.backup.dialogs.EnumDialogUI
-import com.machiav3lli.backup.dialogs.ListDialogUI
+import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
+import com.machiav3lli.backup.dialogs.ListPrefDialogUI
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.secondaryColorItems
 import com.machiav3lli.backup.themeItems
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsOutLineVertical
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Clock
@@ -101,7 +102,9 @@ fun UserPrefsPage() {
 
     AppTheme {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .blockBorder()
+                .fillMaxSize(),
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -115,19 +118,21 @@ fun UserPrefsPage() {
 
         if (openDialog.value) {
             if (dialogsPref == pref_pathBackupFolder) {
+                openDialog.value = false
                 launcher.launch(BACKUP_DIRECTORY_INTENT)
             } else BaseDialog(openDialogCustom = openDialog) {
                 when (dialogsPref) {
                     pref_languages,
-                    -> ListDialogUI(
+                    -> ListPrefDialogUI(
                         //TODO hg42 encapsulate in pref
                         pref = dialogsPref as ListPref,
                         openDialogCustom = openDialog,
                     )
+
                     pref_appTheme,
                     pref_appAccentColor,
                     pref_appSecondaryColor,
-                    -> EnumDialogUI(
+                    -> EnumPrefDialogUI(
                         //TODO hg42 encapsulate in pref
                         pref = dialogsPref as EnumPref,
                         openDialogCustom = openDialog,

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -30,6 +29,7 @@ import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.showNotification
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Bug
@@ -37,7 +37,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarX
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ListNumbers
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
 import com.machiav3lli.backup.ui.compose.item.LaunchPreference
-import com.machiav3lli.backup.ui.compose.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.compose.theme.AppTheme
 import com.machiav3lli.backup.ui.compose.theme.ColorDeData
 import com.machiav3lli.backup.ui.compose.theme.ColorExodus
@@ -58,7 +58,6 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolsPrefsPage(navController: NavHostController) {
     val context = LocalContext.current
@@ -75,6 +74,7 @@ fun ToolsPrefsPage(navController: NavHostController) {
             LazyColumn(
                 modifier = Modifier
                     .padding(paddingValues)
+                    .blockBorder()
                     .fillMaxSize(),
                 contentPadding = PaddingValues(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -95,15 +95,18 @@ fun ToolsPrefsPage(navController: NavHostController) {
                                         snackbarHostState,
                                         coroutineScope
                                     )
+
                                     pref_copySelfApk -> context.onClickCopySelf(
                                         snackbarHostState,
                                         coroutineScope
                                     )
+
                                     pref_schedulesExportImport -> navController.navigate(NavItem.Exports.destination)
                                     pref_saveAppsList -> context.onClickSaveAppsList(
                                         snackbarHostState,
                                         coroutineScope
                                     )
+
                                     pref_logViewer -> navController.navigate(NavItem.Logs.destination)
                                     pref_terminal -> navController.navigate(NavItem.Terminal.destination)
                                 }
@@ -206,7 +209,7 @@ private fun Context.onClickCopySelf(
         GlobalScope.launch(Dispatchers.IO) {
             if (BackupRestoreHelper.copySelfApk(
                     this@onClickCopySelf,
-                    OABX.shellHandlerInstance!!
+                    OABX.shellHandler!!
                 )
             ) {
                 showNotification(

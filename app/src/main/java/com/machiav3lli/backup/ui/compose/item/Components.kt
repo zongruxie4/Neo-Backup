@@ -22,14 +22,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -41,8 +38,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedButton
@@ -51,6 +46,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -59,7 +56,6 @@ import androidx.compose.material3.SelectableChipColors
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -319,8 +315,8 @@ fun cachedAsyncImagePainter(
                 imageLoader = imageLoader,
                 onState = {
                     if (it !is AsyncImagePainter.State.Loading)
-                        it.painter?.let {
-                            IconCache.putIcon(model, it)
+                        it.painter?.let { painter ->
+                            IconCache.putIcon(model, painter)
                         }
                 }
             )
@@ -441,39 +437,35 @@ fun CardButton(
 ) {
     val showTooltip = remember { mutableStateOf(false) }
 
-    Surface(
+    ListItem(
         modifier = modifier
+            .clip(MaterialTheme.shapes.large)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = { showTooltip.value = true }
             ),
-        color = tint.let {
-            if (isSystemInDarkTheme()) it.brighter(0.2f)
-            else it.darker(0.2f)
-        },
-        contentColor = MaterialTheme.colorScheme.background,
-        shape = MaterialTheme.shapes.medium,
-    ) {
-        Column(
-            modifier = modifier.padding(PaddingValues(12.dp)),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceAround
-        ) {
+        colors = ListItemDefaults.colors(
+            containerColor = if (isSystemInDarkTheme()) tint.brighter(0.2f)
+            else tint.darker(0.2f),
+            headlineColor = MaterialTheme.colorScheme.background,
+            leadingIconColor = MaterialTheme.colorScheme.background,
+        ),
+        leadingContent = {
             Icon(imageVector = icon, contentDescription = description)
-            /*Text(
-                modifier = modifier.weight(1f),
+        },
+        headlineContent = {
+            Text(
                 text = description,
-                textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
                 style = MaterialTheme.typography.titleSmall
-            )*/
-        }
+            )
 
-        if (showTooltip.value) {
-            Tooltip(description, showTooltip)
+            if (showTooltip.value) {
+                Tooltip(description, showTooltip)
+            }
         }
-    }
-
+    )
 }
 
 @Composable
@@ -550,20 +542,20 @@ fun StateChip(
     Surface(
         modifier = modifier
             .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
-            .clip(MaterialTheme.shapes.medium)
+            .clip(MaterialTheme.shapes.small)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = { openPopup.value = true }
             ),
-        contentColor = if (checked) MaterialTheme.colorScheme.onSurface else color,
+        contentColor = if (checked) MaterialTheme.colorScheme.background else color,
         color = if (checked) color else Color.Transparent,
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.small,
         border = BorderStroke(1.dp, color),
     ) {
         Icon(
             modifier = Modifier.padding(8.dp),
             imageVector = icon,
-            contentDescription = text
+            contentDescription = text,
         )
 
         if (openPopup.value) {
@@ -575,16 +567,16 @@ fun StateChip(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckChip(
+    modifier: Modifier = Modifier,
     checked: Boolean,
     textId: Int,
     checkedTextId: Int,
-    modifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val (checked, check) = remember(checked) { mutableStateOf(checked) }   //TODO hg42 should probably be removed like for MultiChips
 
     FilterChip(
-        modifier = modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+        modifier = modifier,
         selected = checked,
         colors = FilterChipDefaults.filterChipColors(
             labelColor = MaterialTheme.colorScheme.onBackground,
@@ -594,6 +586,7 @@ fun CheckChip(
             containerColor = Color.Transparent,
             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
         ),
+        shape = MaterialTheme.shapes.medium,
         leadingIcon = {
             if (checked) ButtonIcon(Phosphor.Checks, R.string.enabled)
         },
@@ -602,48 +595,13 @@ fun CheckChip(
             check(!checked)
         },
         label = {
-            Row {
-                Text(text = if (checked) stringResource(id = checkedTextId) else stringResource(id = textId))
+            Row(modifier = Modifier.padding(vertical = 10.dp)) {
+                Text(text = stringResource(id = if (checked) checkedTextId else textId))
             }
         }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ActionChip(
-    modifier: Modifier = Modifier,
-    @StringRes textId: Int,
-    icon: ImageVector,
-    positive: Boolean,
-    onClick: () -> Unit = {},
-) {
-    AssistChip(
-        modifier = modifier,
-        label = {
-            Text(text = stringResource(id = textId))
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = icon,
-                contentDescription = stringResource(id = textId)
-            )
-        },
-        shape = MaterialTheme.shapes.large,
-        colors = AssistChipDefaults.assistChipColors(
-            containerColor = if (positive) MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.tertiaryContainer,
-            labelColor = if (positive) MaterialTheme.colorScheme.onPrimaryContainer
-            else MaterialTheme.colorScheme.onTertiaryContainer,
-            leadingIconContentColor = if (positive) MaterialTheme.colorScheme.onPrimaryContainer
-            else MaterialTheme.colorScheme.onTertiaryContainer,
-        ),
-        border = null,
-        onClick = onClick
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionChip(
     modifier: Modifier = Modifier,
@@ -657,9 +615,11 @@ fun ActionChip(
         modifier = modifier,
         label = {
             Text(
-                modifier = Modifier.ifThen(fullWidth) {
-                    fillMaxWidth()
-                },
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .ifThen(fullWidth) {
+                        fillMaxWidth()
+                    },
                 text = text,
                 textAlign = TextAlign.Center,
             )
@@ -696,29 +656,27 @@ fun SwitchChip(
     firstSelected: Boolean = true,
     colors: SelectableChipColors = FilterChipDefaults.filterChipColors(
         containerColor = Color.Transparent,
-        selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-        labelColor = MaterialTheme.colorScheme.onSurface,
+        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        iconColor = MaterialTheme.colorScheme.onSurface,
+        iconColor = MaterialTheme.colorScheme.onSurfaceVariant,
         selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
     ),
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier
-            .border(1.dp, MaterialTheme.colorScheme.onPrimaryContainer, MaterialTheme.shapes.medium)
-            .padding(horizontal = 6.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium)
+            .padding(horizontal = 8.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         val (firstSelected, selectFirst) = remember { mutableStateOf(firstSelected) }   //TODO hg42 should probably be removed like for MultiChips
 
         FilterChip(
             modifier = Modifier.weight(1f),
-            border = FilterChipDefaults.filterChipBorder(
-                borderColor = Color.Transparent,
-                borderWidth = 0.dp
-            ),
+            shape = MaterialTheme.shapes.small,
+            border = null,
             selected = firstSelected,
             colors = colors,
             onClick = {
@@ -729,27 +687,17 @@ fun SwitchChip(
                 ButtonIcon(firstIcon, firstTextId)
             },
             label = {
-                Row(
-                    Modifier
-                        .padding(vertical = 8.dp, horizontal = 4.dp)
-                        .weight(1f)
-                ) {
-                    Text(
-                        text = stringResource(id = firstTextId),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f),
-                        fontWeight = if (firstSelected) FontWeight.Black
-                        else FontWeight.Normal
-                    )
-                }
+                Text(
+                    text = stringResource(id = firstTextId),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f),
+                )
             }
         )
         FilterChip(
             modifier = Modifier.weight(1f),
-            border = FilterChipDefaults.filterChipBorder(
-                borderColor = Color.Transparent,
-                borderWidth = 0.dp
-            ),
+            shape = MaterialTheme.shapes.small,
+            border = null,
             selected = !firstSelected,
             colors = colors,
             onClick = {
@@ -757,19 +705,11 @@ fun SwitchChip(
                 selectFirst(false)
             },
             label = {
-                Row(
-                    Modifier
-                        .padding(vertical = 8.dp, horizontal = 4.dp)
-                        .weight(1f)
-                ) {
-                    Text(
-                        text = stringResource(id = secondTextId),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f),
-                        fontWeight = if (!firstSelected) FontWeight.Black
-                        else FontWeight.Normal
-                    )
-                }
+                Text(
+                    text = stringResource(id = secondTextId),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f),
+                )
             },
             trailingIcon = {
                 ButtonIcon(secondIcon, secondTextId)
@@ -850,16 +790,16 @@ fun StatefulAnimatedVisibility(
     collapsedView: @Composable (AnimatedVisibilityScope.() -> Unit),
 ) {
     AnimatedVisibility(
-        visible = !currentState,
-        enter = enterNegative,
-        exit = exitNegative,
-        content = collapsedView
-    )
-    AnimatedVisibility(
         visible = currentState,
         enter = enterPositive,
         exit = exitPositive,
         content = expandedView
+    )
+    AnimatedVisibility(
+        visible = !currentState,
+        enter = enterNegative,
+        exit = exitNegative,
+        content = collapsedView
     )
 }
 
@@ -885,10 +825,10 @@ fun VerticalFadingVisibility(
     collapsedView: @Composable (AnimatedVisibilityScope.() -> Unit),
 ) = StatefulAnimatedVisibility(
     currentState = expanded,
-    enterPositive = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
-    exitPositive = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
-    enterNegative = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-    exitNegative = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+    enterPositive = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+    exitPositive = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+    enterNegative = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+    exitNegative = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
     collapsedView = collapsedView,
     expandedView = expandedView
 )
@@ -1138,35 +1078,32 @@ fun DoubleVerticalText(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardSubRow(
+    modifier: Modifier = Modifier,
     text: String,
     icon: ImageVector,
     iconColor: Color = MaterialTheme.colorScheme.onBackground,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background,
+    ListItem(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .clickable { onClick() },
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent,
         ),
-        elevation = CardDefaults.cardElevation(0.dp),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        leadingContent = {
             Icon(imageVector = icon, contentDescription = text, tint = iconColor)
+        },
+        headlineContent = {
             Text(
                 text = text,
                 maxLines = 2,
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis
             )
-        }
-    }
+        },
+    )
 }

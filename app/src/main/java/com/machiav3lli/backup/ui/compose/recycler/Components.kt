@@ -28,11 +28,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -48,9 +45,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,7 +58,7 @@ import com.machiav3lli.backup.preferences.pref_busyLaserBackground
 import com.machiav3lli.backup.preferences.pref_busyTurnTime
 import com.machiav3lli.backup.preferences.pref_versionOpacity
 import com.machiav3lli.backup.ui.compose.item.ActionChip
-import com.machiav3lli.backup.ui.compose.item.ButtonIcon
+import com.machiav3lli.backup.ui.compose.item.SelectionChip
 import com.machiav3lli.backup.ui.item.ChipItem
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import kotlinx.coroutines.Dispatchers
@@ -90,10 +85,12 @@ fun <T : Any> VerticalItemList(
                 text = stringResource(id = R.string.loading_list),
                 color = MaterialTheme.colorScheme.onBackground
             )
+
             list.isEmpty() -> Text(
                 text = stringResource(id = R.string.empty_filtered_list),
                 color = MaterialTheme.colorScheme.onBackground
             )
+
             else           -> {
                 // TODO add scrollbars
                 val state = rememberLazyListState()
@@ -147,10 +144,12 @@ fun <T> SizedItemList(
                 text = stringResource(id = R.string.loading_list),
                 color = MaterialTheme.colorScheme.onBackground
             )
+
             list.isEmpty() -> Text(
                 text = stringResource(id = R.string.empty_filtered_list),
                 color = MaterialTheme.colorScheme.onBackground
             )
+
             else           -> {
                 // TODO add scrollbars
                 LazyColumn(
@@ -180,10 +179,12 @@ fun <T> HorizontalItemList(
                 text = stringResource(id = R.string.loading_list),
                 color = MaterialTheme.colorScheme.onBackground
             )
+
             list.isEmpty() -> Text(
                 text = stringResource(id = R.string.empty_filtered_list),
                 color = MaterialTheme.colorScheme.onBackground
             )
+
             else           -> {
                 LazyRow(
                     horizontalArrangement = Arrangement.Absolute.spacedBy(4.dp),
@@ -211,40 +212,13 @@ fun SelectableChipGroup(
             .fillMaxWidth(),
         mainAxisSpacing = 8.dp
     ) {
-        list.forEach {
-            val colors = FilterChipDefaults.filterChipColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-                labelColor = MaterialTheme.colorScheme.onSurface,
-                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                iconColor = MaterialTheme.colorScheme.onSurface,
-                selectedLeadingIconColor = colorResource(id = it.colorId)
-            )
-
-            FilterChip(
-                colors = colors,
-                border = FilterChipDefaults.filterChipBorder(
-                    borderColor = Color.Transparent,
-                    selectedBorderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    borderWidth = 0.dp,
-                    selectedBorderWidth = 1.dp
-                ),
-                selected = it.flag == selectedFlag,
-                leadingIcon = {
-                    ButtonIcon(it.icon, it.textId)
-                },
-                onClick = {
-                    onClick(it.flag)
-                },
-                label = {
-                    Text(
-                        text = stringResource(id = it.textId),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = if (it.flag == selectedFlag) FontWeight.Black
-                        else FontWeight.Normal
-                    )
-                }
-            )
+        list.forEach { item ->
+            SelectionChip(
+                item = item,
+                isSelected = item.flag == selectedFlag,
+            ) {
+                onClick(item.flag)
+            }
         }
     }
 }
@@ -263,40 +237,13 @@ fun MultiSelectableChipGroup(
             .fillMaxWidth(),
         mainAxisSpacing = 8.dp
     ) {
-        list.forEach {
-            val colors = FilterChipDefaults.filterChipColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-                labelColor = MaterialTheme.colorScheme.onSurface,
-                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                iconColor = MaterialTheme.colorScheme.onSurface,
-                selectedLeadingIconColor = colorResource(id = it.colorId)
-            )
-
-            FilterChip(
-                colors = colors,
-                border = FilterChipDefaults.filterChipBorder(
-                    borderColor = Color.Transparent,
-                    selectedBorderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    borderWidth = 0.dp,
-                    selectedBorderWidth = 1.dp
-                ),
-                selected = it.flag and selectedFlags != 0,
-                leadingIcon = {
-                    ButtonIcon(it.icon, it.textId)
-                },
-                onClick = {
-                    onClick(selectedFlags xor it.flag, it.flag)
-                },
-                label = {
-                    Text(
-                        text = stringResource(id = it.textId),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = if (it.flag and selectedFlags != 0) FontWeight.Black
-                        else FontWeight.Normal
-                    )
-                }
-            )
+        list.forEach { item ->
+            SelectionChip(
+                item = item,
+                isSelected = item.flag and selectedFlags != 0,
+            ) {
+                onClick(selectedFlags xor item.flag, item.flag)
+            }
         }
     }
 }
@@ -467,7 +414,7 @@ fun BusyBackground(
             Text(
                 text = "${BuildConfig.VERSION_NAME} $applicationIssuer",
                 fontSize = 8.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = pref_versionOpacity.value/100f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = pref_versionOpacity.value / 100f),
                 modifier = Modifier
                     .fillMaxSize()
                     .wrapContentSize(Alignment.TopStart)

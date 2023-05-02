@@ -1,12 +1,17 @@
 package com.machiav3lli.backup.ui.compose
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.traceFlows
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -35,6 +40,16 @@ fun Modifier.ifThen(boolean: Boolean, modifier: Modifier.() -> Modifier): Modifi
     }
 }
 
+fun Modifier.blockBorder() = composed {
+    this
+        .clip(MaterialTheme.shapes.extraLarge)
+        .border(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant,
+            MaterialTheme.shapes.extraLarge,
+        )
+}
+
 @Composable
 fun SelectionContainerX(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     SelectionContainer(modifier = modifier, content = content)
@@ -45,7 +60,7 @@ fun SelectionContainerX(modifier: Modifier = Modifier, content: @Composable () -
 class MutableComposableSharedFlow<T>(
     var initial: T,
     val scope: CoroutineScope,
-    val label: String = "ComposableSharedFlow"
+    val label: String = "ComposableSharedFlow",
 ) {
     var flow = MutableSharedFlow<T>()
 
@@ -82,7 +97,7 @@ class MutableComposableSharedFlow<T>(
 class MutableComposableStateFlow<T>(
     var initial: T,
     val scope: CoroutineScope,
-    val label: String = "ComposableStateFlow"
+    val label: String = "ComposableStateFlow",
 ) {
     var flow = MutableStateFlow<T>(initial)
 
@@ -127,7 +142,7 @@ fun LazyListState.isAtBottom() = remember {
     derivedStateOf {
         try {
             layoutInfo.visibleItemsInfo.last().index >= layoutInfo.totalItemsCount - 1
-        } catch(_: Throwable) {
+        } catch (_: Throwable) {
             true
         }
     }

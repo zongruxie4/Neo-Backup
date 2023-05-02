@@ -557,7 +557,7 @@ class OABX : Application() {
 
         var appsSuspendedChecked = false
 
-        var shellHandlerInstance: ShellHandler? = null
+        var shellHandler: ShellHandler? = null
             private set
 
         var dbRef: WeakReference<ODatabase> = WeakReference(null)
@@ -571,8 +571,8 @@ class OABX : Application() {
 
         fun initShellHandler(): ShellHandler? {
             return try {
-                shellHandlerInstance = ShellHandler()
-                shellHandlerInstance
+                shellHandler = ShellHandler()
+                shellHandler
             } catch (e: ShellHandler.ShellCommandFailedException) {
                 null
             }
@@ -592,7 +592,7 @@ class OABX : Application() {
             return Build.VERSION.SDK_INT >= sdk
         }
 
-        val isRelease = BuildConfig.APPLICATION_ID.endsWith(".backup")
+        val isRelease =BuildConfig.APPLICATION_ID.endsWith(".backup")
         val isDebug = BuildConfig.DEBUG
         val isNeo = BuildConfig.APPLICATION_ID.contains("neo")
         val isHg42 = BuildConfig.APPLICATION_ID.contains("hg42")
