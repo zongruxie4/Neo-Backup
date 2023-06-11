@@ -20,14 +20,13 @@ package com.machiav3lli.backup.sheets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -47,10 +46,13 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.enabledFilterChipItems
+import com.machiav3lli.backup.installedFilterChipItems
 import com.machiav3lli.backup.items.SortFilterModel
+import com.machiav3lli.backup.latestFilterChipItems
+import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainBackupModeChipItems
 import com.machiav3lli.backup.mainFilterChipItems
-import com.machiav3lli.backup.mainSpecialFilterChipItems
 import com.machiav3lli.backup.sortChipItems
 import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -59,15 +61,16 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Check
 import com.machiav3lli.backup.ui.compose.icons.phosphor.SortAscending
 import com.machiav3lli.backup.ui.compose.icons.phosphor.SortDescending
+import com.machiav3lli.backup.ui.compose.item.CategoryTitleText
 import com.machiav3lli.backup.ui.compose.item.DoubleVerticalText
 import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.SwitchChip
-import com.machiav3lli.backup.ui.compose.item.TitleText
 import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
 import com.machiav3lli.backup.ui.compose.theme.AppTheme
 import com.machiav3lli.backup.ui.item.ChipItem
+import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getStats
 import com.machiav3lli.backup.utils.sortFilterModel
@@ -92,6 +95,41 @@ fun SortFilterSheet(onDismiss: () -> Unit) {
         Scaffold(
             containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onBackground,
+            topBar = {
+                ListItem(
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    ),
+                    headlineContent = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            DoubleVerticalText(
+                                upperText = currentStats().first.toString(),
+                                bottomText = stringResource(id = R.string.stats_apps),
+                                modifier = Modifier.weight(1f)
+                            )
+                            DoubleVerticalText(
+                                upperText = currentStats().second.toString(),
+                                bottomText = stringResource(id = R.string.stats_backups),
+                                modifier = Modifier.weight(1f)
+                            )
+                            DoubleVerticalText(
+                                upperText = currentStats().third.toString(),
+                                bottomText = stringResource(id = R.string.stats_updated),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    },
+                    trailingContent = {
+                        RoundButton(icon = Phosphor.CaretDown) {
+                            onDismiss()
+                        }
+                    }
+                )
+            },
             bottomBar = {
                 Row(
                     modifier = Modifier.padding(8.dp),
@@ -131,43 +169,13 @@ fun SortFilterSheet(onDismiss: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(8.dp)
             ) {
+                item { CategoryTitleText(R.string.sorting_order) }
                 item {
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        DoubleVerticalText(
-                            upperText = currentStats().first.toString(),
-                            bottomText = stringResource(id = R.string.stats_apps),
-                            modifier = Modifier.weight(1f)
-                        )
-                        DoubleVerticalText(
-                            upperText = currentStats().second.toString(),
-                            bottomText = stringResource(id = R.string.stats_backups),
-                            modifier = Modifier.weight(1f)
-                        )
-                        DoubleVerticalText(
-                            upperText = currentStats().third.toString(),
-                            bottomText = stringResource(id = R.string.stats_updated),
-                            modifier = Modifier.weight(1f)
-                        )
-                        RoundButton(icon = Phosphor.CaretDown) {
-                            onDismiss()
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Divider(thickness = 2.dp)
-                }
-                item {
-                    TitleText(R.string.sort_options)
                     SelectableChipGroup(
                         list = sortChipItems,
                         selectedFlag = model.sort
                     ) { flag ->
-                        model = model.copy().apply { sort = flag }
+                        model = model.copy(sort = flag)
                     }
                     SwitchChip(
                         firstTextId = R.string.sortAsc,
@@ -176,12 +184,12 @@ fun SortFilterSheet(onDismiss: () -> Unit) {
                         secondIcon = Phosphor.SortDescending,
                         firstSelected = model.sortAsc,
                         onCheckedChange = { checked ->
-                            model = model.copy().apply { sortAsc = checked }
+                            model = model.copy(sortAsc = checked)
                         }
                     )
                 }
+                item { CategoryTitleText(R.string.filters_app) }
                 item {
-                    TitleText(R.string.filter_options)
                     MultiSelectableChipGroup(
                         list = if (specialBackupsEnabled) mainFilterChipItems
                         else mainFilterChipItems.minus(ChipItem.Special),
@@ -190,8 +198,8 @@ fun SortFilterSheet(onDismiss: () -> Unit) {
                         model = model.copy(mainFilter = flags)
                     }
                 }
+                item { CategoryTitleText(R.string.filters_backup) }
                 item {
-                    TitleText(R.string.backup_filters)
                     MultiSelectableChipGroup(
                         list = mainBackupModeChipItems,
                         selectedFlags = model.backupFilter
@@ -199,13 +207,49 @@ fun SortFilterSheet(onDismiss: () -> Unit) {
                         model = model.copy(backupFilter = flags)
                     }
                 }
+                item { CategoryTitleText(R.string.filters_installed) }
                 item {
-                    TitleText(R.string.other_filters_options)
                     SelectableChipGroup(
-                        list = mainSpecialFilterChipItems,
-                        selectedFlag = model.specialFilter
+                        list = installedFilterChipItems,
+                        selectedFlag = model.installedFilter
                     ) { flag ->
-                        model = model.copy(specialFilter = flag)
+                        model = model.copy(installedFilter = flag)
+                    }
+                }
+                item { CategoryTitleText(R.string.filters_launchable) }
+                item {
+                    SelectableChipGroup(
+                        list = launchableFilterChipItems,
+                        selectedFlag = model.launchableFilter
+                    ) { flag ->
+                        model = model.copy(launchableFilter = flag)
+                    }
+                }
+                item { CategoryTitleText(R.string.filters_updated) }
+                item {
+                    SelectableChipGroup(
+                        list = updatedFilterChipItems,
+                        selectedFlag = model.updatedFilter
+                    ) { flag ->
+                        model = model.copy(updatedFilter = flag)
+                    }
+                }
+                item { CategoryTitleText(R.string.filters_latest) }
+                item {
+                    SelectableChipGroup(
+                        list = latestFilterChipItems,
+                        selectedFlag = model.latestFilter
+                    ) { flag ->
+                        model = model.copy(latestFilter = flag)
+                    }
+                }
+                item { CategoryTitleText(R.string.filters_enabled) }
+                item {
+                    SelectableChipGroup(
+                        list = enabledFilterChipItems,
+                        selectedFlag = model.enabledFilter
+                    ) { flag ->
+                        model = model.copy(enabledFilter = flag)
                     }
                 }
             }

@@ -129,7 +129,7 @@ fun AdvancedPrefsPage() {
 val debug = if (isDebug)
     "dev"
 else
-    "dbg"
+    "debug"
 
 val hg42 = if (isHg42)
     "dev"
@@ -313,13 +313,13 @@ val pref_restartAppOnLanguageChange = BooleanPref(
 val pref_useYamlPreferences = BooleanPref(
     key = "$debug-alt.useYamlPreferences",
     summary = "create human readable yaml format for preferences",
-    defaultValue = true
+    defaultValue = false
 )
 
 val pref_useYamlSchedules = BooleanPref(
     key = "$debug-alt.useYamlSchedules",
     summary = "create human readable yaml format for schedules",
-    defaultValue = true
+    defaultValue = false
 )
 
 val pref_useYamlProperties = BooleanPref(
@@ -339,12 +339,6 @@ val pref_busyTurnTime = IntPref(
     summary = "time the animated busy bars need for one rotation (ms)",
     entries = (500..50000 step 500).toList(),
     defaultValue = 50000
-)
-
-val pref_busyLaserBackground = BooleanPref(
-    key = "dev-alt.busyLaserBackground",
-    summary = "Use animated laser as busy background",
-    defaultValue = true
 )
 
 val pref_versionOpacity = IntPref(
@@ -506,6 +500,11 @@ val persist_ignoreBatteryOptimization = BooleanPref(
 
 val persist_sortFilter = StringPref(
     key = "persist.sortFilter",
+    defaultValue = ""
+)
+
+val persist_specialFilters = StringPref(
+    key = "persist.specialFilters",
     defaultValue = ""
 )
 

@@ -21,16 +21,16 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
-    kotlin("plugin.serialization").version("1.8.20")
+    kotlin("plugin.serialization").version("1.8.21")
 }
 
-val vKotlin = "1.8.20"
-val vComposeCompiler = "1.4.5"
-val vCompose = "1.5.0-alpha03"
-val vKotlinSerialization = "1.5.0"
+val vKotlin = "1.8.21"
+val vComposeCompiler = "1.4.7"
+val vCompose = "1.5.0-beta01"
+val vKotlinSerialization = "1.5.1"
 val vRoom = "2.5.1"
-val vNavigation = "2.6.0-beta01"
-val vAccompanist = "0.31.0-alpha"
+val vNavigation = "2.7.0-alpha01"
+val vAccompanist = "0.31.3-beta"
 val vLibsu = "5.0.5"
 //val vIconics = "5.3.4"
 
@@ -45,8 +45,8 @@ android {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
         targetSdk = 33
-        versionCode = 8306
-        versionName = "8.3.2-alpha04"
+        versionCode = 8308
+        versionName = "8.3.2-rc01"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
 
@@ -130,7 +130,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$vKotlinSerialization")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$vKotlinSerialization")
-    implementation("com.charleskorn.kaml:kaml:0.53.0")
+    implementation("com.charleskorn.kaml:kaml:0.54.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
@@ -143,7 +143,7 @@ dependencies {
     implementation("de.voize:semver4k:4.1.0")
 
     // UI
-    implementation("com.google.android.material:material:1.8.0")
+    implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.preference:preference-ktx:1.2.0")
 
     // Compose
@@ -153,11 +153,9 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:$vCompose")
     implementation("androidx.compose.runtime:runtime-livedata:$vCompose")
     implementation("androidx.navigation:navigation-compose:$vNavigation")
-    implementation("io.coil-kt:coil-compose:2.3.0")
-    implementation("androidx.compose.material3:material3:1.1.0-rc01")
-    implementation("com.google.accompanist:accompanist-flowlayout:$vAccompanist")
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha02")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$vAccompanist")
-    implementation("com.google.accompanist:accompanist-navigation-animation:$vAccompanist")
     implementation("com.google.accompanist:accompanist-permissions:$vAccompanist")
 
     // Testing

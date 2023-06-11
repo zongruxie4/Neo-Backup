@@ -376,4 +376,7 @@
     <string name="post_notifications_permission_message">Od Androidu 13 vyžadují aplikace toto oprávnění, aby mohly odesílat oznámení.</string>
     <string name="prefs_password_summary">Také používáno pro dešifrování při obnovení</string>
     <string name="backup_revisions_limit">Limit záloh: %d</string>
+    <string name="clear_text">Vymazat text</string>
+    <string name="prefs_laserbackground">Zobrazit animovaný laser na pozadí</string>
+    <string name="prefs_laserbackground_summary">Použít animovaná barevná světla jako pozadí při načítání/zaneprázdnění.</string>
 </resources>

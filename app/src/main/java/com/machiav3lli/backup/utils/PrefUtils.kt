@@ -51,6 +51,7 @@ import com.machiav3lli.backup.items.SortFilterModel
 import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
 import com.machiav3lli.backup.preferences.persist_salt
 import com.machiav3lli.backup.preferences.persist_sortFilter
+import com.machiav3lli.backup.preferences.persist_specialFilters
 import com.machiav3lli.backup.preferences.pref_allowDowngrade
 import com.machiav3lli.backup.preferences.pref_appAccentColor
 import com.machiav3lli.backup.preferences.pref_appSecondaryColor
@@ -191,6 +192,7 @@ val Context.hasStoragePermissions: Boolean
     get() = when {
         OABX.minSDK(Build.VERSION_CODES.R) ->
             Environment.isExternalStorageManager()
+
         else                               ->
             checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
                     PackageManager.PERMISSION_GRANTED
@@ -203,6 +205,7 @@ fun Activity.getStoragePermission() {
             intent.data = Uri.parse("package:$packageName")
             startActivity(intent)
         }
+
         else                               -> {
             requireWriteStoragePermission()
             requireReadStoragePermission()
@@ -412,6 +415,7 @@ val Context.checkUsageStatsPermission: Boolean
                     Process.myUid(),
                     packageName
                 )
+
             else                               ->
                 appOps.checkOpNoThrow(  //TODO 'checkOpNoThrow(String, Int, String): Int' is deprecated. Deprecated in Java. @machiav3lli not replaceable without increasing minSDK as the two functions have different minSDK
                     AppOpsManager.OPSTR_GET_USAGE_STATS,
@@ -467,15 +471,17 @@ val isAllowDowngrade: Boolean
 
 var sortFilterModel: SortFilterModel
     get() {
-        val sortFilterModel: SortFilterModel
         val sortFilterPref = persist_sortFilter.value
-        sortFilterModel =
-            if (!sortFilterPref.isNullOrEmpty()) SortFilterModel(sortFilterPref)
-            else SortFilterModel()
-        return sortFilterModel
+        val specialFiltersPref = persist_specialFilters.value
+        return SortFilterModel(
+            sortFilterPref.takeIf { it.isNotEmpty() },
+            specialFiltersPref.takeIf { it.isNotEmpty() },
+        )
     }
     set(value) {
-        persist_sortFilter.value = value.toString()
+        val modelString = value.toString().split(",")
+        persist_sortFilter.value = modelString.first()
+        persist_specialFilters.value = modelString.last()
         OABX.main?.viewModel?.modelSortFilter?.value = value   //setSortFilter(value)
     }
 
@@ -517,10 +523,12 @@ fun Context.getLocaleOfCode(localeCode: String): Locale = when {
         localeCode.substring(0, 2),
         localeCode.substring(4)
     )
+
     localeCode.contains("_")  -> Locale(
         localeCode.substring(0, 2),
         localeCode.substring(3)
     )
+
     else                      -> Locale(localeCode)
 }
 

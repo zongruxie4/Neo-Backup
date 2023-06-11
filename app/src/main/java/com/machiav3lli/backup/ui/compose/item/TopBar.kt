@@ -39,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -293,16 +292,14 @@ fun TopBar(
 fun ExpandableSearchAction(
     query: String,
     modifier: Modifier = Modifier,
-    expanded: Boolean = false,
+    expanded: MutableState<Boolean> = mutableStateOf(false),
     onClose: () -> Unit,
     onQueryChanged: (String) -> Unit,
 ) {
-    val (expanded, onExpanded) = rememberSaveable {
-        mutableStateOf(expanded)
-    }
+    val (isExpanded, onExpanded) = remember { expanded }
 
     HorizontalExpandingVisibility(
-        expanded = expanded,
+        expanded = isExpanded,
         expandedView = {
             ExpandedSearchView(
                 query = query,
@@ -338,49 +335,43 @@ fun ExpandedSearchView(
         mutableStateOf(TextFieldValue(query, TextRange(query.length)))
     }
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TextField(
-            value = textFieldValue,
-            onValueChange = {
-                textFieldValue = it
-                onQueryChanged(it.text)
-            },
-            modifier = Modifier
-                .weight(1f)
-                .focusRequester(textFieldFocusRequester),
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-            ),
-            leadingIcon = {
+    TextField(
+        value = textFieldValue,
+        onValueChange = {
+            textFieldValue = it
+            onQueryChanged(it.text)
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .focusRequester(textFieldFocusRequester),
+        singleLine = true,
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        leadingIcon = {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                imageVector = Phosphor.MagnifyingGlass,
+                contentDescription = stringResource(id = R.string.search),
+            )
+        },
+        trailingIcon = {
+            IconButton(onClick = {
+                onExpanded(false)
+                textFieldValue = TextFieldValue("")
+                onQueryChanged("")
+                onClose()
+            }) {
                 Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = Phosphor.MagnifyingGlass,
-                    contentDescription = stringResource(id = R.string.search),
+                    imageVector = Phosphor.X,
+                    contentDescription = stringResource(id = R.string.dialogCancel)
                 )
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    onExpanded(false)
-                    textFieldValue = TextFieldValue("")
-                    onQueryChanged("")
-                    onClose()
-                }) {
-                    Icon(
-                        imageVector = Phosphor.X,
-                        contentDescription = stringResource(id = R.string.dialogCancel)
-                    )
-                }
-            },
-            label = { Text(text = stringResource(id = R.string.searchHint)) },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-        )
-    }
+            }
+        },
+        label = { Text(text = stringResource(id = R.string.searchHint)) },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+    )
 }

@@ -27,7 +27,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -57,10 +56,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
@@ -150,7 +149,7 @@ class MainActivityX : BaseActivity() {
     }
 
     @OptIn(
-        ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
+        ExperimentalFoundationApi::class,
         ExperimentalMaterial3Api::class,
     )
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -219,14 +218,14 @@ class MainActivityX : BaseActivity() {
 
             AppTheme {
                 val scope = rememberCoroutineScope()
-                val pagerState = rememberPagerState()
-                navController = rememberAnimatedNavController()
+                navController = rememberNavController()
                 val pages = listOf(
                     NavItem.Home,
                     NavItem.Backup,
                     NavItem.Restore,
                     NavItem.Scheduler,
                 )
+                val pagerState = rememberPagerState(pageCount = { pages.size })
                 val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }   //TODO hg42 remove remember ???
                 var barVisible by remember { mutableStateOf(true) }
                 val openBlocklist = remember { mutableStateOf(false) }
@@ -266,7 +265,9 @@ class MainActivityX : BaseActivity() {
 
                 var query by rememberSaveable { mutableStateOf(viewModel.searchQuery.value) }
                 //val query by viewModel.searchQuery.flow.collectAsState(viewModel.searchQuery.initial)  // doesn't work with rotate (not saveable)...
-                val searchExpanded = query.isNotEmpty()
+                val searchExpanded = remember {
+                    mutableStateOf(false)
+                }
 
                 Timber.d("compose: query = '$query'")
 
@@ -304,7 +305,7 @@ class MainActivityX : BaseActivity() {
                                     ) { navController.navigate(NavItem.Settings.destination) }
                                 }
 
-                                barVisible                                               -> Column() {
+                                barVisible                                               -> Column {
                                     TopBar(title = stringResource(id = currentPage.title)) {
                                         ExpandableSearchAction(
                                             expanded = searchExpanded,
@@ -319,12 +320,15 @@ class MainActivityX : BaseActivity() {
                                                 viewModel.searchQuery.value = ""
                                             }
                                         )
-
-                                        RefreshButton() { refreshPackagesAndBackups() }
-                                        RoundButton(
-                                            description = stringResource(id = R.string.prefs_title),
-                                            icon = Phosphor.GearSix
-                                        ) { navController.navigate(NavItem.Settings.destination) }
+                                        AnimatedVisibility(barVisible && !searchExpanded.value) {
+                                            RefreshButton { refreshPackagesAndBackups() }
+                                        }
+                                        AnimatedVisibility(barVisible && !searchExpanded.value) {
+                                            RoundButton(
+                                                description = stringResource(id = R.string.prefs_title),
+                                                icon = Phosphor.GearSix
+                                            ) { navController.navigate(NavItem.Settings.destination) }
+                                        }
                                     }
                                     Row(
                                         modifier = Modifier.padding(horizontal = 8.dp),
@@ -388,7 +392,6 @@ class MainActivityX : BaseActivity() {
                             ModalBottomSheet(
                                 sheetState = sortSheetState,
                                 containerColor = MaterialTheme.colorScheme.background,
-                                dragHandle = null,
                                 scrimColor = Color.Transparent,
                                 onDismissRequest = {
                                     scope.launch { sortSheetState.hide() }
@@ -406,7 +409,6 @@ class MainActivityX : BaseActivity() {
                             ModalBottomSheet(
                                 sheetState = batchSheetState,
                                 containerColor = MaterialTheme.colorScheme.background,
-                                dragHandle = null,
                                 scrimColor = Color.Transparent,
                                 onDismissRequest = {
                                     scope.launch { batchSheetState.hide() }
@@ -420,7 +422,6 @@ class MainActivityX : BaseActivity() {
                             ModalBottomSheet(
                                 sheetState = appSheetState,
                                 containerColor = MaterialTheme.colorScheme.background,
-                                dragHandle = null,
                                 scrimColor = Color.Transparent,
                                 onDismissRequest = {
                                     scope.launch { appSheetState.hide() }
@@ -469,10 +470,6 @@ class MainActivityX : BaseActivity() {
             && this::navController.isInitialized
             && !navController.currentDestination?.route?.equals(NavItem.Permissions.destination)!!
         ) navController.navigate(NavItem.Permissions.destination)
-    }
-
-    override fun onPause() {
-        super.onPause()
     }
 
     override fun onDestroy() {
@@ -624,6 +621,7 @@ class MainActivityX : BaseActivity() {
                                 resultsSuccess = resultsSuccess and succeeded
                                 oneTimeWorkLiveData.removeObserver(this)
                             }
+
                             else                     -> {}
                         }
                     }
@@ -705,6 +703,7 @@ class MainActivityX : BaseActivity() {
                                 resultsSuccess = resultsSuccess and succeeded
                                 oneTimeWorkLiveData.removeObserver(this)
                             }
+
                             else                     -> {}
                         }
                     }
