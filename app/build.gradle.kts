@@ -20,21 +20,25 @@ import com.android.build.gradle.internal.tasks.factory.dependsOn
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("kapt")
-    kotlin("plugin.serialization").version("1.8.21")
+    kotlin("plugin.serialization").version("1.9.0")
+    id("com.google.devtools.ksp") version ("1.9.0-1.0.13")
 }
 
-val vKotlin = "1.8.21"
-val vComposeCompiler = "1.4.7"
-val vCompose = "1.5.0-beta02"
-val vKotlinSerialization = "1.5.1"
-val vRoom = "2.5.2"
-val vNavigation = "2.7.0-beta01"
-val vAccompanist = "0.31.4-beta"
+val vKotlin = "1.9.0"
+val vComposeCompiler = "1.5.2"
+val vCompose = "1.6.0-alpha04"
+//val vMaterial3 = "1.2.0-alpha06" // still crashes...
+val vMaterial3 = "1.1.1" // does NOT crash in context menu "Put"
+val vConstraintLayout = "2.1.4"
+val vKotlinSerialization = "1.6.0"
+val vRoom = "2.6.0-beta01"
+val vNavigation = "2.7.0"
+val vAccompanist = "0.33.0-alpha"
+val vCoil = "2.4.0"
 val vLibsu = "5.0.5"
 //val vIconics = "5.3.4"
 
-val vTest = "1.5.2"
+val vTest = "1.5.0"
 val vTestRules = "1.5.0"
 val vTestExt = "1.1.5"
 
@@ -56,12 +60,10 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments(
-                    mapOf(
-                        "room.schemaLocation" to "$projectDir/schemas",
-                        "room.incremental" to "true"
-                    )
-                )
+                ksp {
+                    arg("room.schemaLocation", "$projectDir/schemas")
+                    arg("room.incremental", "true")
+                }
             }
         }
 
@@ -103,8 +105,8 @@ android {
         compose = true
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     composeOptions {
         kotlinCompilerExtensionVersion = vComposeCompiler
@@ -131,21 +133,22 @@ android {
 dependencies {
     implementation(kotlin("stdlib", vKotlin))
     implementation(kotlin("reflect", vKotlin))
+    implementation("com.google.devtools.ksp:symbol-processing-api:$vKotlin-1.0.13")
 
     // Libs
     implementation("androidx.room:room-runtime:$vRoom")
     implementation("androidx.room:room-ktx:$vRoom")
-    kapt("androidx.room:room-compiler:$vRoom")
+    ksp("androidx.room:room-compiler:$vRoom")
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$vKotlinSerialization")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$vKotlinSerialization")
-    implementation("com.charleskorn.kaml:kaml:0.54.0")
+    implementation("com.charleskorn.kaml:kaml:0.55.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
     implementation("org.apache.commons:commons-compress:1.23.0")
-    implementation("commons-io:commons-io:2.11.0")      // attention, there is an old 20030203.000550 version, that looks higher
+    implementation("commons-io:commons-io:2.12.0")      // attention, there is an old 20030203.000550 version, that looks higher
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("com.github.topjohnwu.libsu:core:$vLibsu")
     implementation("com.github.topjohnwu.libsu:io:$vLibsu")
@@ -153,7 +156,7 @@ dependencies {
 
     // UI
     implementation("com.google.android.material:material:1.9.0")
-    implementation("androidx.preference:preference-ktx:1.2.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 
     // Compose
     implementation("androidx.compose.runtime:runtime:$vCompose")
@@ -162,8 +165,8 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:$vCompose")
     implementation("androidx.compose.runtime:runtime-livedata:$vCompose")
     implementation("androidx.navigation:navigation-compose:$vNavigation")
-    implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha03")
+    implementation("io.coil-kt:coil-compose:$vCoil")
+    implementation("androidx.compose.material3:material3:$vMaterial3")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$vAccompanist")
     implementation("com.google.accompanist:accompanist-permissions:$vAccompanist")
 
@@ -180,6 +183,11 @@ dependencies {
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation("androidx.compose.ui:ui-test-manifest:$vCompose")
 }
+
+//TODO: how to do this with ksp?
+//kapt {
+//    correctErrorTypes = true
+//}
 
 // using a task as a preBuild dependency instead of a function that takes some time insures that it runs
 task("detectAndroidLocals") {
@@ -200,7 +208,6 @@ task("detectAndroidLocals") {
 }
 tasks.preBuild.dependsOn("detectAndroidLocals")
 
-// tells all test tasks to use Gradle's built-in JUnit 5 support
 tasks.withType<Test> {
     useJUnit()          // we still use junit4
     //useTestNG()

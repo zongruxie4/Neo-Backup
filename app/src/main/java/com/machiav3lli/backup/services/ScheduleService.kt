@@ -174,6 +174,8 @@ open class ScheduleService : Service() {
                             var queued = 0
 
                             if (selectedItems.isEmpty()) {
+                                beginSchedule(scheduleId, name, "no work")
+                                endSchedule(scheduleId, name, "no work", intent)
                                 showNotification(
                                     context,
                                     MainActivityX::class.java,
@@ -284,7 +286,7 @@ open class ScheduleService : Service() {
                     textLog(
                         listOf(
                             message,
-                            "--- autoLogAfterSchedule $scheduleId $name"
+                            "--- autoLogSuspicious $scheduleId $name"
                         ) + supportInfo()
                     )
             }
