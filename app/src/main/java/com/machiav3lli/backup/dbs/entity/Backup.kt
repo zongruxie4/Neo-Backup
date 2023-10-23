@@ -41,7 +41,8 @@ import java.time.LocalDateTime
 data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
     var backupVersionCode: Int = 0,
     var packageName: String,
-    var packageLabel: String?,
+    var packageLabel: String,
+    @ColumnInfo(defaultValue = "-")
     var versionName: String? = "-",
     var versionCode: Int = 0,
     var profileId: Int = 0,
@@ -230,6 +231,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
                 || file?.path != other.file?.path
                 || dir?.path != other.dir?.path
                        -> false
+
         else           -> true
     }
 

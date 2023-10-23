@@ -17,7 +17,7 @@
  */
 package com.machiav3lli.backup.pages
 
-import androidx.compose.foundation.background
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,20 +25,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -51,9 +55,12 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BatchActionDialogUI
+import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_languages
 import com.machiav3lli.backup.preferences.pref_menuButtonAlwaysVisible
+import com.machiav3lli.backup.sheets.AppSheet
+import com.machiav3lli.backup.sheets.Sheet
 import com.machiav3lli.backup.traceCompose
 import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -71,11 +78,16 @@ import com.machiav3lli.backup.ui.compose.recycler.UpdatedPackageRecycler
 import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import com.machiav3lli.backup.utils.altModeToMode
+import com.machiav3lli.backup.viewmodels.AppSheetViewModel
+import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomePage() {
     // TODO include tags in search
     val mActivity = OABX.main!!
+    val scope = rememberCoroutineScope()
     val viewModel = mActivity.viewModel
 
     val filteredList by viewModel.filteredList.collectAsState(emptyList())
@@ -88,6 +100,21 @@ fun HomePage() {
     val menuExpanded = viewModel.menuExpanded
     val menuButtonAlwaysVisible = pref_menuButtonAlwaysVisible.value
     val openBatchDialog = remember { mutableStateOf(false) }
+    val appSheetState = rememberModalBottomSheetState(true)
+    val appSheetPN: MutableState<String?> = rememberSaveable { mutableStateOf(null) }
+    val appSheetPackage: MutableState<Package?> = remember(appSheetPN.value) {
+        mutableStateOf(
+            (filteredList + updatedPackages)
+                .find { it.packageName == appSheetPN.value }
+        )
+    }
+    val appSheetVM = remember(appSheetPackage.value) {
+        if (appSheetPackage.value != null) AppSheetViewModel(
+            appSheetPackage.value,
+            OABX.db,
+            ShellCommands(),
+        ) else null
+    }
 
     traceCompose {
         "HomePage filtered=${
@@ -122,17 +149,7 @@ fun HomePage() {
                         ExpandingFadingVisibility(
                             expanded = updaterExpanded,
                             expandedView = {
-                                Column(
-                                    modifier = Modifier
-                                        .shadow(
-                                            elevation = 6.dp,
-                                            MaterialTheme.shapes.large
-                                        )
-                                        .background(
-                                            MaterialTheme.colorScheme.surface,
-                                            MaterialTheme.shapes.large
-                                        )
-                                ) {
+                                Column {
                                     Row(
                                         modifier = Modifier.padding(horizontal = 8.dp),
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -154,7 +171,7 @@ fun HomePage() {
                                     UpdatedPackageRecycler(
                                         productsList = updatedPackages,
                                         onClick = { item ->
-                                            mActivity.showAppSheet(item)
+                                            appSheetPN.value = item.packageName
                                         }
                                     )
                                 }
@@ -173,6 +190,8 @@ fun HomePage() {
                                             contentDescription = text
                                         )
                                     },
+                                    containerColor = Color.Transparent,
+                                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
                                     onClick = { updaterExpanded = !updaterExpanded }
                                 )
                             }
@@ -197,12 +216,10 @@ fun HomePage() {
                 }
             }
         }
-    ) { paddingValues ->
-
+    ) {
         HomePackageRecycler(
             modifier = Modifier
                 .blockBorder()
-                .padding(paddingValues)
                 .fillMaxSize(),
             productsList = filteredList,
             selection = selection,
@@ -216,7 +233,7 @@ fun HomePage() {
             },
             onClick = { item ->
                 if (filteredList.none { selection[it.packageName] == true }) {
-                    mActivity.showAppSheet(item)
+                    appSheetPN.value = item.packageName
                 } else {
                     selection[item.packageName] = selection[item.packageName] != true
                 }
@@ -235,8 +252,24 @@ fun HomePage() {
                     productsList = filteredList,
                     selection = selection,
                     openSheet = { item ->
-                        mActivity.showAppSheet(item)
+                        appSheetPN.value = item.packageName
                     }
+                )
+            }
+        }
+        if (appSheetPN.value != null) {
+            val dismiss = {
+                scope.launch { appSheetState.hide() }
+                appSheetPN.value = null
+            }
+            Sheet(
+                sheetState = appSheetState,
+                onDismissRequest = dismiss
+            ) {
+                AppSheet(
+                    viewModel = appSheetVM!!,
+                    packageName = appSheetPN.value ?: "",
+                    onDismiss = dismiss,
                 )
             }
         }

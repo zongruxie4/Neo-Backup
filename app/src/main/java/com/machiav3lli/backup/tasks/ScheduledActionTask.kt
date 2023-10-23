@@ -25,6 +25,7 @@ import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.getInstalledPackageList
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.utils.FileUtils
+import com.machiav3lli.backup.utils.FileUtils.ensureBackups
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.filterPackages
 import timber.log.Timber
@@ -35,11 +36,11 @@ open class ScheduledActionTask(val context: Context, private val scheduleId: Lon
     override fun doInBackground(vararg params: Void?): Triple<String, List<String>, Int>? {
 
         val database = OABX.db
-        val scheduleDao = database.scheduleDao
-        val blacklistDao = database.blocklistDao
+        val scheduleDao = database.getScheduleDao()
+        val blacklistDao = database.getBlocklistDao()
 
         val schedule = scheduleDao.getSchedule(scheduleId)
-                       ?: return Triple("DbFailed", listOf(), MODE_UNSET)
+            ?: return Triple("DbFailed", listOf(), MODE_UNSET)
 
         val name = schedule.name
         val filter = schedule.filter
@@ -53,7 +54,9 @@ open class ScheduledActionTask(val context: Context, private val scheduleId: Lon
 
         val unfilteredPackages: List<Package> = try {
 
-            // findBackups not necessary, it's done in OABX.onCreate
+            // findBackups *is* necessary, because it's *not* done in OABX.onCreate any more
+            ensureBackups()
+
             context.getInstalledPackageList()   // <========================== get the package list
 
         } catch (e: FileUtils.BackupLocationInAccessibleException) {

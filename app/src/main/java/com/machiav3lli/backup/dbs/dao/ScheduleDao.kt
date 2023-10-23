@@ -37,27 +37,27 @@ interface ScheduleDao : BaseDao<Schedule> {
     fun getSchedule(name: String): Schedule?
 
     @Query("SELECT * FROM schedule WHERE id = :id")
-    fun getScheduleFlow(id: Long): Flow<Schedule>
+    fun getScheduleFlow(id: Long): Flow<Schedule?>
 
     @Query("SELECT customList FROM schedule WHERE id = :id")
-    fun _getCustomListFlow(id: Long): Flow<String>
+    fun _getCustomListFlow(id: Long): Flow<String?>
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getCustomListFlow(id: Long): Flow<Set<String>> =
         _getCustomListFlow(id).mapLatest { Converters().toStringSet(it) }
 
     @Query("SELECT blockList FROM schedule WHERE id = :id")
-    fun _getBlockListFlow(id: Long): Flow<String>
+    fun _getBlockListFlow(id: Long): Flow<String?>
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getBlockListFlow(id: Long): Flow<Set<String>> =
         _getBlockListFlow(id).mapLatest { Converters().toStringSet(it) }
 
-    @get:Query("SELECT * FROM schedule ORDER BY id ASC")
-    val all: List<Schedule>
+    @Query("SELECT * FROM schedule ORDER BY id ASC")
+    fun getAll(): List<Schedule>
 
-    @get:Query("SELECT * FROM schedule ORDER BY id ASC")
-    val allFlow: Flow<List<Schedule>>
+    @Query("SELECT * FROM schedule ORDER BY id ASC")
+    fun getAllFlow(): Flow<List<Schedule>>
 
     @Query("DELETE FROM schedule")
     fun deleteAll()

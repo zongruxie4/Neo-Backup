@@ -20,23 +20,33 @@ import com.android.build.gradle.internal.tasks.factory.dependsOn
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("plugin.serialization").version("1.9.0")
-    id("com.google.devtools.ksp") version ("1.9.0-1.0.13")
+    kotlin("plugin.serialization").version("1.9.10")
+    id("com.google.devtools.ksp") version ("1.9.10-1.0.13")
 }
 
-val vKotlin = "1.9.0"
-val vComposeCompiler = "1.5.2"
-val vCompose = "1.6.0-alpha04"
-//val vMaterial3 = "1.2.0-alpha06" // still crashes...
-val vMaterial3 = "1.1.1" // does NOT crash in context menu "Put"
-val vConstraintLayout = "2.1.4"
-val vKotlinSerialization = "1.6.0"
-val vRoom = "2.6.0-beta01"
-val vNavigation = "2.7.0"
-val vAccompanist = "0.33.0-alpha"
+val vAccompanist = "0.33.2-alpha"
+val vBiometric = "1.2.0-alpha05"
 val vCoil = "2.4.0"
-val vLibsu = "5.0.5"
-//val vIconics = "5.3.4"
+val vCommonsCompress = "1.24.0"
+val vCommonsIO = "2.14.0"
+val vComposeCompiler = "1.5.3"
+val vCompose = "1.6.0-alpha07"
+val vComposeM3 = "1.1.2" // does NOT crash in context menu "Put"
+val vDatastore = "1.0.0"
+val vKAML = "0.55.0"
+val vKotlin = "1.9.10"
+val vKSP = "1.0.13"
+val vLibsu = "5.2.1"
+val vLifecycle = "2.6.2"
+val vMaterial = "1.10.0"
+val vNavigation = "2.7.4"
+val vPreference = "1.2.1"
+val vRoom = "2.6.0-rc01"
+val vSecurity = "1.1.0-alpha06"
+val vSemVer = "4.1.0"
+val vSerialization = "1.6.0"
+val vTimber = "5.0.1"
+val vWork = "2.8.1"
 
 val vTest = "1.5.0"
 val vTestRules = "1.5.0"
@@ -50,8 +60,8 @@ android {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
         targetSdk = 33
-        versionCode = 8309
-        versionName = "8.3.2"
+        versionCode = 8313
+        versionName = "8.3.4"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
 
@@ -63,6 +73,7 @@ android {
                 ksp {
                     arg("room.schemaLocation", "$projectDir/schemas")
                     arg("room.incremental", "true")
+                    arg("room.generateKotlin", "true")
                 }
             }
         }
@@ -133,30 +144,30 @@ android {
 dependencies {
     implementation(kotlin("stdlib", vKotlin))
     implementation(kotlin("reflect", vKotlin))
-    implementation("com.google.devtools.ksp:symbol-processing-api:$vKotlin-1.0.13")
+    implementation("com.google.devtools.ksp:symbol-processing-api:$vKotlin-$vKSP")
 
     // Libs
     implementation("androidx.room:room-runtime:$vRoom")
     implementation("androidx.room:room-ktx:$vRoom")
     ksp("androidx.room:room-compiler:$vRoom")
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$vKotlinSerialization")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$vKotlinSerialization")
-    implementation("com.charleskorn.kaml:kaml:0.55.0")
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
-    implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
-    implementation("androidx.biometric:biometric:1.2.0-alpha05")
-    implementation("org.apache.commons:commons-compress:1.23.0")
-    implementation("commons-io:commons-io:2.12.0")      // attention, there is an old 20030203.000550 version, that looks higher
-    implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation("androidx.work:work-runtime-ktx:$vWork")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$vSerialization")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$vSerialization")
+    implementation("com.charleskorn.kaml:kaml:$vKAML")
+    implementation("androidx.datastore:datastore-preferences:$vDatastore")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$vLifecycle")
+    implementation("androidx.security:security-crypto-ktx:$vSecurity")
+    implementation("androidx.biometric:biometric:$vBiometric")
+    implementation("org.apache.commons:commons-compress:$vCommonsCompress")
+    implementation("commons-io:commons-io:$vCommonsIO")      // attention, there is an old 20030203.000550 version, that looks higher
+    implementation("com.jakewharton.timber:timber:$vTimber")
     implementation("com.github.topjohnwu.libsu:core:$vLibsu")
     implementation("com.github.topjohnwu.libsu:io:$vLibsu")
-    implementation("de.voize:semver4k:4.1.0")
+    implementation("de.voize:semver4k:$vSemVer")
 
     // UI
-    implementation("com.google.android.material:material:1.9.0")
-    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("com.google.android.material:material:$vMaterial")
+    implementation("androidx.preference:preference-ktx:$vPreference")
 
     // Compose
     implementation("androidx.compose.runtime:runtime:$vCompose")
@@ -166,7 +177,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:$vCompose")
     implementation("androidx.navigation:navigation-compose:$vNavigation")
     implementation("io.coil-kt:coil-compose:$vCoil")
-    implementation("androidx.compose.material3:material3:$vMaterial3")
+    implementation("androidx.compose.material3:material3:$vComposeM3")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$vAccompanist")
     implementation("com.google.accompanist:accompanist-permissions:$vAccompanist")
 
@@ -176,7 +187,6 @@ dependencies {
     implementation("androidx.test.ext:junit-ktx:$vTestExt")
 
     // compose testing
-    //androidTestImplementation("androidx.ui:ui-test:$vCompose")
     // Test rules and transitive dependencies:
     androidTestImplementation("androidx.compose.ui:ui-test:$vCompose")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$vCompose")
