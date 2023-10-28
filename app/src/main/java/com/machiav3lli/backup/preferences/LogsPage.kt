@@ -19,16 +19,19 @@ package com.machiav3lli.backup.preferences
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.items.Log
 import com.machiav3lli.backup.ui.compose.blockBorder
+import com.machiav3lli.backup.ui.compose.item.TopBar
 import com.machiav3lli.backup.ui.compose.recycler.LogRecycler
-import com.machiav3lli.backup.ui.compose.theme.AppTheme
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.viewmodels.LogViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -41,16 +44,20 @@ fun LogsPage(viewModel: LogViewModel) {
         viewModel.refreshList()
     }
 
-    AppTheme {
-        Scaffold(containerColor = Color.Transparent) {
-            LogRecycler(
-                modifier = Modifier
-                    .blockBorder()
-                    .fillMaxSize(),
-                productsList = logs.sortedByDescending(Log::logDate),
-                onShare = { viewModel.shareLog(it, pref_shareAsFile.value) },
-                onDelete = { viewModel.deleteLog(it) }
-            )
+    Scaffold(
+        containerColor = Color.Transparent,
+        topBar = {
+            TopBar(title = stringResource(id = NavItem.Logs.title))
         }
+    ) { paddingValues ->
+        LogRecycler(
+            modifier = Modifier
+                .padding(paddingValues)
+                .blockBorder()
+                .fillMaxSize(),
+            productsList = logs.sortedByDescending(Log::logDate),
+            onShare = { viewModel.shareLog(it, pref_shareAsFile.value) },
+            onDelete = { viewModel.deleteLog(it) }
+        )
     }
 }
