@@ -61,8 +61,8 @@ import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.methodName
 import com.machiav3lli.backup.utils.getInstalledPackageInfosWithPermissions
+import com.machiav3lli.backup.utils.isDynamicTheme
 import com.machiav3lli.backup.utils.scheduleAlarmsOnce
-import com.machiav3lli.backup.utils.styleTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -257,7 +257,7 @@ class OABX : Application() {
         DynamicColors.applyToActivitiesIfAvailable(
             this,
             DynamicColorsOptions.Builder()
-                .setPrecondition { _, _ -> styleTheme == THEME_DYNAMIC }
+                .setPrecondition { _, _ -> isDynamicTheme }
                 .build()
         )
 
@@ -330,11 +330,13 @@ class OABX : Application() {
         val JsonDefault = Json {
             serializersModule = serMod
         }
+
         @OptIn(ExperimentalSerializationApi::class)
         val JsonPretty = Json {
             serializersModule = serMod
             prettyPrint = true
         }
+
         @OptIn(ExperimentalSerializationApi::class)
         val YamlDefault = Yaml(serMod)
 
@@ -594,7 +596,7 @@ class OABX : Application() {
             return Build.VERSION.SDK_INT >= sdk
         }
 
-        val isRelease =BuildConfig.APPLICATION_ID.endsWith(".backup")
+        val isRelease = BuildConfig.APPLICATION_ID.endsWith(".backup")
         val isDebug = BuildConfig.DEBUG
         val isNeo = BuildConfig.APPLICATION_ID.contains("neo")
         val isHg42 = BuildConfig.APPLICATION_ID.contains("hg42")

@@ -76,6 +76,7 @@ import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.RestoreDialogUI
 import com.machiav3lli.backup.dialogs.StringInputDialogUI
 import com.machiav3lli.backup.exodusUrl
+import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
@@ -92,6 +93,7 @@ import com.machiav3lli.backup.ui.compose.icons.icon.Exodus
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowSquareOut
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Leaf
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
@@ -100,7 +102,6 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
 import com.machiav3lli.backup.ui.compose.item.BackupItem
 import com.machiav3lli.backup.ui.compose.item.CardButton
-import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.item.PackageIcon
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TagsBlock
@@ -123,6 +124,7 @@ const val DIALOG_ENABLEDISABLE = 7
 const val DIALOG_UNINSTALL = 8
 const val DIALOG_ADDTAG = 9
 const val DIALOG_NOTE = 10
+const val DIALOG_ENFORCE_LIMIT = 11
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -282,7 +284,7 @@ fun AppSheet(
                         CardButton(
                             modifier = Modifier.fillMaxHeight(),
                             icon = Icon.Exodus,
-                            tint = colorResource(id = R.color.ic_exodus),
+                            contentColor = colorResource(id = R.color.ic_exodus),
                             description = stringResource(id = R.string.exodus_report)
                         ) {
                             context.startActivity(
@@ -298,7 +300,6 @@ fun AppSheet(
                     CardButton(
                         modifier = Modifier,
                         icon = Phosphor.Prohibit,
-                        tint = MaterialTheme.colorScheme.tertiary,
                         description = stringResource(id = R.string.global_blocklist_add)
                     ) {
                         mActivity.viewModel.addToBlocklist(
@@ -313,7 +314,7 @@ fun AppSheet(
                         CardButton(
                             modifier = Modifier.fillMaxHeight(),
                             icon = Phosphor.ArrowSquareOut,
-                            tint = colorResource(id = R.color.ic_obb),
+                            contentColor = MaterialTheme.colorScheme.primary,
                             description = stringResource(id = R.string.launch_app)
                         ) {
                             launchIntent?.let {
@@ -329,7 +330,7 @@ fun AppSheet(
                         CardButton(
                             modifier = Modifier,
                             icon = Phosphor.Warning,
-                            tint = colorResource(id = R.color.ic_updated),
+                            contentColor = colorResource(id = R.color.ic_updated),
                             description = stringResource(id = R.string.forceKill)
                         ) {
                             dialogProps.value = Pair(DIALOG_FORCEKILL, pkg)
@@ -345,8 +346,8 @@ fun AppSheet(
                             modifier = Modifier.fillMaxHeight(),
                             icon = if (pkg.isDisabled) Phosphor.Leaf
                             else Phosphor.ProhibitInset,
-                            tint = if (pkg.isDisabled) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = if (pkg.isDisabled) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.tertiary,
                             description = stringResource(
                                 id = if (pkg.isDisabled) R.string.enablePackage
                                 else R.string.disablePackage
@@ -365,7 +366,7 @@ fun AppSheet(
                         CardButton(
                             modifier = Modifier.fillMaxHeight(),
                             icon = Phosphor.TrashSimple,
-                            tint = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.tertiary,
                             description = stringResource(id = R.string.uninstall),
                             onClick = {
                                 dialogProps.value = Pair(DIALOG_UNINSTALL, pkg)
@@ -419,54 +420,63 @@ fun AppSheet(
                     }
                 }
                 item(span = { GridItemSpan(columns) }) {
-                    Column {
-                        TitleText(textId = R.string.available_actions)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                    TitleText(textId = R.string.available_actions)
+                }
+                item {
+                    AnimatedVisibility(visible = pkg.isInstalled || pkg.isSpecial) {
+                        CardButton(
+                            icon = Phosphor.ArchiveTray,
+                            description = stringResource(id = R.string.backup),
+                            enabled = !snackbarVisible,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         ) {
-                            AnimatedVisibility(visible = pkg.isInstalled || pkg.isSpecial) {
-                                ElevatedActionButton(
-                                    icon = Phosphor.ArchiveTray,
-                                    text = stringResource(id = R.string.backup),
-                                    fullWidth = true,
-                                    enabled = !snackbarVisible,
-                                    onClick = {
-                                        dialogProps.value = Pair(DIALOG_BACKUP, pkg)
-                                        openDialog.value = true
-                                    }
-                                )
-                            }
-                            AnimatedVisibility(visible = hasBackups) {
-                                ElevatedActionButton(
-                                    icon = Phosphor.TrashSimple,
-                                    text = stringResource(id = R.string.delete_all_backups),
-                                    fullWidth = true,
-                                    positive = false,
-                                    enabled = !snackbarVisible,
-                                    onClick = {
-                                        dialogProps.value = Pair(DIALOG_DELETEALL, pkg)
-                                        openDialog.value = true
-                                    }
-                                )
-                            }
-                            AnimatedVisibility(
-                                visible = pkg.isInstalled &&
-                                        !pkg.isSpecial &&
-                                        ((pkg.storageStats?.dataBytes ?: 0L) >= 0L)
-                            ) {
-                                ElevatedActionButton(
-                                    icon = Phosphor.TrashSimple,
-                                    text = stringResource(id = R.string.clear_cache),
-                                    fullWidth = true,
-                                    colored = false,
-                                    onClick = {
-                                        dialogProps.value = Pair(DIALOG_CLEANCACHE, pkg)
-                                        openDialog.value = true
-                                    }
-                                )
-                            }
+                            dialogProps.value = Pair(DIALOG_BACKUP, pkg)
+                            openDialog.value = true
+                        }
+                    }
+                }
+                item {
+                    AnimatedVisibility(
+                        visible = pkg.isInstalled &&
+                                !pkg.isSpecial &&
+                                ((pkg.storageStats?.dataBytes ?: 0L) >= 0L)
+                    ) {
+                        CardButton(
+                            icon = Phosphor.TrashSimple,
+                            description = stringResource(id = R.string.clear_cache),
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ) {
+                            dialogProps.value = Pair(DIALOG_CLEANCACHE, pkg)
+                            openDialog.value = true
+                        }
+                    }
+                }
+                item {
+                    AnimatedVisibility(visible = hasBackups) {
+                        CardButton(
+                            icon = Phosphor.TrashSimple,
+                            description = stringResource(id = R.string.delete_all_backups),
+                            enabled = !snackbarVisible,
+                            contentColor = MaterialTheme.colorScheme.tertiary,
+                        ) {
+                            dialogProps.value = Pair(DIALOG_DELETEALL, pkg)
+                            openDialog.value = true
+                        }
+                    }
+                }
+                item {
+                    AnimatedVisibility(
+                        visible = pkg.hasBackups
+                    ) {
+                        CardButton(
+                            icon = Phosphor.Hash,
+                            description = stringResource(id = R.string.enforce_backups_limit),
+                            enabled = !snackbarVisible,
+                            contentColor = colorResource(id = R.color.ic_updated),
+                        ) {
+                            dialogProps.value = Pair(DIALOG_ENFORCE_LIMIT, pkg)
+                            openDialog.value = true
                         }
                     }
                 }
@@ -704,6 +714,22 @@ fun AppSheet(
                             ) {
                                 viewModel.setExtras(appExtras.copy(note = it))
                             }
+                        }
+
+                        DIALOG_ENFORCE_LIMIT -> {
+                            ActionsDialogUI(
+                                titleText = thePackage.packageLabel,
+                                messageText = stringResource(
+                                    id = R.string.enforce_backups_limit_description,
+                                    pref_numBackupRevisions.value
+                                ),
+                                openDialogCustom = openDialog,
+                                primaryText = stringResource(id = R.string.dialogYes),
+                                primaryAction = {
+                                    BackupRestoreHelper.housekeepingPackageBackups(obj as Package)
+                                    Package.invalidateCacheForPackage(obj.packageName)
+                                }
+                            )
                         }
 
                         DIALOG_ADDTAG        -> {
