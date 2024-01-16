@@ -17,6 +17,7 @@
  */
 package com.machiav3lli.backup.activities
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
@@ -31,14 +32,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.NavHostController
@@ -81,6 +80,7 @@ import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.utils.checkRootAccess
 import com.machiav3lli.backup.utils.isBiometricLockAvailable
 import com.machiav3lli.backup.utils.isBiometricLockEnabled
+import com.machiav3lli.backup.utils.isDarkTheme
 import com.machiav3lli.backup.utils.isDeviceLockEnabled
 import com.machiav3lli.backup.utils.isEncryptionEnabled
 import com.machiav3lli.backup.viewmodels.BatchViewModel
@@ -121,6 +121,7 @@ class MainActivityX : BaseActivity() {
         LogViewModel.Factory(application)
     }
 
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         val mainChanged = (this != OABX.mainSaved)
@@ -203,11 +204,11 @@ class MainActivityX : BaseActivity() {
                     statusBarStyle = SystemBarStyle.auto(
                         android.graphics.Color.TRANSPARENT,
                         android.graphics.Color.TRANSPARENT,
-                    ),
+                    )  { isDarkTheme },
                     navigationBarStyle = SystemBarStyle.auto(
                         android.graphics.Color.TRANSPARENT,
                         android.graphics.Color.TRANSPARENT,
-                    ),
+                    )  { isDarkTheme },
                 )
                 onDispose {}
             }
@@ -234,14 +235,14 @@ class MainActivityX : BaseActivity() {
                 }
 
                 Scaffold(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.onBackground,
-                ) { paddingValues ->
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ) {
                     ObservedEffect {
                         resumeMain()
                     }
 
-                    Box(modifier = Modifier.padding(paddingValues)) {
+                    Box {
                         MainNavHost(
                             navController = navController,
                         )

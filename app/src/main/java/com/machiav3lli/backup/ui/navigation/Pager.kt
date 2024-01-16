@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -62,7 +61,7 @@ fun PagerNavBar(pageItems: List<NavItem>, pagerState: PagerState) {
     NavigationBar(
         modifier = Modifier.padding(horizontal = 8.dp),
         containerColor = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onBackground,
+        contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         pageItems.forEachIndexed { index, tab ->
             val selected = pagerState.currentPage == index
@@ -117,7 +116,6 @@ fun RowScope.AltNavBarItem(
         horizontalArrangement = Arrangement.Center,
     ) {
         Column(
-            modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -139,7 +137,7 @@ fun RowScope.AltNavBarItem(
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = iconColor,
                 )
             }
         }
