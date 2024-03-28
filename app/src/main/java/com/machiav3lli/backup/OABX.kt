@@ -41,6 +41,7 @@ import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
+import com.machiav3lli.backup.handler.AssetHandler
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.WorkHandler
@@ -260,7 +261,8 @@ class OABX : Application() {
                 .build()
         )
 
-        beginBusy(startupMsg)
+        //TODO hg42 beginBusy(startupMsg)
+        hitBusy(60000)
 
         initShellHandler()
         db = ODatabase.getInstance(applicationContext)
@@ -481,6 +483,8 @@ class OABX : Application() {
         var refNB: WeakReference<OABX> = WeakReference(null)
         val NB: OABX get() = refNB.get()!!
 
+        val assets get() = AssetHandler(context)
+
         // service might be null
         var serviceRef: WeakReference<ScheduleService> = WeakReference(null)
         var service: ScheduleService?
@@ -698,6 +702,7 @@ class OABX : Application() {
         //------------------------------------------------------------------------------------------ busy
 
         var busyCountDown = AtomicInteger(0)
+        var busyLevel = AtomicInteger(0)
         val busyTick = 250
         var busy = mutableStateOf(false)
 
@@ -721,10 +726,15 @@ class OABX : Application() {
             }
         }
 
-        fun hitBusy(time: Long = 0L) {
-            busyCountDown.set(
-                max(time.toInt(), pref_busyHitTime.value) / busyTick
-            )
+        fun hitBusy(time: Int = 0) {
+            if(busyLevel.get() > 0)
+                busyCountDown.set(
+                    60000 / busyTick
+                )
+            else
+                busyCountDown.set(
+                    max(time.toInt(), pref_busyHitTime.value) / busyTick
+                )
         }
 
         fun beginBusy(name: String? = null) {
@@ -732,13 +742,17 @@ class OABX : Application() {
                 val label = name ?: methodName(1)
                 """*** \ busy $label"""
             }
-            hitBusy()
+            busyLevel.incrementAndGet()
+            hitBusy(60000)
             beginNanoTimer("busy.$name")
         }
 
         fun endBusy(name: String? = null): Long {
             val time = endNanoTimer("busy.$name")
-            hitBusy(0)
+            if(busyLevel.decrementAndGet() <= 0)
+                busyCountDown.set(100)
+            else
+                hitBusy(pref_busyHitTime.value)
             traceBusy {
                 val label = name ?: methodName(1)
                 "*** / busy $label ${"%.3f".format(time / 1E9)} sec"

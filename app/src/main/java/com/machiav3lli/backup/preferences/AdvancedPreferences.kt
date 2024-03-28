@@ -28,7 +28,6 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.preferences.ui.PrefsExpandableGroupHeader
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.preferences.ui.PrefsGroupCollapsed
-import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
@@ -84,9 +83,7 @@ fun AdvancedPrefsPage() {
     val prefs = Pref.prefGroups["adv"] ?: listOf()
 
     BusyBackground(
-        modifier = Modifier
-            .blockBorder()
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -179,12 +176,6 @@ val pref_menuButtonAlwaysVisible = BooleanPref(
 val pref_hideBackupLabels = BooleanPref(
     key = "dev-adv.hideBackupLabels",
     summary = "speed up package list by hiding the backup data type icons (keeps the package type)",
-    defaultValue = false
-)
-
-val pref_allPrefsShouldLookEqual = BooleanPref(
-    key = "dev-adv.allPrefsShouldLookEqual",
-    summary = "all preferences should be worth the same 🙂 regardless of their position in the list, meaning: don't shade backgrounds from top to bottom",
     defaultValue = false
 )
 

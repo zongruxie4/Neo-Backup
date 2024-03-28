@@ -55,6 +55,7 @@ import com.machiav3lli.backup.pref_catchUncaughtException
 import com.machiav3lli.backup.pref_uncaughtExceptionsJumpToPreferences
 import com.machiav3lli.backup.sheets.Sheet
 import com.machiav3lli.backup.sheets.SortFilterSheet
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FunnelSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
@@ -138,51 +139,52 @@ fun MainPage(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
-            when (currentPage.destination) {
-                NavItem.Scheduler.destination -> TopBar(
+            Column {
+                TopBar(
                     title = stringResource(id = currentPage.title)
                 ) {
-
-                    RoundButton(
-                        icon = Phosphor.Prohibit,
-                        description = stringResource(id = R.string.sched_blocklist)
-                    ) {
-                        openBlocklist.value = true
-                    }
-                    RoundButton(
-                        description = stringResource(id = R.string.prefs_title),
-                        icon = Phosphor.GearSix
-                    ) { navController.navigate(NavItem.Settings.destination) }
-                }
-
-                else                          -> Column {
-                    TopBar(title = stringResource(id = currentPage.title)) {
-                        ExpandableSearchAction(
-                            expanded = searchExpanded,
-                            query = query,
-                            onQueryChanged = { newQuery ->
-                                //if (newQuery != query)  // empty string doesn't work...
-                                query = newQuery
-                                OABX.main?.viewModel?.searchQuery?.value = query
-                            },
-                            onClose = {
-                                query = ""
-                                OABX.main?.viewModel?.searchQuery?.value = ""
-                            }
-                        )
-                        AnimatedVisibility(!searchExpanded.value) {
-                            RefreshButton { OABX.main?.refreshPackagesAndBackups() }
-                        }
-                        AnimatedVisibility(!searchExpanded.value) {
+                    when (currentPage.destination) {
+                        NavItem.Scheduler.destination -> {
+                            RoundButton(
+                                icon = Phosphor.Prohibit,
+                                description = stringResource(id = R.string.sched_blocklist)
+                            ) { openBlocklist.value = true }
                             RoundButton(
                                 description = stringResource(id = R.string.prefs_title),
                                 icon = Phosphor.GearSix
                             ) { navController.navigate(NavItem.Settings.destination) }
                         }
+
+                        else                          -> {
+                            ExpandableSearchAction(
+                                expanded = searchExpanded,
+                                query = query,
+                                onQueryChanged = { newQuery ->
+                                    //if (newQuery != query)  // empty string doesn't work...
+                                    query = newQuery
+                                    OABX.main?.viewModel?.searchQuery?.value = query
+                                },
+                                onClose = {
+                                    query = ""
+                                    OABX.main?.viewModel?.searchQuery?.value = ""
+                                }
+                            )
+                            AnimatedVisibility(!searchExpanded.value) {
+                                RefreshButton { OABX.main?.refreshPackagesAndBackups() }
+                            }
+                            AnimatedVisibility(!searchExpanded.value) {
+                                RoundButton(
+                                    description = stringResource(id = R.string.prefs_title),
+                                    icon = Phosphor.GearSix
+                                ) { navController.navigate(NavItem.Settings.destination) }
+                            }
+                        }
                     }
+                }
+                AnimatedVisibility(currentPage.destination != NavItem.Scheduler.destination) {
                     Row(
                         modifier = Modifier.padding(horizontal = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -215,7 +217,9 @@ fun MainPage(
     ) { paddingValues ->
 
         SlidePager(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier
+                .padding(paddingValues)
+                .blockBorder(),
             pagerState = pagerState,
             pageItems = pages,
             navController = navController

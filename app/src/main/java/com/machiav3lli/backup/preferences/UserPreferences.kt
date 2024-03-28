@@ -30,7 +30,6 @@ import com.machiav3lli.backup.dialogs.ListPrefDialogUI
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.secondaryColorItems
 import com.machiav3lli.backup.themeItems
-import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsOutLineVertical
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CircleWavyWarning
@@ -104,9 +103,7 @@ fun UserPrefsPage() {
         }
 
     BusyBackground(
-        modifier = Modifier
-            .blockBorder()
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -282,6 +279,14 @@ val pref_altNavBarItem = BooleanPref(
     titleId = R.string.prefs_altnavbaritem,
     summaryId = R.string.prefs_altnavbaritem_summary,
     icon = Phosphor.TagSimple,
+    defaultValue = false
+)
+
+val pref_altBlockLayout = BooleanPref(
+    key = "user.altBlockLayout",
+    titleId = R.string.prefs_altblocklayout,
+    summaryId = R.string.prefs_altblocklayout_summary,
+    icon = Phosphor.Swatches,
     defaultValue = false
 )
 

@@ -21,7 +21,6 @@ import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
 import com.machiav3lli.backup.dialogs.StringPrefDialogUI
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
-import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FileZip
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FloppyDisk
@@ -60,9 +59,7 @@ fun ServicePrefsPage() {
     var dialogsPref by remember { mutableStateOf<Pref?>(null) }
 
     BusyBackground(
-        modifier = Modifier
-            .blockBorder()
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -195,7 +192,7 @@ val pref_backupNoBackupData = BooleanPref(
     icon = Phosphor.ProhibitInset,
     iconTint = ColorData,
     defaultValue = false,
-    onChanged = { OABX.shellHandler!!.assets.updateExcludeFiles() },
+    onChanged = { OABX.assets.updateExcludeFiles() },
 )
 
 val pref_restoreDeviceProtectedData = BooleanPref(
@@ -241,7 +238,7 @@ val pref_restoreNoBackupData = BooleanPref(
     icon = Phosphor.ProhibitInset,
     iconTint = ColorData,
     defaultValue = false,
-    onChanged = { OABX.shellHandler!!.assets.updateExcludeFiles() },
+    onChanged = { OABX.assets.updateExcludeFiles() },
 )
 
 val pref_restorePermissions = BooleanPref(

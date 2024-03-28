@@ -39,6 +39,7 @@ import androidx.navigation.NavHostController
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.sheets.HelpSheet
 import com.machiav3lli.backup.sheets.Sheet
+import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.item.RoundButton
@@ -74,7 +75,7 @@ fun PrefsPage(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
             TopBar(title = stringResource(id = currentPage.title)) {
@@ -91,7 +92,9 @@ fun PrefsPage(
         }
     ) { paddingValues ->
         SlidePager(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier
+                .padding(paddingValues)
+                .blockBorder(),
             pagerState = pagerState,
             pageItems = pages,
             navController = navController
