@@ -58,6 +58,7 @@ import com.machiav3lli.backup.utils.Dirty
 import com.machiav3lli.backup.utils.decryptStream
 import com.machiav3lli.backup.utils.getCryptoSalt
 import com.machiav3lli.backup.utils.getEncryptionPassword
+import com.machiav3lli.backup.utils.getCompressionType
 import com.machiav3lli.backup.utils.isAllowDowngrade
 import com.machiav3lli.backup.utils.isDisableVerification
 import com.machiav3lli.backup.utils.isEncryptionEnabled
@@ -67,6 +68,7 @@ import com.machiav3lli.backup.utils.suRecursiveCopyFileFromDocument
 import com.machiav3lli.backup.utils.suUnpackTo
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream
 import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.File
@@ -437,7 +439,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         }
     }
 
-    @Throws(CryptoSetupException::class, IOException::class)
+    @Throws(RestoreFailedException::class, CryptoSetupException::class, IOException::class)
     protected fun openArchiveFile(
         archive: StorageFile,
         isCompressed: Boolean,
@@ -453,7 +455,11 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             }
         }
         if (isCompressed) {
-            inputStream = GzipCompressorInputStream(inputStream)
+            when (getCompressionType()) {
+                "gz" -> inputStream = GzipCompressorInputStream(inputStream)
+                "zstd" -> inputStream = ZstdCompressorInputStream(inputStream)
+                else -> throw RestoreFailedException("Unsupported compression algorithm: ${getCompressionType()}")
+            }
         }
         return inputStream
     }

@@ -48,6 +48,7 @@ val vSemVer = "4.2.1"
 val vSerialization = "1.6.3"
 val vTimber = "5.0.1"
 val vWork = "2.9.0"
+val vZstdJni = "1.5.5-11@aar"
 
 val vTest = "1.5.0"
 val vTestRules = "1.5.0"
@@ -162,6 +163,7 @@ dependencies {
     implementation("androidx.security:security-crypto-ktx:$vSecurity")
     implementation("androidx.biometric:biometric:$vBiometric")
     implementation("org.apache.commons:commons-compress:$vCommonsCompress")
+    implementation("com.github.luben:zstd-jni:$vZstdJni")
     implementation("commons-io:commons-io:$vCommonsIO")      // attention, there is an old 20030203.000550 version, that looks higher
     implementation("com.jakewharton.timber:timber:$vTimber")
     implementation("com.github.topjohnwu.libsu:core:$vLibsu")

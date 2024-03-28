@@ -44,6 +44,7 @@ import com.machiav3lli.backup.preferences.pref_backupExternalData
 import com.machiav3lli.backup.preferences.pref_backupMediaData
 import com.machiav3lli.backup.preferences.pref_backupObbData
 import com.machiav3lli.backup.preferences.pref_biometricLock
+import com.machiav3lli.backup.preferences.pref_compressionType
 import com.machiav3lli.backup.preferences.pref_compressionLevel
 import com.machiav3lli.backup.preferences.pref_deviceLock
 import com.machiav3lli.backup.preferences.pref_disableVerification
@@ -97,7 +98,9 @@ fun isEncryptionEnabled(): Boolean =
 fun getEncryptionPassword(): String = pref_password.value
 
 fun isCompressionEnabled(): Boolean =
-    getCompressionLevel() > 0 // && compression algorithm != null
+    getCompressionType().isNotEmpty() && getCompressionLevel() > 0
+
+fun getCompressionType(): String = pref_compressionType.value
 
 fun getCompressionLevel() = pref_compressionLevel.value
 

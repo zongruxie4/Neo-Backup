@@ -47,6 +47,7 @@ import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
 import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.ui.item.BooleanPref
 import com.machiav3lli.backup.ui.item.EnumPref
+import com.machiav3lli.backup.ui.item.ListPref
 import com.machiav3lli.backup.ui.item.IntPref
 import com.machiav3lli.backup.ui.item.PasswordPref
 import com.machiav3lli.backup.ui.item.Pref
@@ -258,6 +259,18 @@ val pref_numBackupRevisions = IntPref(
     iconTint = ColorSpecial,
     entries = ((0..9) + (10..20 step 2) + (50..200 step 50)).toList(),
     defaultValue = 2
+)
+val pref_compressionType = ListPref(
+    key = "srv.compressionType",
+    titleId = R.string.prefs_compression_type,
+    summaryId = R.string.prefs_compression_type_summary,
+    icon = Phosphor.FileZip,
+    iconTint = ColorExodus,
+    entries = mapOf(
+        "gz" to "Gzip Compression",
+        "zstd" to "Zstandard Compression"
+    ),
+    defaultValue = "gz"
 )
 
 val pref_compressionLevel = IntPref(

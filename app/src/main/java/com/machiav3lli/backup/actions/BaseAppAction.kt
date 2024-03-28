@@ -28,6 +28,7 @@ import com.machiav3lli.backup.handler.ShellHandler.Companion.utilBoxQ
 import com.machiav3lli.backup.handler.ShellHandler.ShellCommandFailedException
 import com.machiav3lli.backup.preferences.pref_backupSuspendApps
 import com.machiav3lli.backup.tasks.AppActionWork
+import com.machiav3lli.backup.utils.getCompressionType
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ShellUtils
@@ -47,7 +48,19 @@ abstract class BaseAppAction protected constructor(
         isCompressed: Boolean,
         isEncrypted: Boolean
     ): String {
-        return "$what.tar${if (isCompressed) ".gz" else ""}${if (isEncrypted) ".enc" else ""}"
+        val extension = buildString {
+            if (isCompressed) {
+                append(when (getCompressionType()) {
+                    "gz" -> ".gz"
+                    "zstd" -> ".zst"
+                    else -> ""
+                })
+            }
+            if (isEncrypted) {
+                append(".enc")
+            }
+        }
+        return "$what.tar$extension"
     }
 
     abstract class AppActionFailedException : Exception {
