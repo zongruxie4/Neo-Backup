@@ -29,7 +29,6 @@ import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.utils.LocalDateTimeSerializer
 import com.machiav3lli.backup.utils.getBackupRoot
-import com.machiav3lli.backup.utils.getCompressionType
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -58,7 +57,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
     var hasExternalData: Boolean = false,
     var hasObbData: Boolean = false,
     var hasMediaData: Boolean = false,
-    var compressionType: String? = getCompressionType(),
+    var compressionType: String? = null,
     var cipherType: String? = null,
     var iv: ByteArray? = byteArrayOf(),
     var cpuArch: String?,
@@ -162,7 +161,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
     )
 
     val isCompressed: Boolean
-        get() = !compressionType.isNullOrBlank()
+        get() = compressionType != null && compressionType?.isNotEmpty() == true
 
     val isEncrypted: Boolean
         get() = cipherType != null && cipherType?.isNotEmpty() == true

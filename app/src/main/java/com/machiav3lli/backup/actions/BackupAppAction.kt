@@ -193,6 +193,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 }
 
                 if (isCompressionEnabled()) {
+                    Timber.i("$app: Compressing backup using ${getCompressionType()}")
                     backupBuilder.setCompressionType(getCompressionType())
                 }
                 if (isEncryptionEnabled()) {
