@@ -252,6 +252,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         val backupFilename = getBackupArchiveFilename(
             dataType,
             shouldCompress,
+            getCompressionType(),
             iv != null && isEncryptionEnabled()
         )
         val backupFile = backupInstanceDir.createFile(backupFilename)
@@ -409,6 +410,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         val backupFilename = getBackupArchiveFilename(
             dataType,
             shouldCompress,
+            getCompressionType(),
             iv != null && isEncryptionEnabled()
         )
         val backupFile = backupInstanceDir.createFile(backupFilename)

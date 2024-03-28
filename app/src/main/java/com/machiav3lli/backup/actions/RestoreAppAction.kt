@@ -443,6 +443,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
     protected fun openArchiveFile(
         archive: StorageFile,
         isCompressed: Boolean,
+        compressionType: String?,
         isEncrypted: Boolean,
         iv: ByteArray?,
     ): InputStream {
@@ -455,10 +456,10 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             }
         }
         if (isCompressed) {
-            when (getCompressionType()) {
+            when (compressionType) {
                 "gz" -> inputStream = GzipCompressorInputStream(inputStream)
                 "zstd" -> inputStream = ZstdCompressorInputStream(inputStream)
-                else -> throw RestoreFailedException("Unsupported compression algorithm: ${getCompressionType()}")
+                else -> throw RestoreFailedException("Unsupported compression algorithm: ${compressionType}")
             }
         }
         return inputStream
@@ -470,6 +471,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         archive: StorageFile,
         targetPath: String,
         isCompressed: Boolean,
+        compressionType: String?,
         isEncrypted: Boolean,
         iv: ByteArray?,
         cachePath: File?,
@@ -482,7 +484,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         var tempDir: RootFile? = null
         try {
             TarArchiveInputStream(
-                openArchiveFile(archive, isCompressed, isEncrypted, iv)
+                openArchiveFile(archive, isCompressed, compressionType, isEncrypted, iv)
             ).use { archiveStream ->
                 if (pref_restoreAvoidTemporaryCopy.value) {
                     // clear the data from the final directory
@@ -543,6 +545,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         archive: StorageFile,
         targetPath: String,
         isCompressed: Boolean,
+        compressionType: String?,
         isEncrypted: Boolean,
         iv: ByteArray?,
     ) {
@@ -552,7 +555,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                 throw RestoreFailedException("Backup archive at $archive is missing")
             }
             try {
-                openArchiveFile(archive, isCompressed, isEncrypted, iv).use { archiveStream ->
+                openArchiveFile(archive, isCompressed, compressionType, isEncrypted, iv).use { archiveStream ->
 
                     targetDir.mkdirs()  // in case it doesn't exist
 
@@ -628,6 +631,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         archive: StorageFile,
         targetPath: String,
         isCompressed: Boolean,
+        compressionType: String?,
         isEncrypted: Boolean,
         iv: ByteArray?,
         cachePath: File?,
@@ -640,6 +644,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                 archive,
                 targetPath,
                 isCompressed,
+                compressionType,
                 isEncrypted,
                 iv
             )
@@ -649,6 +654,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                 archive,
                 targetPath,
                 isCompressed,
+                compressionType,
                 isEncrypted,
                 iv,
                 cachePath,
@@ -775,6 +781,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         val backupFilename = getBackupArchiveFilename(
             dataType,
             backup.isCompressed,
+            backup.compressionType,
             backup.isEncrypted
         )
         Timber.d(LOG_EXTRACTING_S, backup.packageName, backupFilename)
@@ -801,6 +808,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             backupArchive,
             extractTo,
             backup.isCompressed,
+            backup.compressionType,
             backup.isEncrypted,
             backup.iv,
             RootFile(context.cacheDir),
@@ -823,6 +831,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         val backupFilename = getBackupArchiveFilename(
             dataType,
             backup.isCompressed,
+            backup.compressionType,
             backup.isEncrypted
         )
         Timber.d(LOG_EXTRACTING_S, backup.packageName, backupFilename)
@@ -849,6 +858,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             backupArchive,
             extractTo,
             backup.isCompressed,
+            backup.compressionType,
             backup.isEncrypted,
             backup.iv,
             RootFile(deviceProtectedStorageContext.cacheDir),
@@ -871,6 +881,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         val backupFilename = getBackupArchiveFilename(
             dataType,
             backup.isCompressed,
+            backup.compressionType,
             backup.isEncrypted
         )
         Timber.d(LOG_EXTRACTING_S, backup.packageName, backupFilename)
@@ -893,6 +904,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             backupArchive,
             extractTo,
             backup.isCompressed,
+            backup.compressionType,
             backup.isEncrypted,
             backup.iv,
             context.externalCacheDir?.let { RootFile(it) },
@@ -931,6 +943,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             val backupFilename = getBackupArchiveFilename(
                 dataType,
                 backup.isCompressed,
+                backup.compressionType,
                 backup.isEncrypted
             )
             Timber.d(LOG_EXTRACTING_S, backup.packageName, backupFilename)
@@ -948,6 +961,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                 backupArchive,
                 extractTo,
                 backup.isCompressed,
+                backup.compressionType,
                 backup.isEncrypted,
                 backup.iv,
                 context.externalCacheDir?.let { RootFile(it) },
@@ -986,6 +1000,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             val backupFilename = getBackupArchiveFilename(
                 dataType,
                 backup.isCompressed,
+                backup.compressionType,
                 backup.isEncrypted
             )
             Timber.d(LOG_EXTRACTING_S, backup.packageName, backupFilename)
@@ -1003,6 +1018,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                 backupArchive,
                 extractTo,
                 backup.isCompressed,
+                backup.compressionType,
                 backup.isEncrypted,
                 backup.iv,
                 context.externalCacheDir?.let { RootFile(it) }

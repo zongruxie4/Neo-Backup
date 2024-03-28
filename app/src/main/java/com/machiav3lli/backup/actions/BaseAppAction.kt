@@ -46,11 +46,12 @@ abstract class BaseAppAction protected constructor(
     fun getBackupArchiveFilename(
         what: String,
         isCompressed: Boolean,
+        compressionType: String?,
         isEncrypted: Boolean
     ): String {
         val extension = buildString {
             if (isCompressed) {
-                append(when (getCompressionType()) {
+                append(when (compressionType) {
                     "gz" -> ".gz"
                     "zstd" -> ".zst"
                     else -> ""
