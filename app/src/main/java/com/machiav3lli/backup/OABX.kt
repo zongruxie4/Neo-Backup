@@ -727,14 +727,9 @@ class OABX : Application() {
         }
 
         fun hitBusy(time: Int = 0) {
-            if(busyLevel.get() > 0)
-                busyCountDown.set(
-                    60000 / busyTick
-                )
-            else
-                busyCountDown.set(
-                    max(time.toInt(), pref_busyHitTime.value) / busyTick
-                )
+            busyCountDown.set(
+                max(time.toInt(), pref_busyHitTime.value) / busyTick
+            )
         }
 
         fun beginBusy(name: String? = null) {
@@ -743,7 +738,7 @@ class OABX : Application() {
                 """*** \ busy $label"""
             }
             busyLevel.incrementAndGet()
-            hitBusy(60000)
+            hitBusy(10000)
             beginNanoTimer("busy.$name")
         }
 
