@@ -49,8 +49,8 @@ import com.machiav3lli.backup.utils.CryptoSetupException
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.encryptStream
-import com.machiav3lli.backup.utils.getCompressionType
 import com.machiav3lli.backup.utils.getCompressionLevel
+import com.machiav3lli.backup.utils.getCompressionType
 import com.machiav3lli.backup.utils.getCryptoSalt
 import com.machiav3lli.backup.utils.getEncryptionPassword
 import com.machiav3lli.backup.utils.initIv
@@ -61,8 +61,8 @@ import com.machiav3lli.backup.utils.suCopyFileToDocument
 import com.topjohnwu.superuser.ShellUtils
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
-import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream
 import timber.log.Timber
 import java.io.IOException
 import java.io.OutputStream
@@ -276,8 +276,8 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                         gzipParams
                     )
                 }
-                "zstd" -> outStream = ZstdCompressorOutputStream(outStream, compressionLevel)
-                else -> throw UnsupportedOperationException("Compression algoritm ${getCompressionType()} not supported")
+                "zst" -> outStream = ZstdCompressorOutputStream(outStream, compressionLevel)
+                else -> throw UnsupportedOperationException("Unsupported compression algorithm: ${getCompressionType()}")
             }
         }
 
@@ -434,8 +434,8 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                         gzipParams
                     )
                 }
-                "zstd" -> outStream = ZstdCompressorOutputStream(outStream, compressionLevel)
-                else -> throw UnsupportedOperationException("Compression algoritm ${getCompressionType()} not supported")
+                "zst" -> outStream = ZstdCompressorOutputStream(outStream, compressionLevel)
+                else -> throw UnsupportedOperationException("Unsupported compression algorithm: ${getCompressionType()}")
             }
         }
 

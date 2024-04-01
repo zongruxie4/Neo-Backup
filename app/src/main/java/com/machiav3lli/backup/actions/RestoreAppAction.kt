@@ -58,7 +58,6 @@ import com.machiav3lli.backup.utils.Dirty
 import com.machiav3lli.backup.utils.decryptStream
 import com.machiav3lli.backup.utils.getCryptoSalt
 import com.machiav3lli.backup.utils.getEncryptionPassword
-import com.machiav3lli.backup.utils.getCompressionType
 import com.machiav3lli.backup.utils.isAllowDowngrade
 import com.machiav3lli.backup.utils.isDisableVerification
 import com.machiav3lli.backup.utils.isEncryptionEnabled
@@ -458,7 +457,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         if (isCompressed) {
             when (compressionType) {
                 "gz" -> inputStream = GzipCompressorInputStream(inputStream)
-                "zstd" -> inputStream = ZstdCompressorInputStream(inputStream)
+                "zst" -> inputStream = ZstdCompressorInputStream(inputStream)
                 else -> throw RestoreFailedException("Unsupported compression algorithm: ${compressionType}")
             }
         }

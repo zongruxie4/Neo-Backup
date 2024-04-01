@@ -161,8 +161,8 @@
     <string name="prefs_deviceprotecteddata_summary">Backs up data that is placed in data/user_de</string>
     <string name="prefs_numBackupRevisions">Number of backup revisions</string>
     <string name="prefs_numBackupRevisions_summary">The oldest revision will be deleted upon creation of a new backup if the number is exceeded. Set it to zero to keep all revisions.</string>
-    <string name="prefs_compression_type">Compression Algorithm</string>
-    <string name="prefs_compression_type_summary">Select either gz or zstd</string>
+    <string name="prefs_compression_type">Compression type</string>
+    <string name="prefs_compression_type_summary">Select the type of compression used</string>
     <string name="prefs_compression_level">Compression Level</string>
     <string name="prefs_compression_level_summary">A lower value compresses faster but results in larger files. A higher value compresses better but takes more time.</string>
     <string name="prefs_acquirewakelock">Prevent sleep</string>

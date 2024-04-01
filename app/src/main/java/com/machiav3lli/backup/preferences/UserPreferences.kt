@@ -124,18 +124,17 @@ fun UserPrefsPage() {
             openDialog.value = false
             launcher.launch(BACKUP_DIRECTORY_INTENT)
         } else BaseDialog(openDialogCustom = openDialog) {
-            when (dialogsPref) {
-                pref_languages,
-                -> ListPrefDialogUI(
-                    //TODO hg42 encapsulate in pref
+            when (dialogsPref) {  //TODO hg42 encapsulate in pref
+                //pref_languages,
+                is ListPref -> ListPrefDialogUI(
                     pref = dialogsPref as ListPref,
                     openDialogCustom = openDialog,
                 )
 
-                pref_appTheme,
-                pref_appAccentColor,
-                pref_appSecondaryColor,
-                -> EnumPrefDialogUI(
+                //pref_appTheme,
+                //pref_appAccentColor,
+                //pref_appSecondaryColor,
+                is EnumPref -> EnumPrefDialogUI(
                     //TODO hg42 encapsulate in pref
                     pref = dialogsPref as EnumPref,
                     openDialogCustom = openDialog,
