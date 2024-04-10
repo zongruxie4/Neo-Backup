@@ -49,6 +49,7 @@ import com.machiav3lli.backup.utils.CryptoSetupException
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.encryptStream
+import com.machiav3lli.backup.utils.getCompressionType
 import com.machiav3lli.backup.utils.getCompressionLevel
 import com.machiav3lli.backup.utils.getCryptoSalt
 import com.machiav3lli.backup.utils.getEncryptionPassword
@@ -60,13 +61,13 @@ import com.machiav3lli.backup.utils.suCopyFileToDocument
 import com.topjohnwu.superuser.ShellUtils
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
 import timber.log.Timber
 import java.io.IOException
 import java.io.OutputStream
 
-const val COMPRESSION_ALGORITHM = "gz"
-
+// var COMPRESSION_TYPE = getCompressionType()
 open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellHandler) :
     BaseAppAction(context, work, shell) {
 
@@ -192,7 +193,8 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 }
 
                 if (isCompressionEnabled()) {
-                    backupBuilder.setCompressionType(COMPRESSION_ALGORITHM)
+                    Timber.i("$app: Compressing backup using ${getCompressionType()}")
+                    backupBuilder.setCompressionType(getCompressionType())
                 }
                 if (isEncryptionEnabled()) {
                     backupBuilder.setCipherType(CIPHER_ALGORITHM)
@@ -251,6 +253,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         val backupFilename = getBackupArchiveFilename(
             dataType,
             shouldCompress,
+            getCompressionType(),
             iv != null && isEncryptionEnabled()
         )
         val backupFile = backupInstanceDir.createFile(backupFilename)
@@ -263,13 +266,19 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
 
         if (shouldCompress) {
             val compressionLevel = getCompressionLevel()
-            val gzipParams = GzipParameters()
-            gzipParams.compressionLevel = compressionLevel
+            when (getCompressionType()) {
+                "gz" -> {
+                    val gzipParams = GzipParameters()
+                    gzipParams.compressionLevel = compressionLevel
 
-            outStream = GzipCompressorOutputStream(
-                outStream,
-                gzipParams
-            )
+                    outStream = GzipCompressorOutputStream(
+                        outStream,
+                        gzipParams
+                    )
+                }
+                "zstd" -> outStream = ZstdCompressorOutputStream(outStream, compressionLevel)
+                else -> throw UnsupportedOperationException("Compression algoritm ${getCompressionType()} not supported")
+            }
         }
 
         try {
@@ -402,6 +411,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         val backupFilename = getBackupArchiveFilename(
             dataType,
             shouldCompress,
+            getCompressionType(),
             iv != null && isEncryptionEnabled()
         )
         val backupFile = backupInstanceDir.createFile(backupFilename)
@@ -414,13 +424,19 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
 
         if (shouldCompress) {
             val compressionLevel = getCompressionLevel()
-            val gzipParams = GzipParameters()
-            gzipParams.compressionLevel = compressionLevel
+            when (getCompressionType()) {
+                "gz" -> {
+                    val gzipParams = GzipParameters()
+                    gzipParams.compressionLevel = compressionLevel
 
-            outStream = GzipCompressorOutputStream(
-                outStream,
-                gzipParams
-            )
+                    outStream = GzipCompressorOutputStream(
+                        outStream,
+                        gzipParams
+                    )
+                }
+                "zstd" -> outStream = ZstdCompressorOutputStream(outStream, compressionLevel)
+                else -> throw UnsupportedOperationException("Compression algoritm ${getCompressionType()} not supported")
+            }
         }
 
         var result = false
