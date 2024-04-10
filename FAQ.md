@@ -1089,3 +1089,5 @@ At least the tar files looked ok from looking at some samples.
         still share from there
   * `afterSupport` reset them to defaults (less intensive tracing)
 * you may enable `logToSystemLogcat`, if the internal log isn't long enough and you need to use an app to capture a longer log (or catch it in case of crashes etc.)
+
+Also see TROUBLESHOOTING.md document...
