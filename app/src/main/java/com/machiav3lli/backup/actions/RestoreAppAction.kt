@@ -355,22 +355,23 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             }
             success = runAsRoot(sb.toString()).isSuccess // TODO integrate permissionsResult too
 
-            val permissionsCmd = mutableListOf<String>()
             if (!isRestoreAllPermissions && pref_restorePermissions.value) {
                 backup.permissions
                     .filterNot { it.isEmpty() }
                     .forEach { p ->
-                        permissionsCmd.addAll(listOf("pm", "grant", backup.packageName, p, ";"))
+                        try {
+                            runAsRoot("pm grant ${backup.packageName} $p")
+                        } catch (e: ShellCommandFailedException) {
+                            val details = e.shellResult.err
+                                    .joinToString("\n")
+                                    .splitToSequence("\n\tat ")
+                                    .first()
+                            val error = "Restoring permission $p failed: $details"
+                            Timber.e(error)
+                            // TODO integrate this exception in the result
+                        }
                     }
-                try {
-                    runAsRoot(permissionsCmd.joinToString(" "))
-                } catch (e: ShellCommandFailedException) {
-                    val error = e.shellResult.err.joinToString { "\n" }
-                    Timber.e("Restoring permissions failed: $error")
-                    // TODO integrate this exception in the result
-                }
             }
-
 
             // re-enable verify apps over usb
             if (disableVerification)
@@ -403,9 +404,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             } catch (e: ShellCommandFailedException) {
                 Timber.w(
                     "<$packageName> Cleanup after failure failed: ${
-                        e.shellResult.err.joinToString(
-                            "; "
-                        )
+                        e.shellResult.err.joinToString("\n").trim()
                     }"
                 )
             }
