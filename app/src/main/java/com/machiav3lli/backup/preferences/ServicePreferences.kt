@@ -19,6 +19,7 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
+import com.machiav3lli.backup.dialogs.ListPrefDialogUI
 import com.machiav3lli.backup.dialogs.StringPrefDialogUI
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -48,6 +49,7 @@ import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.ui.item.BooleanPref
 import com.machiav3lli.backup.ui.item.EnumPref
 import com.machiav3lli.backup.ui.item.IntPref
+import com.machiav3lli.backup.ui.item.ListPref
 import com.machiav3lli.backup.ui.item.PasswordPref
 import com.machiav3lli.backup.ui.item.Pref
 import com.machiav3lli.backup.ui.item.StringPref
@@ -75,21 +77,27 @@ fun ServicePrefsPage() {
 
     if (openDialog.value) {
         BaseDialog(openDialogCustom = openDialog) {
-            when (dialogsPref) {
-                is PasswordPref -> StringPrefDialogUI(              //TODO hg42 encapsulate in pref
+            when (dialogsPref) {                            //TODO hg42 encapsulate in pref
+
+                is ListPref -> ListPrefDialogUI(
+                    pref = dialogsPref as ListPref,
+                    openDialogCustom = openDialog,
+                )
+
+                is EnumPref -> EnumPrefDialogUI(
+                    pref = dialogsPref as EnumPref,
+                    openDialogCustom = openDialog
+                )
+
+                is PasswordPref -> StringPrefDialogUI(
                     pref = dialogsPref as PasswordPref,
                     isPrivate = true,
                     confirm = true,
                     openDialogCustom = openDialog
                 )
 
-                is StringPref   -> StringPrefDialogUI(              //TODO hg42 encapsulate in pref
+                is StringPref   -> StringPrefDialogUI(
                     pref = dialogsPref as StringPref,
-                    openDialogCustom = openDialog
-                )
-
-                is EnumPref     -> EnumPrefDialogUI(                //TODO hg42 encapsulate in pref
-                    pref = dialogsPref as EnumPref,
                     openDialogCustom = openDialog
                 )
             }
@@ -258,6 +266,19 @@ val pref_numBackupRevisions = IntPref(
     iconTint = ColorSpecial,
     entries = ((0..9) + (10..20 step 2) + (50..200 step 50)).toList(),
     defaultValue = 2
+)
+
+val pref_compressionType = ListPref(
+    key = "srv.compressionType",
+    titleId = R.string.prefs_compression_type,
+    summaryId = R.string.prefs_compression_type_summary,
+    icon = Phosphor.FileZip,
+    iconTint = ColorExodus,
+    entries = mapOf(
+        "gz"  to "Gzip Compression",
+        "zst" to "Zstd Compression"
+    ),
+    defaultValue = "gz"
 )
 
 val pref_compressionLevel = IntPref(

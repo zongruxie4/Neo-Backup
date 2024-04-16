@@ -57,7 +57,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
     var hasExternalData: Boolean = false,
     var hasObbData: Boolean = false,
     var hasMediaData: Boolean = false,
-    var compressionType: String? = "gz",
+    var compressionType: String? = null,
     var cipherType: String? = null,
     var iv: ByteArray? = byteArrayOf(),
     var cpuArch: String?,

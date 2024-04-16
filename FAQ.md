@@ -8,18 +8,19 @@
 * [How do I use NB?](#how-do-i-use-nb)
 * [What are all these backup-parts (icons)? / which parts are included in a backup?](#what-are-all-these-backup-parts-icons--which-parts-are-included-in-a-backup)
 * [What are Special Backups?](#what-are-special-backups)
+  * [How can I backup SMS \& Call log?](#how-can-i-backup-sms--call-log)
+  * [How to restore special backups for bluetooth and wifi?](#how-to-restore-special-backups-for-bluetooth-and-wifi)
 * [Do I need a rooted phone?](#do-i-need-a-rooted-phone)
-* [What is root access used for?](#what-is-root-access-used-for)
+  * [What is root access used for?](#what-is-root-access-used-for)
 * [Why is NB so slow?](#why-is-nb-so-slow)
-* [So why use SAF then?](#so-why-use-saf-then)
-* [Below some "performance" or time measuring infos from an older phone](#below-some-performance-or-time-measuring-infos-from-an-older-phone)
+  * [So why use SAF then?](#so-why-use-saf-then)
+  * [Below some "performance" or time measuring infos from an older phone](#below-some-performance-or-time-measuring-infos-from-an-older-phone)
 * [I do not see any apps in the list. What can be the reason?](#i-do-not-see-any-apps-in-the-list-what-can-be-the-reason)
 * [What should I do, when I get the "No SAF manager" message?](#what-should-i-do-when-i-get-the-no-saf-manager-message)
 * [I do not see the app which is currently backed up in the notification during batch or scheduled backups](#i-do-not-see-the-app-which-is-currently-backed-up-in-the-notification-during-batch-or-scheduled-backups)
 * [At restore the data directory of the app does not exist](#at-restore-the-data-directory-of-the-app-does-not-exist)
 * [How does NB stop / pause / (un)suspend apps during backup?](#how-does-nb-stop--pause--unsuspend-apps-during-backup)
-* [Do I need to pause apps?](#do-i-need-to-pause-apps)
-* [How can I backup SMS \& Call log?](#how-can-i-backup-sms--call-log)
+  * [Do I need to pause apps?](#do-i-need-to-pause-apps)
 * [Are you going to support older Android versions?](#are-you-going-to-support-older-android-versions)
 * [Can I use NB to switch to a new device / new OS / new Custom ROM / new major release of my ROM?](#can-i-use-nb-to-switch-to-a-new-device--new-os--new-custom-rom--new-major-release-of-my-rom)
 * [Why do I have to login/register to app x y z again after restore?](#why-do-i-have-to-loginregister-to-app-x-y-z-again-after-restore)
@@ -178,17 +179,45 @@ Beginning with version 8 some of them are supported.
 * Wifi Access Points (user reported differently, but should work &rarr; after restore)
 * Bluetooth (also reported working by some user)
 
-Enable them in the preferences. NB will ask for the needed privileges for SMS and Call-Logs after a restart (of NB).
-
-See also [How can I backup SMS &amp; Call log?](#how-can-i-backup-sms--call-log)
+Enable them in the preferences.
 
 For all the others NB does not provide full support right now, try at your own discretion.
+
+### How can I backup SMS & Call log?
+
+**SMS/MMS and Call-logs** <br/>
+NB starts supporting backup SMS/MMS and Call logs beginning with version 8. The current implementation (of [DL](https://github.com/dl200010)) writes all the details into a JSON format.
+
+The Call-Logs are saved in data providers like some other special data (`com.android.providers.telephony`).
+
+*You may need to restart your device after restoring special data, to see the restored data*.
+
+NB will ask for the needed privileges for SMS and Call-Logs after a restart (of NB).
+
+**contacts, calendar** and todo-lists <br/>
+Users ask quite often about this.
+We advise to use [DecSync](https://github.com/39aldo39/DecSync) with its diverse apps.
+Alternatively use a CalDAV/CardDAV management app (like DavX5) and sync them with a trustworthy mail provider account (or your private Mailserver, a Nextcloud, etc. etc.).
+
+For contacts it should also work to back up the data of "Contacts Storage" (package `com.android.providers.contacts`) system app.
+Restoring it later on should restore contacts fine, but it's not guaranteed. Up to now it's not implemented as a [special backup](#what-are-special-backups) by NB.
+
+### How to restore special backups for bluetooth and wifi?
+
+A user writes: I always had trouble to restore Bluetooth. Now I found a reliable workflow.
+1. Disable Bluetooth
+2. Restore the Bluetooth backup
+3. Enable Bluetooth again and wait a few seconds
+4. Don't reboot before as the BT restore gets wiped (from some sort of cache) otherwise
+5. Now reboot (as I use to do after bulk restore when switching ROMs)
+
+WiFi restore does need the reboot after the restoring process
 
 ## Do I need a rooted phone?
 
 Yes, Oui, Si, Si, Ja, Ja, Da, Ay...
 
-## What is root access used for?
+### What is root access used for?
 
 In short:
 Accessing the APK+data of all apps (including system apps and special backups), so to access [all the necessary paths in the filesystem](#what-are-all-these-backup-parts-icons--which-parts-are-included-in-a-backup).
@@ -257,7 +286,7 @@ To change back the backup directory, you can clear data, or edit it in the share
 
 </details>
 
-## So why use SAF then?
+### So why use SAF then?
 
 [Access documents and other files from shared storage](https://developer.android.com/training/data-storage/shared/documents-files)
 In the next Android versions Google will (most probably) force apps more and more to access the storage via SAF.
@@ -275,7 +304,7 @@ In the next Android versions Google will (most probably) force apps more and mor
 * obfuscation of the classical path structure
 * unreliable file names (providers can rename the files as they like)
 
-## Below some "performance" or time measuring infos from an older phone
+### Below some "performance" or time measuring infos from an older phone
 
 Todays measurements are like 1-2 sec to scan ~500 backup instances.
 
@@ -474,7 +503,7 @@ before a restore if `restoreKillApps` is enabled.
 This means, it first tries to gracefully stop the app (which needs a recent Android version).
 If that fails (or stop-app doesn't exist) the stop is forced.
 
-## Do I need to pause apps?
+### Do I need to pause apps?
 
 Originally backup software is used when the system is properly shutdown and not running.
 This is the best method, because everything is in a consistent state.
@@ -507,24 +536,6 @@ With pausing, you increase the chance for a consistent backup.
 In general you should run backups, when you don't use your system, because there is always a risk of incomplete files.
 
 In practice, pausing seems to matter less than expected, **if** you don't use your system while the backup runs.
-
-## How can I backup SMS & Call log?
-
-Generally please see [What are Special Backups?](#what-are-special-backups) first.
-
-**SMS/MMS and Call-logs** </br>
-NB starts supporting backup SMS/MMS and Call logs beginning with version 8. The current implementation (of [DL](https://github.com/dl200010)) writes all the details into a JSON format.
-
-The Call-Logs are saved in data providers like some other special data (`com.android.providers.telephony`).
-
-*You may need to restart your device after restoring special data, to see the restored data*.
-
-Next to this users asked quite often about **contacts, calendar** and todo-lists:
-We advise to use [DecSync](https://github.com/39aldo39/DecSync) with its diverse apps.
-Alternatively use a CalDAV/CardDAV management app (like DavX5) and sync them with a trustworthy mail provider account (or your private Mailserver, a Nextcloud, etc. etc.).
-
-For contacts it should also work to back up the data of "Contacts Storage" (package `com.android.providers.contacts`) system app.
-Restoring it later on should restore contacts fine, but it's not guaranteed. Up to now it's not implemented as a [special backup](#what-are-special-backups) by NB.
 
 ## Are you going to support older Android versions?
 
@@ -1078,3 +1089,5 @@ At least the tar files looked ok from looking at some samples.
         still share from there
   * `afterSupport` reset them to defaults (less intensive tracing)
 * you may enable `logToSystemLogcat`, if the internal log isn't long enough and you need to use an app to capture a longer log (or catch it in case of crashes etc.)
+
+Also see TROUBLESHOOTING.md document...

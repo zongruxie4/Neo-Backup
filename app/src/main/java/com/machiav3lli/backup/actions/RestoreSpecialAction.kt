@@ -65,13 +65,14 @@ class RestoreSpecialAction(context: Context, work: AppActionWork?, shell: ShellH
         val backupFilename = getBackupArchiveFilename(
             BACKUP_DIR_DATA,
             backup.isCompressed,
+            backup.compressionType,
             backup.isEncrypted
         )
         val backupArchiveFile = backupDir.findFile(backupFilename)
             ?: throw RestoreFailedException("Backup archive at $backupFilename is missing")
         try {
             TarArchiveInputStream(
-                openArchiveFile(backupArchiveFile, backup.isCompressed, backup.isEncrypted, backup.iv)
+                openArchiveFile(backupArchiveFile, backup.isCompressed, backup.compressionType, backup.isEncrypted, backup.iv)
             ).use { archiveStream ->
                 tempPath.mkdir()
                 // Extract the contents to a temporary directory
