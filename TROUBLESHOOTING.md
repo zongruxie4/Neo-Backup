@@ -32,3 +32,15 @@ only collecting what comes along when supporting users...
 ### "install failed verification"
 
     => Disable verify apps over USB   [x]
+
+### *.properties files are zero size, but corresponding archives are created
+
+    => it seems ANExplorer replaced DocumentsUI and doesn't work
+
+    this is not really proofed and it doesn't feel logical,
+    but using DocumentsUI again worked, which also means reselecting the backup directory,
+    it is possible that the permission got lost.
+    However, if access is not working, no file would have been created.
+    Though, ANExplorer seems to be the provider for the storage and this means it is at least
+    between a request and the execution by the system.
+    Perhaps text files are handled differently and don't work.
