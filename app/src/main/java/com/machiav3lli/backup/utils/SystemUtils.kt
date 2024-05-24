@@ -85,6 +85,29 @@ object SystemUtils {
         }
     }
 
+    fun share(text: String, subject: String? = null) {
+        MainScope().launch(Dispatchers.IO) {
+            try {
+                if (text.isEmpty())
+                    throw Exception("text is empty")
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    if (subject.isNullOrEmpty())
+                        putExtra(Intent.EXTRA_SUBJECT, "[NeoBackup]")
+                    else
+                        putExtra(Intent.EXTRA_SUBJECT, subject)
+                    putExtra(Intent.EXTRA_TEXT, text)
+                }
+                val shareIntent = Intent.createChooser(sendIntent, subject ?: "NeoBackup")
+                OABX.activity?.startActivity(shareIntent)
+            } catch (e: Throwable) {
+                LogsHandler.unexpectedException(e)
+            }
+        }
+    }
+
     fun share(file: StorageFile, asFile: Boolean = true) {
         MainScope().launch(Dispatchers.IO) {
             try {

@@ -93,7 +93,7 @@ fun LogItem(
                             positive = false,
                             onClick = { onDelete(item) }
                         )
-                        ElevatedActionButton(
+                        ElevatedActionButton(       // TODO: remove?, share button already in TerminalText
                             icon = Phosphor.ShareNetwork,
                             text = stringResource(id = R.string.shareTitle),
                             withText = false,
@@ -108,6 +108,7 @@ fun LogItem(
             Card(modifier = Modifier.fillMaxWidth()) {
                 Box(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(0.dp)
                         .background(color = Color(0.2f, 0.2f, 0.3f))
                 ) {

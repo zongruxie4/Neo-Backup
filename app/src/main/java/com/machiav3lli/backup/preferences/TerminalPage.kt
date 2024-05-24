@@ -21,6 +21,7 @@ import android.annotation.SuppressLint
 import android.os.Environment
 import android.os.Process
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +45,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -97,7 +99,6 @@ import com.machiav3lli.backup.items.Log
 import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.items.UndeterminedStorageFile
 import com.machiav3lli.backup.items.uriFromFile
-import com.machiav3lli.backup.ui.compose.SelectionContainerX
 import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowDown
@@ -106,6 +107,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUp
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Equals
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Play
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ShareNetwork
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.ifThen
 import com.machiav3lli.backup.ui.compose.isAtBottom
@@ -324,9 +326,7 @@ fun textLogShare(lines: List<String>, temporary: Boolean = false) {
                 }
             } else {
                 LogsHandler.writeToLogFile(text)?.let { file ->
-                    Log(file).let { log ->
-                        share(log, asFile = true)
-                    }
+                    share(Log(file), asFile = true)
                 }
             }
         }.onFailure {
@@ -393,159 +393,14 @@ fun TerminalButton(
 @Composable
 fun SmallButton(
     icon: ImageVector,
-    tint: Color = MaterialTheme.colorScheme.primary,
+    tint: Color? = null,
     onClick: () -> Unit,
 ) {
     RoundButton(
         icon = icon,
         onClick = onClick,
-        tint = tint
+        tint = tint ?: MaterialTheme.colorScheme.primary
     )
-}
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun TerminalPage() {
-    val output = remember { mutableStateListOf<String>() }
-    var command by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current
-    //val shellFocusRequester = remember { FocusRequester() }
-    //SideEffect { shellFocusRequester.requestFocus() }
-    val padding = 4.dp
-
-    fun launch(todo: () -> Unit) {
-        scope.launch(Dispatchers.Default) {
-            todo()
-        }
-    }
-
-    fun produce(produceLines: () -> List<String>) {
-        launch {
-            val hittingBusy = CoroutineScope(Dispatchers.Default)
-            hittingBusy.launch {
-                while (true) {
-                    OABX.hitBusy(50)
-                    delay(50)
-                }
-            }
-
-            runCatching {
-                focusManager.clearFocus()
-            }
-
-            val lines = produceLines()
-
-            output.addAll(lines)
-
-            hittingBusy.cancel()
-        }
-    }
-
-    fun run(command: String) {
-        produce { shell(command) }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            needFreshShell()
-        }
-    }
-
-    Scaffold(
-        containerColor = Color.Transparent,
-        topBar = {
-            TopBar(title = stringResource(id = NavItem.Terminal.title))
-        },
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-        ) {
-            OutlinedTextField(modifier = Modifier
-                .padding(padding)
-                .fillMaxWidth(),
-                //.focusRequester(shellFocusRequester),
-                value = command,
-                singleLine = false,
-                placeholder = { Text(text = "shell command", color = Color.Gray) },
-                trailingIcon = {
-                    Row {
-                        if (command.isNotEmpty())
-                            RoundButton(icon = Phosphor.X) {
-                                command = ""
-                            }
-                        RoundButton(icon = Phosphor.Play) {
-                            command.removeSuffix("\n")
-                            run(command)
-                            command = ""
-                        }
-                    }
-                },
-                keyboardOptions = KeyboardOptions(
-                    autoCorrect = false,
-                    imeAction = ImeAction.Go
-                ),
-                keyboardActions = KeyboardActions(
-                    onGo = {
-                        command.removeSuffix("\n")
-                        run(command)
-                        command = ""
-                    }
-                ),
-                onValueChange = {
-                    //if (it.endsWith("\n")) {
-                    //    run(command)
-                    //    command = ""
-                    //} else
-                    command = it
-                }
-            )
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(padding),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                TerminalButton("SUPPORT", important = true) { launch { supportInfoLogShare() } }
-                TerminalButton("share", important = true) { launch { textLogShare(output) } }
-                TerminalButton("clear", important = true) { output.clear() }
-                TerminalButton("log/int") { produce { logInt() } }
-                TerminalButton("log/app") { produce { logApp() } }
-                TerminalButton("log/rel") { produce { logRel() } }
-                TerminalButton("log/all") { produce { logSys() } }
-                TerminalButton("info") { produce { extendedInfo() } }
-                TerminalButton("prefs") { produce { dumpPrefs() } }
-                TerminalButton("env") { produce { dumpEnv() } }
-                TerminalButton("alarms") { produce { dumpAlarms() } }
-                TerminalButton("timing") { produce { dumpTiming() } }
-                TerminalButton("threads") { produce { threadsInfo() } }
-                TerminalButton("access") { produce { accessTest() } }
-                TerminalButton("dbpkg") { produce { dumpDbAppInfo() } }
-                TerminalButton("dbsch") { produce { dumpDbSchedule() } }
-                TerminalButton("errInfo") { produce { lastErrorPkg() + lastErrorCommand() } }
-                TerminalButton("err->cmd") {
-                    command =
-                        if (OABX.lastErrorCommands.isNotEmpty())
-                            OABX.lastErrorCommands.first()
-                        else
-                            "no error command"
-                }
-                TerminalButton("findBackups") { OABX.context.findBackups(forceTrace = true) }
-            }
-            Box(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .blockBorder()
-                    .weight(1f)
-            ) {
-                TerminalText(output, limitLines = 0, scrollOnAdd = true)
-            }
-        }
-    }
 }
 
 @Composable
@@ -594,14 +449,17 @@ fun TerminalText(
             modifier = Modifier
                 .fillMaxWidth()
                 .ifThen(limitLines == 0) { fillMaxHeight() }
+                //.ifThen(!wrap) { horizontalScroll(hscroll) }
                 .padding(0.dp)
-                .ifThen(!wrap) { horizontalScroll(hscroll) }
                 .background(color = Color(0.2f, 0.2f, 0.3f))
         ) {
-            SelectionContainerX(modifier = Modifier.fillMaxWidth()) {
+            SelectionContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp)
+            ) {
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .ifThen(limitLines == 0) { fillMaxHeight() }
                         .ifThen(limitLines > 0) {
                             heightIn(
@@ -609,6 +467,8 @@ fun TerminalText(
                                 totalLineHeight * limitLines + lineSpacing
                             )
                         }
+                        .fillMaxWidth()
+                        .ifThen(!wrap) { horizontalScroll(hscroll) }
                         .padding(8.dp, 0.dp, 0.dp, 0.dp),
                     verticalArrangement = Arrangement.spacedBy(lineSpacing),
                     state = listState
@@ -707,22 +567,178 @@ fun TerminalText(
                     search = it
                 }
             )
+            SmallButton(icon = Phosphor.ShareNetwork) {
+                SystemUtils.share(lines.joinToString("\n"))
+            }
             SmallButton(icon = if (wrap) Phosphor.ArrowUDownLeft else Phosphor.Equals) {
                 wrap = !wrap
             }
             // TODO move nav actions above the bar
             SmallButton(
                 icon = Phosphor.ArrowUp,
-                tint = if (listState.isAtTop()) Color.Transparent else MaterialTheme.colorScheme.inversePrimary
+                tint = if (listState.isAtTop()) Color.Transparent else null
             ) {
                 scope.launch { listState.scrollToItem(0) }
             }
             SmallButton(
                 icon = Phosphor.ArrowDown,
-                tint = if (listState.isAtBottom()) Color.Transparent else MaterialTheme.colorScheme.inversePrimary
+                tint = if (listState.isAtBottom()) Color.Transparent else null
             ) {
                 autoScroll = true
                 scope.launch { listState.scrollToItem(text.size) }
+            }
+        }
+    }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun TerminalPage(
+    modifier: Modifier = Modifier,
+) {
+    val output = remember { mutableStateListOf<String>() }
+    var command by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    //val shellFocusRequester = remember { FocusRequester() }
+    //SideEffect { shellFocusRequester.requestFocus() }
+    val padding = 4.dp
+
+    fun launch(todo: () -> Unit) {
+        scope.launch(Dispatchers.Default) {
+            todo()
+        }
+    }
+
+    fun produce(produceLines: () -> List<String>) {
+        launch {
+            val hittingBusy = CoroutineScope(Dispatchers.Default)
+            hittingBusy.launch {
+                while (true) {
+                    OABX.hitBusy(50)
+                    delay(50)
+                }
+            }
+
+            runCatching {
+                focusManager.clearFocus()
+            }
+
+            val lines = produceLines()
+
+            output.addAll(lines)
+
+            hittingBusy.cancel()
+        }
+    }
+
+    fun run(command: String) {
+        produce { shell(command) }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            needFreshShell()
+        }
+    }
+
+    Scaffold(
+        modifier = modifier,
+        containerColor = Color.Transparent,
+        topBar = {
+            TopBar(title = stringResource(id = NavItem.Terminal.title))
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+        ) {
+            OutlinedTextField(modifier = Modifier
+                .padding(padding)
+                .fillMaxWidth(),
+                //.focusRequester(shellFocusRequester),
+                value = command,
+                singleLine = false,
+                placeholder = { Text(text = "shell command", color = Color.Gray) },
+                trailingIcon = {
+                    Row {
+                        if (command.isNotEmpty())
+                            RoundButton(icon = Phosphor.X) {
+                                command = ""
+                            }
+                        RoundButton(icon = Phosphor.Play) {
+                            command.removeSuffix("\n")
+                            run(command)
+                            command = ""
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    autoCorrect = false,
+                    imeAction = ImeAction.Go
+                ),
+                keyboardActions = KeyboardActions(
+                    onGo = {
+                        command.removeSuffix("\n")
+                        run(command)
+                        command = ""
+                    }
+                ),
+                onValueChange = {
+                    //if (it.endsWith("\n")) {
+                    //    run(command)
+                    //    command = ""
+                    //} else
+                    command = it
+                }
+            )
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(padding),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                TerminalButton("SUPPORT", important = true) { launch { supportInfoLogShare() } }
+                TerminalButton("share", important = true) { launch { textLogShare(output) } }
+                TerminalButton("clear", important = true) { output.clear() }
+                TerminalButton("log/int") { produce { logInt() } }
+                TerminalButton("log/app") { produce { logApp() } }
+                TerminalButton("log/rel") { produce { logRel() } }
+                TerminalButton("log/all") { produce { logSys() } }
+                TerminalButton("info") { produce { extendedInfo() } }
+                TerminalButton("prefs") { produce { dumpPrefs() } }
+                TerminalButton("env") { produce { dumpEnv() } }
+                TerminalButton("alarms") { produce { dumpAlarms() } }
+                TerminalButton("timing") { produce { dumpTiming() } }
+                TerminalButton("threads") { produce { threadsInfo() } }
+                TerminalButton("access") { produce { accessTest() } }
+                TerminalButton("dbpkg") { produce { dumpDbAppInfo() } }
+                TerminalButton("dbsch") { produce { dumpDbSchedule() } }
+                TerminalButton("errInfo") { produce { lastErrorPkg() + lastErrorCommand() } }
+                TerminalButton("err->cmd") {
+                    command =
+                        if (OABX.lastErrorCommands.isNotEmpty())
+                            OABX.lastErrorCommands.first()
+                        else
+                            "no error command"
+                }
+                TerminalButton("findBackups") { OABX.context.findBackups(forceTrace = true) }
+            }
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .blockBorder()
+                    .weight(1f)
+            ) {
+                TerminalText(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = output,
+                    limitLines = 0,
+                    scrollOnAdd = true
+                )
             }
         }
     }
@@ -734,7 +750,7 @@ fun PreviewTerminalText() {
 
     val text = remember {
         mutableStateListOf(
-            //"aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa.",
+            "0123456789.0123456789.0123456789.0123456789.0123456789.0123456789.0123456789.0123456789.",
             //"bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb bbbb.",
             //"cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc cccc.",
             //"dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd dddd.",
@@ -746,7 +762,7 @@ fun PreviewTerminalText() {
             "this is an ERROR",
             "this is a warning",
             "this is a WARNING",
-            *((13..30).map { "line $it" }.toTypedArray())
+            *((8..100).map { "line $it" }.toTypedArray())
         )
     }
 
@@ -770,10 +786,65 @@ fun PreviewTerminalText() {
 
 @Preview
 @Composable
-fun PreviewTerminal() {
+fun PreviewTestTextWidth() {
+
+    val listState = rememberLazyListState()
+    val lineSpacing = 8.dp
+    val hscroll = rememberScrollState()
+    val wrap = false
+
     Box(
         modifier = Modifier
             .height(500.dp)
+            .fillMaxWidth()
+            .background(color = Color.Blue)
+            .padding(8.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                //.ifThen(!wrap) { horizontalScroll(hscroll) }
+                .background(color = Color.Gray)
+        ) {
+            SelectionContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        //.fillMaxWidth()
+                        .padding(8.dp)
+                        .ifThen(!wrap) { horizontalScroll(hscroll) }
+                        .background(color = Color.Yellow),
+                    verticalArrangement = Arrangement.spacedBy(lineSpacing),
+                    state = listState
+                ) {
+                    items(100) {
+                        Text(
+                            text = "line $it ###################################################",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .padding(4.dp)
+                                .border(1.dp, Color.Black)
+                                .padding(4.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewTerminal() {
+
+    Box(
+        modifier = Modifier
+        //.height(500.dp)
         //.width(500.dp)
     ) {
         TerminalPage()
