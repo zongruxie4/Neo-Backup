@@ -62,14 +62,14 @@ fun LogItem(
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Row {
-                                if (!item.deviceName.isNullOrEmpty())
+                                if (item.deviceName.isNotEmpty())
                                     Text(
                                         text = "${item.deviceName} ",
                                         overflow = TextOverflow.Ellipsis,
                                         maxLines = 1,
                                         style = MaterialTheme.typography.labelMedium,
                                     )
-                                if (!item.sdkCodename.isNullOrEmpty())
+                                if (item.sdkCodename.isNotEmpty())
                                     Text(
                                         text = "abi${item.sdkCodename} ",
                                         softWrap = true,
@@ -77,7 +77,7 @@ fun LogItem(
                                         maxLines = 1,
                                         style = MaterialTheme.typography.labelMedium,
                                     )
-                                if (!item.cpuArch.isNullOrEmpty())
+                                if (item.cpuArch.isNotEmpty())
                                     Text(
                                         text = "${item.cpuArch} ",
                                         overflow = TextOverflow.Ellipsis,

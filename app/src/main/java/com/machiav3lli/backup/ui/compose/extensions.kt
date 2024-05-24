@@ -2,6 +2,7 @@ package com.machiav3lli.backup.ui.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -64,10 +66,11 @@ inline fun Modifier.ifThenElse(
     }
 }
 
-fun Modifier.blockBorder(style: Boolean = pref_altBlockLayout.value) = composed {
+fun Modifier.blockBorder(style: Boolean? = null) = composed {
+    val altBlockStyle = style ?: (if(LocalInspectionMode.current) false else pref_altBlockLayout.value)
     this
         .clip(MaterialTheme.shapes.extraLarge)
-        .ifThenElse(style,
+        .ifThenElse(altBlockStyle,
             modifier = {
                 border(
                     1.dp,
@@ -83,7 +86,7 @@ fun Modifier.blockBorder(style: Boolean = pref_altBlockLayout.value) = composed 
 
 @Composable
 fun SelectionContainerX(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    SelectionContainer(modifier = modifier, content = content)
+    SelectionContainer(modifier = modifier.fillMaxWidth(), content = content)
     //content()
 }
 
