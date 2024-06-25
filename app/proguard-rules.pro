@@ -50,6 +50,17 @@
 # @Serializable and @Polymorphic are used at runtime for polymorphic serialization.
 -keepattributes RuntimeVisibleAnnotations,AnnotationDefault
 
+# Keep classes with native methods (jni)
+#-keepclasseswithmembers class ** {
+#    native <methods>;
+#}
+# general way does not help, so go the specific way:
+# Keep all classes and methods in the zstd package
+-keep class com.github.luben.zstd.** { *; }
+-keepclasseswithmembers class com.github.luben.zstd.** {
+    native <methods>;
+}
+
 -dontobfuscate
 
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
