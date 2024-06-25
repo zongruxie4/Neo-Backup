@@ -50,16 +50,9 @@
 # @Serializable and @Polymorphic are used at runtime for polymorphic serialization.
 -keepattributes RuntimeVisibleAnnotations,AnnotationDefault
 
-# Keep classes with native methods (jni)
-#-keepclasseswithmembers class ** {
-#    native <methods>;
-#}
-# general way does not help, so go the specific way:
-# Keep all classes and methods in the zstd package
+# zstd, for some reason minify doesn't work without this:
+# TODO: I guess the pattern could be more limited
 -keep class com.github.luben.zstd.** { *; }
--keepclasseswithmembers class com.github.luben.zstd.** {
-    native <methods>;
-}
 
 -dontobfuscate
 
