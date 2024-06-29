@@ -42,6 +42,7 @@
 * [What does the notification of schedules and batch jobs tell me?](#what-does-the-notification-of-schedules-and-batch-jobs-tell-me)
 * [Does NB support multi-user setups / work-profile?](#does-nb-support-multi-user-setups--work-profile)
 * [Does NB support remote backup locations?](#does-nb-support-remote-backup-locations)
+* [I need label/tags/similar on some backups to identify them](#i-need-labeltagssimilar-on-some-backups-to-identify-them)
 * [Troubleshooting](#troubleshooting)
 
 ## What is Neo Backup?
@@ -1068,6 +1069,32 @@ Not sure what happened. At least it seems that less apps could eventually work..
 At least the tar files looked ok from looking at some samples.
 
 </details>
+
+## I need label/tags/similar on some backups to identify them
+
+that's not implemented (yet?).
+
+As a workaround you can rename the backup or easier put both in a sub-folder with a useful name. The subfolder could also be reused later for other backups of that "label".
+
+* you always need to handle folder and properties file equally, so that they live at the same directory level and have the same name like this:
+  ```
+  path/backupfolder/
+  path/backupfolder.properties
+  ```
+* any subdirectories and file name additions below the basic backup directory (that one chosen in the preferences) will be shown after the date of the backup
+* in this name
+  * the package name will be replaced by the package symbol
+  * the date and time will be removed
+* the date and time used in the entry is that from inside the properties file (which should always be equal to that in the file name)
+
+e.g.
+```
+<backupdir>/xyz/abc-the.package.name-def/<date-and-time>-some-file-name-addition.properties
+```
+will be shown like
+```
+xyz/abc-📦-def/some-file-name-addition
+```
 
 ## Troubleshooting
 
