@@ -44,6 +44,7 @@
 * [Does NB support remote backup locations?](#does-nb-support-remote-backup-locations)
 * [I need label/tags/similar on some backups to identify them](#i-need-labeltagssimilar-on-some-backups-to-identify-them)
 * [How do I create a support log?](#how-do-i-create-a-support-log)
+* [How do I filter on changed data?](#how-do-i-filter-on-changed-data)
 * [Troubleshooting](#troubleshooting)
 
 ## What is Neo Backup?
@@ -1096,9 +1097,27 @@ will be shown like
 ```
 xyz/abc-📦-def/some-file-name-addition
 ```
+
+
 ## How do I create a support log?
 
 use `preferences / Tools / Terminal / SUPPORT` (...wait...) then share the file (or find it in `<backupdir>/!-LOGS`)
+
+
+## How do I filter on changed data?
+
+you can't...
+
+We know, Titanium Backup had this feature. We also discussed it.
+
+Some Android versions ago, we checked how much data changes every day.
+We found that almost all apps have changed data.
+* Those that don't, have a very small data size (apps like bubble level, calculators etc.), so they do not matter much.
+* Those with bigger data usually update it frequently (especially messaging apps).
+* The number of files is also much bigger today. Scanning all those data files does not make much sense.
+
+It is easier to have categories (= different schedules) of important and less important apps/data with corresponding backup intervals.
+
 
 ## Troubleshooting
 
