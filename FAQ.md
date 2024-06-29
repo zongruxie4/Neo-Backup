@@ -43,6 +43,7 @@
 * [Does NB support multi-user setups / work-profile?](#does-nb-support-multi-user-setups--work-profile)
 * [Does NB support remote backup locations?](#does-nb-support-remote-backup-locations)
 * [I need label/tags/similar on some backups to identify them](#i-need-labeltagssimilar-on-some-backups-to-identify-them)
+* [How do I create a support log?](#how-do-i-create-a-support-log)
 * [Troubleshooting](#troubleshooting)
 
 ## What is Neo Backup?
@@ -1095,6 +1096,9 @@ will be shown like
 ```
 xyz/abc-📦-def/some-file-name-addition
 ```
+## How do I create a support log?
+
+use `preferences / Tools / Terminal / SUPPORT` (...wait...) then share the file (or find it in `<backupdir>/!-LOGS`)
 
 ## Troubleshooting
 
