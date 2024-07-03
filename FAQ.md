@@ -865,7 +865,7 @@ UPDATE:
 
 There is now an experimental script that scans a whole directory and creates decrypted and renamed copies of the included backups:
 
-see [decrypt-all](https://github.com/NeoApplications/Neo-Backup/blob/main/FAQ.md)
+see [decrypt-all](https://github.com/NeoApplications/Neo-Backup/tree/main/etc/decrypt)
 
 It is derived from Nils' experimental `decrypt.py` found in his OABXDecrypt github repo.
 Don't forget to read the `README.md` before doing anything with it and create a backup of the backups.
