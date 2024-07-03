@@ -855,9 +855,22 @@ Here is a quick status overview, what NB is capable of - to be edited.
 
 You can find the encryption algorithm and setup in this class: [Neo-Backup - Crypto.kt · GitHub](https://github.com/NeoApplications/Neo-Backup/blob/main/app/src/main/java/com/machiav3lli/backup/utils/CryptoUtils.kt) . The rest depends on the version you used.
 
-One of the contributors ([Pizze](https://github.com/Tiefkuehlpizze)) took the last Java version this Crypto class and built a wrapper around it. <br/>
---> https://github.com/Tiefkuehlpizze/OABXDecrypt <br/>
-So for those who really want to decryp the backups on their PCs, this might be a good start and a helpful tool.
+One of the contributors (Nils: [Pizze](https://github.com/Tiefkuehlpizze)) took the last Java version of this Crypto class and built a wrapper around it:
+
+[OABXDecrypt](https://github.com/Tiefkuehlpizze/OABXDecrypt)
+
+So for those who really want to decrypt the backups on their PCs, this might be a good start and a helpful tool.
+
+UPDATE:
+
+There is now an experimental script that scans a whole directory and creates decrypted and renamed copies of the included backups:
+
+see [decrypt-all](https://github.com/NeoApplications/Neo-Backup/blob/main/FAQ.md)
+
+It is derived from Nils' experimental `decrypt.py` found in his OABXDecrypt github repo.
+Don't forget to read the `README.md` before doing anything with it and create a backup of the backups.
+
+Note: decryption needs the `iv` vector from the properties file (a random value), so it is impossible to decrypt anything without the corresponding properties file (e.g. you can create a fake properties file, unless you encrypted the backup).
 
 ## What does the notification of schedules and batch jobs tell me?
 
