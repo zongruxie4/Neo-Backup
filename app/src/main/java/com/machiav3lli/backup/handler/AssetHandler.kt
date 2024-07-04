@@ -14,7 +14,6 @@ import java.io.FileOutputStream
 class AssetHandler(context: Context) {
 
     val VERSION_FILE = "__version__"
-    val ASSETS_SUBDIR = "assets"
 
     var directory: File
         private set
@@ -25,7 +24,7 @@ class AssetHandler(context: Context) {
         // the version file is written at the end of the copy to validate the transaction
         // this may upgrade or downgrade files, but always all at once
 
-        directory = File(context.filesDir, ASSETS_SUBDIR)
+        directory = context.filesDir
         directory.mkdirs()
         val appVersion = BuildConfig.VERSION_NAME
         val version = try {

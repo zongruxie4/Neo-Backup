@@ -46,6 +46,7 @@ import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.findBackups
+import com.machiav3lli.backup.plugins.Plugin
 import com.machiav3lli.backup.preferences.pref_busyHitTime
 import com.machiav3lli.backup.preferences.pref_cancelOnStart
 import com.machiav3lli.backup.preferences.pref_prettyJson
@@ -265,6 +266,8 @@ class OABX : Application() {
         hitBusy(60000)
 
         initShellHandler()
+        Plugin.ensureScanned()
+
         db = ODatabase.getInstance(applicationContext)
 
         val result = registerReceiver(
@@ -690,7 +693,7 @@ class OABX : Application() {
 
         fun endLogSection(section: String) {    //TODO hg42 timer!
             val time = endNanoTimer("section.$section")
-            var count = 0
+            var count : Int
             synchronized(logSections) {
                 count = logSections.getValue(section)
                 logSections[section] = count - 1
