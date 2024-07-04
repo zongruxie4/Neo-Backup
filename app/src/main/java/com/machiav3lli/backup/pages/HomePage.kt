@@ -259,15 +259,17 @@ fun HomePage() {
                 scope.launch { appSheetState.hide() }
                 appSheetPN.value = null
             }
-            Sheet(
-                sheetState = appSheetState,
-                onDismissRequest = dismiss
-            ) {
-                AppSheet(
-                    viewModel = appSheetVM!!,
-                    packageName = appSheetPN.value ?: "",
-                    onDismiss = dismiss,
-                )
+            appSheetVM?.let { vm ->
+                Sheet(
+                    sheetState = appSheetState,
+                    onDismissRequest = dismiss
+                ) {
+                    AppSheet(
+                        viewModel = vm,
+                        packageName = appSheetPN.value ?: "",
+                        onDismiss = dismiss,
+                    )
+                }
             }
         }
         if (openBatchDialog.value) BaseDialog(openDialogCustom = openBatchDialog) {
