@@ -1,0 +1,9 @@
+#!/bin/sh
+
+password=${1:-no_password_given}
+directory=$(realpath ${2:-.})
+
+cd $(dirname $0)
+
+pipenv --bare install
+pipenv --bare run python decrypt-all.py $password $directory

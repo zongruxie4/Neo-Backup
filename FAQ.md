@@ -42,6 +42,9 @@
 * [What does the notification of schedules and batch jobs tell me?](#what-does-the-notification-of-schedules-and-batch-jobs-tell-me)
 * [Does NB support multi-user setups / work-profile?](#does-nb-support-multi-user-setups--work-profile)
 * [Does NB support remote backup locations?](#does-nb-support-remote-backup-locations)
+* [I need label/tags/similar on some backups to identify them](#i-need-labeltagssimilar-on-some-backups-to-identify-them)
+* [How do I filter on changed data?](#how-do-i-filter-on-changed-data)
+* [How do I create a support log?](#how-do-i-create-a-support-log)
 * [Troubleshooting](#troubleshooting)
 
 ## What is Neo Backup?
@@ -852,9 +855,22 @@ Here is a quick status overview, what NB is capable of - to be edited.
 
 You can find the encryption algorithm and setup in this class: [Neo-Backup - Crypto.kt · GitHub](https://github.com/NeoApplications/Neo-Backup/blob/main/app/src/main/java/com/machiav3lli/backup/utils/CryptoUtils.kt) . The rest depends on the version you used.
 
-One of the contributors ([Pizze](https://github.com/Tiefkuehlpizze)) took the last Java version this Crypto class and built a wrapper around it. <br/>
---> https://github.com/Tiefkuehlpizze/OABXDecrypt <br/>
-So for those who really want to decryp the backups on their PCs, this might be a good start and a helpful tool.
+One of the contributors (Nils: [Pizze](https://github.com/Tiefkuehlpizze)) took the last Java version of this Crypto class and built a wrapper around it:
+
+[OABXDecrypt](https://github.com/Tiefkuehlpizze/OABXDecrypt)
+
+So for those who really want to decrypt the backups on their PCs, this might be a good start and a helpful tool.
+
+UPDATE:
+
+There is now an experimental script that scans a whole directory and creates decrypted and renamed copies of the included backups:
+
+see [decrypt-all](https://github.com/NeoApplications/Neo-Backup/tree/main/etc/decrypt)
+
+It is derived from Nils' experimental `decrypt.py` found in his OABXDecrypt github repo.
+Don't forget to read the `README.md` before doing anything with it and create a backup of the backups.
+
+Note: decryption needs the `iv` vector from the properties file (a random value), so it is impossible to decrypt anything without the corresponding properties file (e.g. you can create a fake properties file, unless you encrypted the backup).
 
 ## What does the notification of schedules and batch jobs tell me?
 
@@ -1068,6 +1084,53 @@ Not sure what happened. At least it seems that less apps could eventually work..
 At least the tar files looked ok from looking at some samples.
 
 </details>
+
+## I need label/tags/similar on some backups to identify them
+
+that's not implemented (yet?).
+
+As a workaround you can rename the backup or easier put both in a sub-folder with a useful name. The subfolder could also be reused later for other backups of that "label".
+
+* you always need to handle folder and properties file equally, so that they live at the same directory level and have the same name like this:
+  ```
+  path/backupfolder/
+  path/backupfolder.properties
+  ```
+* any subdirectories and file name additions below the basic backup directory (that one chosen in the preferences) will be shown after the date of the backup
+* in this name
+  * the package name will be replaced by the package symbol
+  * the date and time will be removed
+* the date and time used in the entry is that from inside the properties file (which should always be equal to that in the file name)
+
+e.g.
+```
+<backupdir>/xyz/abc-the.package.name-def/<date-and-time>-some-file-name-addition.properties
+```
+will be shown like
+```
+xyz/abc-📦-def/some-file-name-addition
+```
+
+
+## How do I filter on changed data?
+
+you can't...
+
+We know, Titanium Backup had this feature. We also discussed it.
+
+Some Android versions ago, we checked how much data changes every day.
+We found that almost all apps have changed data.
+* Those that don't, have a very small data size (apps like bubble level, calculators etc.), so they do not matter much.
+* Those with bigger data usually update it frequently (especially messaging apps).
+* The number of files is also much bigger today. Scanning all those data files does not make much sense.
+
+It is easier to have categories (= different schedules) of important and less important apps/data with corresponding backup intervals.
+
+
+## How do I create a support log?
+
+use `preferences / Tools / Terminal / SUPPORT` (...wait...) then share the file (or find it in `<backupdir>/!-LOGS`)
+
 
 ## Troubleshooting
 

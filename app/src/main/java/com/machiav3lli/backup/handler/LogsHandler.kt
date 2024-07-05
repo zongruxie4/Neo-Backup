@@ -254,10 +254,10 @@ class LogsHandler {
         fun handleErrorMessages(context: Context, errorText: String?): String? {
             return when {
                 errorText?.contains("bytes specified in the header were written")
-                    ?: false -> context.getString(R.string.error_datachanged)
+                    ?: false -> context.getString(R.string.error_datachanged) + "\n(" + errorText + ")"
 
                 errorText?.contains("Input is not in the .gz format")
-                    ?: false -> context.getString(R.string.error_encryptionpassword)
+                    ?: false -> context.getString(R.string.error_encryptionpassword) + "\n" + errorText + ")"
 
                 else         -> errorText
             }

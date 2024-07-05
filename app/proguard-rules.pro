@@ -50,6 +50,10 @@
 # @Serializable and @Polymorphic are used at runtime for polymorphic serialization.
 -keepattributes RuntimeVisibleAnnotations,AnnotationDefault
 
+# zstd, for some reason minify doesn't work without this:
+# TODO: I guess the pattern could be more limited
+-keep class com.github.luben.zstd.** { *; }
+
 -dontobfuscate
 
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
