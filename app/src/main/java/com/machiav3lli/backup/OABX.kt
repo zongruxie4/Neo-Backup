@@ -215,6 +215,12 @@ val traceWIP = TraceUtils.TracePrefExtreme(
     default = false
 )
 
+val traceAccess = TraceUtils.TracePref(
+    name = "Access",
+    summary = "trace access",
+    default = false
+)
+
 val traceBackups = TraceUtils.TracePref(
     name = "Backups",
     summary = "trace backups",

@@ -913,7 +913,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
     ) {
         val dataType = BACKUP_DIR_EXTERNAL_FILES
         val backupArchive = findBackupArchive(dataType, backup, backupDir)
-        val extractTo = app.getExternalDataPath(context)
+        val extractTo = app.getExternalDataPath()
         if (!isPlausiblePath(extractTo, app.packageName))
             throw RestoreFailedException(
                 "path '$extractTo' does not contain ${app.packageName}"
@@ -944,7 +944,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         backup: Backup,
         backupDir: StorageFile,
     ) {
-        val extractTo = app.getObbFilesPath(context)
+        val extractTo = app.getObbFilesPath()
         if (!isPlausiblePath(extractTo, app.packageName))
             throw RestoreFailedException(
                 "path '$extractTo' does not contain ${app.packageName}"
@@ -988,7 +988,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         backup: Backup,
         backupDir: StorageFile,
     ) {
-        val extractTo = app.getMediaFilesPath(context)
+        val extractTo = app.getMediaFilesPath()
         if (!isPlausiblePath(extractTo, app.packageName))
             throw RestoreFailedException(
                 "path '$extractTo' does not contain ${app.packageName}"

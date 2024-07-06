@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.handler.LogsHandler
+import com.machiav3lli.backup.items.RootFile
 import com.machiav3lli.backup.items.StorageFile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 import java.io.ByteArrayInputStream
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -131,4 +133,83 @@ object SystemUtils {
             }
         }
     }
+
+    fun isWritablePath(file: RootFile?): Boolean =
+        file?.let { file.exists() && file.canRead() && file.canWrite() } ?: false
+
+    fun isReadablePath(file: RootFile?): Boolean =
+        file?.let { file.exists() && file.canRead() } ?: false
+
+    val storagePath = mutableMapOf<String, RootFile?>()
+
+    fun getShadowPath(
+        user: String,
+        storage: String,
+        subPath: String,
+        isUseablePath: (file: RootFile?) -> Boolean = ::isWritablePath
+    ): RootFile? {
+        // check final path for shadow
+        val key = "shadow:$user:$storage:$subPath"
+        return storagePath.getOrElse(key) {
+            val possiblePaths = listOf(
+                "/mnt/media_rw/$storage/$subPath",
+                "/mnt/pass_through/$user/$storage/$subPath",
+                "/mnt/runtime/full/$storage/$subPath",
+                "/mnt/runtime/default/$storage/$subPath",
+
+                // NOTE: lockups occur in emulator (or A12?) for certain paths
+                // e.g. /storage/emulated/$user
+                //
+                // lockups! primary links to /storage/emulated/$user and all self etc.
+                //"/storage/$storage/$subpath",
+                //"/storage/self/$storage/$subpath",
+                //"/mnt/runtime/default/self/$storage/$subpath"
+                //"/mnt/user/$user/$storage/$subpath",
+                //"/mnt/user/$user/self/$storage/$subpath",
+                //"/mnt/androidwritable/$user/self/$storage/$subpath",
+            )
+            possiblePaths.forEach { path ->
+                val file = RootFile(path)
+                if (isUseablePath(file)) {   //TODO hg42 check with timeout in case of lockups
+                    Timber.i("found $key at $file")
+                    storagePath.put(path, file)
+                    return file
+                }
+            }
+            return null
+        }
+    }
+
+    fun getAndroidFolder(
+        user: String,
+        subPath: String,
+        isUseablePath: (file: RootFile?) -> Boolean = ::isWritablePath
+    ): RootFile? {
+        // only check Android folder and add subFolder even if it does not exist
+        val key = "Android:$user:$subPath"
+        return storagePath.getOrElse(key) {
+            val baseKey = "Android:$user:"
+            storagePath.getOrElse(baseKey) {
+                val possiblePaths = listOf(
+                    "/data/media/$user/Android",
+                    "/mnt/user/$user/emulated/$user/Android",
+                )
+                possiblePaths.forEach { path ->
+                    val file = RootFile(path)
+                    if (isUseablePath(file)) {   //TODO hg42 check with timeout in case of lockups
+                        Timber.i("found $key at$file")
+                        storagePath.put(baseKey, file)
+                        return file
+                    }
+                }
+                return null
+            }?.let {
+                val file = RootFile(it, subPath)
+                storagePath.put(key, file)
+                return file
+            }
+            return null
+        }
+    }
+
 }

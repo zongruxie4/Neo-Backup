@@ -32,6 +32,7 @@ import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.isFileNotFoundException
 import com.machiav3lli.backup.handler.ShellHandler.Companion.quote
+import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRootPipeOutCollectErr
 import com.machiav3lli.backup.handler.ShellHandler.Companion.utilBoxQ
 import com.machiav3lli.backup.handler.ShellHandler.ShellCommandFailedException
@@ -44,6 +45,7 @@ import com.machiav3lli.backup.preferences.pref_backupPauseApps
 import com.machiav3lli.backup.preferences.pref_backupTarCmd
 import com.machiav3lli.backup.preferences.pref_fakeBackupSeconds
 import com.machiav3lli.backup.tasks.AppActionWork
+import com.machiav3lli.backup.traceAccess
 import com.machiav3lli.backup.utils.CIPHER_ALGORITHM
 import com.machiav3lli.backup.utils.CryptoSetupException
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
@@ -322,36 +324,6 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
     }
 
     @Throws(BackupFailedException::class)
-    protected open fun backupPackage(app: Package, backupInstanceDir: StorageFile) {
-        Timber.i("<${app.packageName}> Backup package apks")
-        var apksToBackup = arrayOf(app.apkPath)
-        if (app.apkSplits.isEmpty()) {
-            Timber.d("<${app.packageName}> The app is a normal apk")
-        } else {
-            apksToBackup += app.apkSplits.drop(0)
-            Timber.d("<${app.packageName}> Package is split into ${apksToBackup.size} apks")
-        }
-        Timber.d(
-            "[%s] Backing up package (%d apks: %s)",
-            app.packageName,
-            apksToBackup.size,
-            apksToBackup.joinToString(" ") { s: String -> RootFile(s).name }
-        )
-        for (apk in apksToBackup) {
-            try {
-                Timber.i("${app.packageName}: $apk")
-                suCopyFileToDocument(apk, backupInstanceDir)
-            } catch (e: IOException) {
-                Timber.e("$app: Could not backup apk $apk: $e")
-                throw BackupFailedException("Could not backup apk $apk", e)
-            } catch (e: Throwable) {
-                LogsHandler.unexpectedException(e, app)
-                throw BackupFailedException("Could not backup apk $apk", e)
-            }
-        }
-    }
-
-    @Throws(BackupFailedException::class)
     private fun assembleFileList(sourcePath: String): List<ShellHandler.FileInfo> {
         // get and filter the whole tree at once //TODO use iterator instead of list
         return try {
@@ -524,6 +496,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         iv: ByteArray?,
     ): Boolean {
         Timber.i("${OABX.NB.packageName} <- $sourcePath")
+        traceAccess { runAsRoot("echo '$sourcePath: '  '$sourcePath'/*").out.joinToString("\n") }
         if (pref_backupTarCmd.value) {
             return genericBackupDataTarCmd(
                 dataType,
@@ -540,6 +513,36 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 compress,
                 iv
             )
+        }
+    }
+
+    @Throws(BackupFailedException::class)
+    protected open fun backupPackage(app: Package, backupInstanceDir: StorageFile) {
+        Timber.i("<${app.packageName}> Backup package apks")
+        var apksToBackup = arrayOf(app.apkPath)
+        if (app.apkSplits.isEmpty()) {
+            Timber.d("<${app.packageName}> The app is a normal apk")
+        } else {
+            apksToBackup += app.apkSplits.drop(0)
+            Timber.d("<${app.packageName}> Package is split into ${apksToBackup.size} apks")
+        }
+        Timber.d(
+            "[%s] Backing up package (%d apks: %s)",
+            app.packageName,
+            apksToBackup.size,
+            apksToBackup.joinToString(" ") { s: String -> RootFile(s).name }
+        )
+        for (apk in apksToBackup) {
+            try {
+                Timber.i("${app.packageName}: $apk")
+                suCopyFileToDocument(apk, backupInstanceDir)
+            } catch (e: IOException) {
+                Timber.e("$app: Could not backup apk $apk: $e")
+                throw BackupFailedException("Could not backup apk $apk", e)
+            } catch (e: Throwable) {
+                LogsHandler.unexpectedException(e, app)
+                throw BackupFailedException("Could not backup apk $apk", e)
+            }
         }
     }
 
@@ -572,7 +575,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             genericBackupData(
                 dataType,
                 backupInstanceDir,
-                app.getExternalDataPath(context),
+                app.getExternalDataPath(),
                 isCompressionEnabled(),
                 iv
             )
@@ -602,7 +605,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             genericBackupData(
                 dataType,
                 backupInstanceDir,
-                app.getObbFilesPath(context),
+                app.getObbFilesPath(),
                 isCompressionEnabled(),
                 iv
             )
@@ -632,7 +635,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             genericBackupData(
                 dataType,
                 backupInstanceDir,
-                app.getMediaFilesPath(context),
+                app.getMediaFilesPath(),
                 isCompressionEnabled(),
                 iv
             )

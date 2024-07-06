@@ -26,6 +26,7 @@ import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.handler.LogsHandler
+import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.handler.getPackageStorageStats
 import com.machiav3lli.backup.preferences.pref_flatStructure
@@ -34,6 +35,8 @@ import com.machiav3lli.backup.preferences.pref_paranoidBackupLists
 import com.machiav3lli.backup.traceBackups
 import com.machiav3lli.backup.utils.FileUtils
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
+import com.machiav3lli.backup.utils.SystemUtils
+import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.getBackupRoot
 import kotlinx.coroutines.launch
@@ -411,28 +414,27 @@ class Package {
         get() = if (isSpecial) packageInfo.icon
         else "android.resource://${packageName}/${packageInfo.icon}"
 
-    // the following three assume a structure of the external data directories like:
-    //   Android/<datatype>/<packageName>
-    // each is constructed by using a relative relation to our own external data directories
-
-    fun getExternalDataPath(context: Context): String {
-        return context.getExternalFilesDir(null)        // Android/data/<ownpkg>/files
-            ?.parentFile?.parentFile?.absolutePath           // Android/data
-            ?.plus("${File.separator}$packageName")    // Android/data/<pkg>
+    fun getExternalDataPath(): String {
+        val user = ShellCommands.currentUser.toString()
+        return getAndroidFolder(user, "data", SystemUtils::isWritablePath)
+            ?.absolutePath
+            ?.plus("${File.separator}$packageName")
             ?: ""
     }
 
-    fun getObbFilesPath(context: Context): String {
-        return context.obbDir                                // Android/obb/<ownpkg>
-            .parentFile?.absolutePath                        // Android/obb
-            ?.plus("${File.separator}$packageName")    // Android/obb/<pkg>
+    fun getObbFilesPath(): String {
+        val user = ShellCommands.currentUser.toString()
+        return getAndroidFolder(user, "obb", SystemUtils::isWritablePath)
+            ?.absolutePath
+            ?.plus("${File.separator}$packageName")
             ?: ""
     }
 
-    fun getMediaFilesPath(context: Context): String {
-        return context.obbDir                                                     // Android/obb/<ownpkg>
-            .parentFile?.parentFile?.absolutePath                                 // Android
-            ?.plus("${File.separator}media${File.separator}$packageName")   // Android/media/<pkg>
+    fun getMediaFilesPath(): String {
+        val user = ShellCommands.currentUser.toString()
+        return getAndroidFolder(user, "media", SystemUtils::isWritablePath)
+            ?.absolutePath
+            ?.plus("${File.separator}$packageName")
             ?: ""
     }
 
