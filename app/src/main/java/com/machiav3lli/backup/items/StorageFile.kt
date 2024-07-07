@@ -298,7 +298,7 @@ open class StorageFile {
                                 throw Exception("cannot use RootFile shadow at $last")
                         } else {
                             var (storage, subPath) = last.split(":")
-                            val user = ShellCommands.currentUser
+                            val user = ShellCommands.currentProfile
                             if (storage == "primary")
                                 storage = "emulated/$user"
                             file = getShadowPath(

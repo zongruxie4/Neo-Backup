@@ -163,7 +163,7 @@ class ShellCommands {
 
         // using reflection to get id of calling user since method getCallingUserId of UserHandle is hidden
         // https://github.com/android/platform_frameworks_base/blob/master/core/java/android/os/UserHandle.java#L123
-        val currentUser: Int
+        val currentProfile: Int
             get() {
                 //TODO hg42 another possibility RootFile.cmd("echo \$USER_ID").toInt()
                 try {

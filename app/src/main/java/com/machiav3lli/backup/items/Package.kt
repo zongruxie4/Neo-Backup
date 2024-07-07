@@ -415,7 +415,7 @@ class Package {
         else "android.resource://${packageName}/${packageInfo.icon}"
 
     fun getExternalDataPath(): String {
-        val user = ShellCommands.currentUser.toString()
+        val user = ShellCommands.currentProfile.toString()
         return getAndroidFolder(user, "data", SystemUtils::isWritablePath)
             ?.absolutePath
             ?.plus("${File.separator}$packageName")
@@ -423,7 +423,7 @@ class Package {
     }
 
     fun getObbFilesPath(): String {
-        val user = ShellCommands.currentUser.toString()
+        val user = ShellCommands.currentProfile.toString()
         return getAndroidFolder(user, "obb", SystemUtils::isWritablePath)
             ?.absolutePath
             ?.plus("${File.separator}$packageName")
@@ -431,7 +431,7 @@ class Package {
     }
 
     fun getMediaFilesPath(): String {
-        val user = ShellCommands.currentUser.toString()
+        val user = ShellCommands.currentProfile.toString()
         return getAndroidFolder(user, "media", SystemUtils::isWritablePath)
             ?.absolutePath
             ?.plus("${File.separator}$packageName")

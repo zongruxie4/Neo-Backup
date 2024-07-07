@@ -49,7 +49,7 @@ class SpecialFilesPlugin : Plugin {
         }
 
         fun replaceVars(text: String) : String {
-            val userId = ShellCommands.currentUser
+            val userId = ShellCommands.currentProfile
             val replacements = mapOf(
                 "userId"        to userId.toString(),
                 "miscData"      to "/data/misc",
