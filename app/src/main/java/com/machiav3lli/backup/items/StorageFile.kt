@@ -187,7 +187,7 @@ open class StorageFile {
                     _uri
                 }
             } ?: uriFromFile(f)
-        } ?: Uri.fromFile(file?.absoluteFile)
+        }
 
     data class DocumentInfo(
         val id: String,

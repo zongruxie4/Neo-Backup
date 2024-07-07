@@ -135,7 +135,18 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                     false
                 )
             }
-            val backupBuilder = BackupBuilder(app.packageInfo, appBackupRoot)
+            val backupBuilder = try {
+                BackupBuilder(app.packageInfo, appBackupRoot)
+            } catch (e: Throwable) {
+                val realException: Exception =
+                    BackupFailedException(STORAGE_LOCATION_NOTWRITABLE, e)
+                return ActionResult(
+                    app,
+                    null,
+                    "${realException.javaClass.simpleName}: ${e.message}${e.cause?.let { it.message?.let {" - ${it}" }}}",
+                    false
+                )
+            }
             val iv = initIv(CIPHER_ALGORITHM) // as we're using a static Cipher Algorithm
             backupBuilder.setIv(iv)
 
@@ -677,5 +688,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         const val LOG_NO_THING_TO_BACKUP = "[%s] No %s to backup available"
         const val STORAGE_LOCATION_INACCESSIBLE =
             "Cannot backup data. Storage location not set or inaccessible"
+        const val STORAGE_LOCATION_NOTWRITABLE =
+            "Cannot backup data. Storage location not writable"
     }
 }
