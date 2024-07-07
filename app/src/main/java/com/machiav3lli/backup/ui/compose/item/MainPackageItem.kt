@@ -55,7 +55,8 @@ import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.SELECTIONS_FOLDER_NAME
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
+import com.machiav3lli.backup.handler.ShellCommands
+import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_fixNavBarOverlap
 import com.machiav3lli.backup.traceContextMenu
@@ -470,21 +471,27 @@ fun launchRestore(packages: List<Package>) {
 
 fun launchEnable(packages: List<Package>) {
     launchEachPackage(packages, "enable", parallel = false) {
-        runAsRoot("pm enable ${it.packageName}")
+        val users = listOf(currentProfile.toString())
+        //runAsRoot("pm enable ${it.packageName}")
+        ShellCommands.enableDisable(users, it.packageName, true)
         Package.invalidateCacheForPackage(it.packageName)
     }
 }
 
 fun launchDisable(packages: List<Package>) {
     launchEachPackage(packages, "disable", parallel = false) {
-        runAsRoot("pm disable ${it.packageName}")
+        val users = listOf(currentProfile.toString())
+        //runAsRoot("pm disable ${it.packageName}")
+        ShellCommands.enableDisable(users, it.packageName, false)
         Package.invalidateCacheForPackage(it.packageName)
     }
 }
 
 fun launchUninstall(packages: List<Package>) {
     launchEachPackage(packages, "uninstall", parallel = false) {
-        runAsRoot("pm uninstall ${it.packageName}")
+        val users = listOf(currentProfile.toString())
+        //runAsRoot("pm uninstall ${it.packageName}")
+        ShellCommands.uninstall(users, it.packageName, it.apkPath, it.dataPath, it.isSystem)
         Package.invalidateCacheForPackage(it.packageName)
     }
 }

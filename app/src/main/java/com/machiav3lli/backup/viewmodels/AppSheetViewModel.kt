@@ -29,6 +29,7 @@ import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellCommands
+import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.showNotification
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.ui.compose.MutableComposableFlow
@@ -75,17 +76,20 @@ class AppSheetViewModel(
 
     fun uninstallApp() {
         viewModelScope.launch {
-            uninstall()
+            val users = listOf(currentProfile.toString())
+            uninstall(users)
             refreshNow.value = true
         }
     }
 
-    private suspend fun uninstall() {
+    private suspend fun uninstall(users: List<String>) {
+        val packageName = thePackage.value?.packageName ?: return
         withContext(Dispatchers.IO) {
             thePackage.value?.let { mPackage ->
                 Timber.i("uninstalling: ${mPackage.packageLabel}")
                 try {
-                    shellCommands.uninstall(
+                    ShellCommands.uninstall(
+                        users,
                         mPackage.packageName, mPackage.apkPath,
                         mPackage.dataPath, mPackage.isSystem
                     )
@@ -116,8 +120,9 @@ class AppSheetViewModel(
         }
     }
 
-    fun enableDisableApp(users: List<String>, enable: Boolean) {
+    fun enableDisableApp(enable: Boolean) {
         viewModelScope.launch {
+            val users = listOf(currentProfile.toString())
             enableDisable(users, enable)
             refreshNow.value = true
         }
@@ -126,12 +131,8 @@ class AppSheetViewModel(
     @Throws(ShellCommands.ShellActionFailedException::class)
     private suspend fun enableDisable(users: List<String>, enable: Boolean) {
         withContext(Dispatchers.IO) {
-            shellCommands.enableDisablePackage(thePackage.value?.packageName, users, enable)
+            ShellCommands.enableDisable(users, thePackage.value?.packageName, enable)
         }
-    }
-
-    fun getUsers(): Array<String> {
-        return shellCommands.getUsers().toTypedArray()
     }
 
     fun deleteBackup(backup: Backup) {              //TODO hg42 launchDeleteBackup ?

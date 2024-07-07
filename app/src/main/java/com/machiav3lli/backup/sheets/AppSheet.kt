@@ -77,6 +77,7 @@ import com.machiav3lli.backup.dialogs.StringInputDialogUI
 import com.machiav3lli.backup.exodusUrl
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.ShellCommands
+import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.items.Package
@@ -643,6 +644,7 @@ fun AppSheet(
                         }
 
                         DIALOG_FORCEKILL     -> {
+                            val profileId = currentProfile
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.forceKillMessage),
@@ -652,26 +654,25 @@ fun AppSheet(
                                     //TODO hg42 force-stop, force-close, ... ? I think these are different ones, and I don't know which.
                                     //TODO hg42 killBackgroundProcesses seems to be am kill
                                     //TODO in api33 A13 there is am stop-app which doesn't kill alarms and
-                                    runAsRoot("am stop-app ${pkg.packageName} || am force-stop ${pkg.packageName}")
+                                    runAsRoot("am stop-app --user $profileId ${pkg.packageName} || am force-stop --user $profileId ${pkg.packageName}")
                                 }
                             )
                         }
 
                         DIALOG_ENABLEDISABLE -> {
                             val enable = dialogProps.value.second as Boolean
-                            val userList = viewModel.getUsers()
 
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(
-                                    id = if (enable) R.string.enablePackageTitle
-                                    else R.string.disablePackageTitle
+                                    id = if (enable) R.string.enablePackage
+                                    else R.string.disablePackage
                                 ),
                                 openDialogCustom = openDialog,
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     try {
-                                        viewModel.enableDisableApp(userList.toList(), enable)
+                                        viewModel.enableDisableApp(enable)
                                         // TODO (re-)add user selection support
                                     } catch (e: ShellCommands.ShellActionFailedException) {
                                         mActivity.showError(e.message)

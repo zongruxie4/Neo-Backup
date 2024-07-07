@@ -21,7 +21,6 @@ import android.content.Context
 import android.os.Binder
 import com.machiav3lli.backup.handler.ShellHandler.Companion.quote
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsUser
 import com.machiav3lli.backup.handler.ShellHandler.Companion.utilBoxQ
 import com.machiav3lli.backup.handler.ShellHandler.ShellCommandFailedException
 import com.machiav3lli.backup.items.Package
@@ -30,131 +29,6 @@ import timber.log.Timber
 import java.io.File
 
 class ShellCommands {
-    var multiuserEnabled: Boolean
-    private var users = emptyList<String>()
-
-    init {
-        try {
-            users = getUsers()
-        } catch (e: ShellActionFailedException) {
-            users = arrayListOf()
-            val error =
-                when (val cause = e.cause) {
-                    is ShellCommandFailedException ->
-                        " : ${cause.shellResult.err.joinToString(" ")}"
-
-                    else                           -> ""
-                }
-            Timber.e("Could not load list of users: ${e}$error")
-        }
-        multiuserEnabled = users.isNotEmpty() && users.size > 1
-    }
-
-    @Throws(ShellActionFailedException::class)
-    fun uninstall(packageName: String?, sourceDir: String?, dataDir: String?, isSystem: Boolean) {
-        var command: String
-        if (!isSystem) {
-            // Uninstalling while user app
-            command = "pm uninstall $packageName"
-            try {
-                runAsRoot(command)
-            } catch (e: ShellCommandFailedException) {
-                throw ShellActionFailedException(command, e.shellResult.err.joinToString("\n"), e)
-            } catch (e: Throwable) {
-                LogsHandler.unexpectedException(e, command)
-                throw ShellActionFailedException(command, "unhandled exception", e)
-            }
-            // don't care for the result here, it likely fails due to file not found
-            try {
-                if (!packageName.isNullOrEmpty()) { // IMPORTANT!!! otherwise removing all in parent(!) directory
-                    command = "$utilBoxQ rm -rf /data/lib/$packageName/*"
-                    runAsRoot(command)
-                }
-            } catch (e: ShellCommandFailedException) {
-                Timber.d("Command '$command' failed: ${e.shellResult.err.joinToString(" ")}")
-            } catch (e: Throwable) {
-                LogsHandler.unexpectedException(e, command)
-            }
-        } else {
-            // Deleting while system app
-            // it seems that busybox mount sometimes fails silently so use toolbox instead
-            var apkSubDir = FileUtils.getName(sourceDir!!)
-            apkSubDir = apkSubDir.substring(0, apkSubDir.lastIndexOf('.'))
-            if (apkSubDir.isEmpty()) {
-                val error = ("Variable apkSubDir in uninstall method is empty. This is used "
-                        + "in a recursive rm call and would cause catastrophic damage!")
-                Timber.wtf(error)
-                throw IllegalArgumentException(error)
-            }
-            // TODO: add logging/throw to each variable.isNullOrEmpty() test below?
-            command = "mount -o remount,rw /system && ("
-            if (!sourceDir.isNullOrEmpty())    // IMPORTANT!!! otherwise removing all in parent(!) directory     //TODO hg42 check plausible path
-                command += " ; $utilBoxQ rm -rf ${quote(sourceDir)}"
-            if (!apkSubDir.isEmpty())          // IMPORTANT!!! otherwise removing all in parent(!) directory   //TODO hg42 check plausible path
-                command += " ; $utilBoxQ rm -rf ${quote("/system/app/$apkSubDir")}"
-            command += ") ; mount -o remount,ro /system"
-            if (!dataDir.isNullOrEmpty())      // IMPORTANT!!! otherwise removing all in parent(!) directory    //TODO hg42 check plausible path
-                command += " ; $utilBoxQ rm -rf ${quote(dataDir)}"
-            if (!packageName.isNullOrEmpty())  // IMPORTANT!!! otherwise removing all in parent(!) directory    //TODO hg42 check plausible path
-                command += " ; $utilBoxQ rm -rf ${quote("/data/app-lib/${packageName}")}/*"
-            try {
-                runAsRoot(command)
-            } catch (e: ShellCommandFailedException) {
-                throw ShellActionFailedException(command, e.shellResult.err.joinToString("\n"), e)
-            } catch (e: Throwable) {
-                LogsHandler.unexpectedException(e, command)
-                throw ShellActionFailedException(command, "unhandled exception", e)
-            }
-        }
-    }
-
-    @Throws(ShellActionFailedException::class)
-    fun enableDisablePackage(packageName: String?, users: List<String?>?, enable: Boolean) {
-        val option = if (enable) "enable" else "disable"
-        if (!users.isNullOrEmpty()) {
-            val commands = mutableListOf<String>()
-            for (user in users) {
-                commands.add("pm $option --user $user $packageName")
-            }
-            val command = commands.joinToString(" ; ")  // no dependency
-            try {
-                runAsRoot(command)
-            } catch (e: ShellCommandFailedException) {
-                throw ShellActionFailedException(
-                    command,
-                    "Could not $option package $packageName",
-                    e
-                )
-            } catch (e: Throwable) {
-                LogsHandler.unexpectedException(e, command)
-                throw ShellActionFailedException(
-                    command,
-                    "Could not $option package $packageName",
-                    e
-                )
-            }
-        }
-    }
-
-    @Throws(ShellActionFailedException::class)
-    fun getUsers(): List<String> {
-        if (users.isNotEmpty()) {
-            return users
-        }
-        val command = "pm list users | $utilBoxQ sed -nr 's/.*\\{([0-9]+):.*/\\1/p'"
-        return try {
-            val result = runAsRoot(command)
-            result.out
-                .map { obj: String -> obj.trim { it <= ' ' } }
-                .filter { it.isNotEmpty() }
-                .toList()
-        } catch (e: ShellCommandFailedException) {
-            throw ShellActionFailedException(command, "Could not fetch list of users", e)
-        } catch (e: Throwable) {
-            LogsHandler.unexpectedException(e, command)
-            throw ShellActionFailedException(command, "Could not fetch list of users", e)
-        }
-    }
 
     class ShellActionFailedException(val command: String, message: String, cause: Throwable?) :
         Exception(message, cause)
@@ -180,12 +54,137 @@ class ShellCommands {
                 return 0
             }
 
+        @Throws(ShellActionFailedException::class)
+        fun uninstall(users: List<String?>?, packageName: String?, sourceDir: String?, dataDir: String?, isSystem: Boolean) {
+            if (!isSystem) {
+                // Uninstalling if user app
+                if (!users.isNullOrEmpty()) {
+                    val commands = mutableListOf<String>()
+                    for (user in users) {
+                        commands.add("pm uninstall --user $user $packageName")
+                    }
+                    val command = commands.joinToString(" ; ")  // no dependency
+                    try {
+                        runAsRoot(command)
+                    } catch (e: ShellCommandFailedException) {
+                        throw ShellActionFailedException(
+                            command,
+                            e.shellResult.err.joinToString("\n"),
+                            e
+                        )
+                    } catch (e: Throwable) {
+                        LogsHandler.unexpectedException(e, command)
+                        throw ShellActionFailedException(command, "unhandled exception", e)
+                    }
+                    // don't care for the result here, it likely fails due to file not found
+                    try {
+                        if (!packageName.isNullOrEmpty()) { // IMPORTANT!!! otherwise removing all in parent(!) directory
+                            val command = "$utilBoxQ rm -rf /data/lib/$packageName/*"
+                            runAsRoot(command)
+                        }
+                    } catch (e: ShellCommandFailedException) {
+                        Timber.d("Command '$command' failed: ${e.shellResult.err.joinToString(" ")}")
+                    } catch (e: Throwable) {
+                        LogsHandler.unexpectedException(e, command)
+                    }
+                }
+            } else {
+                // Deleting if system app
+                // it seems that busybox mount sometimes fails silently so use toolbox instead
+                var apkSubDir = FileUtils.getName(sourceDir!!)
+                apkSubDir = apkSubDir.substring(0, apkSubDir.lastIndexOf('.'))
+                if (apkSubDir.isEmpty()) {
+                    val error = ("Variable apkSubDir in uninstall method is empty. This is used "
+                            + "in a recursive rm call and would cause catastrophic damage!")
+                    Timber.wtf(error)
+                    throw IllegalArgumentException(error)
+                }
+                // TODO: add logging/throw to each variable.isNullOrEmpty() test below?
+                // TODO what about dedata etc.?
+                var command: String
+                command = "mount -o remount,rw /system && ("
+                if (!sourceDir.isNullOrEmpty())    // IMPORTANT!!! otherwise removing all in parent(!) directory   //TODO hg42 check plausible path
+                    command += " ; $utilBoxQ rm -rf ${quote(sourceDir)}"
+                if (!apkSubDir.isEmpty())          // IMPORTANT!!! otherwise removing all in parent(!) directory   //TODO hg42 check plausible path
+                    command += " ; $utilBoxQ rm -rf ${quote("/system/app/$apkSubDir")}"
+                command += ") ; mount -o remount,ro /system"
+                if (!dataDir.isNullOrEmpty())      // IMPORTANT!!! otherwise removing all in parent(!) directory   //TODO hg42 check plausible path
+                    command += " ; $utilBoxQ rm -rf ${quote(dataDir)}"
+                if (!packageName.isNullOrEmpty())  // IMPORTANT!!! otherwise removing all in parent(!) directory   //TODO hg42 check plausible path
+                    command += " ; $utilBoxQ rm -rf ${quote("/data/app-lib/${packageName}")}/*"
+                try {
+                    runAsRoot(command)
+                } catch (e: ShellCommandFailedException) {
+                    throw ShellActionFailedException(command, e.shellResult.err.joinToString("\n"), e)
+                } catch (e: Throwable) {
+                    LogsHandler.unexpectedException(e, command)
+                    throw ShellActionFailedException(command, "unhandled exception", e)
+                }
+            }
+        }
+
+        @Throws(ShellActionFailedException::class)
+        fun enableDisable(users: List<String?>?, packageName: String?, enable: Boolean) {
+            val option = if (enable) "enable" else "disable"
+            if (!users.isNullOrEmpty()) {
+                val commands = mutableListOf<String>()
+                for (user in users) {
+                    commands.add("pm $option --user $user $packageName")
+                }
+                val command = commands.joinToString(" ; ")  // no dependency
+                try {
+                    runAsRoot(command)
+                } catch (e: ShellCommandFailedException) {
+                    throw ShellActionFailedException(
+                        command,
+                        "Could not $option package $packageName",
+                        e
+                    )
+                } catch (e: Throwable) {
+                    LogsHandler.unexpectedException(e, command)
+                    throw ShellActionFailedException(
+                        command,
+                        "Could not $option package $packageName",
+                        e
+                    )
+                }
+            }
+        }
+
+        @Throws(ShellActionFailedException::class)
+        fun getUsers(): List<String> {
+            // do not cache because users can change at runtime
+            //if (users.isNotEmpty()) {
+            //    return users
+            //}
+            val command = "pm list users | $utilBoxQ sed -nr 's/.*\\{([0-9]+):.*/\\1/p'"
+            return try {
+                val result = runAsRoot(command)
+                result.out
+                    .map { obj: String -> obj.trim { it <= ' ' } }
+                    .filter { it.isNotEmpty() }
+                    .toList()
+            } catch (e: ShellCommandFailedException) {
+                throw ShellActionFailedException(command, "Could not fetch list of users", e)
+            } catch (e: Throwable) {
+                LogsHandler.unexpectedException(e, command)
+                throw ShellActionFailedException(command, "Could not fetch list of users", e)
+            }
+        }
+
+        val isMultiuserEnabled: Boolean
+            get() {
+                val users = getUsers()
+                return users.isNotEmpty() && users.size > 1
+            }
+
         @get:Throws(ShellActionFailedException::class)
         val disabledPackages: List<String>
             get() {
-                val command = "pm list packages -d"
+                val profileId = currentProfile
+                val command = "pm list packages --user $profileId -d"
                 return try {
-                    val result = runAsUser(command)
+                    val result = runAsRoot(command)
                     result.out
                         .filter { line: String -> line.contains("s") }
                         .map { line: String ->
