@@ -178,13 +178,15 @@ abstract class BaseAppAction protected constructor(
         }
 
         fun isSuspended(packageName: String): Boolean {
-            return ShellUtils.fastCmdResult("pm dump $packageName | grep suspended=true")
+            val profileId = currentProfile
+            return ShellUtils.fastCmdResult("pm dump --user $profileId $packageName | grep suspended=true")
         }
 
         fun cleanupSuspended(packageName: String) {
+            val profileId = currentProfile
             Timber.i("cleanup $packageName")
             try {
-                runAsRoot("pm dump $packageName | grep suspended=true && pm unsuspend ${packageName}")
+                runAsRoot("pm dump --user $profileId $packageName | grep suspended=true && pm unsuspend --user $profileId ${packageName}")
             } catch (e: Throwable) {
             }
         }

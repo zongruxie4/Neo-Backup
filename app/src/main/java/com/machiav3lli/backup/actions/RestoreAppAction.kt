@@ -367,7 +367,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                     .filterNot { it.isEmpty() }
                     .forEach { p ->
                         try {
-                            runAsRoot("pm grant ${backup.packageName} $p")
+                            runAsRoot("pm grant --user $profileId ${backup.packageName} $p")
                         } catch (e: ShellCommandFailedException) {
                             val details = e.shellResult.err
                                 .joinToString("\n")

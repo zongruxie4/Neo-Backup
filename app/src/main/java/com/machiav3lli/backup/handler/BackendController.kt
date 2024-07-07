@@ -44,6 +44,7 @@ import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
+import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.Package.Companion.invalidateBackupCacheForPackage
@@ -734,10 +735,11 @@ fun Context.updateAppTables() {
                         ?.flags
                         ?: 0) and ApplicationInfo.FLAG_SUSPENDED
                 }.apply {
+                    val profileId = currentProfile
                     OABX.main?.whileShowingSnackBar(getString(R.string.supended_apps_cleanup)) {
                         // cleanup suspended package if lock file found
                         this.forEach { packageName ->
-                            runAsRoot("pm unsuspend $packageName")
+                            runAsRoot("pm unsuspend --user $profileId $packageName")
                         }
                         OABX.appsSuspendedChecked = true
                     }
@@ -748,7 +750,6 @@ fun Context.updateAppTables() {
         } finally {
             endNanoTimer("unsuspend")
         }
-
 
         val backupsMap = ensureBackups()
         val backups = backupsMap.values.flatten()
