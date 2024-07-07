@@ -468,12 +468,6 @@ fun launchRestore(packages: List<Package>) {
     )
 }
 
-// fun launchToBlocklist(packages: List<Package>) {
-//     launchEachPackage(packages, "blocklist <-", parallel = false) {
-//         OABX.main?.viewModel?.addToBlocklist(it.packageName)
-//     }
-// }
-
 fun launchEnable(packages: List<Package>) {
     launchEachPackage(packages, "enable", parallel = false) {
         runAsRoot("pm enable ${it.packageName}")
@@ -697,19 +691,6 @@ fun MainPackageContextMenu(
                     }
                 }
             )
-
-            //  Divider() //----------------------------------------------------------------------------
-
-            //  DropdownMenuItem(
-            //      text = { Text("Add to Blocklist...") },
-            //      onClick = {
-            //          openSubMenu(subMenu) {
-            //              Confirmation(expanded) {
-            //                  launchToBlocklist(selectedVisible)
-            //              }
-            //          }
-            //      }
-            //  )
 
             HorizontalDivider() //----------------------------------------------------------------------------
 
