@@ -29,6 +29,7 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.LogsHandler
+import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.findScript
 import com.machiav3lli.backup.handler.ShellHandler.Companion.hasPmBypassLowTargetSDKBlock
@@ -222,7 +223,10 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
     @Throws(RestoreFailedException::class)
     open fun restorePackage(backupDir: StorageFile, backup: Backup) {
         val packageName = backup.packageName
-        Timber.i("<$packageName> Restoring from $backupDir")
+        val profileId = ShellCommands.currentProfile
+
+        Timber.i("<$packageName> Restoring from $backupDir to profile $profileId")
+
         val apkTargetPath = File(backup.sourceDir ?: BASE_APK_FILENAME)
         val baseApkName = apkTargetPath.name
         val baseApkFile = backupDir.findFile(baseApkName)
@@ -314,7 +318,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                     // create session
                     runAsRoot(
                         getSessionCreateCommand(
-                            backup.profileId,
+                            profileId,
                             packageFiles.sumOf { it.length() })
                     ).let {
                         val sessionIdPattern = Pattern.compile("""(\d+)""")
@@ -338,7 +342,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                     sb.append(
                         getPackageInstallCommand(
                             RootFile(stagingApkPath, "$packageName.${baseApkFile.name}"),
-                            backup.profileId
+                            profileId
                         )
                     )
                     // If split apk resources exist, install them afterwards (order does not matter)
@@ -348,7 +352,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                             sb.append(" ; ").append(
                                 getPackageInstallCommand(
                                     RootFile(stagingApkPath, "$packageName.${it.name}"),
-                                    backup.profileId,
+                                    profileId,
                                     backup.packageName
                                 )
                             )

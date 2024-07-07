@@ -3,6 +3,9 @@
 command=$1
 shift
 
+profileid=$1
+shift
+
 utilbox=$1
 shift
 
@@ -30,11 +33,11 @@ if [[ $command == "pre-backup" ]]; then
   shift
 
 
-  #am force-stop $package
-  #am kill $package
+  #am force-stop --user $profileid $package
+  #am kill --user $profileid $package
 
   if $suspend; then
-    pm suspend $package >/dev/null
+    pm suspend --user $profileid $package >/dev/null
     $utilbox sleep 3
   fi
 
@@ -74,12 +77,12 @@ if [[ $command == "post-backup" ]]; then
   shift
 
   # kill background processes, which should be restarted by the system when necessary
-  am kill $package
+  am kill --user $profileid $package
 
   if [[ -n $* ]]; then $utilbox kill -CONT "$@"; fi
 
   if $suspend; then
-    pm unsuspend $package
+    pm unsuspend --user $profileid $package
   fi
 
   exit
@@ -95,7 +98,7 @@ if [[ $command == "pre-restore" ]]; then
 
   # kill app and all of its services without canceling it's scheduled alarms and jobs.
   # if command does not exist (or fails) stop everything instead
-  am stop-app $package || am force-stop $package
+  am stop-app --user $profileid $package || am force-stop --user $profileid $package
 
   exit
 fi

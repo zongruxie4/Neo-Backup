@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.handler.LogsHandler
+import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.findDefinition
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
@@ -77,22 +78,23 @@ abstract class BaseAppAction protected constructor(
 
     open fun preprocessPackage(type: String, packageName: String) {
         try {
+            val profileId = currentProfile
             val applicationInfo = context.packageManager.getApplicationInfo(packageName, 0)
             val script = ShellHandler.findScript("package.sh").toString()
-            traceBold { "---------------------------------------- preprocess $type $packageName uid ${applicationInfo.uid}" }
+            traceBold { "---------------------------------------- preprocess $type $packageName profile $profileId uid ${applicationInfo.uid}" }
             if (applicationInfo.uid < android.os.Process.FIRST_APPLICATION_UID) { // exclude several system users, e.g. system, radio
                 Timber.w("$type $packageName: ignore processes of system user UID < ${android.os.Process.FIRST_APPLICATION_UID}")
                 return
             }
             if (!packageName.matches(doNotStop)) { // will stop most activity, needs a good blacklist
                 val shellResult =
-                    runAsRoot("sh $script pre-$type $utilBoxQ ${prepostOptions(type)} $packageName ${applicationInfo.uid}")
-                preResults["$type-$packageName"] = shellResult.out.asSequence()
+                    runAsRoot("sh $script pre-$type $profileId $utilBoxQ ${prepostOptions(type)} $packageName ${applicationInfo.uid}")
+                preprocessResults["$type:$packageName:$profileId"] = shellResult.out.asSequence()
                     .filter { line: String -> line.isNotEmpty() }
                     .toMutableList()
                 Timber.w(
                     "$type $packageName: pre-results: ${
-                        preResults["$type-$packageName"]?.joinToString(
+                        preprocessResults["$type:$packageName:$profileId"]?.joinToString(
                             " "
                         )
                     }"
@@ -109,26 +111,27 @@ abstract class BaseAppAction protected constructor(
 
     open fun postprocessPackage(type: String, packageName: String) {
         try {
+            val profileId = currentProfile
             val applicationInfo = context.packageManager.getApplicationInfo(packageName, 0)
             val script = ShellHandler.findScript("package.sh").toString()
-            traceBold { "........................................ postprocess $type $packageName uid ${applicationInfo.uid}" }
+            traceBold { "........................................ postprocess $type $packageName profile $profileId uid ${applicationInfo.uid}" }
             if (applicationInfo.uid < android.os.Process.FIRST_APPLICATION_UID) { // exclude several system users, e.g. system, radio
                 Timber.w("$type $packageName: ignore processes of system user UID < ${android.os.Process.FIRST_APPLICATION_UID}")
                 return
             }
-            preResults["$type-$packageName"]?.let { results ->
+            preprocessResults["$type:$packageName:$profileId"]?.let { results ->
                 Timber.w("$type $packageName: postprocess pre-results: ${results.joinToString(" ")}")
                 runAsRoot(
-                    "sh $script post-$type $utilBoxQ ${prepostOptions(type)} $packageName ${applicationInfo.uid} ${
+                    "sh $script post-$type $profileId $utilBoxQ ${prepostOptions(type)} $packageName ${applicationInfo.uid} ${
                         results.joinToString(
                             " "
                         )
                     }"
                 )
-                preResults.remove("$type-$packageName")
+                preprocessResults.remove("$type:$packageName:$profileId")
             } ?: run {
                 Timber.w("$type $packageName: no pre-results")
-                runAsRoot("sh $script $packageName ${applicationInfo.uid}")
+                runAsRoot("sh $script post-$type $profileId $utilBoxQ ${prepostOptions(type)} $packageName ${applicationInfo.uid}")
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Timber.w("$type $packageName: cannot postprocess: package does not exist")
@@ -164,7 +167,7 @@ abstract class BaseAppAction protected constructor(
             Timber.i("doNotStop = $doNotStop")
         }
 
-        private val preResults = mutableMapOf<String, List<String>>()
+        private val preprocessResults = mutableMapOf<String, List<String>>()
 
         fun extractErrorMessage(shellResult: Shell.Result): String {
             // if stderr does not say anything, try stdout
