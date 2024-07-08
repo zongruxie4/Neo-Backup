@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.BACKUP_DATE_TIME_SHOW_FORMATTER
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Backup
+import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Lock
@@ -53,26 +55,32 @@ fun BackupItem(
         ),
         headlineContent = {
             Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = item.versionName ?: "",
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically),
-                    softWrap = true,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "(${item.cpuArch})",
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1f),
-                    softWrap = true,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                BackupLabels(item = item)
+                Row(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.versionName ?: "",
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically),
+                        softWrap = true,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 2,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    AnimatedVisibility(visible = (item.cpuArch != android.os.Build.SUPPORTED_ABIS[0])) {
+                        Text(
+                            text = " ${item.cpuArch}",
+                            color = Color.Red,
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically),
+                            softWrap = true,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                }
+                Row(modifier = Modifier.wrapContentWidth()) {
+                    BackupLabels(item = item)
+                }
             }
         },
         supportingContent = {
@@ -95,11 +103,11 @@ fun BackupItem(
                         )
                         if (item.tag.isNotEmpty())
                             Text(
-                                text = " - ${item.tag}",
+                                text = " ${item.tag}",
                                 modifier = Modifier.align(Alignment.Top),
                                 softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
+                                maxLines = 3,
                                 style = MaterialTheme.typography.labelMedium,
                             )
                     }
@@ -118,7 +126,8 @@ fun BackupItem(
                                 Tooltip(description, showTooltip)
                             }
                             Text(
-                                text = " - enc",
+                                text = " enc",
+                                color = Color.Red,
                                 modifier = Modifier
                                     .combinedClickable(
                                         onClick = {},
@@ -130,9 +139,12 @@ fun BackupItem(
                                 style = MaterialTheme.typography.labelMedium,
                             )
                         }
-                        val compressionText = if (item.isCompressed)
-                            " - ${item.compressionType?.replace("/", " ")}"
-                        else ""
+                        val compressionText = if (item.isCompressed) {
+                            if (item.compressionType.isNullOrEmpty())
+                                " gz"
+                            else
+                                " ${item.compressionType}"
+                        } else ""
                         val fileSizeText = if (item.backupVersionCode != 0)
                             " - ${Formatter.formatFileSize(LocalContext.current, item.size)}"
                         else ""
@@ -144,6 +156,22 @@ fun BackupItem(
                             maxLines = 1,
                             style = MaterialTheme.typography.labelMedium,
                         )
+                        AnimatedVisibility(visible = (item.profileId != currentProfile)) {
+                            Row {
+                                Text(
+                                    text = " 👤",
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                                Text(
+                                    text = "${item.profileId}",
+                                    color = Color.Red,
+                                    softWrap = true,
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1,
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
+                        }
                     }
                 }
                 Row(
