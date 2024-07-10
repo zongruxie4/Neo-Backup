@@ -78,7 +78,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         try {
             Timber.i("Backing up: ${app.packageName} (${app.packageLabel})")
             //invalidateCacheForPackage(app.packageName)    //TODO hg42 ???
-            work?.setOperation("pre")
+            work?.setOperation("B")
 
             if (fakeSeconds > 0) {
 
@@ -156,38 +156,38 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             try {
                 if (backupMode and MODE_APK == MODE_APK) {
                     Timber.i("$app: Backing up package")
-                    work?.setOperation("apk")
+                    work?.setOperation("a")
                     backupPackage(app, backupInstanceDir)
                     backupBuilder.setHasApk(true)
                 }
                 var backupCreated: Boolean
                 if (backupMode and MODE_DATA == MODE_DATA) {
                     Timber.i("$app: Backing up data")
-                    work?.setOperation("dat")
+                    work?.setOperation("=d")
                     backupCreated = backupData(app, backupInstanceDir, iv)
                     backupBuilder.setHasAppData(backupCreated)
                 }
                 if (backupMode and MODE_DATA_DE == MODE_DATA_DE) {
                     Timber.i("$app: Backing up device's protected data")
-                    work?.setOperation("prt")
+                    work?.setOperation("==p")
                     backupCreated = backupDeviceProtectedData(app, backupInstanceDir, iv)
                     backupBuilder.setHasDevicesProtectedData(backupCreated)
                 }
                 if (backupMode and MODE_DATA_EXT == MODE_DATA_EXT) {
                     Timber.i("$app: Backing up external data")
-                    work?.setOperation("ext")
+                    work?.setOperation("===x")
                     backupCreated = backupExternalData(app, backupInstanceDir, iv)
                     backupBuilder.setHasExternalData(backupCreated)
                 }
                 if (backupMode and MODE_DATA_OBB == MODE_DATA_OBB) {
                     Timber.i("$app: Backing up obb files")
-                    work?.setOperation("obb")
+                    work?.setOperation("====o")
                     backupCreated = backupObbData(app, backupInstanceDir, iv)
                     backupBuilder.setHasObbData(backupCreated)
                 }
                 if (backupMode and MODE_DATA_MEDIA == MODE_DATA_MEDIA) {
                     Timber.i("$app: Backing up media files")
-                    work?.setOperation("med")
+                    work?.setOperation("=====m")
                     backupCreated = backupMediaData(app, backupInstanceDir, iv)
                     backupBuilder.setHasMediaData(backupCreated)
                 }
@@ -216,7 +216,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             } catch (e: Throwable) {
                 return handleException(e)
             } finally {
-                work?.setOperation("fin")
+                work?.setOperation("======")
                 if (pauseApp) {
                     Timber.d("post-process package (to set it back to normal operation)")
                     postprocessPackage(type = "backup", packageName = app.packageName)
@@ -232,7 +232,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 }
             }
         } finally {
-            work?.setOperation("end")
+            work?.setOperation("======>")
             Timber.i("${app.packageName}: Backup done: ${backup}")
         }
         return ActionResult(app, backup, "", true)

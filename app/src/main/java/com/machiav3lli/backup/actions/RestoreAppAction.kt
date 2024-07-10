@@ -87,7 +87,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
     ): ActionResult {
         try {
             Timber.i("Restoring: ${app.packageName} (${app.packageLabel})")
-            work?.setOperation("pre")
+            work?.setOperation("R")
             val killApp = pref_restoreKillApps.value
             if (killApp) {
                 Timber.d("pre-process package")
@@ -103,7 +103,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                     }
                 if (backupDir != null) {
                     if (backupMode and MODE_APK == MODE_APK) {
-                        work?.setOperation("apk")
+                        work?.setOperation("a")
                         restorePackage(backupDir, backup)
                         refreshAppInfo(context, app)    // also waits for valid paths
                     }
@@ -141,14 +141,14 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             } catch (e: CryptoSetupException) {
                 return ActionResult(app, null, "${e.javaClass.simpleName}: ${e.message}", false)
             } finally {
-                work?.setOperation("fin")
+                work?.setOperation("======")
                 if (killApp) {
                     Timber.d("post-process package (to set it back to normal operation)")
                     postprocessPackage(type = "restore", packageName = app.packageName)
                 }
             }
         } finally {
-            work?.setOperation("end")
+            work?.setOperation("======>")
             Timber.i("$app: Restore done: $backup")
         }
         return ActionResult(app, backup, "", true)
@@ -166,35 +166,35 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             refreshAppInfo(context, app)    // wait for valid paths
         if (backup.hasAppData && backupMode and MODE_DATA == MODE_DATA) {
             Timber.i("<${backup.packageName}> Restoring app's data")
-            work?.setOperation("dat")
+            work?.setOperation("=d")
             restoreData(app, backup, backupDir)
         } else {
             Timber.i("<${backup.packageName}> Skip restoring app's data; not part of the backup or restore mode")
         }
         if (backup.hasDevicesProtectedData && backupMode and MODE_DATA_DE == MODE_DATA_DE) {
             Timber.i("<${backup.packageName}> Restoring app's device-protected data")
-            work?.setOperation("prt")
+            work?.setOperation("==p")
             restoreDeviceProtectedData(app, backup, backupDir)
         } else {
             Timber.i("<${backup.packageName}> Skip restoring app's device protected data; not part of the backup or restore mode")
         }
         if (backup.hasExternalData && backupMode and MODE_DATA_EXT == MODE_DATA_EXT) {
             Timber.i("<${backup.packageName}> Restoring app's external data")
-            work?.setOperation("ext")
+            work?.setOperation("===x")
             restoreExternalData(app, backup, backupDir)
         } else {
             Timber.i("<${backup.packageName}> Skip restoring app's external data; not part of the backup or restore mode")
         }
         if (backup.hasObbData && backupMode and MODE_DATA_OBB == MODE_DATA_OBB) {
             Timber.i("<${backup.packageName}> Restoring app's obb files")
-            work?.setOperation("obb")
+            work?.setOperation("====o")
             restoreObbData(app, backup, backupDir)
         } else {
             Timber.i("<${backup.packageName}> Skip restoring app's obb files; not part of the backup or restore mode")
         }
         if (backup.hasMediaData && backupMode and MODE_DATA_MEDIA == MODE_DATA_MEDIA) {
             Timber.i("<${backup.packageName}> Restoring app's media files")
-            work?.setOperation("med")
+            work?.setOperation("=====m")
             restoreMediaData(app, backup, backupDir)
         } else {
             Timber.i("<${backup.packageName}> Skip restoring app's media files; not part of the backup or restore mode")

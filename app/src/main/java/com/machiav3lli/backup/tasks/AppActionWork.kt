@@ -71,7 +71,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
     private var failures = getVar(batchName, packageName, "failures")?.toInt() ?: 0
 
     init {
-        setOperation("...")
+        setOperation("")
     }
 
     override suspend fun doWork(): Result {
@@ -89,7 +89,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
 
             var actionResult: ActionResult? = null
 
-            setOperation("...")
+            setOperation("")
 
             var logMessage =
                 "------------------------------------------------------------ Work: $batchName $packageName"
@@ -158,14 +158,14 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
 
             val succeeded = actionResult?.succeeded ?: false
             val result = if (succeeded) {
-                setOperation("OK.")
+                setOperation("======>OK")
                 Timber.w("package: $packageName OK")
                 Result.success(getWorkData("OK", actionResult))
             } else {
                 failures++
                 setVar(batchName, packageName, "failures", failures.toString())
                 if (failures <= pref_maxRetriesPerPackage.value) {
-                    setOperation("err")
+                    setOperation("======>fail")
                     Timber.w("package: $packageName failures: $failures -> retry")
                     Result.retry()
                 } else {
@@ -174,7 +174,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
                         context, MainActivityX::class.java,
                         actionResult.hashCode(), packageLabel, actionResult?.message, message, false
                     )
-                    setOperation("ERR")
+                    setOperation("======>FAIL")
                     Timber.w("package: $packageName FAILED")
                     Result.failure(getWorkData("ERR", actionResult))
                 }

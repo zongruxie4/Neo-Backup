@@ -62,6 +62,7 @@ class BackupSpecialAction(context: Context, work: AppActionWork?, shell: ShellHa
         // It would make sense to implement something like TarUtils.addFilepath with SuFileInputStream and
         val filesToBackup = mutableListOf<ShellHandler.FileInfo>()
         try {
+            work?.setOperation("s")
             for (filePath in appInfo.specialFiles) {
                 if (app.packageName == "special.smsmms.json") {
                     BackupSMSMMSJSONAction.backupData(context, filePath)
