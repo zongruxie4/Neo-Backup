@@ -3,7 +3,9 @@ package com.machiav3lli.backup.handler
 import android.content.Context
 import android.content.res.AssetManager
 import com.machiav3lli.backup.BuildConfig
+import com.machiav3lli.backup.preferences.pref_backupCache
 import com.machiav3lli.backup.preferences.pref_backupNoBackupData
+import com.machiav3lli.backup.preferences.pref_restoreCache
 import com.machiav3lli.backup.preferences.pref_restoreNoBackupData
 import timber.log.Timber
 import java.io.File
@@ -45,27 +47,32 @@ class AssetHandler(context: Context) {
         }
     }
 
-    // @hg42 why exclude lib? how is it restored?
-    // @machiav3lli libs are generally created while installing the app. Backing them up
-    // would result a compatibility problem between devices with different cpu_arch
-
-    val DATA_BACKUP_EXCLUDED_BASENAMES get() = listOfNotNull(
-        "lib",      //TODO hg42 what about architecture dependent names? or may be application specific? lib* ???
-        if (!pref_backupNoBackupData.value) "no_backup" else null //TODO hg42 use Context.getNoBackupFilesDir() ??? tricky, because it's an absolute path (remove common part...)
-    )
-
-    val DATA_RESTORE_EXCLUDED_BASENAMES get() = listOfNotNull(
-        "lib",      //TODO hg42 what about architecture dependent names? or may be application specific? lib* ???
-        if (!pref_restoreNoBackupData.value) "no_backup" else null //TODO hg42 use Context.getNoBackupFilesDir() ??? tricky, because it's an absolute path (remove common part...)
-    )
-
-    val DATA_EXCLUDED_CACHE_DIRS get() = listOf(
+    val DATA_EXCLUDED_CACHE_DIRS = listOf(
         "cache",
         "code_cache"
     )
 
+    val LIB_DIRS = listOf(
+        "lib",      //TODO hg42 what about architecture dependent names? or may be application specific? lib* ???
+    )
+
+    // libs are generally created while installing the app. Backing them up
+    // would result in a compatibility problem between devices with different cpu_arch
+
+    val DATA_BACKUP_EXCLUDED_BASENAMES get() = (
+            LIB_DIRS
+            + if (pref_backupNoBackupData.value) listOf() else listOf("no_backup") //TODO hg42 use Context.getNoBackupFilesDir() ??? tricky, because it's an absolute path (remove common part...)
+            + if (pref_backupCache.value) listOf() else DATA_EXCLUDED_CACHE_DIRS
+            )
+
+    val DATA_RESTORE_EXCLUDED_BASENAMES get() = (
+            LIB_DIRS
+            + if (pref_restoreNoBackupData.value) listOf() else listOf("no_backup") //TODO hg42 use Context.getNoBackupFilesDir() ??? tricky, because it's an absolute path (remove common part...)
+            + if (pref_restoreCache.value) listOf() else DATA_EXCLUDED_CACHE_DIRS
+            )
+
     val DATA_EXCLUDED_NAMES get() = listOfNotNull(
-        "com.google.android.gms.appid.xml",
+        "com.google.android.gms.appid.xml", // appid needs to be recreated
         "com.machiav3lli.backup.xml", // encrypted prefs file
         //"cache",  // don't, this also excludes the cache
         "trash",

@@ -329,6 +329,10 @@
     <string name="loading_list">Учитавам листу…</string>
     <string name="prefs_loadingtoasts_summary">прикажи \"toasts\" док се листа учитава</string>
     <string name="write_apps_list_all">Напиши фајл: листа свих апликација</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
     <plurals name="days_left">
         <item quantity="one">%d дан</item>
         <item quantity="few">%d дани</item>

@@ -46,10 +46,10 @@ import com.machiav3lli.backup.items.RootFile
 import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.preferences.pref_delayBeforeRefreshAppInfo
 import com.machiav3lli.backup.preferences.pref_enableSessionInstaller
-import com.machiav3lli.backup.preferences.pref_excludeCache
 import com.machiav3lli.backup.preferences.pref_installationPackage
 import com.machiav3lli.backup.preferences.pref_refreshAppInfoTimeout
 import com.machiav3lli.backup.preferences.pref_restoreAvoidTemporaryCopy
+import com.machiav3lli.backup.preferences.pref_restoreCache
 import com.machiav3lli.backup.preferences.pref_restoreKillApps
 import com.machiav3lli.backup.preferences.pref_restorePermissions
 import com.machiav3lli.backup.preferences.pref_restoreTarCmd
@@ -95,12 +95,12 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
             }
             try {
                 val backupDir = backup.dir
-                                ?: run {
-                                    val backups =
-                                        context.findBackups(backup.packageName)[backup.packageName]
-                                    val found = backups?.find { it.backupDate == backup.backupDate }
-                                    found?.dir
-                                }
+                    ?: run {
+                        val backups =
+                            context.findBackups(backup.packageName)[backup.packageName]
+                        val found = backups?.find { it.backupDate == backup.backupDate }
+                        found?.dir
+                    }
                 if (backupDir != null) {
                     if (backupMode and MODE_APK == MODE_APK) {
                         work?.setOperation("apk")
@@ -132,6 +132,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                                 extractErrorMessage(cause.shellResult)
                             }"
                         }
+
                         else                           -> {
                             "${e.javaClass.simpleName}: ${e.message}"
                         }
@@ -225,7 +226,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         val apkTargetPath = File(backup.sourceDir ?: BASE_APK_FILENAME)
         val baseApkName = apkTargetPath.name
         val baseApkFile = backupDir.findFile(baseApkName)
-                          ?: throw RestoreFailedException("$baseApkName is missing in backup", null)
+            ?: throw RestoreFailedException("$baseApkName is missing in backup", null)
         Timber.d("<$packageName> Found $baseApkName in backup archive")
         val splitApksInBackup: Array<StorageFile> = try {
             backupDir.listFiles()
@@ -331,6 +332,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                         }
                     }
                 }
+
                 else                              -> {
                     // Install main package
                     sb.append(
@@ -364,9 +366,9 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                             runAsRoot("pm grant ${backup.packageName} $p")
                         } catch (e: ShellCommandFailedException) {
                             val details = e.shellResult.err
-                                    .joinToString("\n")
-                                    .splitToSequence("\n\tat ")
-                                    .first()
+                                .joinToString("\n")
+                                .splitToSequence("\n\tat ")
+                                .first()
                             val error = "Restoring permission $p failed: $details"
                             Timber.e(error)
                             // TODO integrate this exception in the result
@@ -420,12 +422,12 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
     ) {
         try {
             val backupDirToRestore = backupInstanceDir.findFile(what)
-                                     ?: throw RestoreFailedException(
-                                         String.format(
-                                             LOG_DIR_IS_MISSING_CANNOT_RESTORE,
-                                             what
-                                         )
-                                     )
+                ?: throw RestoreFailedException(
+                    String.format(
+                        LOG_DIR_IS_MISSING_CANNOT_RESTORE,
+                        what
+                    )
+                )
             suRecursiveCopyFileFromDocument(backupDirToRestore, targetPath)
         } catch (e: IOException) {
             throw RestoreFailedException("Could not read the input file due to IOException", e)
@@ -457,9 +459,9 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         if (isCompressed) {
             when (compressionType) {
                 "no" -> {}
-                "gz"  -> inputStream = GzipCompressorInputStream(inputStream)
+                "gz" -> inputStream = GzipCompressorInputStream(inputStream)
                 "zst" -> inputStream = ZstdCompressorInputStream(inputStream)
-                else  -> throw RestoreFailedException("Unsupported compression algorithm: ${compressionType}")
+                else -> throw RestoreFailedException("Unsupported compression algorithm: ${compressionType}")
             }
         }
         return inputStream
@@ -555,7 +557,13 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                 throw RestoreFailedException("Backup archive at $archive is missing")
             }
             try {
-                openArchiveFile(archive, isCompressed, compressionType, isEncrypted, iv).use { archiveStream ->
+                openArchiveFile(
+                    archive,
+                    isCompressed,
+                    compressionType,
+                    isEncrypted,
+                    iv
+                ).use { archiveStream ->
 
                     targetDir.mkdirs()  // in case it doesn't exist
 
@@ -569,7 +577,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
 
                     var options = ""
                     options += " --exclude ${quote(ShellHandler.RESTORE_EXCLUDE_FILE)}"
-                    if (pref_excludeCache.value) {
+                    if (!pref_restoreCache.value) {
                         options += " --exclude ${quote(ShellHandler.EXCLUDE_CACHE_FILE)}"
                     }
 
@@ -592,8 +600,8 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                         .split("\n")
                         .filterNot { line ->
                             line.isBlank()
-                            || line.contains("tar: unknown file type") // e.g. socket 140000
-                            || line.contains("tar: had errors") // summary at the end
+                                    || line.contains("tar: unknown file type") // e.g. socket 140000
+                                    || line.contains("tar: had errors") // summary at the end
                         }
                     if (errLines.isNotEmpty()) {
                         val errFiltered = errLines.joinToString("\n")
@@ -778,11 +786,16 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         val isEncrypted: Boolean,
     )
 
-    fun findBackupArchive(dataType: String, backup: Backup, backupDir: StorageFile) : FoundBackupArchive {
+    fun findBackupArchive(
+        dataType: String,
+        backup: Backup,
+        backupDir: StorageFile,
+    ): FoundBackupArchive {
 
         // try all variants starting with that described in the properties file
-        val encryptionsToTry = listOf(backup.isEncrypted, ! backup.isEncrypted)
-        val compressionsToTry = (listOf(if(backup.isCompressed) backup.compressionType else "no") + COMPRESSION_TYPES.keys).toSet()
+        val encryptionsToTry = listOf(backup.isEncrypted, !backup.isEncrypted)
+        val compressionsToTry =
+            (listOf(if (backup.isCompressed) backup.compressionType else "no") + COMPRESSION_TYPES.keys).toSet()
 
         var count = 0
         for (tryEncrypted in encryptionsToTry) {
@@ -803,7 +816,12 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                     if (count > 1)
                         Timber.w("found $backupFilename but properties file describes: compression=${backup.isCompressed}/${backup.compressionType} encryption=${backup.isEncrypted}")
 
-                    return FoundBackupArchive(backupArchive, tryCompressed, tryCompression, tryEncrypted)
+                    return FoundBackupArchive(
+                        backupArchive,
+                        tryCompressed,
+                        tryCompression,
+                        tryEncrypted
+                    )
 
                 } catch (e: Exception) {
                     continue
@@ -1099,8 +1117,8 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
 
     private fun isPlausiblePackageInfo(app: Package): Boolean {
         return app.dataPath.isNotBlank()
-               && app.apkPath.isNotBlank()
-               && app.devicesProtectedDataPath.isNotBlank()
+                && app.apkPath.isNotBlank()
+                && app.devicesProtectedDataPath.isNotBlank()
     }
 
     private fun isPlausiblePath(path: String, packageName: String): Boolean {

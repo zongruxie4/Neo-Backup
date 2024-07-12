@@ -440,4 +440,8 @@
     <string name="enforce_backups_limit_description">Delete older backups to enforce the limit to %d</string>
     <string name="prefs_altblocklayout">Use alternative layout for page blocks</string>
     <string name="prefs_altblocklayout_summary">Use an alternative/old layout for page blocks with borders instead of colored surfaces.</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

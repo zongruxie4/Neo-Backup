@@ -197,4 +197,8 @@
     <string name="radio_deviceprotecteddata">Seadmes kaitstud andmed</string>
     <string name="radio_externaldata">Välised andmed</string>
     <string name="radio_updated">Uuendatud</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

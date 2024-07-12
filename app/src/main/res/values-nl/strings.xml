@@ -211,4 +211,8 @@
     <string name="prefs_enablespecial_summary">Moet nog intensief getest worden, probeer het gevaar te kennen dat het boot loops kan veroorzaken. Feedback is altijd welkom.</string>
     <string name="prefs_devicelock_summary">Beveilig de app met apparaatreferenties</string>
     <string name="prefs_devicelock">Apparaatvergrendeling</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

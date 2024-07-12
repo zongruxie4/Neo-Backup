@@ -410,4 +410,8 @@
     <string name="prefs_theme_dynamic_dark">Oscuro con colores dinámicos</string>
     <string name="enforce_backups_limit">Aplicar el límite de las copias de seguridad</string>
     <string name="enforce_backups_limit_description">Borra las copias de seguridad más antiguas para cumplir con el límite a %d</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

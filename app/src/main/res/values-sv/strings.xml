@@ -182,4 +182,8 @@
     <string name="prefs_excludecache_summary">Exkludera appens cache från data-backup</string>
     <string name="prefs_deviceprotecteddata_summary">Säkerhetskopierar data som är placerad i data/user_de</string>
     <string name="error_updating_schedule_mode">Misslyckades med att uppdatera %1$s av schema %2$d</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

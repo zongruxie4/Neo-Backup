@@ -404,4 +404,8 @@
     <string name="prefs_theme_dynamic_dark">Tmavý s dynamickými barvami</string>
     <string name="enforce_backups_limit">Vynutit limit záloh</string>
     <string name="enforce_backups_limit_description">Smazat starší zálohy pro vynucení limitu na %d</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

@@ -397,4 +397,8 @@
     <string name="prefs_altnavbaritem">使用备用导航栏布局</string>
     <string name="prefs_altnavbaritem_summary">使用替代/旧的导航栏布局，该布局会显示未选定选项页的标签名。</string>
     <string name="prefs_theme_system_black">跟随系统(深色)</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

@@ -411,4 +411,8 @@
     <string name="prefs_theme_dynamic_dark">Scuro con colori dinamici</string>
     <string name="enforce_backups_limit">Applica limite backup</string>
     <string name="enforce_backups_limit_description">Elimina backup più vecchi per applicare il limite a %d</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

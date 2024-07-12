@@ -395,4 +395,8 @@
     <string name="show_enabled_apps">Włączone aplikacje</string>
     <string name="backup_revisions_limit">Limit liczby kopii zapasowych: %d</string>
     <string name="filters_installed">Instalacja</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

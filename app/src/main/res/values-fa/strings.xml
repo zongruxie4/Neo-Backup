@@ -129,4 +129,8 @@
     <string name="prefs_theme_system_black">پوسته سیستم (سیاه)</string>
     <string name="prefs_theme_dynamic_dark">تیره با رنگ های پویا</string>
     <string name="prefs_theme_black_summary">تقویت رنگ مشکی در حالت تاریک</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

@@ -339,4 +339,8 @@
     <string name="prefs_deviceprotecteddata_summary">備份位於 data/user_de 中的資料</string>
     <string name="prefs_obbdata_summary">備份應用程式位於外部儲存空間的 obb 檔案（例如：/storage/emulated/0/Android/obb/）</string>
     <string name="prefs_theme_system_black">系統主題（黑色）</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

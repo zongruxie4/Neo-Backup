@@ -23,4 +23,8 @@
     <string name="handleData">ਡੇਟਾ</string>
     <string name="restoreConfirmation">ਰੀਸਟੋਰ?</string>
     <string name="radio_special">ਸਪੈਸ਼ਲ ਬੈਕਅੱਪਸ</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

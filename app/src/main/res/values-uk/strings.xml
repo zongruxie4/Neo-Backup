@@ -407,4 +407,8 @@
     <string name="prefs_theme_dynamic_dark">Темна динамічна</string>
     <string name="enforce_backups_limit">Ліміт на резервне копіювання</string>
     <string name="enforce_backups_limit_description">Видаліть старіші резервні копії, щоб застосувати ліміт до %d</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

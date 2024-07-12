@@ -406,4 +406,8 @@
     <string name="prefs_theme_dynamic_dark">Σκοτεινό με δυναμικά χρώματα</string>
     <string name="prefs_externaldata_rst">Επαναφορά εξωτερικών δεδομένων</string>
     <string name="prefs_obbdata_rst">Επαναφορά αρχείων obb</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

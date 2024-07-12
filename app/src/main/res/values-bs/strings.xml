@@ -165,4 +165,8 @@
     <string name="sched_timeLeft">Vrijeme do sljedeće izrade sigurnosne kopije:</string>
     <string name="sched_startingbackup">Pokretanje planirane izrade sigurnosne kopije…</string>
     <string name="sched_notificationMessage">Planirana izrada sigurnosne kopije</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

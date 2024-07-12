@@ -402,4 +402,8 @@
     <string name="prefs_theme_dynamic_light">Claro com cores dinâmicas</string>
     <string name="prefs_theme_system_black">Tema do sistema (preto)</string>
     <string name="prefs_theme_dynamic_dark">Escuro com cores dinâmicas</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

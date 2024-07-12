@@ -39,9 +39,9 @@ import com.machiav3lli.backup.items.ActionResult
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.RootFile
 import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.preferences.pref_backupCache
 import com.machiav3lli.backup.preferences.pref_backupPauseApps
 import com.machiav3lli.backup.preferences.pref_backupTarCmd
-import com.machiav3lli.backup.preferences.pref_excludeCache
 import com.machiav3lli.backup.preferences.pref_fakeBackupSeconds
 import com.machiav3lli.backup.tasks.AppActionWork
 import com.machiav3lli.backup.utils.CIPHER_ALGORITHM
@@ -344,7 +344,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
     private fun assembleFileList(sourcePath: String): List<ShellHandler.FileInfo> {
         // get and filter the whole tree at once //TODO use iterator instead of list
         return try {
-            val excludeCache = pref_excludeCache.value
+            val excludeCache = ! pref_backupCache.value
             val allFilesToBackup =
                 shell.suGetDetailedDirectoryContents(sourcePath, true, sourcePath)
                     .filterNot { f: ShellHandler.FileInfo -> f.filename in OABX.assets.DATA_BACKUP_EXCLUDED_BASENAMES } //TODO basenames! not all levels
@@ -431,7 +431,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
 
             var options = ""
             options += " --exclude ${quote(ShellHandler.BACKUP_EXCLUDE_FILE)}"
-            if (pref_excludeCache.value) {
+            if (! pref_backupCache.value) {
                 options += " --exclude ${quote(ShellHandler.EXCLUDE_CACHE_FILE)}"
             }
 

@@ -406,4 +406,8 @@
     <string name="prefs_theme_dynamic_light">Hell mit dynamischen Farben</string>
     <string name="prefs_theme_system_black">Systemthema (Schwarz)</string>
     <string name="prefs_theme_dynamic_dark">Dunkel mit dynamischen Farben</string>
+    <string name="prefs_backupcache">Cache Dateien sichern</string>
+    <string name="prefs_backupcache_summary">Sichert Dateien, die in Cache-Ordnern abgelegt sind</string>
+    <string name="prefs_restorecache">Cache Dateien wiederherstellen</string>
+    <string name="prefs_restorecache_summary">Stellt Dateien wieder her, die in Cache-Ordnern abgelegt sind</string>
 </resources>

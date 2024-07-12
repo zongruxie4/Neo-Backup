@@ -2,4 +2,8 @@
 <resources>
     <string name="backup">Biztonsági mentés</string>
     <string name="restore">Visszaállítás</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

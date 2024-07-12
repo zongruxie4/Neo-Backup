@@ -413,4 +413,8 @@
     <string name="prefs_theme_dynamic_dark">داكن بالألوان المتكيفة</string>
     <string name="enforce_backups_limit">فرض حد النسخ الاحتياطية</string>
     <string name="enforce_backups_limit_description">قم بحذف النسخ الاحتياطية القديمة لفرض الحد الأقصى لـ %d</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

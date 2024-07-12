@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.BuildConfig
@@ -57,7 +56,6 @@ import com.machiav3lli.backup.ui.item.StringPref
 
 @Composable
 fun ServicePrefsPage() {
-    val context = LocalContext.current
     val openDialog = remember { mutableStateOf(false) }
     var dialogsPref by remember { mutableStateOf<Pref?>(null) }
 
@@ -204,6 +202,14 @@ val pref_backupNoBackupData = BooleanPref(
     onChanged = { OABX.assets.updateExcludeFiles() },
 )
 
+val pref_backupCache = BooleanPref(
+    key = "srv-bkp.backupCache",
+    titleId = R.string.prefs_backupcache,
+    summaryId = R.string.prefs_backupcache_summary,
+    icon = Phosphor.Prohibit,
+    defaultValue = false
+)
+
 val pref_restoreDeviceProtectedData = BooleanPref(
     key = "srv-rst.restoreDeviceProtectedData",
     titleId = R.string.prefs_deviceprotecteddata_rst,
@@ -248,6 +254,14 @@ val pref_restoreNoBackupData = BooleanPref(
     iconTint = ColorData,
     defaultValue = false,
     onChanged = { OABX.assets.updateExcludeFiles() },
+)
+
+val pref_restoreCache = BooleanPref(
+    key = "srv-rst.restoreCache",
+    titleId = R.string.prefs_restorecache,
+    summaryId = R.string.prefs_restorecache_summary,
+    icon = Phosphor.Prohibit,
+    defaultValue = false
 )
 
 val pref_restorePermissions = BooleanPref(
@@ -303,12 +317,4 @@ val pref_installationPackage = StringPref(
     icon = Phosphor.Textbox,
     iconTint = ColorOBB,
     defaultValue = BuildConfig.APPLICATION_ID
-)
-
-val pref_excludeCache = BooleanPref(
-    key = "srv.excludeCache",
-    titleId = R.string.prefs_excludecache,
-    summaryId = R.string.prefs_excludecache_summary,
-    icon = Phosphor.Prohibit,
-    defaultValue = false
 )

@@ -368,4 +368,8 @@
     <string name="prefs_externaldata_rst_summary">Atkuria duomenis, kurie yra išorinėje saugykloje (pvz., /storage/emulated/0/Android/data/)</string>
     <string name="prefs_mediadata_rst_summary">Atkuria išorinėje saugykloje (pvz., /storage/emulated/0/Android/media/) esančius programos medijos failus</string>
     <string name="prefs_nobackupdata_rst_summary">Atkuria failus duomenyse, kurių atsarginės kopijos nepadarytos</string>
+    <string name="prefs_backupcache">Back up cached data</string>
+    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
+    <string name="prefs_restorecache">Restore cached data</string>
+    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>
