@@ -67,57 +67,6 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
     @ColumnInfo(defaultValue = "0")
     var persistent: Boolean = false,
 ) {
-    // TODO WECH
-    // TODO hg42
-    // it's unused (can there be any hidden references? e.g. dynamic?)
-    // seems to construct from android.content.pm.PackageInfo which is now capsulated in NB's PackageInfo
-    //constructor(
-    //    context: Context,
-    //    pi: PackageInfo,
-    //    backupDate: LocalDateTime,
-    //    hasApk: Boolean,
-    //    hasAppData: Boolean,
-    //    hasDevicesProtectedData: Boolean,
-    //    hasExternalData: Boolean,
-    //    hasObbData: Boolean,
-    //    hasMediaData: Boolean,
-    //    compressionType: String?,
-    //    cipherType: String?,
-    //    iv: ByteArray?,
-    //    cpuArch: String?,
-    //    size: Long,
-    //    persistent: Boolean = false,
-    //) : this(
-    //    backupVersionCode = BuildConfig.MAJOR * 1000 + BuildConfig.MINOR,
-    //    packageName = pi.packageName,
-    //    packageLabel = pi.applicationInfo.loadLabel(context.packageManager).toString(),
-    //    versionName = pi.versionName,
-    //    versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pi.longVersionCode.toInt()
-    //    else pi.versionCode,
-    //    profileId = try {
-    //        File(pi.applicationInfo.dataDir).parentFile?.name?.toInt() ?: -1
-    //    } catch (e: NumberFormatException) {
-    //        -1 // Android System "App" points to /data/system
-    //    },
-    //    sourceDir = pi.applicationInfo.sourceDir,
-    //    splitSourceDirs = pi.applicationInfo.splitSourceDirs ?: arrayOf(),
-    //    isSystem = pi.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == ApplicationInfo.FLAG_SYSTEM,
-    //    backupDate = backupDate,
-    //    hasApk = hasApk,
-    //    hasAppData = hasAppData,
-    //    hasDevicesProtectedData = hasDevicesProtectedData,
-    //    hasExternalData = hasExternalData,
-    //    hasObbData = hasObbData,
-    //    hasMediaData = hasMediaData,
-    //    compressionType = compressionType,
-    //    cipherType = cipherType,
-    //    iv = iv,
-    //    cpuArch = cpuArch,
-    //    permissions = pi.grantedPermissions.sorted(),
-    //    size = size,
-    //    persistent = persistent,
-    //)
-
     constructor(
         base: com.machiav3lli.backup.dbs.entity.PackageInfo,
         backupDate: LocalDateTime,

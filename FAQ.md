@@ -561,7 +561,7 @@ Note: If you're using banking apps, TAN generators etc., the [app may use Androi
 
 More detailed articles about - how to properly backup your device - would be great, but it comes with lots of caveats due to variety of devices and versions. So it is a challenge to keep/word this as general as possible, as well as keeping it up to date (which is also true for this FAQ itself). If you have the knowledge and time to prepare such guidance for anyone, who's really interested in doing it right, we are happy about any participation.
 
-You probaly want to look into [app-restore-experiences.txt](app-restore-experiences.txt), where we started to document (loosely for now), how apps react on the restore. You should get a picture what to expect and how imperfect a restore will be in general. The times to get a complete restore with on click are definitely gone.
+You probably want to look into [app-restore-experiences.txt](app-restore-experiences.txt), where we started to loosly document, how apps react on the restore. You should get a picture what to expect and how imperfect a restore will be in general. The times to get a complete restore with one click are definitely gone.
 
 ## Why do I have to login/register to app x y z again after restore?
 

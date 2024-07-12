@@ -678,7 +678,7 @@ class OABX : Application() {
         //------------------------------------------------------------------------------------------ section
 
         fun beginLogSection(section: String) {
-            var count = 0
+            var count : Int
             synchronized(logSections) {
                 count = logSections.getValue(section)
                 logSections[section] = count + 1
