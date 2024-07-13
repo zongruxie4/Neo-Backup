@@ -622,10 +622,6 @@ class ShellHandler {
         var utilBox: UtilBox = UtilBox()
         val utilBoxQ get() = utilBox.quote()
 
-        val EXCLUDE_CACHE_FILE = File(OABX.assets.directory, "tar_EXCLUDE_CACHE").toString()
-        val BACKUP_EXCLUDE_FILE = File(OABX.assets.directory, "tar_BACKUP_EXCLUDE").toString()
-        val RESTORE_EXCLUDE_FILE = File(OABX.assets.directory, "tar_RESTORE_EXCLUDE").toString()
-
         val isGrantedRoot get() = Shell.isAppGrantedRoot()
         val hasRootShell get() = Shell.getShell().status >= Shell.ROOT_SHELL
         val hasMountMaster get() = Shell.getShell().status >= Shell.ROOT_MOUNT_MASTER

@@ -441,9 +441,9 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             val tarScript = ShellHandler.findScript("tar.sh").toString()
 
             var options = ""
-            options += " --exclude ${quote(ShellHandler.BACKUP_EXCLUDE_FILE)}"
+            options += " --exclude ${quote(OABX.assets.BACKUP_EXCLUDE_FILE)}"
             if (! pref_backupCache.value) {
-                options += " --exclude ${quote(ShellHandler.EXCLUDE_CACHE_FILE)}"
+                options += " --exclude ${quote(OABX.assets.EXCLUDE_CACHE_FILE)}"
             }
 
             val cmd = "sh ${quote(tarScript)} create $utilBoxQ $options ${quote(sourcePath)}"

@@ -576,9 +576,9 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                     val qTarScript = quote(tarScript)
 
                     var options = ""
-                    options += " --exclude ${quote(ShellHandler.RESTORE_EXCLUDE_FILE)}"
+                    options += " --exclude ${quote(OABX.assets.RESTORE_EXCLUDE_FILE)}"
                     if (!pref_restoreCache.value) {
-                        options += " --exclude ${quote(ShellHandler.EXCLUDE_CACHE_FILE)}"
+                        options += " --exclude ${quote(OABX.assets.EXCLUDE_CACHE_FILE)}"
                     }
 
                     val cmd = "sh $qTarScript extract $utilBoxQ $options ${quote(targetDir)}"

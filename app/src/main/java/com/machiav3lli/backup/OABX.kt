@@ -486,7 +486,19 @@ class OABX : Application() {
         var refNB: WeakReference<OABX> = WeakReference(null)
         val NB: OABX get() = refNB.get()!!
 
-        val assets get() = AssetHandler(context)
+        // lint: "Do not place Android context classes in static fields; this is a memory leak"
+        // but: only if a context is assigned, and this is only used by Preview (and maybe by Tests)
+        @SuppressLint("StaticFieldLeak")
+        var fakeContext: Context? = null
+        val context: Context get() = fakeContext ?: NB.applicationContext
+
+        var assetsRef: WeakReference<AssetHandler> = WeakReference(null)
+        val assets: AssetHandler
+            get() {
+                if (assetsRef.get() == null)
+                    assetsRef = WeakReference(AssetHandler(context))
+                return assetsRef.get()!!
+            }
 
         // service might be null
         var serviceRef: WeakReference<ScheduleService> = WeakReference(null)
@@ -587,12 +599,6 @@ class OABX : Application() {
                 null
             }
         }
-
-        // lint: "Do not place Android context classes in static fields; this is a memory leak"
-        // but: only if a context is assigned, this is only used by Preview (and maybe by Tests)
-        @SuppressLint("StaticFieldLeak")
-        var fakeContext: Context? = null
-        val context: Context get() = fakeContext ?: NB.applicationContext
 
         val work: WorkHandler get() = NB.work!!
 

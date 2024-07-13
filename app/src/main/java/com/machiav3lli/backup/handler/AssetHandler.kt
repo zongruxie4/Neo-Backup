@@ -46,17 +46,23 @@ class AssetHandler(context: Context) {
         }
     }
 
-    val DATA_EXCLUDED_CACHE_DIRS = listOf(
+    val EXCLUDE_CACHE_FILE get() = File(directory, "tar_EXCLUDE_CACHE").toString()
+    val BACKUP_EXCLUDE_FILE get() = File(directory, "tar_BACKUP_EXCLUDE").toString()
+    val RESTORE_EXCLUDE_FILE get() = File(directory, "tar_RESTORE_EXCLUDE").toString()
+
+    val DATA_EXCLUDED_CACHE_DIRS get() = listOf(
         "cache",
         "code_cache"
     )
 
-    val LIB_DIRS = listOf(
+    // libs are generally created while installing the app. Backing them up
+    // would result in a compatibility problem between devices with different cpu_arch
+
+    val LIB_DIRS get() = listOf(
         "lib",      //TODO hg42 what about architecture dependent names? or may be application specific? lib* ???
     )
 
-    // libs are generally created while installing the app. Backing them up
-    // would result in a compatibility problem between devices with different cpu_arch
+    // these need to be dynamic, becasue the preferences can change at runtime
 
     val DATA_BACKUP_EXCLUDED_BASENAMES get() = (
             LIB_DIRS
@@ -81,19 +87,19 @@ class AssetHandler(context: Context) {
 
     fun updateExcludeFiles() {
 
-        File(ShellHandler.BACKUP_EXCLUDE_FILE)
+        File(BACKUP_EXCLUDE_FILE)
             .writeText(
                 (DATA_BACKUP_EXCLUDED_BASENAMES.map { "./$it" }
                         + DATA_EXCLUDED_NAMES)
                     .joinToString("") { it + "\n" }
             )
-        File(ShellHandler.RESTORE_EXCLUDE_FILE)
+        File(RESTORE_EXCLUDE_FILE)
             .writeText(
                 (DATA_RESTORE_EXCLUDED_BASENAMES.map { "./$it" }
                         + DATA_EXCLUDED_NAMES)
                     .joinToString("") { it + "\n" }
             )
-        File(ShellHandler.EXCLUDE_CACHE_FILE)
+        File(EXCLUDE_CACHE_FILE)
             .writeText(
                 DATA_EXCLUDED_CACHE_DIRS.map { "./$it" }
                     .joinToString("") { it + "\n" }
