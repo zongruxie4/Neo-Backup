@@ -584,6 +584,8 @@ open class StorageFile {
     }
 
     fun renameTo(displayName: String): Boolean {
+        if (name == displayName)
+            return true
         // removes this, so need to change parent
         parent?.path?.let { cacheFilesRemove(it, this) }
         var ok = false
@@ -610,6 +612,7 @@ open class StorageFile {
         }
         // adds this, so need to change parent
         parent?.path?.let { cacheFilesAdd(it, this) }
+
         return ok
     }
 
