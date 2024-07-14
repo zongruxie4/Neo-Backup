@@ -50,7 +50,6 @@ private val valueSerMod = SerializersModule {
     }
 }
 
-@Serializer(forClass = Map::class)
 object MapAnySerializer : KSerializer<Map<String, AnyType>> {
 
     @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
@@ -65,10 +64,15 @@ object MapAnySerializer : KSerializer<Map<String, AnyType>> {
             for ((key, value) in value) {
                 encodeStringElement(descriptor, 0, key)
                 when (value) {
-                    is Int -> encodeIntElement(descriptor, 1, value)
+                    is Int     -> encodeIntElement(descriptor, 1, value)
                     is Boolean -> encodeBooleanElement(descriptor, 1, value)
-                    is String -> encodeStringElement(descriptor, 1, value)
-                    else -> encodeSerializableElement(descriptor, 1, PolymorphicSerializer(Any::class), value)
+                    is String  -> encodeStringElement(descriptor, 1, value)
+                    else       -> encodeSerializableElement(
+                        descriptor,
+                        1,
+                        PolymorphicSerializer(Any::class),
+                        value
+                    )
                 }
             }
         }
@@ -83,14 +87,19 @@ object MapAnySerializer : KSerializer<Map<String, AnyType>> {
                     0                            -> {
                         val key = decodeStringElement(descriptor, 0)
                         val value = when (val elemIndex = decodeElementIndex(descriptor)) {
-                            1 -> decodeIntElement(descriptor, 1)
-                            2 -> decodeBooleanElement(descriptor, 2)
-                            3 -> decodeStringElement(descriptor, 3)
-                            else -> decodeSerializableElement(descriptor, elemIndex, PolymorphicSerializer(Any::class))
+                            1    -> decodeIntElement(descriptor, 1)
+                            2    -> decodeBooleanElement(descriptor, 2)
+                            3    -> decodeStringElement(descriptor, 3)
+                            else -> decodeSerializableElement(
+                                descriptor,
+                                elemIndex,
+                                PolymorphicSerializer(Any::class)
+                            )
                         }
                         result[key] = value
                     }
-                    else -> throw SerializationException("Invalid index: $index")
+
+                    else                         -> throw SerializationException("Invalid index: $index")
                 }
             }
             result
@@ -98,7 +107,6 @@ object MapAnySerializer : KSerializer<Map<String, AnyType>> {
     }
 }
 
-@Serializer(forClass = Map::class)
 object MapSerializerAny : KSerializer<Map<String, AnyType>> {
 
     @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
@@ -145,30 +153,31 @@ sealed class Primitive {
 
     companion object {
         fun <T : Any> from(value: T) =
-            when(value) {
-                is Int -> IntValue(value)
+            when (value) {
+                is Int     -> IntValue(value)
                 is Boolean -> BooleanValue(value)
-                is String -> StringValue(value)
-                else -> throw Exception("only Int, Boolean, String allowed")
+                is String  -> StringValue(value)
+                else       -> throw Exception("only Int, Boolean, String allowed")
             }
     }
 }
 
 typealias MapPrimitive = Map<String, Primitive>
 
+@OptIn(ExperimentalSerializationApi::class, InternalSerializationApi::class)
 object PrimitiveSerializer : KSerializer<Primitive> {
-    @OptIn(InternalSerializationApi::class)
-    override val descriptor: SerialDescriptor = buildSerialDescriptor("Primitive", PolymorphicKind.SEALED)
+    override val descriptor: SerialDescriptor =
+        buildSerialDescriptor("Primitive", PolymorphicKind.SEALED)
 
     override fun serialize(encoder: Encoder, value: Primitive) {
         when (value) {
-            is Primitive.IntValue ->  encoder.encodeInt(value.value)
+            is Primitive.IntValue     -> encoder.encodeInt(value.value)
             is Primitive.BooleanValue -> encoder.encodeBoolean(value.value)
-            is Primitive.StringValue -> encoder.encodeString(value.value)
+            is Primitive.StringValue  -> encoder.encodeString(value.value)
             //else -> encoder.encodeStructure(descriptor) {
             //    encodeSerializableElement(descriptor, 3, PolymorphicSerializer(Any::class), value)
             //}
-            else -> error("only Int, Boolean, String allowed")
+            else                      -> error("only Int, Boolean, String allowed")
         }
     }
 
@@ -179,11 +188,11 @@ object PrimitiveSerializer : KSerializer<Primitive> {
             var stringValue: String? = runCatching { decoder.decodeString() }.getOrNull()
             var anyValue: Any? = null
             when {
-                intValue != null -> Primitive.IntValue(intValue)
+                intValue != null     -> Primitive.IntValue(intValue)
                 booleanValue != null -> Primitive.BooleanValue(booleanValue)
-                stringValue != null -> Primitive.StringValue(stringValue)
+                stringValue != null  -> Primitive.StringValue(stringValue)
                 //anyValue != null -> Primitive.AnyValue(anyValue)
-                else -> error("No values found")
+                else                 -> error("No values found")
             }
         }
     }
@@ -200,15 +209,16 @@ class Try_Serialization {
 
     fun <K, T> mapAnyOf(vararg args: Pair<K, T>) = mapOf<K, T>(*args)  //.mapValues { AnyType(it) }
 
-    val mapAny : MapAny = mapAnyOf(
+    val mapAny: MapAny = mapAnyOf(
         "int" to 123,
         "boolean" to false,
         "string" to "abc",
     )
 
-    fun <K, T : Any> mapPrimitiveOf(vararg args: Pair<K, T>) = mapOf<K, T>(*args).mapValues { Primitive.from(it.value) }
+    fun <K, T : Any> mapPrimitiveOf(vararg args: Pair<K, T>) =
+        mapOf<K, T>(*args).mapValues { Primitive.from(it.value) }
 
-    val mapPrimitive : MapPrimitive = mapPrimitiveOf(
+    val mapPrimitive: MapPrimitive = mapPrimitiveOf(
         "int" to 123,
         "boolean" to false,
         "string" to "abc",
@@ -271,7 +281,8 @@ class Try_Serialization {
     fun test_mapPrimitiveSerializer() {
         val ser = serializer.encodeToString(mapPrimitiveSerializer, mapPrimitive)
         println("ser: '\n$ser\n'")
-        val obj = serializer.decodeFromString(mapPrimitiveSerializer, ser).mapValues { it.value.asAny() }
+        val obj =
+            serializer.decodeFromString(mapPrimitiveSerializer, ser).mapValues { it.value.asAny() }
         assertEquals(mapAny, obj)
     }
 
@@ -287,7 +298,7 @@ class Try_Serialization {
     fun test_obj() {
         val ser = serializer.encodeToString(aObj)
         println("ser: '\n$ser\n'")
-        val obj : aClass = serializer.decodeFromString(ser)
+        val obj: aClass = serializer.decodeFromString(ser)
         assertEquals(aObj, obj)
     }
 

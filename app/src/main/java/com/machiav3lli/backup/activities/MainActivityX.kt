@@ -276,7 +276,7 @@ class MainActivityX : BaseActivity() {
         super.onDestroy()
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         doIntent(intent)
         super.onNewIntent(intent)
     }

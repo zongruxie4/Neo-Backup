@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,8 +77,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
     val main = OABX.main!!
     val scope = rememberCoroutineScope()
     val filteredList by main.viewModel.filteredList.collectAsState(emptyList())
-    val showBatchSheet = remember { mutableStateOf(false) }
-    val backupBatchSheet = remember { mutableStateOf(backupBoolean) }
+    val showBatchSheet = rememberSaveable { mutableStateOf(false) }
     val batchSheetState = rememberModalBottomSheetState(true)
     val openDialog = remember { mutableStateOf(false) }
 
@@ -241,7 +241,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                 onDismissRequest = dismiss
             ) {
                 BatchPrefsSheet(
-                    backupBoolean = backupBatchSheet.value
+                    backupBoolean = backupBoolean
                 )
             }
         }

@@ -579,7 +579,7 @@ open class StorageFile {
             if (result != null) {
                 _uri = result
                 ok = true
-            }
+            } else { }
         } catch (e: Throwable) {
             logException(e, path, backTrace = false)
             ok = false
