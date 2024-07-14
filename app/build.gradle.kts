@@ -22,6 +22,7 @@ plugins {
     kotlin("android")
     kotlin("plugin.serialization").version("1.9.22")
     id("com.google.devtools.ksp") version ("1.9.22-1.0.18")
+    kotlin("plugin.compose").version("2.0.0")
 }
 
 val vActivity = "1.8.2"
@@ -35,8 +36,8 @@ val vCompose = "1.6.3"
 val vComposeM3 = "1.2.1"
 val vDatastore = "1.0.0"
 val vKAML = "0.57.0"
-val vKotlin = "1.9.22"
-val vKSP = "1.0.18"
+val vKotlin = "2.0.0"
+val vKSP = "1.0.22"
 val vLibsu = "5.2.2"
 val vLifecycle = "2.7.0"
 val vMaterial = "1.11.0"
@@ -120,9 +121,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = vComposeCompiler
     }
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
