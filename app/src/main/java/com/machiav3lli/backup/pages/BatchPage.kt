@@ -77,7 +77,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
     val scope = rememberCoroutineScope()
     val filteredList by main.viewModel.filteredList.collectAsState(emptyList())
     val showBatchSheet = remember { mutableStateOf(false) }
-    val backupBatchSheet = remember { mutableStateOf(false) }
+    val backupBatchSheet = remember { mutableStateOf(backupBoolean) }
     val batchSheetState = rememberModalBottomSheetState(true)
     val openDialog = remember { mutableStateOf(false) }
 
