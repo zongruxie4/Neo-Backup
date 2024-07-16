@@ -346,20 +346,20 @@ class WorkHandler(appContext: Context) {
                         WorkInfo.State.ENQUEUED  -> {
                             queued++
                             workEnqueued++
-                            packageName?.let { packagesState.put(it, "...") }
+                            packageName?.let { packagesState.put(it, "") }
                         }
 
                         WorkInfo.State.BLOCKED   -> {
                             queued++
                             workBlocked++
-                            packageName?.let { packagesState.put(it, "...") }
+                            packageName?.let { packagesState.put(it, "") }
                         }
 
                         WorkInfo.State.RUNNING   -> {
                             workRunning++
-                            packageName?.let { packagesState.put(it, operation ?: "...") }
+                            packageName?.let { packagesState.put(it, operation ?: "") }
                             when (operation) {
-                                "..." -> queued++
+                                "" -> queued++
                                 else  -> {
                                     running++
                                     val shortPackageName =
