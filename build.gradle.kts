@@ -131,7 +131,7 @@ dependencies {
     implementation(libs.security.crypto)
     implementation(libs.commons.io)
     implementation(libs.commons.compress)
-    implementation(libs.zstd.jni)
+    implementation(variantOf(libs.zstd.jni) { artifactType("aar") })
     implementation(libs.timber)
     implementation(libs.semver)
     implementation(libs.libsu.core)
