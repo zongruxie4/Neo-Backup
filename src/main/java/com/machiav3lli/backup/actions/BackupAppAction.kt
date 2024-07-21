@@ -40,6 +40,7 @@ import com.machiav3lli.backup.items.ActionResult
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.RootFile
 import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.plugins.ShellScriptPlugin
 import com.machiav3lli.backup.preferences.pref_backupCache
 import com.machiav3lli.backup.preferences.pref_backupPauseApps
 import com.machiav3lli.backup.preferences.pref_backupTarCmd
@@ -50,6 +51,7 @@ import com.machiav3lli.backup.utils.CIPHER_ALGORITHM
 import com.machiav3lli.backup.utils.CryptoSetupException
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
+import com.machiav3lli.backup.utils.TraceUtils.canonicalName
 import com.machiav3lli.backup.utils.encryptStream
 import com.machiav3lli.backup.utils.getCompressionLevel
 import com.machiav3lli.backup.utils.getCompressionType
@@ -113,7 +115,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 return ActionResult(
                     app,
                     null,
-                    "${realException.javaClass.simpleName}: ${e.message}",
+                    "${realException::class.simpleName}: ${e.message}",
                     false
                 )
             } catch (e: StorageLocationNotConfiguredException) {
@@ -122,7 +124,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 return ActionResult(
                     app,
                     null,
-                    "${realException.javaClass.simpleName}: ${e.message}",
+                    "${realException::class.simpleName}: ${e.message}",
                     false
                 )
             } catch (e: Throwable) {
@@ -133,7 +135,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 return ActionResult(
                     app,
                     null,
-                    "${realException.javaClass.simpleName}: ${e.message}",
+                    "${realException::class.simpleName}: ${e.message}",
                     false
                 )
             }
@@ -145,7 +147,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 return ActionResult(
                     app,
                     null,
-                    "${realException.javaClass.simpleName}: ${e.message}${e.cause?.let { it.message?.let {" - ${it}" }}}",
+                    "${realException::class.simpleName}: ${e.message}${e.cause?.let { it.message?.let {" - ${it}" }}}",
                     false
                 )
             }
@@ -161,7 +163,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
 
             fun handleException(e: Throwable): ActionResult {
                 val message =
-                    "${e.javaClass.simpleName}: ${e.message}${e.cause?.let { " - ${it.message}" }}"
+                    "${e::class.simpleName}: ${e.message}${e.cause?.let { " - ${it.message}" }}"
                 Timber.e("Backup failed: $message")
                 return ActionResult(app, null, message, false)
             }
@@ -369,11 +371,11 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             */
             createBackupArchiveTarApi(backupInstanceDir, dataType, filesToBackup, compress, iv)
         } catch (e: IOException) {
-            val message = "${e.javaClass.canonicalName} occurred on $dataType backup: $e"
+            val message = "${e::class.canonicalName} occurred on $dataType backup: $e"
             Timber.e(message)
             throw BackupFailedException(message, e)
         } catch (e: Throwable) {
-            val message = "${e.javaClass.canonicalName} occurred on $dataType backup: $e"
+            val message = "${e::class.canonicalName} occurred on $dataType backup: $e"
             LogsHandler.unexpectedException(e, message)
             throw BackupFailedException(message, e)
         }
@@ -410,7 +412,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
 
         var result = false
         try {
-            val tarScript = ShellHandler.findScript("tar.sh").toString()
+            val tarScript = ShellScriptPlugin.findScript("tar").toString()
 
             var options = ""
             options += " --exclude ${quote(OABX.assets.BACKUP_EXCLUDE_FILE)}"
@@ -462,11 +464,11 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
 
             result = true
         } catch (e: IOException) {
-            val message = "${e.javaClass.canonicalName} occurred on $dataType backup: $e"
+            val message = "${e::class.canonicalName} occurred on $dataType backup: $e"
             Timber.e(message)
             throw BackupFailedException(message, e)
         } catch (e: Throwable) {
-            val message = "${e.javaClass.canonicalName} occurred on $dataType backup: $e"
+            val message = "${e::class.canonicalName} occurred on $dataType backup: $e"
             LogsHandler.unexpectedException(e, message)
             throw BackupFailedException(message, e)
         } finally {

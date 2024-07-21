@@ -8,6 +8,7 @@ import com.machiav3lli.backup.ui.item.BooleanPref
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
+import kotlin.reflect.KClass
 
 object TraceUtils {
 
@@ -154,6 +155,8 @@ object TraceUtils {
 
     // reflection
 
+    val KClass<*>.canonicalName get() = java.canonicalName
+
     fun stackFrame(skip: Int = 0): StackTraceElement? {
         return try {
             // >= Java 9  StackWalker.getInstance().walk { stream -> stream.skip(1).findFirst().get() }
@@ -206,11 +209,10 @@ object TraceUtils {
 
     fun classAndId(obj: Any?): String {
         return if (obj != null)
-            "${obj.javaClass.simpleName}@${Integer.toHexString(obj.hashCode())}"
+            "${obj::class.simpleName}@${Integer.toHexString(obj.hashCode())}"
         else
             "<null>"
     }
-
 
     // helpers
 

@@ -961,8 +961,5 @@ class ShellHandler {
             }
             return found
         }
-
-        fun findScript(fileName: String): File? = findUserOverridableFile("script", fileName)
-        fun findDefinition(fileName: String): File? = findUserOverridableFile("definition", fileName)
     }
 }

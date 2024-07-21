@@ -155,6 +155,12 @@ val pref_trace = BooleanPref(
     defaultValue = isDebug || isHg42
 )
 
+val tracePlugin = TraceUtils.TracePref(
+    name = "Plugin",
+    summary = "trace plugins",
+    default = true
+)
+
 val traceSection = TraceUtils.TracePref(
     name = "Section",
     summary = "trace important sections (backup, schedule, etc.)",

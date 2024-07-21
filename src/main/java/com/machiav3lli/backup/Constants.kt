@@ -62,6 +62,7 @@ const val ISO_LIKE_DATE_TIME_MIN_PATTERN = "yyyy-MM-dd HH:mm"
 const val ISO_LIKE_DATE_TIME_MS_PATTERN = "yyyy-MM-dd HH:mm:ss:SSS"
 const val FILE_DATE_TIME_MS_PATTERN = "yyyy-MM-dd-HH-mm-ss-SSS"
 const val FILE_DATE_TIME_PATTERN = "yyyy-MM-dd-HH-mm-ss"
+const val DATE_TIME_AS_VERSION_CODE_PATTERN = "yyMMddHH"
 
 val ISO_DATE_TIME_FORMAT
     get() = SimpleDateFormat(
@@ -89,8 +90,8 @@ val ISO_DATE_TIME_FORMAT_MS
 
 // use millisec, because computers (and users) can be faster than a sec
 val BACKUP_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(FILE_DATE_TIME_MS_PATTERN)
-
 val BACKUP_DATE_TIME_SHOW_FORMATTER = DateTimeFormatter.ofPattern(ISO_LIKE_DATE_TIME_PATTERN)
+val DATE_TIME_AS_VERSION_CODE_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_AS_VERSION_CODE_PATTERN)
 
 // optional millisec to include old format
 const val BACKUP_INSTANCE_REGEX_PATTERN = """\d\d\d\d-\d\d-\d\d-\d\d-\d\d-\d\d(-\d\d\d)?-user_\d+"""

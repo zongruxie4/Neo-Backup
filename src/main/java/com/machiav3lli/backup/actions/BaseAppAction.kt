@@ -19,14 +19,14 @@ package com.machiav3lli.backup.actions
 
 import android.content.Context
 import android.content.pm.PackageManager
-import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.ShellHandler
-import com.machiav3lli.backup.handler.ShellHandler.Companion.findDefinition
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.handler.ShellHandler.Companion.utilBoxQ
 import com.machiav3lli.backup.handler.ShellHandler.ShellCommandFailedException
+import com.machiav3lli.backup.plugins.RegexPlugin.Companion.findRegex
+import com.machiav3lli.backup.plugins.ShellScriptPlugin
 import com.machiav3lli.backup.preferences.pref_backupSuspendApps
 import com.machiav3lli.backup.tasks.AppActionWork
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
@@ -80,7 +80,7 @@ abstract class BaseAppAction protected constructor(
         try {
             val profileId = currentProfile
             val applicationInfo = context.packageManager.getApplicationInfo(packageName, 0)
-            val script = ShellHandler.findScript("package.sh").toString()
+            val script = ShellScriptPlugin.findScript("package").toString()
             traceBold { "---------------------------------------- preprocess $type $packageName profile $profileId uid ${applicationInfo.uid}" }
             if (applicationInfo.uid < android.os.Process.FIRST_APPLICATION_UID) { // exclude several system users, e.g. system, radio
                 Timber.w("$type $packageName: ignore processes of system user UID < ${android.os.Process.FIRST_APPLICATION_UID}")
@@ -113,7 +113,7 @@ abstract class BaseAppAction protected constructor(
         try {
             val profileId = currentProfile
             val applicationInfo = context.packageManager.getApplicationInfo(packageName, 0)
-            val script = ShellHandler.findScript("package.sh").toString()
+            val script = ShellScriptPlugin.findScript("package").toString()
             traceBold { "........................................ postprocess $type $packageName profile $profileId uid ${applicationInfo.uid}" }
             if (applicationInfo.uid < android.os.Process.FIRST_APPLICATION_UID) { // exclude several system users, e.g. system, radio
                 Timber.w("$type $packageName: ignore processes of system user UID < ${android.os.Process.FIRST_APPLICATION_UID}")
@@ -152,15 +152,8 @@ abstract class BaseAppAction protected constructor(
         const val BACKUP_DIR_OBB_FILES = "obb_files"
         const val BACKUP_DIR_MEDIA_FILES = "media_files"
 
-
-        val ignoredPackages = Regex("""(?x)(^(""" +
-                findDefinition("ignored_packages.regex")!!.readText()
-                + """)$)"""
-        )
-        val doNotStop = Regex("""(?x)(^(""" +
-                findDefinition("do_not_stop.regex")!!.readText()
-                + "|" + Regex.escape(BuildConfig.APPLICATION_ID) + """)$)"""
-        )
+        val ignoredPackages = findRegex("ignored_packages")
+        val doNotStop = findRegex("do_not_stop")
 
         init {
             Timber.i("ignoredPackages = $ignoredPackages")
