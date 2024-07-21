@@ -27,18 +27,22 @@ abstract class Plugin(val name: String, var file: File) {
         // add new plugin classes here, necessary to have all classes initialized
 
         val pluginClasses = mutableListOf<KClass<out Plugin>>(
-            SpecialFilesPlugin::class,
-            SpecialKotlinScriptPlugin::class,
-            RegexPlugin::class,
-            ShellScriptPlugin::class,
-        )
+                SpecialFilesPlugin::class,
+                SpecialKotlinScriptPlugin::class,
+                RegexPlugin::class,
+                ShellScriptPlugin::class,
+            )
 
         var pluginTypes = mutableMapOf<String, KClass<out Plugin>>()
         var pluginExtensions = mutableMapOf<String, String>()
         var pluginExtension = mutableMapOf<String, String>()
         val default = "SpecialFiles"
 
-        fun registerType(type: String, pluginClass: KClass<out Plugin>, extensions: List<String>) : Boolean {
+        fun registerType(
+            type: String,
+            pluginClass: KClass<out Plugin>,
+            extensions: List<String>,
+        ): Boolean {
             tracePlugin { ("register ${pluginClass.simpleName} type: $type, extensions: $extensions") }
             pluginTypes.put(type, pluginClass)
             pluginExtension.put(type, extensions.first())
