@@ -125,6 +125,7 @@ const val DIALOG_UNINSTALL = 8
 const val DIALOG_ADDTAG = 9
 const val DIALOG_NOTE = 10
 const val DIALOG_ENFORCE_LIMIT = 11
+const val DIALOG_NOTE_BACKUP = 12
 
 @Composable
 fun AppSheet(
@@ -512,6 +513,10 @@ fun AppSheet(
                             dialogProps.value = Pair(DIALOG_DELETE, item)
                             openDialog.value = true
                         },
+                        onNote = { item ->
+                            dialogProps.value = Pair(DIALOG_NOTE_BACKUP, item)
+                            openDialog.value = true
+                        },
                         rewriteBackup = { backup, changedBackup ->
                             viewModel.rewriteBackup(backup, changedBackup)
                         }
@@ -708,6 +713,18 @@ fun AppSheet(
                                 openDialogCustom = openDialog,
                             ) {
                                 viewModel.setExtras(appExtras.copy(note = it))
+                            }
+                        }
+
+                        DIALOG_NOTE_BACKUP   -> {
+                            val backup = dialogProps.value.second as Backup
+
+                            StringInputDialogUI(
+                                titleText = stringResource(id = R.string.edit_note),
+                                initValue = backup.note,
+                                openDialogCustom = openDialog,
+                            ) {
+                                viewModel.rewriteBackup(backup, backup.copy(note = it))
                             }
                         }
 

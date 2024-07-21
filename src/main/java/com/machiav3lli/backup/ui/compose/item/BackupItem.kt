@@ -44,6 +44,7 @@ fun BackupItem(
     item: Backup,
     onRestore: (Backup) -> Unit = { },
     onDelete: (Backup) -> Unit = { },
+    onNote: (Backup) -> Unit = { },
     rewriteBackup: (Backup, Backup) -> Unit = { backup, changedBackup -> },
 ) {
     ListItem(
@@ -78,7 +79,15 @@ fun BackupItem(
                         )
                     }
                 }
-                Row(modifier = Modifier.wrapContentWidth()) {
+                Row(
+                    modifier = Modifier.wrapContentWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    NoteTagItem(
+                        tag = item.note.ifEmpty { stringResource(id = R.string.edit_note) },
+                        action = item.note.isEmpty(),
+                        onClick = { onNote(item) },
+                    )
                     BackupLabels(item = item)
                 }
             }
