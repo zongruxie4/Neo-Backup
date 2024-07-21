@@ -4,11 +4,10 @@
 *.hprof
 .gradle
 .idea
-app/src/main/assets
+src/main/assets
 assets
 build/
-app/build
 local.properties
-app/src/main/jniLibs/
+src/main/jniLibs/
 release/
-app/neo/
+neo/
