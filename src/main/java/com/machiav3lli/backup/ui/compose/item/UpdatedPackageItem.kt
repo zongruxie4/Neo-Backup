@@ -57,7 +57,6 @@ fun UpdatedPackageItem(
             Text(
                 text = item.packageLabel,
                 modifier = Modifier.fillMaxWidth(),
-                softWrap = true,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = MaterialTheme.typography.titleSmall

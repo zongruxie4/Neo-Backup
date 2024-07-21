@@ -56,7 +56,6 @@ fun LogItem(
                         Column(modifier = Modifier.weight(1f, true)) {
                             Text(
                                 text = item.logDate.getFormattedDate(true) ?: "",
-                                softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
                                 style = MaterialTheme.typography.titleMedium
@@ -72,7 +71,6 @@ fun LogItem(
                                 if (item.sdkCodename.isNotEmpty())
                                     Text(
                                         text = "abi${item.sdkCodename} ",
-                                        softWrap = true,
                                         overflow = TextOverflow.Ellipsis,
                                         maxLines = 1,
                                         style = MaterialTheme.typography.labelMedium,

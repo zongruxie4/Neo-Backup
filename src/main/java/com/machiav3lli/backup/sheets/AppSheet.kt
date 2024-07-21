@@ -206,14 +206,12 @@ fun AppSheet(
                         ) {
                             Text(
                                 text = pkg.packageLabel,
-                                softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
                                 text = pkg.packageName,
-                                softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
                                 style = MaterialTheme.typography.labelMedium,
