@@ -26,6 +26,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomSheetScaffold
@@ -34,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +71,7 @@ import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.PagerNavBar
 import com.machiav3lli.backup.ui.navigation.SlidePager
 import com.topjohnwu.superuser.Shell
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.system.exitProcess
@@ -80,14 +83,12 @@ fun MainPage(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val pages = listOf(
+    val pages = persistentListOf(
         NavItem.Home,
         NavItem.Backup,
         NavItem.Restore,
         NavItem.Scheduler,
     )
-    val pagerState = rememberPagerState(pageCount = { pages.size })
-    val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }
     val scaffoldState = rememberBottomSheetScaffoldState()
 
     OABX.appsSuspendedChecked = false
@@ -121,20 +122,14 @@ fun MainPage(
 
     Shell.getShell()
 
-
     BackHandler {
         OABX.main?.finishAffinity()
     }
-
-    val openBlocklist = remember { mutableStateOf(false) }
 
     var query by rememberSaveable {
         mutableStateOf(
             OABX.main?.viewModel?.searchQuery?.value ?: ""
         )
-    }
-    val searchExpanded = remember {
-        mutableStateOf(false)
     }
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -152,6 +147,13 @@ fun MainPage(
             )
         }
     ) {
+        val pagerState = rememberPagerState(pageCount = { pages.size })
+        val currentPage by remember { derivedStateOf { pages[pagerState.currentPage] } }
+        val openBlocklist = rememberSaveable { mutableStateOf(false) }
+        val searchExpanded = remember {
+            mutableStateOf(false)
+        }
+
         Scaffold(
             containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -231,24 +233,23 @@ fun MainPage(
                 PagerNavBar(pageItems = pages, pagerState = pagerState)
             }
         ) { paddingValues ->
-
             SlidePager(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .blockBorder(),
+                    .blockBorder()
+                    .fillMaxSize(),
                 pagerState = pagerState,
                 pageItems = pages,
-                navController = navController
             )
+        }
 
-            if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
-                GlobalBlockListDialogUI(
-                    currentBlocklist = OABX.main?.viewModel?.getBlocklist()?.toSet()
-                        ?: emptySet(),
-                    openDialogCustom = openBlocklist,
-                ) { newSet ->
-                    OABX.main?.viewModel?.setBlocklist(newSet)
-                }
+        if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
+            GlobalBlockListDialogUI(
+                currentBlocklist = OABX.main?.viewModel?.getBlocklist()?.toSet()
+                    ?: emptySet(),
+                openDialogCustom = openBlocklist,
+            ) { newSet ->
+                OABX.main?.viewModel?.setBlocklist(newSet)
             }
         }
     }

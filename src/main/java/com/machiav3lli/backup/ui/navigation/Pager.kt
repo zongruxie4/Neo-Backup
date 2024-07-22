@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -34,13 +35,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.preferences.pref_altNavBarItem
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SlidePager(
     modifier: Modifier = Modifier,
-    pageItems: List<NavItem>,
+    pageItems: ImmutableList<NavItem>,
     pagerState: PagerState,
 ) {
     HorizontalPager(modifier = modifier, state = pagerState, beyondBoundsPageCount = 3) { page ->
@@ -58,21 +60,24 @@ fun PagerNavBar(pageItems: List<NavItem>, pagerState: PagerState) {
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
-        pageItems.forEachIndexed { index, tab ->
-            val selected = pagerState.currentPage == index
+        pageItems.forEachIndexed { index, item ->
+            val selected by derivedStateOf { pagerState.currentPage == index }
 
-            if (pref_altNavBarItem.value) AltNavBarItem(
-                selected = selected,
-                icon = tab.icon,
-                labelId = tab.title,
-                onClick = {
-                    scope.launch { pagerState.animateScrollToPage(index) }
-                },
-            ) else NavBarItem(
+            if (pref_altNavBarItem.value)
+                AltNavBarItem(
+                    modifier = Modifier.weight(1f),
+                    icon = item.icon,
+                    labelId = item.title,
+                    selected = selected,
+                    onClick = {
+                        scope.launch { pagerState.animateScrollToPage(index) }
+                    },
+                )
+            else NavBarItem(
                 modifier = Modifier.weight(if (selected) 2f else 1f),
+                icon = item.icon,
+                labelId = item.title,
                 selected = selected,
-                icon = tab.icon,
-                labelId = tab.title,
                 onClick = {
                     scope.launch { pagerState.animateScrollToPage(index) }
                 },

@@ -27,8 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -48,6 +48,7 @@ import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.PagerNavBar
 import com.machiav3lli.backup.ui.navigation.SlidePager
 import com.topjohnwu.superuser.Shell
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -57,14 +58,14 @@ fun PrefsPage(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val pages = listOf(
+    val pages = persistentListOf(
         NavItem.UserPrefs,
         NavItem.ServicePrefs,
         NavItem.AdvancedPrefs,
         NavItem.ToolsPrefs,
     )
     val pagerState = rememberPagerState(pageCount = { pages.size })
-    val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }
+    val currentPage by remember { derivedStateOf { pages[pagerState.currentPage] } }
     val scaffoldState = rememberBottomSheetScaffoldState()
 
     Shell.getShell()
