@@ -114,6 +114,7 @@ dependencies {
 
     // Libs
     implementation(libs.activity.compose)
+    implementation(libs.collections.immutable)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
