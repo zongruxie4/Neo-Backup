@@ -10,7 +10,7 @@ import org.junit.Test
 class Test_ignoredPackages {
 
     @Test
-    fun test_failsOnOthers() {
+    fun test_ignoredPackages_doesNotMatchSimilar() {
 
         for (packageName in
             """
@@ -39,7 +39,7 @@ class Test_ignoredPackages {
     }
 
     @Test
-    fun test_matchesOwnPackage() {
+    fun test_doNotStop_matchesOwnPackage() {
         val packageName = com.machiav3lli.backup.BuildConfig.APPLICATION_ID  // use explicit BuildConfig
         assertTrue(
             "does not match: $packageName",
@@ -52,7 +52,7 @@ class Test_ignoredPackages {
     }
 
     @Test
-    fun test_matchesOnIgnoredPackages() {
+    fun test_ignoredPackages_matches() {
 
         for (packageName in
         """

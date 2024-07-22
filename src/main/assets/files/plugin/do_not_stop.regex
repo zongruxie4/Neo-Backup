@@ -5,7 +5,8 @@
 
 # processes used by NB should not be stopped (this would be a dead lock)
 
-  android                                               # *the* system
+<ownPackage>                                            # not a good idea to stop the running code
+| android                                               # *the* system
 | com\.(google\.)?android\.systemui                     # *the* ui
 | com\.(google\.)?android\.externalstorage              # storage
 | com\.(google\.)?android\.mtp                          # storage
