@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.machiav3lli.backup.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
@@ -59,8 +58,9 @@ import java.time.LocalDateTime
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ToolsPrefsPage(navController: NavHostController) {
+fun ToolsPrefsPage() {
     val context = LocalContext.current
+    val neoActivity = context as MainActivityX
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -102,14 +102,14 @@ fun ToolsPrefsPage(navController: NavHostController) {
                                         coroutineScope
                                     )
 
-                                    pref_schedulesExportImport -> navController.navigate(NavItem.Exports.destination)
+                                    pref_schedulesExportImport -> neoActivity.moveTo(NavItem.Exports.destination)
                                     pref_saveAppsList -> context.onClickSaveAppsList(
                                         snackbarHostState,
                                         coroutineScope
                                     )
 
-                                    pref_logViewer -> navController.navigate(NavItem.Logs.destination)
-                                    pref_terminal -> navController.navigate(NavItem.Terminal.destination)
+                                    pref_logViewer -> neoActivity.moveTo(NavItem.Logs.destination)
+                                    pref_terminal -> neoActivity.moveTo(NavItem.Terminal.destination)
                                 }
                             }
                             if (index < size - 1) Spacer(modifier = Modifier.height(4.dp))

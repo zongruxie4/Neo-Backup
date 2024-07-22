@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.machiav3lli.backup.preferences.pref_altNavBarItem
 import kotlinx.coroutines.launch
 
@@ -43,12 +42,9 @@ fun SlidePager(
     modifier: Modifier = Modifier,
     pageItems: List<NavItem>,
     pagerState: PagerState,
-    navController: NavHostController,
 ) {
     HorizontalPager(modifier = modifier, state = pagerState, beyondBoundsPageCount = 3) { page ->
-        pageItems[page].ComposablePage(
-            navController = navController,
-        )
+        pageItems[page].content()
     }
 }
 

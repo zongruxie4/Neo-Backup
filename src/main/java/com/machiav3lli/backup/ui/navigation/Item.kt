@@ -2,7 +2,6 @@ package com.machiav3lli.backup.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavHostController
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.OABX.Companion.isHg42
@@ -31,7 +30,12 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.UserGear
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Wrench
 
-sealed class NavItem(var title: Int, var icon: ImageVector, var destination: String) {
+sealed class NavItem(
+    val title: Int,
+    val icon: ImageVector,
+    val destination: String,
+    val content: @Composable () -> Unit = {}
+) {
 
     data object Welcome :
         NavItem(R.string.welcome_to_oabx, Phosphor.House, "intro_welcome")
@@ -51,17 +55,30 @@ sealed class NavItem(var title: Int, var icon: ImageVector, var destination: Str
                 isHg42  -> Phosphor.Detective
                 else    -> Phosphor.House
             },
-            "home"
+            "home",
+            { HomePage() }
         )
 
     data object Backup :
-        NavItem(R.string.backup, Phosphor.ArchiveTray, "batch_backup")
+        NavItem(R.string.backup, Phosphor.ArchiveTray, "batch_backup", {
+            OABX.main?.backupViewModel?.let {
+                BatchPage(viewModel = it, backupBoolean = true)
+            }
+        })
 
     data object Restore :
-        NavItem(R.string.restore, Phosphor.ClockCounterClockwise, "batch_restore")
+        NavItem(R.string.restore, Phosphor.ClockCounterClockwise, "batch_restore", {
+            OABX.main?.restoreViewModel?.let {
+                BatchPage(viewModel = it, backupBoolean = false)
+            }
+        })
 
     data object Scheduler :
-        NavItem(R.string.sched_title, Phosphor.CalendarX, "scheduler")
+        NavItem(R.string.sched_title, Phosphor.CalendarX, "scheduler", {
+            OABX.main?.schedulerViewModel?.let { viewModel ->
+                SchedulerPage(viewModel)
+            }
+        })
 
     data object Main :
         NavItem(R.string.main, Phosphor.House, "main")
@@ -70,16 +87,23 @@ sealed class NavItem(var title: Int, var icon: ImageVector, var destination: Str
         NavItem(R.string.prefs_title, Phosphor.GearSix, "settings")
 
     data object UserPrefs :
-        NavItem(R.string.prefs_user_short, Phosphor.UserGear, "prefs_user")
+        NavItem(R.string.prefs_user_short, Phosphor.UserGear, "prefs_user", {
+            UserPrefsPage()
+        })
 
     data object ServicePrefs :
-        NavItem(R.string.prefs_service_short, Phosphor.SlidersHorizontal, "prefs_service")
+        NavItem(R.string.prefs_service_short, Phosphor.SlidersHorizontal, "prefs_service",{
+            ServicePrefsPage()
+        })
 
     data object AdvancedPrefs :
-        NavItem(R.string.prefs_advanced_short, Phosphor.Flask, "prefs_advanced")
+        NavItem(R.string.prefs_advanced_short, Phosphor.Flask, "prefs_advanced",{
+            AdvancedPrefsPage()
+        })
 
-    data object ToolsPrefs :
-        NavItem(R.string.prefs_tools_short, Phosphor.Wrench, "prefs_tools")
+    data object ToolsPrefs : NavItem(R.string.prefs_tools_short, Phosphor.Wrench, "prefs_tools", {
+            ToolsPrefsPage()
+        })
 
     data object Terminal :
         NavItem(R.string.prefs_tools_terminal, Phosphor.Bug, "prefs_tools/terminal")
@@ -95,30 +119,4 @@ sealed class NavItem(var title: Int, var icon: ImageVector, var destination: Str
         Phosphor.Bug,
         "prefs_tools/logs"
     )
-
-    @Composable
-    fun ComposablePage(navController: NavHostController) {
-        when (destination) {
-            Home.destination                        -> HomePage()
-            Backup.destination, Restore.destination -> {
-                OABX.main?.let {
-                    if (destination == Backup.destination) it.backupViewModel
-                    else it.restoreViewModel
-                }?.let {
-                    BatchPage(viewModel = it, backupBoolean = destination == Backup.destination)
-                }
-            }
-
-            Scheduler.destination                   -> {
-                OABX.main?.schedulerViewModel?.let { viewModel ->
-                    SchedulerPage(viewModel)
-                }
-            }
-
-            UserPrefs.destination                   -> UserPrefsPage()
-            ServicePrefs.destination                -> ServicePrefsPage()
-            AdvancedPrefs.destination               -> AdvancedPrefsPage()
-            ToolsPrefs.destination                  -> ToolsPrefsPage(navController = navController)
-        }
-    }
 }
