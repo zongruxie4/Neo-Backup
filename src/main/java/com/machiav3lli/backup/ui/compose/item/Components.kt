@@ -36,12 +36,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -51,8 +53,11 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MultiChoiceSegmentedButtonRowScope
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SelectableChipColors
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -542,22 +547,34 @@ fun StateChip(
     icon: ImageVector,
     text: String,
     color: Color,
+    index: Int,
+    count: Int,
     checked: Boolean,
     onClick: () -> Unit,
 ) {
     val openPopup = remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(
+        topStart = if (index == 0) MaterialTheme.shapes.extraLarge.topStart
+        else MaterialTheme.shapes.extraSmall.topStart,
+        bottomStart = if (index == 0) MaterialTheme.shapes.extraLarge.topStart
+        else MaterialTheme.shapes.extraSmall.topStart,
+        topEnd = if (index == count - 1) MaterialTheme.shapes.extraLarge.topStart
+        else MaterialTheme.shapes.extraSmall.topStart,
+        bottomEnd = if (index == count - 1) MaterialTheme.shapes.extraLarge.topStart
+        else MaterialTheme.shapes.extraSmall.topStart,
+    )
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
-            .clip(MaterialTheme.shapes.small)
+            .defaultMinSize(minWidth = 56.dp, minHeight = 1.dp)
+            .clip(shape)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = { openPopup.value = true }
             ),
         contentColor = if (checked) MaterialTheme.colorScheme.surfaceContainerLowest else color,
         color = if (checked) color else Color.Transparent,
-        shape = MaterialTheme.shapes.small,
+        shape = shape,
         border = BorderStroke(1.dp, color),
     ) {
         Icon(

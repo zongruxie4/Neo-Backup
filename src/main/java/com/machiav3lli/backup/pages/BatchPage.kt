@@ -21,10 +21,8 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -40,7 +38,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -58,7 +55,7 @@ import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.DiamondsFour
 import com.machiav3lli.backup.ui.compose.icons.phosphor.HardDrives
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Nut
-import com.machiav3lli.backup.ui.compose.item.ActionButton
+import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.StateChip
 import com.machiav3lli.backup.ui.compose.recycler.BatchPackageRecycler
@@ -165,22 +162,20 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                     .size
             }
             HorizontalDivider(
-                thickness = 4.dp,
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .clip(MaterialTheme.shapes.extraLarge)
+                thickness = 2.dp,
             )
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Spacer(modifier = Modifier.width(4.dp))
                 StateChip(
                     icon = Phosphor.DiamondsFour,
                     text = stringResource(id = R.string.all_apk),
                     checked = allApkChecked,
-                    color = ColorAPK
+                    color = ColorAPK,
+                    index = 0,
+                    count = 2,
                 ) {
                     val checkBoolean = !allApkChecked
                     allApkChecked = checkBoolean
@@ -204,7 +199,9 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                     icon = Phosphor.HardDrives,
                     text = stringResource(id = R.string.all_data),
                     checked = allDataChecked,
-                    color = ColorData
+                    color = ColorData,
+                    index = 1,
+                    count = 2,
                 ) {
                     val checkBoolean = !allDataChecked
                     allDataChecked = checkBoolean
@@ -229,7 +226,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                         scaffoldState.bottomSheetState.expand()
                     }
                 }
-                ActionButton(
+                ElevatedActionButton(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = if (backupBoolean) R.string.backup else R.string.restore),
                     positive = true
