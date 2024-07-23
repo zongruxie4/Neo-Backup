@@ -545,7 +545,7 @@ val persist_skippedEncryptionCounter = IntPref(
 //----------------------------------------
 
 fun publicPreferences(persist: Boolean = false) =
-    Pref.prefGroups.map {
+    Pref.prefGroups.flatMap {
         val (group, prefs) = it
         prefs.mapNotNull { pref ->
             if (pref.private ||
@@ -557,4 +557,4 @@ fun publicPreferences(persist: Boolean = false) =
             else
                 pref
         }
-    }.flatten()
+    }

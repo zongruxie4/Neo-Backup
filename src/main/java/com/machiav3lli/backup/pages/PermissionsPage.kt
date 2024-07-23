@@ -122,7 +122,9 @@ fun PermissionsPage() {
                             mainActivity.requireStorageLocation(askForDirectory)
                         }
 
-                    if (!context.checkBatteryOptimization(powerManager) && none { it.key == Permission.BatteryOptimization })
+                    if (!context.checkBatteryOptimization(powerManager)
+                        && none { it.key == Permission.BatteryOptimization }
+                    )
                         set(Permission.BatteryOptimization) {
                             mainActivity.showBatteryOptimizationDialog(powerManager)
                         }
@@ -139,7 +141,9 @@ fun PermissionsPage() {
                     if (!context.checkContactsPermission && none { it.key == Permission.Contacts })
                         set(Permission.Contacts) { mainActivity.contactsPermission }
 
-                    if (permissionStatePostNotifications?.status?.isGranted == false && none { it.key == Permission.PostNotifications })
+                    if (permissionStatePostNotifications?.status?.isGranted == false
+                        && none { it.key == Permission.PostNotifications }
+                    )
                         set(Permission.PostNotifications) {
                             permissionStatePostNotifications.launchPermissionRequest()
                         }
