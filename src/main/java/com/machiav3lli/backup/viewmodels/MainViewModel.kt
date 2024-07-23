@@ -60,7 +60,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import timber.log.Timber
-import kotlin.reflect.*
 
 class MainViewModel(
     private val db: ODatabase,
@@ -244,7 +243,12 @@ class MainViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val filteredList =
         //========================================================================================== filteredList
-        combine(notBlockedList, modelSortFilter.flow, searchQuery.flow) { pkgs, filter, search ->
+        combine(
+            notBlockedList,
+            modelSortFilter.flow,
+            searchQuery.flow,
+            appExtrasMap
+        ) { pkgs, filter, search, extras ->
 
             var list = emptyList<Package>()
 
@@ -253,7 +257,13 @@ class MainViewModel(
             list = pkgs
                 .filter { item: Package ->
                     search.isEmpty() || (
-                            listOf(item.packageName, item.packageLabel)
+                            (extras[item.packageName]?.customTags ?: emptySet()).plus(
+                                listOfNotNull(
+                                    item.packageName,
+                                    item.packageLabel,
+                                    extras[item.packageName]?.note
+                                )
+                            )
                                 .any { it.contains(search, ignoreCase = true) }
                             )
                 }

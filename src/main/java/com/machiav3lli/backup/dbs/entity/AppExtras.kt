@@ -24,6 +24,6 @@ import androidx.room.PrimaryKey
 data class AppExtras(
     @PrimaryKey
     val packageName: String = "",
-    val customTags: MutableSet<String> = hashSetOf(),
+    val customTags: Set<String> = hashSetOf(),
     val note: String = "",
 )

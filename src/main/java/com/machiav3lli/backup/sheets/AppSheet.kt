@@ -221,7 +221,8 @@ fun AppSheet(
                         AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
                             RoundButton(
                                 icon = Phosphor.Info,
-                                modifier = Modifier.fillMaxHeight()
+                                modifier = Modifier.fillMaxHeight(),
+                                description = stringResource(id = R.string.app_info)
                             ) {
                                 val intent =
                                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -392,9 +393,11 @@ fun AppSheet(
                         TagsBlock(
                             tags = appExtras.customTags,
                             onRemove = {
-                                viewModel.setExtras(appExtras.apply {
-                                    customTags.remove(it)
-                                })
+                                viewModel.setExtras(
+                                    appExtras.copy(
+                                        customTags = appExtras.customTags.minus(it)
+                                    )
+                                )
                             },
                             onAdd = {
                                 dialogProps.value = Pair(DIALOG_ADDTAG, "")
@@ -763,9 +766,11 @@ fun AppSheet(
                                 initValue = dialogProps.value.second as String,
                                 openDialogCustom = openDialog,
                             ) {
-                                viewModel.setExtras(appExtras.apply {
-                                    customTags.add(it)
-                                })
+                                viewModel.setExtras(
+                                    appExtras.copy(
+                                        customTags = appExtras.customTags.plus(it)
+                                    )
+                                )
                             }
                         }
 
