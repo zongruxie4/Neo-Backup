@@ -33,9 +33,10 @@ import com.machiav3lli.backup.ICON_SIZE_MEDIUM
 import com.machiav3lli.backup.traceDebug
 import com.machiav3lli.backup.ui.compose.item.ExpandableBlock
 import com.machiav3lli.backup.ui.item.Pref
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
-fun PrefsGroupCollapsed(prefs: List<Pref>, heading: String) {
+fun PrefsGroupCollapsed(prefs: ImmutableList<Pref>, heading: String) {
     if (prefs.isNotEmpty())
         ExpandableBlock(
             heading = heading,
@@ -66,7 +67,7 @@ fun PrefsGroup(
 fun PrefsGroup(
     modifier: Modifier = Modifier,
     heading: String? = null,
-    prefs: List<Pref>,
+    prefs: ImmutableList<Pref>,
     onPrefDialog: (Pref) -> Unit = {},
 ) {
     val size = prefs.size

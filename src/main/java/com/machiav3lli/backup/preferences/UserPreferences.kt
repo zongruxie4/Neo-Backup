@@ -68,6 +68,10 @@ import com.machiav3lli.backup.utils.recreateActivities
 import com.machiav3lli.backup.utils.restartApp
 import com.machiav3lli.backup.utils.setBackupDir
 import com.machiav3lli.backup.utils.setCustomTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import timber.log.Timber
 
 @Composable
@@ -77,7 +81,7 @@ fun UserPrefsPage() {
     var dialogsPref by remember { mutableStateOf<Pref?>(null) }
     var backupDir by remember { mutableStateOf(backupDirConfigured) }   //TODO hg42 remember ???
 
-    val prefs = Pref.prefGroups["user"] ?: listOf()
+    val prefs = Pref.prefGroups["user"]?.toPersistentList() ?: persistentListOf()
 
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
