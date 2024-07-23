@@ -21,6 +21,7 @@ import android.content.Context
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
+import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.getInstalledPackageList
 import com.machiav3lli.backup.items.Package
@@ -38,6 +39,7 @@ open class ScheduledActionTask(val context: Context, private val scheduleId: Lon
         val database = OABX.db
         val scheduleDao = database.getScheduleDao()
         val blacklistDao = database.getBlocklistDao()
+        val extrasDao = database.getAppExtrasDao()
 
         val schedule = scheduleDao.getSchedule(scheduleId)
             ?: return Triple("DbFailed", listOf(), MODE_UNSET)
@@ -49,6 +51,9 @@ open class ScheduledActionTask(val context: Context, private val scheduleId: Lon
         val customBlocklist = schedule.blockList
         val globalBlocklist = blacklistDao.getBlocklistedPackages(PACKAGES_LIST_GLOBAL_ID)
         val blockList = globalBlocklist.plus(customBlocklist)
+        val extrasMap = extrasDao.getAll().associateBy(AppExtras::packageName)
+        val allTags = extrasDao.getAll().flatMap { it.customTags }.distinct()
+        val tagsList = schedule.tagsList.filter { it in allTags }
 
         //TODO hg42 the whole filter mechanics should be the same for app and service
 
@@ -76,10 +81,12 @@ open class ScheduledActionTask(val context: Context, private val scheduleId: Lon
         val selectedItems =
             filterPackages(
                 packages = unfilteredPackages,
+                extrasMap = extrasMap,
                 filter = filter,
                 specialFilter = specialFilter,
                 whiteList = customList,
-                blackList = blockList
+                blackList = blockList,
+                tagsList = tagsList,
             ).map(Package::packageName)
 
         return Triple(

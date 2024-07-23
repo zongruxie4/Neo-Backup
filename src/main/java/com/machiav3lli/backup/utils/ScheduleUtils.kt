@@ -360,6 +360,12 @@ fun startSchedule(schedule: Schedule) {
                 ) else getString(R.string.dialogNo)
             }"
         )
+        message.append(
+            "\n${getString(R.string.filters_tags)}: ${
+                if (schedule.tagsList.isNotEmpty()) schedule.tagsList.joinToString(",")
+                else getString(R.string.dialogNo)
+            }"
+        )
         AlertDialog.Builder(it)
             .setTitle("${schedule.name}: ${getString(R.string.sched_activateButton)}?")
             .setMessage(message)

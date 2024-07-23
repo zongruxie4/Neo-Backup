@@ -78,6 +78,32 @@ fun SelectionChip(
 }
 
 @Composable
+fun SelectionChip(
+    label: String,
+    isSelected: Boolean,
+    colors: SelectableChipColors = FilterChipDefaults.filterChipColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        labelColor = MaterialTheme.colorScheme.onSurface,
+        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ),
+    onClick: () -> Unit,
+) {
+    val selectableChipTransitionState = selectableChipTransition(selected = isSelected)
+
+    FilterChip(
+        colors = colors,
+        shape = RoundedCornerShape(selectableChipTransitionState.cornerRadius),
+        border = null,
+        selected = isSelected,
+        onClick = onClick,
+        label = {
+            Text(text = label)
+        }
+    )
+}
+
+@Composable
 fun InfoChip(
     item: InfoChipItem,
 ) {

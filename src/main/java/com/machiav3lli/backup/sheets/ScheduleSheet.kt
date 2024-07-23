@@ -120,6 +120,7 @@ fun ScheduleSheet(
     val schedule by viewModel.schedule.collectAsState(null)
     val customList by viewModel.customList.collectAsState(emptySet())
     val blockList by viewModel.blockList.collectAsState(emptySet())
+    val allTags by viewModel.allTags.collectAsState()
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
     schedule?.let { schedule ->
@@ -381,6 +382,22 @@ fun ScheduleSheet(
                         ) { flag ->
                             refresh(
                                 schedule.copy(enabledFilter = flag),
+                                false,
+                            )
+                        }
+                    }
+                }
+                item {
+                    ExpandableBlock(
+                        heading = stringResource(id = R.string.filters_tags),
+                        preExpanded = schedule.tagsList.isNotEmpty(),
+                    ) {
+                        MultiSelectableChipGroup(
+                            list = allTags.toSet(),
+                            selected = schedule.tagsList,
+                        ) { tags ->
+                            refresh(
+                                schedule.copy(tagsList = tags),
                                 false,
                             )
                         }
