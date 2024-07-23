@@ -18,7 +18,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,7 +40,6 @@ import com.machiav3lli.backup.ui.item.IntPref
 import com.machiav3lli.backup.ui.item.ListPref
 import com.machiav3lli.backup.ui.item.PasswordPref
 import com.machiav3lli.backup.ui.item.Pref
-import com.machiav3lli.backup.ui.item.Pref.Companion.prefChangeListeners
 import com.machiav3lli.backup.ui.item.StringPref
 import kotlin.math.roundToInt
 
@@ -58,16 +57,8 @@ fun BasePreference(
     bottomWidget: (@Composable (isEnabled: Boolean) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    var isEnabled by remember {
-        mutableStateOf(pref.enableIf?.invoke() ?: true)
-    }   //TODO hg42 remove remember ???
-
-    SideEffect {
-        pref.enableIf?.run {
-            prefChangeListeners.put(pref) {
-                isEnabled = pref.enableIf.invoke()
-            }
-        }
+    val isEnabled by remember {
+        derivedStateOf { pref.enableIf?.invoke() ?: true }
     }
 
     val base = index.toFloat() / groupSize
