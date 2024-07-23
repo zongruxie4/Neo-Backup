@@ -398,8 +398,4 @@
     <string name="prefs_theme_dynamic_dark">Tối với màu sắc năng động</string>
     <string name="enforce_backups_limit">Thực thi giới hạn sao lưu</string>
     <string name="enforce_backups_limit_description">Xóa các bản sao lưu cũ hơn để thực thi giới hạn ở %d</string>
-    <string name="prefs_backupcache">Back up cached data</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
-    <string name="prefs_restorecache">Restore cached data</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

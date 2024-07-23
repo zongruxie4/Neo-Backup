@@ -246,10 +246,6 @@
     <string name="prefs_devicelock_summary">Sikre programmet med enhetsidentietsdetaljer</string>
     <string name="prefs_devicelock">Enhetslås</string>
     <string name="filtered_list">Filtrert liste</string>
-    <string name="prefs_backupcache">Back up cached data</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
-    <string name="prefs_restorecache">Restore cached data</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
     <plurals name="sched_interval_formal">
         <item quantity="one">hver dag</item>
         <item quantity="other">hver %d dag</item>

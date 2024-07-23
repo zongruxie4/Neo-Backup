@@ -402,8 +402,4 @@
     <string name="grant_usage_access_title">Dozvoli Pristup Korištenja</string>
     <string name="error_updating_schedule_mode">Greška pri ažuriranju %1$s rasporeda %2$d</string>
     <string name="prefs_theme_dynamic_dark">Tamna sa dinamičnim bojama</string>
-    <string name="prefs_backupcache">Back up cached data</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
-    <string name="prefs_restorecache">Restore cached data</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

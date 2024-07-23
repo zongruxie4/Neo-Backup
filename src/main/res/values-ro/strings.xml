@@ -321,9 +321,7 @@
     <string name="prefs_externaldata_rst">Restaurează datele externe</string>
     <string name="prefs_obbdata_rst">Restaurează fișierele obb</string>
     <string name="prefs_backupcache">Fă backup datelor păstrate în cache</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
     <string name="prefs_restorecache">Restaurează datele păstrate în cache</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
     <string name="prefs_compression_type_summary">Selectează tipul de comprimare folosit</string>
     <string name="prefs_compression_type">Tip de comprimare</string>
     <string name="post_notifications_permission_message">Începând cu Android 13, aplicațiile au nevoie de această permisiune pentru a putea posta notificări.</string>
