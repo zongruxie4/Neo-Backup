@@ -96,6 +96,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Leaf
+import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ProhibitInset
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
@@ -231,6 +232,20 @@ fun AppSheet(
                                         null
                                     )
                                 context.startActivity(intent)
+                            }
+                        }
+                        AnimatedVisibility(visible = !pkg.isInstalled && !pkg.isSpecial) {
+                            RoundButton(
+                                icon = Phosphor.MagnifyingGlass,
+                                modifier = Modifier.fillMaxHeight(),
+                                description = stringResource(id = R.string.search_package)
+                            ) {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("market://search?q=${pkg.packageName}")
+                                    )
+                                )
                             }
                         }
                         RoundButton(

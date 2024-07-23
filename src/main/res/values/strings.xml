@@ -444,4 +444,5 @@
     <string name="prefs_backupcache_summary">Back up files in cache directories</string>
     <string name="prefs_restorecache">Restore cached data</string>
     <string name="prefs_restorecache_summary">Restore files in cache directories</string>
+    <string name="search_package">Search for the app in store</string>
 </resources>
