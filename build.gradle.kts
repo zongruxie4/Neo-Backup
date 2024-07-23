@@ -103,8 +103,18 @@ android {
         includeInBundle = false
     }
     packaging {
-        resources.excludes.add("META-INF/LICENSE.md")
-        resources.excludes.add("META-INF/LICENSE-notice.md")
+        resources {
+            excludes += listOf(
+                "/DebugProbesKt.bin",
+                "/kotlin/**.kotlin_builtins",
+                "/kotlin/**.kotlin_metadata",
+                "/META-INF/**.kotlin_module",
+                "/META-INF/**.pro",
+                "/META-INF/**.version",     // comment out to enable layout inspector
+                "/META-INF/LICENSE-notice.md",
+                "/META-INF/LICENSE.md"
+            )
+        }
     }
 }
 
