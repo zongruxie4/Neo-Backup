@@ -53,12 +53,11 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MultiChoiceSegmentedButtonRowScope
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SelectableChipColors
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -68,6 +67,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -670,6 +670,7 @@ fun ActionChip(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwitchChip(
     firstTextId: Int,
@@ -677,71 +678,54 @@ fun SwitchChip(
     secondTextId: Int,
     secondIcon: ImageVector,
     firstSelected: Boolean = true,
-    colors: SelectableChipColors = FilterChipDefaults.filterChipColors(
-        containerColor = Color.Transparent,
-        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-        labelColor = MaterialTheme.colorScheme.onSurface,
-        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        iconColor = MaterialTheme.colorScheme.onSurface,
-        selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    ),
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    Row(
+    val colors = SegmentedButtonDefaults.colors(
+        inactiveContainerColor = Color.Transparent,
+        activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        inactiveContentColor = MaterialTheme.colorScheme.onSurface,
+        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        activeBorderColor = Color.Transparent,
+        inactiveBorderColor = Color.Transparent,
+    )
+    var firstSelected by remember { mutableStateOf(firstSelected) }
+
+    SingleChoiceSegmentedButtonRow(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.shapes.medium)
             .padding(horizontal = 6.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        val (firstSelected, selectFirst) = remember { mutableStateOf(firstSelected) }   //TODO hg42 should probably be removed like for MultiChips
-
-        FilterChip(
+        SegmentedButton(
             modifier = Modifier.weight(1f),
-            shape = MaterialTheme.shapes.small,
-            border = null,
             selected = firstSelected,
+            shape = MaterialTheme.shapes.small,
             colors = colors,
-            onClick = {
-                onCheckedChange(true)
-                selectFirst(true)
-            },
-            leadingIcon = {
+            icon = {
                 ButtonIcon(firstIcon, firstTextId)
             },
-            label = {
-                Text(
-                    text = stringResource(id = firstTextId),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 8.dp),
-                )
+            onClick = {
+                onCheckedChange(true)
+                firstSelected = true
             }
-        )
-        FilterChip(
+        ) {
+            Text(text = stringResource(id = firstTextId))
+        }
+        SegmentedButton(
             modifier = Modifier.weight(1f),
-            shape = MaterialTheme.shapes.small,
-            border = null,
             selected = !firstSelected,
+            shape = MaterialTheme.shapes.small,
             colors = colors,
+            icon = {
+                ButtonIcon(secondIcon, secondTextId)
+            },
             onClick = {
                 onCheckedChange(false)
-                selectFirst(false)
-            },
-            label = {
-                Text(
-                    text = stringResource(id = secondTextId),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 8.dp),
-                )
-            },
-            trailingIcon = {
-                ButtonIcon(secondIcon, secondTextId)
+                firstSelected = false
             }
-        )
+        ) {
+            Text(text = stringResource(id = secondTextId))
+        }
     }
 }
 
