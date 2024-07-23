@@ -75,6 +75,9 @@ import com.machiav3lli.backup.utils.requireContactsPermission
 import com.machiav3lli.backup.utils.requireSMSMMSPermission
 import com.machiav3lli.backup.utils.requireStorageLocation
 import com.machiav3lli.backup.utils.setBackupDir
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 // TODO use rememberPermissionState to manage more permissions
@@ -82,6 +85,7 @@ import timber.log.Timber
 @Composable
 fun PermissionsPage() {
     val context = LocalContext.current
+    val mScope = CoroutineScope(Dispatchers.Main)
     val mainActivity = context as MainActivityX
     val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     val permissionsList = remember {
@@ -156,7 +160,9 @@ fun PermissionsPage() {
                     if (permissionStatePostNotifications?.status?.isGranted == true)
                         remove(Permission.PostNotifications)
                 }
-                if (permissionsList.isEmpty()) mainActivity.moveTo(NavItem.Main.destination)
+                if (permissionsList.isEmpty()) mScope.launch {
+                    mainActivity.moveTo(NavItem.Main.destination)
+                }
             }
         }
 
