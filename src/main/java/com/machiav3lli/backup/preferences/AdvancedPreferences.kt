@@ -308,6 +308,11 @@ val pref_refreshAppInfoTimeout = IntPref(
 
 //---------------------------------------- developer settings - implementation alternatives
 
+val pref_useNoteIcon = BooleanPref(
+    key = "dev-alt.useNoteIcon",
+    summary = "use the icon instead of the big fat 'edit note' button",
+    defaultValue = false
+)
 val pref_paranoidBackupLists = BooleanPref(
     key = "dev-alt.paranoidBackupLists",
     summary = "verify file system after adding or deleting backups (slower, especially remote)",
@@ -350,7 +355,7 @@ val pref_useYamlProperties = BooleanPref(
     defaultValue = false
 )
 
-val pref_prettyJson = BooleanPref(
+val pref_prettyJson = BooleanPref(  //TODO hg42 to be removed
     key = "dev-alt.prettyJson",
     summary = "create human readable json files. Note they should be compatible in both directions",
     defaultValue = true
@@ -378,7 +383,7 @@ val pref_busyHitTime = IntPref(
     defaultValue = 2000
 )
 
-val pref_earlyEmptyBackups = BooleanPref(
+val pref_earlyEmptyBackups = BooleanPref(   //TODO hg42 to be removed
     key = "dev-alt.earlyEmptyBackups",
     summary = "empty backup lists for installed packages early, to prevent single scanning",
     defaultValue = true
@@ -391,7 +396,7 @@ val pref_flatStructure = BooleanPref(
 )
 
 val pref_propertiesInDir = BooleanPref(
-    key = "$debug-alt.propertiesInDir",         //TODO hg42 currently not working in scanner
+    key = "$debug-alt.propertiesInDir",         //TODO hg42 currently not working in scanner (hmm, I think it works now)
     summary = "store the properties inside the backup directory",
     defaultValue = false
 )

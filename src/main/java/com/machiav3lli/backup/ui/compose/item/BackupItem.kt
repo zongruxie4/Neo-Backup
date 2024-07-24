@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
@@ -74,6 +75,7 @@ fun BackupItem_headlineContent(
                 item,
                 onNote = onNote,
             )
+            Spacer(modifier = Modifier.width(16.dp))
             BackupLabels(item = item)
         }
     }
