@@ -795,3 +795,9 @@ Weather: de.beowulf.wetter @ 3.20
 Yr: no.nrk.yr @ 5.21.12
 Zapp: de.christinecoenen.code.zapp @ 8.3.2
 
+================================================================================
+Poco X3 Pro crDroid 10 (A14) microG
+         or LineageOS (A13) microG
+================================================================================
+DB Navigator (de.hafas.android.db 24.21.0)
+  crashes after restore when backup was taken in logined state. The data needs to be cleared.
