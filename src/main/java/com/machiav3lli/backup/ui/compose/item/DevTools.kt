@@ -70,7 +70,7 @@ import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.items.UndeterminedStorageFile
 import com.machiav3lli.backup.plugins.Plugin
 import com.machiav3lli.backup.plugins.Plugin.Companion.pluginTypes
-import com.machiav3lli.backup.plugins.SpecialKotlinScriptPlugin
+import com.machiav3lli.backup.plugins.SpecialFilesPlugin
 import com.machiav3lli.backup.plugins.TextPlugin
 import com.machiav3lli.backup.pref_autoLogAfterSchedule
 import com.machiav3lli.backup.pref_autoLogExceptions
@@ -320,7 +320,7 @@ fun PluginEditor(plugin: Plugin? = null, onSubmit: (plugin: Plugin?) -> Unit) {
     var name by remember { mutableStateOf(TextFieldValue(plugin?.name ?: "")) }
     var editPlugin by remember { mutableStateOf(plugin) }
     var selectedClass by remember { mutableStateOf(
-        editPlugin?.let { typeFor(it) } ?: Plugin.default
+        editPlugin?.let { typeFor(it) } ?: Plugin.DEFAULT_TYPE
     ) }
     val where = displayPath(editPlugin?.file?.path ?: "")
 
@@ -543,9 +543,9 @@ fun PluginsPagePreview() {
     OABX.fakeContext = LocalContext.current.applicationContext
 
     Plugin.plugins = mutableMapOf(
-        "test_app1" to SpecialKotlinScriptPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app1.kt")),
-        "test_app2" to SpecialKotlinScriptPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app2.kt")),
-        "test_ext" to SpecialKotlinScriptPlugin(File("/storage/emulated/Android/data/com.machiav3lli.backup.hg42/files/plugin/test_ext.kt")),
+        "test_files1" to SpecialFilesPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app1.special_files")),
+        "test_files2" to SpecialFilesPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app2.special_files")),
+        "test_ext" to SpecialFilesPlugin(File("/storage/emulated/Android/data/com.machiav3lli.backup.hg42/files/plugin/test_ext.special_files")),
     )
 
     PluginsPage()
@@ -946,9 +946,9 @@ fun DevToolsPreview() {
     OABX.fakeContext = LocalContext.current.applicationContext
 
     Plugin.plugins = mutableMapOf(
-        "test_app1" to SpecialKotlinScriptPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app1.kt")),
-        "test_app2" to SpecialKotlinScriptPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app2.kt")),
-        "test_ext" to SpecialKotlinScriptPlugin(File("/storage/emulated/Android/data/com.machiav3lli.backup.hg42/files/plugin/test_ext.kt")),
+        "test_files1" to SpecialFilesPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app1.special_files")),
+        "test_files2" to SpecialFilesPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app2.special_files")),
+        "test_ext" to SpecialFilesPlugin(File("/storage/emulated/Android/data/com.machiav3lli.backup.hg42/files/plugin/test_ext.special_files")),
     )
 
     val expanded = remember { mutableStateOf(true) }

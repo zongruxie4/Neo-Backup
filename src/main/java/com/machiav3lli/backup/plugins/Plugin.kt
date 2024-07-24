@@ -6,10 +6,14 @@ import com.machiav3lli.backup.tracePlugin
 import timber.log.Timber
 import java.io.File
 import kotlin.reflect.KClass
-import kotlin.reflect.full.companionObject
-import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.declaredFunctions
-import kotlin.reflect.full.primaryConstructor
+
+interface PluginCompanion {
+
+    fun klass() : KClass<out Plugin>
+    fun name() : String = klass().simpleName?.removeSuffix("Plugin") ?: "Unknown"
+    fun register() : Boolean
+    fun create(file: File) : Plugin?
+}
 
 abstract class Plugin(val name: String, var file: File) {
 
@@ -26,35 +30,34 @@ abstract class Plugin(val name: String, var file: File) {
 
         // add new plugin classes here, necessary to have all classes initialized
 
-        val pluginClasses = mutableListOf<KClass<out Plugin>>(
-                SpecialFilesPlugin::class,
-                SpecialKotlinScriptPlugin::class,
-                RegexPlugin::class,
-                ShellScriptPlugin::class,
-            )
+        val pluginCompanions = mutableListOf<PluginCompanion>(
+            SpecialFilesPlugin.Companion,
+            RegexPlugin.Companion,
+            ShellScriptPlugin.Companion,
+        )
 
-        var pluginTypes = mutableMapOf<String, KClass<out Plugin>>()
+        var pluginTypes = mutableMapOf<String, PluginCompanion>()
         var pluginExtensions = mutableMapOf<String, String>()
         var pluginExtension = mutableMapOf<String, String>()
-        val default = "SpecialFiles"
+        const val DEFAULT_TYPE = "SpecialFiles"
 
         fun registerType(
             type: String,
-            pluginClass: KClass<out Plugin>,
+            pluginCompanion: PluginCompanion,
             extensions: List<String>,
         ): Boolean {
-            tracePlugin { ("register ${pluginClass.simpleName} type: $type, extensions: $extensions") }
-            pluginTypes.put(type, pluginClass)
-            pluginExtension.put(type, extensions.first())
+            tracePlugin { ("register ${pluginCompanion.name()} type: $type, extensions: $extensions") }
+            pluginTypes[type] = pluginCompanion
+            pluginExtension[type] = extensions.first()
             extensions.forEach {
-                pluginExtensions.put(it, type)
+                pluginExtensions[it] = type
             }
             return true
         }
 
         fun createFrom(file: File) =
-            pluginExtensions.get(file.extension)?.let { type ->
-                pluginTypes.get(type)?.primaryConstructor?.call(file)
+            pluginExtensions[file.extension]?.let { type ->
+                pluginTypes[type]?.create(file)
             }
 
         var scanned = false
@@ -70,28 +73,24 @@ abstract class Plugin(val name: String, var file: File) {
         }
 
         fun loadPlugin(file: File): Plugin? {
-            if (file.isDirectory()) {
-                return loadPluginFromDir(file)
+            return if (file.isDirectory()) {
+                loadPluginFromDir(file)
             } else {
-                return createFrom(file)
+                createFrom(file)
             }
         }
 
         fun loadPluginsFromDir(dir: File) {
             dir.listFiles()?.forEach {
                 loadPlugin(it)?.let { plugin ->
-                    plugins.put(plugin.name, plugin)
+                    plugins[plugin.name] = plugin
                 }
             }
         }
 
         fun scan() {
 
-            pluginClasses.forEach { pluginClass ->
-                pluginClass.companionObject?.declaredFunctions
-                    ?.find { it.name == "register" }
-                    ?.call(pluginClass.companionObjectInstance)
-            }
+            pluginCompanions.forEach { it.register() }
 
             synchronized(Plugin) {
                 scanned = false

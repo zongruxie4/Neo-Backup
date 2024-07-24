@@ -20,9 +20,11 @@ class SpecialFilesPlugin(file: File) : TextPlugin(file) {
         tracePlugin { (listOf("${this.javaClass.simpleName} $name <- ${file.name}") + files).joinToString("\n  ") }
     }
 
-    companion object {
+    companion object : PluginCompanion {
 
-        fun register() = Plugin.registerType("SpecialFiles", SpecialFilesPlugin::class, listOf("special_files"))
+        override fun klass() = SpecialFilesPlugin::class
+        override fun register() = registerType(name(), Companion, listOf("special_files"))
+        override fun create(file: File) = SpecialFilesPlugin(file)
 
         fun specialInfos() : List<SpecialInfo> {
 

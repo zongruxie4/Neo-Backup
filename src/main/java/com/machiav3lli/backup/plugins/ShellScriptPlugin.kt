@@ -9,9 +9,11 @@ class ShellScriptPlugin(file: File) : TextPlugin(file) {
         tracePlugin { ("${this::class.simpleName} $name <- ${file.name}") } //TODO hg42
     }
 
-    companion object {
+    companion object : PluginCompanion {
 
-        fun register() = Plugin.registerType("ShellScript", ShellScriptPlugin::class, listOf("sh"))
+        override fun klass() = ShellScriptPlugin::class
+        override fun register() = registerType(name(), Companion, listOf("sh"))
+        override fun create(file: File) = ShellScriptPlugin(file)
 
         fun findScript(name: String) =
             try {

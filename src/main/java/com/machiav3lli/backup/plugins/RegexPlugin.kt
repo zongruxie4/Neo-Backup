@@ -16,13 +16,15 @@ class RegexPlugin(file: File) : TextPlugin(file) {
                 + """)$)"""
     )
 
-    companion object {
+    companion object : PluginCompanion {
 
-        fun register() = Plugin.registerType("Regex", RegexPlugin::class, listOf("regex"))
+        override fun klass() = RegexPlugin::class
+        override fun register() = registerType(name(), Companion, listOf("regex"))
+        override fun create(file: File) = RegexPlugin(file)
 
         fun findRegex(name: String) =
             try {
-                (Plugin.plugins.get(name) as RegexPlugin).regex
+                (plugins.get(name) as RegexPlugin).regex
             } catch (e: Throwable) {
                 Regex("T-h-I-s--S-h-O-u-L-d--N-e-V-e-R--m-A-t-C-h")
             }
