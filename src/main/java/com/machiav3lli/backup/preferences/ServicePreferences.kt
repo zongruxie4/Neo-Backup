@@ -53,6 +53,8 @@ import com.machiav3lli.backup.ui.item.ListPref
 import com.machiav3lli.backup.ui.item.PasswordPref
 import com.machiav3lli.backup.ui.item.Pref
 import com.machiav3lli.backup.ui.item.StringPref
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 @Composable
 fun ServicePrefsPage() {
@@ -78,12 +80,12 @@ fun ServicePrefsPage() {
         BaseDialog(openDialogCustom = openDialog) {
             when (dialogsPref) {                            //TODO hg42 encapsulate in pref
 
-                is ListPref -> ListPrefDialogUI(
+                is ListPref     -> ListPrefDialogUI(
                     pref = dialogsPref as ListPref,
                     openDialogCustom = openDialog,
                 )
 
-                is EnumPref -> EnumPrefDialogUI(
+                is EnumPref     -> EnumPrefDialogUI(
                     pref = dialogsPref as EnumPref,
                     openDialogCustom = openDialog
                 )
@@ -105,9 +107,9 @@ fun ServicePrefsPage() {
 }
 
 fun LazyListScope.ServicePrefGroups(onPrefDialog: (Pref) -> Unit) {
-    val generalServicePrefs = Pref.prefGroups["srv"] ?: listOf()
-    val backupServicePrefs = Pref.prefGroups["srv-bkp"] ?: listOf()
-    val restoreServicePrefs = Pref.prefGroups["srv-rst"] ?: listOf()
+    val generalServicePrefs = Pref.prefGroups["srv"]?.toPersistentList() ?: persistentListOf()
+    val backupServicePrefs = Pref.prefGroups["srv-bkp"]?.toPersistentList() ?: persistentListOf()
+    val restoreServicePrefs = Pref.prefGroups["srv-rst"]?.toPersistentList() ?: persistentListOf()
 
     item {
         PrefsGroup(

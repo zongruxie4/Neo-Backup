@@ -1,6 +1,41 @@
 CHANGELOG
 =========
 
+8.3.7 (24.07.2024) +100 Commits & +20 Translations
+------------
+
+#### Function
+
+- Add: Zstd compression option
+- Fix: Crash on after giving permissions
+- Fix: Reduce many unneeded recompositions
+- Fix: Showing restore-preferences in backup page
+- Fix: App sheet and context menu actions respect user
+- Fix: Profile handling for pm commands
+- Fix: Work profile support
+- Fix: StorageFile related crash
+- Fix: StorageFile duplication if renaming to the same name
+- Update: Split excludeCache to backupCache, restoreCache
+- Update: Rebase SwitchChip on segmented buttons
+- Update: Migrate most sheets to scaffold
+- Update: Restore directories without owner
+
+#### UI & UX
+
+- Add: Respecting tags & notes when searching
+- Add: Tags filter for schedules
+- Add: Notes to backups
+- Add: Button to search for uninstalled app in store
+- Add: Original text to error for better reinterpretation
+- Add: Share button to terminal text
+- Add: Option for alternative page blocks layout
+- Fix: Alternative navigation bar item
+- Update: Backup items' layout info
+- Update: OAndBackup-attribution icon
+- Update: Revamp Batch actions bar
+- Update: Revamp coloring of UI
+- Update: Revamp dialog layouts
+
 8.3.6 (12.01.2024) 6 Commits
 ------------
 

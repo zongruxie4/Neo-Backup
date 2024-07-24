@@ -139,8 +139,4 @@
     <string name="prefs_excludecache_summary">डेटा बैकअप से ऐप के कैश को बाहर निकालें</string>
     <string name="prefs_passwordconfirmation">एन्क्रिप्शन पासवर्ड पुष्टिकरण</string>
     <string name="prefs_enablespecial">विशेष बैकअप सक्षम करें</string>
-    <string name="prefs_backupcache">Back up cached data</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
-    <string name="prefs_restorecache">Restore cached data</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

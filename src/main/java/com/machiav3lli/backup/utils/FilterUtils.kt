@@ -49,6 +49,7 @@ import com.machiav3lli.backup.SPECIAL_FILTER_ALL
 import com.machiav3lli.backup.UPDATED_FILTER_NEW
 import com.machiav3lli.backup.UPDATED_FILTER_NOT
 import com.machiav3lli.backup.UPDATED_FILTER_UPDATED
+import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.SortFilterModel
 import com.machiav3lli.backup.items.SpecialFilter
@@ -65,17 +66,25 @@ import java.time.temporal.ChronoUnit
 
 fun filterPackages(
     packages: List<Package>,
+    extrasMap: Map<String, AppExtras>,
     filter: Int,
     specialFilter: SpecialFilter,
     whiteList: List<String> = emptyList(),
     blackList: List<String>,
+    tagsList: List<String>,
 ): List<Package> {
 
-    val startPackages =
-        if (whiteList.isNotEmpty())
-            packages.filter { whiteList.contains(it.packageName) }
-        else
-            packages
+    val startPackages = (
+            if (tagsList.isNotEmpty()) packages
+                .filter {
+                    extrasMap[it.packageName]?.customTags
+                        ?.any { tag -> tagsList.contains(tag) } ?: false
+                }
+            else packages
+            ).let {
+            if (whiteList.isNotEmpty()) it.filter { whiteList.contains(it.packageName) }
+            else it
+        }
 
     val predicate: (Package) -> Boolean = {
         (if (filter and MAIN_FILTER_SYSTEM == MAIN_FILTER_SYSTEM) it.isSystem and !it.isSpecial else false)

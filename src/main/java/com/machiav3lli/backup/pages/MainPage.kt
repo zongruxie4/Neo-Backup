@@ -26,13 +26,16 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +56,6 @@ import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.pref_catchUncaughtException
 import com.machiav3lli.backup.pref_uncaughtExceptionsJumpToPreferences
-import com.machiav3lli.backup.sheets.Sheet
 import com.machiav3lli.backup.sheets.SortFilterSheet
 import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -69,6 +71,7 @@ import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.PagerNavBar
 import com.machiav3lli.backup.ui.navigation.SlidePager
 import com.topjohnwu.superuser.Shell
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.system.exitProcess
@@ -80,16 +83,13 @@ fun MainPage(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val pages = listOf(
+    val pages = persistentListOf(
         NavItem.Home,
         NavItem.Backup,
         NavItem.Restore,
         NavItem.Scheduler,
     )
-    val pagerState = rememberPagerState(pageCount = { pages.size })
-    val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }
-    val showSortSheet = remember { mutableStateOf(false) }
-    val sortSheetState = rememberModalBottomSheetState(true)
+    val scaffoldState = rememberBottomSheetScaffoldState()
 
     OABX.appsSuspendedChecked = false
 
@@ -122,123 +122,127 @@ fun MainPage(
 
     Shell.getShell()
 
-
     BackHandler {
         OABX.main?.finishAffinity()
     }
-
-    val openBlocklist = remember { mutableStateOf(false) }
 
     var query by rememberSaveable {
         mutableStateOf(
             OABX.main?.viewModel?.searchQuery?.value ?: ""
         )
     }
-    val searchExpanded = remember {
-        mutableStateOf(false)
-    }
-
-    Scaffold(
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 0.dp,
         containerColor = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        topBar = {
-            Column {
-                TopBar(
-                    title = stringResource(id = currentPage.title)
-                ) {
-                    when (currentPage.destination) {
-                        NavItem.Scheduler.destination -> {
-                            RoundButton(
-                                icon = Phosphor.Prohibit,
-                                description = stringResource(id = R.string.sched_blocklist)
-                            ) { openBlocklist.value = true }
-                            RoundButton(
-                                description = stringResource(id = R.string.prefs_title),
-                                icon = Phosphor.GearSix
-                            ) { navController.navigate(NavItem.Settings.destination) }
-                        }
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        sheetContent = {
+            SortFilterSheet(
+                onDismiss = {
+                    scope.launch {
+                        scaffoldState.bottomSheetState.partialExpand()
+                    }
+                },
+            )
+        }
+    ) {
+        val pagerState = rememberPagerState(pageCount = { pages.size })
+        val currentPage by remember { derivedStateOf { pages[pagerState.currentPage] } }
+        val openBlocklist = rememberSaveable { mutableStateOf(false) }
+        val searchExpanded = remember {
+            mutableStateOf(false)
+        }
 
-                        else                          -> {
-                            ExpandableSearchAction(
-                                expanded = searchExpanded,
-                                query = query,
-                                onQueryChanged = { newQuery ->
-                                    //if (newQuery != query)  // empty string doesn't work...
-                                    query = newQuery
-                                    OABX.main?.viewModel?.searchQuery?.value = query
-                                },
-                                onClose = {
-                                    query = ""
-                                    OABX.main?.viewModel?.searchQuery?.value = ""
-                                }
-                            )
-                            AnimatedVisibility(!searchExpanded.value) {
-                                RefreshButton { OABX.main?.refreshPackagesAndBackups() }
-                            }
-                            AnimatedVisibility(!searchExpanded.value) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            topBar = {
+                Column {
+                    TopBar(
+                        title = stringResource(id = currentPage.title)
+                    ) {
+                        when (currentPage.destination) {
+                            NavItem.Scheduler.destination -> {
+                                RoundButton(
+                                    icon = Phosphor.Prohibit,
+                                    description = stringResource(id = R.string.sched_blocklist)
+                                ) { openBlocklist.value = true }
                                 RoundButton(
                                     description = stringResource(id = R.string.prefs_title),
                                     icon = Phosphor.GearSix
                                 ) { navController.navigate(NavItem.Settings.destination) }
                             }
+
+                            else                          -> {
+                                ExpandableSearchAction(
+                                    expanded = searchExpanded,
+                                    query = query,
+                                    onQueryChanged = { newQuery ->
+                                        //if (newQuery != query)  // empty string doesn't work...
+                                        query = newQuery
+                                        OABX.main?.viewModel?.searchQuery?.value = query
+                                    },
+                                    onClose = {
+                                        query = ""
+                                        OABX.main?.viewModel?.searchQuery?.value = ""
+                                    }
+                                )
+                                AnimatedVisibility(!searchExpanded.value) {
+                                    RefreshButton { OABX.main?.refreshPackagesAndBackups() }
+                                }
+                                AnimatedVisibility(!searchExpanded.value) {
+                                    RoundButton(
+                                        description = stringResource(id = R.string.prefs_title),
+                                        icon = Phosphor.GearSix
+                                    ) { navController.navigate(NavItem.Settings.destination) }
+                                }
+                            }
+                        }
+                    }
+                    AnimatedVisibility(currentPage.destination != NavItem.Scheduler.destination) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            ActionChip(
+                                modifier = Modifier.weight(1f),
+                                icon = Phosphor.Prohibit,
+                                text = stringResource(id = R.string.sched_blocklist),
+                                positive = false,
+                                fullWidth = true,
+                            ) {
+                                openBlocklist.value = true
+                            }
+                            ActionChip(
+                                modifier = Modifier.weight(1f),
+                                icon = Phosphor.FunnelSimple,
+                                text = stringResource(id = R.string.sort_and_filter),
+                                positive = true,
+                                fullWidth = true,
+                            ) {
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.expand()
+                                }
+                            }
                         }
                     }
                 }
-                AnimatedVisibility(currentPage.destination != NavItem.Scheduler.destination) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ActionChip(
-                            modifier = Modifier.weight(1f),
-                            icon = Phosphor.Prohibit,
-                            text = stringResource(id = R.string.sched_blocklist),
-                            positive = false,
-                            fullWidth = true,
-                        ) {
-                            openBlocklist.value = true
-                        }
-                        ActionChip(
-                            modifier = Modifier.weight(1f),
-                            icon = Phosphor.FunnelSimple,
-                            text = stringResource(id = R.string.sort_and_filter),
-                            positive = true,
-                            fullWidth = true,
-                        ) {
-                            showSortSheet.value = true
-                        }
-                    }
-                }
+            },
+            bottomBar = {
+                PagerNavBar(pageItems = pages, pagerState = pagerState)
             }
-        },
-        bottomBar = {
-            PagerNavBar(pageItems = pages, pagerState = pagerState)
+        ) { paddingValues ->
+            SlidePager(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .blockBorder()
+                    .fillMaxSize(),
+                pagerState = pagerState,
+                pageItems = pages,
+            )
         }
-    ) { paddingValues ->
 
-        SlidePager(
-            modifier = Modifier
-                .padding(paddingValues)
-                .blockBorder(),
-            pagerState = pagerState,
-            pageItems = pages,
-            navController = navController
-        )
-
-        if (showSortSheet.value) {
-            val dismiss = {
-                scope.launch { sortSheetState.hide() }
-                showSortSheet.value = false
-            }
-            Sheet(
-                sheetState = sortSheetState,
-                onDismissRequest = dismiss,
-            ) {
-                SortFilterSheet(
-                    onDismiss = dismiss,
-                )
-            }
-        }
         if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
             GlobalBlockListDialogUI(
                 currentBlocklist = OABX.main?.viewModel?.getBlocklist()?.toSet()

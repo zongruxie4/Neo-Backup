@@ -61,7 +61,6 @@ fun ScheduleItem(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .weight(1f),
-                    softWrap = true,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.titleMedium
@@ -79,7 +78,6 @@ fun ScheduleItem(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .weight(1f),
-                    softWrap = true,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2,
                     style = MaterialTheme.typography.labelMedium,

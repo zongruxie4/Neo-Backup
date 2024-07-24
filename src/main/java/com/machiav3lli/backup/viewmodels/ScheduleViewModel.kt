@@ -24,15 +24,20 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
+import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.traceSchedule
+import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.cancelAlarm
 import com.machiav3lli.backup.utils.scheduleAlarm
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 
 class ScheduleViewModel(
@@ -50,6 +55,17 @@ class ScheduleViewModel(
     val customList = scheduleDB.getCustomListFlow(id)
     val blockList = scheduleDB.getBlockListFlow(id)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allTags =
+        //------------------------------------------------------------------------------------------ allTags
+        OABX.db.getAppExtrasDao().getAllFlow()
+            .mapLatest { it.flatMap(AppExtras::customTags) }
+            .trace { "*** tags <<- ${it.size}" }
+            .stateIn(
+                viewModelScope + Dispatchers.IO,
+                SharingStarted.Eagerly,
+                emptyList()
+            )
 
     fun updateSchedule(schedule: Schedule?, rescheduleBoolean: Boolean) {
         viewModelScope.launch {

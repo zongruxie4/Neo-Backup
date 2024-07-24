@@ -493,7 +493,6 @@ fun TerminalText(
                             fontFamily = FontFamily.Monospace,
                             fontSize = fontSize,
                             lineHeight = lineHeightSp,
-                            softWrap = wrap,
                             color = color,
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -399,8 +399,4 @@
     <string name="clear_text">Bersihkan teks</string>
     <string name="post_notifications_permission_title">Post Pemberitahuan</string>
     <string name="enforce_backups_limit_description">Hapus cadangan lama untuk menerapkan batas hingga %d</string>
-    <string name="prefs_backupcache">Back up cached data</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
-    <string name="prefs_restorecache">Restore cached data</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

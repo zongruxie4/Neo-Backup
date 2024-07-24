@@ -96,6 +96,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Leaf
+import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ProhibitInset
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
@@ -125,6 +126,7 @@ const val DIALOG_UNINSTALL = 8
 const val DIALOG_ADDTAG = 9
 const val DIALOG_NOTE = 10
 const val DIALOG_ENFORCE_LIMIT = 11
+const val DIALOG_NOTE_BACKUP = 12
 
 @Composable
 fun AppSheet(
@@ -205,14 +207,12 @@ fun AppSheet(
                         ) {
                             Text(
                                 text = pkg.packageLabel,
-                                softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
                                 text = pkg.packageName,
-                                softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
                                 style = MaterialTheme.typography.labelMedium,
@@ -221,7 +221,8 @@ fun AppSheet(
                         AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
                             RoundButton(
                                 icon = Phosphor.Info,
-                                modifier = Modifier.fillMaxHeight()
+                                modifier = Modifier.fillMaxHeight(),
+                                description = stringResource(id = R.string.app_info)
                             ) {
                                 val intent =
                                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -232,6 +233,20 @@ fun AppSheet(
                                         null
                                     )
                                 context.startActivity(intent)
+                            }
+                        }
+                        AnimatedVisibility(visible = !pkg.isInstalled && !pkg.isSpecial) {
+                            RoundButton(
+                                icon = Phosphor.MagnifyingGlass,
+                                modifier = Modifier.fillMaxHeight(),
+                                description = stringResource(id = R.string.search_package)
+                            ) {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("market://search?q=${pkg.packageName}")
+                                    )
+                                )
                             }
                         }
                         RoundButton(
@@ -378,9 +393,11 @@ fun AppSheet(
                         TagsBlock(
                             tags = appExtras.customTags,
                             onRemove = {
-                                viewModel.setExtras(appExtras.apply {
-                                    customTags.remove(it)
-                                })
+                                viewModel.setExtras(
+                                    appExtras.copy(
+                                        customTags = appExtras.customTags.minus(it)
+                                    )
+                                )
                             },
                             onAdd = {
                                 dialogProps.value = Pair(DIALOG_ADDTAG, "")
@@ -510,6 +527,10 @@ fun AppSheet(
                         },
                         onDelete = { item ->
                             dialogProps.value = Pair(DIALOG_DELETE, item)
+                            openDialog.value = true
+                        },
+                        onNote = { item ->
+                            dialogProps.value = Pair(DIALOG_NOTE_BACKUP, item)
                             openDialog.value = true
                         },
                         rewriteBackup = { backup, changedBackup ->
@@ -711,6 +732,18 @@ fun AppSheet(
                             }
                         }
 
+                        DIALOG_NOTE_BACKUP   -> {
+                            val backup = dialogProps.value.second as Backup
+
+                            StringInputDialogUI(
+                                titleText = stringResource(id = R.string.edit_note),
+                                initValue = backup.note,
+                                openDialogCustom = openDialog,
+                            ) {
+                                viewModel.rewriteBackup(backup, backup.copy(note = it))
+                            }
+                        }
+
                         DIALOG_ENFORCE_LIMIT -> {
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
@@ -733,9 +766,11 @@ fun AppSheet(
                                 initValue = dialogProps.value.second as String,
                                 openDialogCustom = openDialog,
                             ) {
-                                viewModel.setExtras(appExtras.apply {
-                                    customTags.add(it)
-                                })
+                                viewModel.setExtras(
+                                    appExtras.copy(
+                                        customTags = appExtras.customTags.plus(it)
+                                    )
+                                )
                             }
                         }
 

@@ -33,12 +33,12 @@ android {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8316
-        versionName = "8.3.6"
+        versionCode = 8317
+        versionName = "8.3.7"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
 
-        testApplicationId = "${applicationId}.tests"
+        testApplicationId = "$applicationId.tests"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
@@ -50,7 +50,6 @@ android {
                 }
             }
         }
-
     }
 
     applicationVariants.all { variant ->
@@ -65,9 +64,8 @@ android {
         named("release") {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
-            //versionNameSuffix = "-alpha01"
             isMinifyEnabled = true
         }
         named("debug") {
@@ -79,13 +77,12 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
     buildFeatures {
         buildConfig = true
-        dataBinding = true
         compose = true
     }
     compileOptions {
@@ -106,18 +103,28 @@ android {
         includeInBundle = false
     }
     packaging {
-        resources.excludes.add("META-INF/LICENSE.md")
-        resources.excludes.add("META-INF/LICENSE-notice.md")
+        resources {
+            excludes += listOf(
+                "/DebugProbesKt.bin",
+                "/kotlin/**.kotlin_builtins",
+                "/kotlin/**.kotlin_metadata",
+                "/META-INF/**.kotlin_module",
+                "/META-INF/**.pro",
+                "/META-INF/**.version",     // comment out to enable layout inspector
+                "/META-INF/LICENSE-notice.md",
+                "/META-INF/LICENSE.md"
+            )
+        }
     }
 }
 
 dependencies {
     implementation(libs.kotlin.stdlib)
-    //implementation(kotlin("reflect", vKotlin))
     implementation(libs.ksp)
 
     // Libs
     implementation(libs.activity.compose)
+    implementation(libs.collections.immutable)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
@@ -131,7 +138,7 @@ dependencies {
     implementation(libs.security.crypto)
     implementation(libs.commons.io)
     implementation(libs.commons.compress)
-    implementation(libs.zstd.jni)
+    implementation(variantOf(libs.zstd.jni) { artifactType("aar") })
     implementation(libs.timber)
     implementation(libs.semver)
     implementation(libs.libsu.core)
@@ -150,10 +157,7 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.animation)
     implementation(libs.compose.navigation)
-    //implementation("androidx.compose.ui:ui-tooling:$vCompose")
-    //implementation("androidx.compose.runtime:runtime-livedata:$vCompose")
     implementation(libs.coil.compose)
-    //implementation("com.google.accompanist:accompanist-systemuicontroller:$vAccompanist")
     implementation(libs.accompanist.permissions)
 
     // Testing
@@ -169,21 +173,20 @@ dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
 }
 
-//TODO: how to do this with ksp?
-//kapt {
-//    correctErrorTypes = true
-//}
-
 // using a task as a preBuild dependency instead of a function that takes some time insures that it runs
 task("detectAndroidLocals") {
     val langsList: MutableSet<String> = HashSet()
 
     // in /res are (almost) all languages that have a translated string is saved. this is safer and saves some time
     fileTree("src/main/res").visit {
-        if (this.file.path.endsWith("strings.xml")
-            && this.file.canonicalFile.readText().contains("<string")
+        if (this.file.path.endsWith("strings.xml") &&
+            this.file.canonicalFile
+                .readText()
+                .contains("<string")
         ) {
-            var languageCode = this.file.parentFile.name.replace("values-", "")
+            var languageCode =
+                this.file.parentFile.name
+                    .replace("values-", "")
             languageCode = if (languageCode == "values") "en" else languageCode
             langsList.add(languageCode)
         }
@@ -194,7 +197,7 @@ task("detectAndroidLocals") {
 tasks.preBuild.dependsOn("detectAndroidLocals")
 
 tasks.withType<Test> {
-    useJUnit()          // we still use junit4
-    //useTestNG()
-    //useJUnitPlatform()
+    useJUnit() // we still use junit4
+    // useTestNG()
+    // useJUnitPlatform()
 }

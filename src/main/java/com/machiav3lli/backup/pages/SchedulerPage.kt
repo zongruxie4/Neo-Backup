@@ -20,14 +20,17 @@ package com.machiav3lli.backup.pages
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -36,12 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.sheets.ScheduleSheet
-import com.machiav3lli.backup.sheets.Sheet
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarPlus
 import com.machiav3lli.backup.ui.compose.recycler.ScheduleRecycler
@@ -55,62 +58,71 @@ import kotlinx.coroutines.launch
 @Composable
 fun SchedulerPage(viewModel: SchedulerViewModel) {
     val context = LocalContext.current
-    val mScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val schedules by viewModel.schedules.collectAsState(emptyList())
+    val scaffoldState = rememberBottomSheetScaffoldState()
     val scheduleSheetId = remember { mutableLongStateOf(-1L) }
-    val scheduleSheetState = rememberModalBottomSheetState(true)
-    val scheduleSheetVM = remember(scheduleSheetId.longValue) {
-        ScheduleViewModel(
-            scheduleSheetId.longValue,
-            OABX.db.getScheduleDao(),
-        )
+    val scheduleSheetVM by remember {
+        derivedStateOf {
+            ScheduleViewModel(
+                scheduleSheetId.longValue,
+                OABX.db.getScheduleDao(),
+            )
+        }
     }
 
-    Scaffold(
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 0.dp,
+        sheetDragHandle = null,
         containerColor = Color.Transparent,
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                text = { Text(stringResource(id = R.string.sched_add)) },
-                icon = {
-                    Icon(
-                        modifier = Modifier.size(ICON_SIZE_SMALL),
-                        imageVector = Phosphor.CalendarPlus,
-                        contentDescription = stringResource(id = R.string.sched_add)
-                    )
-                },
-                onClick = { viewModel.addSchedule(specialBackupsEnabled) }
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        sheetContent = {
+            ScheduleSheet(
+                viewModel = scheduleSheetVM,
+                scheduleId = scheduleSheetId.longValue,
+                onDismiss = {
+                    scope.launch {
+                        scaffoldState.bottomSheetState.partialExpand()
+                        scheduleSheetId.longValue = -1L
+                    }
+                }
             )
         }
     ) {
-        ScheduleRecycler(
-            modifier = Modifier.fillMaxSize(),
-            productsList = schedules,
-            onClick = { item ->
-                scheduleSheetId.longValue = item.id
-            },
-            onCheckChanged = { item: Schedule, b: Boolean ->
-                viewModel.updateSchedule(
-                    item.copy(enabled = b),
-                    true,
+        Scaffold(
+            containerColor = Color.Transparent,
+            floatingActionButton = {
+                ExtendedFloatingActionButton(
+                    text = { Text(stringResource(id = R.string.sched_add)) },
+                    icon = {
+                        Icon(
+                            modifier = Modifier.size(ICON_SIZE_SMALL),
+                            imageVector = Phosphor.CalendarPlus,
+                            contentDescription = stringResource(id = R.string.sched_add)
+                        )
+                    },
+                    onClick = { viewModel.addSchedule(specialBackupsEnabled) }
                 )
             }
-        )
-
-        if (scheduleSheetId.longValue > 0L) {
-            val dismiss = {
-                mScope.launch { scheduleSheetState.hide() }
-                scheduleSheetId.longValue = -1L
-            }
-            Sheet(
-                sheetState = scheduleSheetState,
-                onDismissRequest = dismiss,
-            ) {
-                ScheduleSheet(
-                    viewModel = scheduleSheetVM,
-                    scheduleId = scheduleSheetId.longValue,
-                    onDismiss = dismiss
-                )
-            }
+        ) {
+            ScheduleRecycler(
+                modifier = Modifier.fillMaxSize(),
+                productsList = schedules,
+                onClick = { item ->
+                    scope.launch {
+                        scheduleSheetId.longValue = item.id
+                        scaffoldState.bottomSheetState.expand()
+                    }
+                },
+                onCheckChanged = { item: Schedule, b: Boolean ->
+                    viewModel.updateSchedule(
+                        item.copy(enabled = b),
+                        true,
+                    )
+                }
+            )
         }
     }
 }

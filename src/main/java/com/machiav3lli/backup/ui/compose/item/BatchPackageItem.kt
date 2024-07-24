@@ -106,7 +106,6 @@ fun BatchPackageItem(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .weight(1f),
-                    softWrap = true,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.titleMedium
@@ -122,7 +121,6 @@ fun BatchPackageItem(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .weight(1f),
-                    softWrap = true,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.labelMedium,
@@ -187,7 +185,6 @@ fun RestorePackageItem(
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .weight(1f),
-                        softWrap = true,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.titleMedium

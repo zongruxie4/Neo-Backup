@@ -27,8 +27,4 @@
     <string name="restoreConfirmation">റിസ്റോർ ചെയ്യണോ\?</string>
     <string name="restore">റിസ്റ്റോർ</string>
     <string name="backup">ബാക്കപ്പ്</string>
-    <string name="prefs_backupcache">Back up cached data</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
-    <string name="prefs_restorecache">Restore cached data</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

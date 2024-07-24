@@ -207,6 +207,29 @@ fun MultiSelectableChipGroup(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun MultiSelectableChipGroup(
+    modifier: Modifier = Modifier,
+    list: Set<String>,
+    selected: Set<String>,
+    onClick: (Set<String>) -> Unit,
+) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        list.forEach { item ->
+            SelectionChip(
+                label = item,
+                isSelected = item in selected,
+            ) {
+                onClick(if (item in selected) selected - item else selected + item)
+            }
+        }
+    }
+}
+
 fun Modifier.angledGradientBackground(colors: List<Color>, degrees: Float, factor: Float = 1f) =
     this.then(
         drawBehind {

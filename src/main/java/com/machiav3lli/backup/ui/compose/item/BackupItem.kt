@@ -44,7 +44,8 @@ fun BackupItem(
     item: Backup,
     onRestore: (Backup) -> Unit = { },
     onDelete: (Backup) -> Unit = { },
-    rewriteBackup: (Backup, Backup) -> Unit = { backup, changedBackup -> },
+    onNote: (Backup) -> Unit = { },
+    rewriteBackup: (Backup, Backup) -> Unit = { _, _ -> },
 ) {
     ListItem(
         modifier = Modifier
@@ -55,12 +56,12 @@ fun BackupItem(
         ),
         headlineContent = {
             Row(modifier = Modifier.fillMaxWidth()) {
-                Row(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         text = item.versionName ?: "",
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically),
-                        softWrap = true,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 2,
                         style = MaterialTheme.typography.titleMedium
@@ -69,16 +70,21 @@ fun BackupItem(
                         Text(
                             text = " ${item.cpuArch}",
                             color = Color.Red,
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically),
-                            softWrap = true,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
                             style = MaterialTheme.typography.labelMedium,
                         )
                     }
                 }
-                Row(modifier = Modifier.wrapContentWidth()) {
+                Row(
+                    modifier = Modifier.wrapContentWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    NoteTagItem(
+                        tag = item.note.ifEmpty { stringResource(id = R.string.edit_note) },
+                        action = item.note.isEmpty(),
+                        onClick = { onNote(item) },
+                    )
                     BackupLabels(item = item)
                 }
             }
@@ -96,7 +102,6 @@ fun BackupItem(
                         Text(
                             text = item.backupDate.format(BACKUP_DATE_TIME_SHOW_FORMATTER),
                             modifier = Modifier.align(Alignment.Top),
-                            softWrap = true,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
                             style = MaterialTheme.typography.labelMedium,
@@ -105,7 +110,6 @@ fun BackupItem(
                             Text(
                                 text = " ${item.tag}",
                                 modifier = Modifier.align(Alignment.Top),
-                                softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 3,
                                 style = MaterialTheme.typography.labelMedium,
@@ -114,7 +118,6 @@ fun BackupItem(
                     Row {
                         Text(
                             text = if (item.backupVersionCode == 0) "old" else "${item.backupVersionCode / 1000}.${item.backupVersionCode % 1000}",
-                            softWrap = true,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
                             style = MaterialTheme.typography.labelMedium,
@@ -133,7 +136,6 @@ fun BackupItem(
                                         onClick = {},
                                         onLongClick = { showTooltip.value = true }
                                     ),
-                                softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 2,
                                 style = MaterialTheme.typography.labelMedium,
@@ -151,7 +153,6 @@ fun BackupItem(
                         Text(
                             text = compressionText + fileSizeText,
                             modifier = Modifier.align(Alignment.Top),
-                            softWrap = true,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
                             style = MaterialTheme.typography.labelMedium,
@@ -165,7 +166,6 @@ fun BackupItem(
                                 Text(
                                     text = "${item.profileId}",
                                     color = Color.Red,
-                                    softWrap = true,
                                     overflow = TextOverflow.Ellipsis,
                                     maxLines = 1,
                                     style = MaterialTheme.typography.labelMedium,
@@ -262,7 +262,6 @@ fun RestoreBackupItem(
                     text = item.versionName ?: "",
                     modifier = Modifier
                         .align(Alignment.CenterVertically),
-                    softWrap = true,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.titleMedium
@@ -272,7 +271,6 @@ fun RestoreBackupItem(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .weight(1f),
-                    softWrap = true,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.labelMedium,
@@ -291,7 +289,6 @@ fun RestoreBackupItem(
                 ) {
                     Text(
                         text = item.backupDate.format(BACKUP_DATE_TIME_SHOW_FORMATTER),
-                        softWrap = true,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.labelMedium,
@@ -299,7 +296,6 @@ fun RestoreBackupItem(
                     if (item.tag.isNotEmpty())
                         Text(
                             text = " - ${item.tag}",
-                            softWrap = true,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
                             style = MaterialTheme.typography.labelMedium,
@@ -308,7 +304,6 @@ fun RestoreBackupItem(
                 Row {
                     Text(
                         text = if (item.backupVersionCode == 0) "old" else "${item.backupVersionCode / 1000}.${item.backupVersionCode % 1000}",
-                        softWrap = true,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.labelMedium,
@@ -326,7 +321,6 @@ fun RestoreBackupItem(
                                     onClick = {},
                                     onLongClick = { showTooltip.value = true }
                                 ),
-                            softWrap = true,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
                             style = MaterialTheme.typography.labelMedium,
@@ -340,7 +334,6 @@ fun RestoreBackupItem(
                     else ""
                     Text(
                         text = compressionText + fileSizeText,
-                        softWrap = true,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.labelMedium,

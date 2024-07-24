@@ -21,24 +21,24 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.sheets.HelpSheet
-import com.machiav3lli.backup.sheets.Sheet
 import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
@@ -48,6 +48,7 @@ import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.PagerNavBar
 import com.machiav3lli.backup.ui.navigation.SlidePager
 import com.topjohnwu.superuser.Shell
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -57,16 +58,15 @@ fun PrefsPage(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val pages = listOf(
+    val pages = persistentListOf(
         NavItem.UserPrefs,
         NavItem.ServicePrefs,
         NavItem.AdvancedPrefs,
         NavItem.ToolsPrefs,
     )
     val pagerState = rememberPagerState(pageCount = { pages.size })
-    val currentPage by remember(pagerState.currentPage) { mutableStateOf(pages[pagerState.currentPage]) }
-    var showHelpSheet by remember { mutableStateOf(false) }
-    val helpSheetState = rememberModalBottomSheetState(true)
+    val currentPage by remember { derivedStateOf { pages[pagerState.currentPage] } }
+    val scaffoldState = rememberBottomSheetScaffoldState()
 
     Shell.getShell()
 
@@ -74,45 +74,46 @@ fun PrefsPage(
         navController.navigateUp()
     }
 
-    Scaffold(
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 0.dp,
         containerColor = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        topBar = {
-            TopBar(title = stringResource(id = currentPage.title)) {
-                RoundButton(
-                    icon = Phosphor.Info,
-                    description = stringResource(id = R.string.help),
-                ) {
-                    showHelpSheet = true
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        sheetContent = {
+            HelpSheet {
+                scope.launch {
+                    scaffoldState.bottomSheetState.partialExpand()
                 }
             }
-        },
-        bottomBar = {
-            PagerNavBar(pageItems = pages, pagerState = pagerState)
         }
-    ) { paddingValues ->
-        SlidePager(
-            modifier = Modifier
-                .padding(paddingValues)
-                .blockBorder(),
-            pagerState = pagerState,
-            pageItems = pages,
-            navController = navController
-        )
-
-        if (showHelpSheet) {
-            Sheet(
-                sheetState = helpSheetState,
-                onDismissRequest = {
-                    scope.launch { helpSheetState.hide() }
-                    showHelpSheet = false
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            topBar = {
+                TopBar(title = stringResource(id = currentPage.title)) {
+                    RoundButton(
+                        icon = Phosphor.Info,
+                        description = stringResource(id = R.string.help),
+                    ) {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
                 }
-            ) {
-                HelpSheet {
-                    scope.launch { helpSheetState.hide() }
-                    showHelpSheet = false
-                }
+            },
+            bottomBar = {
+                PagerNavBar(pageItems = pages, pagerState = pagerState)
             }
+        ) { paddingValues ->
+            SlidePager(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .blockBorder(),
+                pagerState = pagerState,
+                pageItems = pages,
+            )
         }
     }
 }

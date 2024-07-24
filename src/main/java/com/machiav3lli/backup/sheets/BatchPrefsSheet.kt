@@ -26,10 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.ui.item.Pref
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 @Composable
 fun BatchPrefsSheet(backupBoolean: Boolean) {
-    val prefs = Pref.prefGroups[if (backupBoolean) "srv-bkp" else "srv-rst"] ?: listOf()
+    val prefs = Pref.prefGroups[if (backupBoolean) "srv-bkp" else "srv-rst"]?.toPersistentList()
+        ?: persistentListOf()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

@@ -279,8 +279,4 @@
     <string name="prefs_theme_black_summary">Força el fons negre en utilitzar el tema fosc</string>
     <string name="prefs_multilineinfochips_summary">Permet que la informació sigui mostrada en diverses línies.</string>
     <string name="prefs_squeezenavtext_summary">Permet reduir la mida dels textos de la barra de navegació per adequar-se a l\'amplada disponible.</string>
-    <string name="prefs_backupcache">Back up cached data</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
-    <string name="prefs_restorecache">Restore cached data</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

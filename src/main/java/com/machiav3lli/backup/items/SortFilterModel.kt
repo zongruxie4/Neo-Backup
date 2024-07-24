@@ -105,9 +105,9 @@ data class SortFilterModel(
 }
 
 class SpecialFilter(
-    var installedFilter: Int = SPECIAL_FILTER_ALL,
-    var launchableFilter: Int = SPECIAL_FILTER_ALL,
-    var updatedFilter: Int = SPECIAL_FILTER_ALL,
-    var latestFilter: Int = SPECIAL_FILTER_ALL,
-    var enabledFilter: Int = SPECIAL_FILTER_ALL,
+    val installedFilter: Int = SPECIAL_FILTER_ALL,
+    val launchableFilter: Int = SPECIAL_FILTER_ALL,
+    val updatedFilter: Int = SPECIAL_FILTER_ALL,
+    val latestFilter: Int = SPECIAL_FILTER_ALL,
+    val enabledFilter: Int = SPECIAL_FILTER_ALL,
 )

@@ -45,18 +45,20 @@ import com.machiav3lli.backup.ui.item.Pref
 import com.machiav3lli.backup.ui.item.StringPref
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.sortFilterModel
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 
 @Composable
 fun DevPrefGroups() {
-    val devUserOptions = Pref.prefGroups["dev-adv"] ?: listOf()
-    val devFileOptions = Pref.prefGroups["dev-file"] ?: listOf()
-    val devLogOptions = Pref.prefGroups["dev-log"] ?: listOf()
-    val devTraceOptions = Pref.prefGroups["dev-trace"] ?: listOf()
-    val devHackOptions = Pref.prefGroups["dev-hack"] ?: listOf()
-    val devAltOptions = Pref.prefGroups["dev-alt"] ?: listOf()
-    val devNewOptions = Pref.prefGroups["dev-new"] ?: listOf()
-    val devFakeOptions = Pref.prefGroups["dev-fake"] ?: listOf()
+    val devUserOptions = Pref.prefGroups["dev-adv"]?.toPersistentList() ?: persistentListOf()
+    val devFileOptions = Pref.prefGroups["dev-file"]?.toPersistentList() ?: persistentListOf()
+    val devLogOptions = Pref.prefGroups["dev-log"]?.toPersistentList() ?: persistentListOf()
+    val devTraceOptions = Pref.prefGroups["dev-trace"]?.toPersistentList() ?: persistentListOf()
+    val devHackOptions = Pref.prefGroups["dev-hack"]?.toPersistentList() ?: persistentListOf()
+    val devAltOptions = Pref.prefGroups["dev-alt"]?.toPersistentList() ?: persistentListOf()
+    val devNewOptions = Pref.prefGroups["dev-new"]?.toPersistentList() ?: persistentListOf()
+    val devFakeOptions = Pref.prefGroups["dev-fake"]?.toPersistentList() ?: persistentListOf()
 
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -80,7 +82,7 @@ fun AdvancedPrefsPage() {
     val context = LocalContext.current
     val (expanded, expand) = remember { mutableStateOf(false) }
 
-    val prefs = Pref.prefGroups["adv"] ?: listOf()
+    val prefs = Pref.prefGroups["adv"]?.toPersistentList() ?: persistentListOf()
 
     BusyBackground(
         modifier = Modifier.fillMaxSize()
@@ -543,7 +545,7 @@ val persist_skippedEncryptionCounter = IntPref(
 //----------------------------------------
 
 fun publicPreferences(persist: Boolean = false) =
-    Pref.prefGroups.map {
+    Pref.prefGroups.flatMap {
         val (group, prefs) = it
         prefs.mapNotNull { pref ->
             if (pref.private ||
@@ -555,4 +557,4 @@ fun publicPreferences(persist: Boolean = false) =
             else
                 pref
         }
-    }.flatten()
+    }

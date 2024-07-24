@@ -78,6 +78,8 @@ import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.utils.recreateActivities
 import com.machiav3lli.backup.viewmodels.LogViewModel
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -204,7 +206,7 @@ fun DevSettingsTab() {
                         .filter {
                             it.key.contains(search, ignoreCase = true)
                                     && it.group !in listOf("persist", "kill")
-                        }
+                        }.toPersistentList()
                 )
         }
     }
@@ -412,7 +414,7 @@ fun DevToolsTab() {
 
     val scroll = rememberScrollState(0)
 
-    val prefs = Pref.prefGroups["dev-tool"] ?: listOf()
+    val prefs = Pref.prefGroups["dev-tool"]?.toPersistentList() ?: persistentListOf()
 
     Column(
         modifier = Modifier
@@ -469,7 +471,7 @@ val pref_afterSupport = LaunchPref(
 fun DevSupportTab() {
     val scroll = rememberScrollState(0)
 
-    val prefs = Pref.prefGroups["dev-support"] ?: listOf()
+    val prefs = Pref.prefGroups["dev-support"]?.toPersistentList() ?: persistentListOf()
 
     Column(
         modifier = Modifier

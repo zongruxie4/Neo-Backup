@@ -136,8 +136,4 @@
     <string name="error_pmDataIncompleteException_dataRestoreFailed">Lietotnes dati netika ielasīti.</string>
     <string name="prefs_language_system">Sistēmas noklusējuma</string>
     <string name="prefs_externaldata_rst">Ielasīt rezerves kopijas ārējos datus</string>
-    <string name="prefs_backupcache">Back up cached data</string>
-    <string name="prefs_backupcache_summary">Back up files in cache directories</string>
-    <string name="prefs_restorecache">Restore cached data</string>
-    <string name="prefs_restorecache_summary">Restore files in cache directories</string>
 </resources>

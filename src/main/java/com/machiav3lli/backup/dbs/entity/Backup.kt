@@ -68,7 +68,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
     var persistent: Boolean = false,
 ) {
     constructor(
-        base: com.machiav3lli.backup.dbs.entity.PackageInfo,
+        base: PackageInfo,
         backupDate: LocalDateTime,
         hasApk: Boolean,
         hasAppData: Boolean,
@@ -83,6 +83,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
         permissions: List<String>,
         size: Long,
         persistent: Boolean = false,
+        note: String = "",
     ) : this(
         backupVersionCode = BuildConfig.MAJOR * 1000 + BuildConfig.MINOR,
         packageName = base.packageName,
@@ -107,6 +108,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
         permissions = permissions.sorted(),
         size = size,
         persistent = persistent,
+        note = note,
     )
 
     val isCompressed: Boolean
@@ -147,6 +149,8 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
             ", cipherType='" + cipherType + '\'' +
             ", iv='" + iv + '\'' +
             ", permissions='" + permissions + '\'' +
+            ", persistent=" + persistent +
+            ", note='" + note + '\'' +
             '}'
 
     override fun equals(other: Any?): Boolean = when {
@@ -178,6 +182,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
                 || isEncrypted != other.isEncrypted
                 || permissions != other.permissions
                 || persistent != other.persistent
+                || note != other.note
                 || file?.path != other.file?.path
                 || dir?.path != other.dir?.path
                        -> false
@@ -209,6 +214,7 @@ data class Backup @OptIn(ExperimentalSerializationApi::class) constructor(
         result = 31 * result + isEncrypted.hashCode()
         result = 31 * result + permissions.hashCode()
         result = 31 * result + persistent.hashCode()
+        result = 31 * result + note.hashCode()
         result = 31 * result + file?.path.hashCode()
         result = 31 * result + dir?.path.hashCode()
         return result
