@@ -1,4 +1,4 @@
-package research
+package tests.research
 
 import android.content.res.Configuration
 import androidx.test.platform.app.InstrumentationRegistry

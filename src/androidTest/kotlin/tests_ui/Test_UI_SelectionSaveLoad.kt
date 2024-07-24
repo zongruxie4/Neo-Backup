@@ -1,4 +1,4 @@
-package tests_ui
+package tests.tests_ui
 
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.click

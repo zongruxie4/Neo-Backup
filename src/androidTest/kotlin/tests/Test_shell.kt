@@ -1,4 +1,4 @@
-package tests
+package tests.tests
 import androidx.test.platform.app.InstrumentationRegistry
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellHandler

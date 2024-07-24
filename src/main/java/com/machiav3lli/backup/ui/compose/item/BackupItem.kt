@@ -196,6 +196,7 @@ fun BackupItem(
                         RoundButton(icon = Phosphor.LockOpen, onClick = togglePersistent)
 
                     Spacer(modifier = Modifier.weight(1f))
+
                     ElevatedActionButton(
                         icon = Phosphor.TrashSimple,
                         text = stringResource(id = R.string.deleteBackup),

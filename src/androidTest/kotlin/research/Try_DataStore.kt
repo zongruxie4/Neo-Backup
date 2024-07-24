@@ -1,4 +1,4 @@
-package research
+package tests.research
 
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences

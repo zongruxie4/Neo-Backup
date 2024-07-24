@@ -1,4 +1,4 @@
-package tests
+package tests.tests
 
 import com.machiav3lli.backup.actions.BaseAppAction.Companion.doNotStop
 import com.machiav3lli.backup.actions.BaseAppAction.Companion.ignoredPackages

@@ -29,7 +29,7 @@ class SpecialFilesPlugin(file: File) : TextPlugin(file) {
             ensureScanned()
 
             return plugins.filter { it.value is SpecialFilesPlugin }.map {
-                val plugin = it as SpecialFilesPlugin
+                val plugin = it.value as SpecialFilesPlugin
                 val name = plugin.name
                 val label = "$ " + name.replace(".", " ").replace("_", " ")
                 val files = plugin.files

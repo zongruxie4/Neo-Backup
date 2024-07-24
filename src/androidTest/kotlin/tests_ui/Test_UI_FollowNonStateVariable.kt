@@ -1,4 +1,4 @@
-package tests_ui
+package tests.tests_ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

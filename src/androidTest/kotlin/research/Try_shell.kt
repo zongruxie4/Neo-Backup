@@ -1,4 +1,4 @@
-package research
+package tests.research
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import org.jetbrains.annotations.TestOnly
 import org.junit.Assert.assertEquals

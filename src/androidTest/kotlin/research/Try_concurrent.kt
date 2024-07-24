@@ -1,4 +1,4 @@
-package research
+package tests.research
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

@@ -170,6 +170,7 @@ class BackupBuilder(
                 permissions = if (packageInfo is AppInfo) packageInfo.permissions else emptyList(),
                 size = size,
                 persistent = false,
+                note = "",
             )
         backup.dir = backupDir
         backup.file = saveBackupProperties(backupPropsFile, backup)

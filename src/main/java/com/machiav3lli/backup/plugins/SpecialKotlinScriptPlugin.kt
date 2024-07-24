@@ -11,6 +11,6 @@ class SpecialKotlinScriptPlugin(file: File) : TextPlugin(file) {
 
     companion object {
 
-        fun register() = PluginTypes.register("SpecialKotlinScript", SpecialKotlinScriptPlugin::class, listOf("special_kts"))
+        fun register() = Plugin.registerType("SpecialKotlinScript", SpecialKotlinScriptPlugin::class, listOf("special_kts"))
     }
 }

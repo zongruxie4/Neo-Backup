@@ -1,4 +1,4 @@
-package research
+package tests.research
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
