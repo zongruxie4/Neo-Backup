@@ -1,6 +1,7 @@
 package com.machiav3lli.backup.dialogs
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.ui.compose.blockShadow
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Eye
 import com.machiav3lli.backup.ui.compose.icons.phosphor.EyeSlash
@@ -72,18 +74,21 @@ fun EnumPrefDialogUI(
         shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier.padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(text = stringResource(pref.titleId), style = MaterialTheme.typography.titleLarge)
             LazyColumn(
-                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .weight(1f, false)
+                    .blockShadow()
             ) {
                 items(items = entryPairs) {
                     val isSelected = rememberSaveable(selected) {
@@ -129,23 +134,24 @@ fun ListPrefDialogUI(
     val entryPairs = pref.entries.toList()
 
     Card(
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier.padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(text = stringResource(pref.titleId), style = MaterialTheme.typography.titleLarge)
             LazyColumn(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 16.dp, bottom = 16.dp)
+                    .padding(vertical = 8.dp)
+                    .weight(1f, false)
+                    .blockShadow()
             ) {
                 items(items = entryPairs) {
                     val isSelected = rememberSaveable(selected) {
@@ -202,14 +208,15 @@ fun StringPrefDialogUI(
     var isEdited by remember { mutableStateOf(false) }
     var notMatching by remember { mutableStateOf(false) }
 
-    val textColor =
-        if (isPrivate) {
+    val textColor by animateColorAsState(
+        targetValue = if (isPrivate) {
             if (savedValue != savedValueConfirm)
                 Color.Red
             else
                 Color.Green
         } else
-            MaterialTheme.colorScheme.onSurface
+            MaterialTheme.colorScheme.onSurface, label = "textColor"
+    )
 
     fun submit() {
         focusManager.clearFocus()
@@ -249,7 +256,7 @@ fun StringPrefDialogUI(
         shape = MaterialTheme.shapes.large,
         modifier = Modifier.padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
@@ -257,7 +264,7 @@ fun StringPrefDialogUI(
         var isPasswordVisible by remember { mutableStateOf(!isPrivate) }  // rememberSavable?
 
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -273,8 +280,8 @@ fun StringPrefDialogUI(
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedTextColor = textColor,
                     unfocusedTextColor = textColor,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),
                 shape = MaterialTheme.shapes.medium,
                 singleLine = true,
@@ -337,8 +344,8 @@ fun StringPrefDialogUI(
                         unfocusedIndicatorColor = Color.Transparent,
                         focusedTextColor = textColor,
                         unfocusedTextColor = textColor,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     shape = MaterialTheme.shapes.medium,
                     singleLine = true,

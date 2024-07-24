@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -83,6 +84,24 @@ fun Modifier.blockBorder(style: Boolean? = null) = composed {
             }
         )
 }
+
+fun Modifier.blockShadow(altStyle: Boolean = pref_altBlockLayout.value) =
+    composed {
+        this
+            .ifThenElse(altStyle,
+                modifier = {
+                    border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline,
+                        MaterialTheme.shapes.extraLarge,
+                    )
+                },
+                elseModifier = {
+                    shadow(elevation = 1.dp, shape = MaterialTheme.shapes.extraLarge)
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                }
+            )
+    }
 
 @Composable
 fun SelectionContainerX(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
