@@ -1,4 +1,4 @@
-package research
+package tests.research
 
 import android.net.Uri
 import android.os.Bundle

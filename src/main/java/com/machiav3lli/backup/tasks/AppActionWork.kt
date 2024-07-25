@@ -313,7 +313,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
                         "backupIndex" to backupIndex,
                         "notificationId" to notificationId,
                         "batchName" to batchName,
-                        "operation" to "...",
+                        "operation" to "",
                         "immediate" to immediate
                     )
                 )

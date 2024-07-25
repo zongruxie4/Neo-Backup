@@ -84,6 +84,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -155,6 +156,7 @@ import com.machiav3lli.backup.ui.compose.theme.ColorUser
 import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import kotlinx.coroutines.delay
+import kotlin.math.max
 
 @Composable
 fun ButtonIcon(
@@ -207,52 +209,6 @@ fun PackageIcon(
         contentScale = ContentScale.Crop
     )
     endNanoTimer("pkgIcon.rCAIP")
-}
-
-@Composable
-fun RefreshButton(
-    modifier: Modifier = Modifier,
-    size: Dp = ICON_SIZE_SMALL,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
-    hideIfNotBusy: Boolean = false,
-    onClick: () -> Unit = {},
-) {
-    val isBusy by remember { OABX.busy }
-
-    if (hideIfNotBusy && isBusy.not())
-        return
-
-    val (angle, scale) = if (isBusy) {
-        val infiniteTransition = rememberInfiniteTransition(label = "infiniteTransition")
-
-        // Animate from 0f to 1f
-        val animationProgress by infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(
-                    durationMillis = pref_busyIconTurnTime.value,
-                    easing = LinearEasing
-                )
-            ), label = "animationProgress"
-        )
-        val angle = 360f * animationProgress
-        val scale = 0.01f * pref_busyIconScale.value
-        angle to scale
-    } else {
-        0f to 1f
-    }
-
-    RoundButton(
-        description = stringResource(id = R.string.refresh),
-        icon = Phosphor.ArrowsClockwise,
-        size = size,
-        tint = if (isBusy) Color.Red else tint,
-        modifier = modifier
-            .scale(scale)
-            .rotate(angle),
-        onClick = onClick
-    )
 }
 
 object IconCache {
@@ -537,6 +493,80 @@ fun RoundButton(
             tint = tint,
             contentDescription = description
         )
+    }
+}
+
+@Composable
+fun RefreshButton(
+    modifier: Modifier = Modifier,
+    size: Dp = ICON_SIZE_SMALL,
+    tint: Color = MaterialTheme.colorScheme.onSurface,
+    hideIfNotBusy: Boolean = false,
+    onClick: () -> Unit = {},
+) {
+    val isBusy by remember { OABX.busy }
+
+    if (hideIfNotBusy && isBusy.not())
+        return
+
+    val (angle, scale) = if (isBusy) {
+        val infiniteTransition = rememberInfiniteTransition(label = "infiniteTransition")
+
+        // Animate from 0f to 1f
+        val animationProgress by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = pref_busyIconTurnTime.value,
+                    easing = LinearEasing
+                )
+            ), label = "animationProgress"
+        )
+        val angle = 360f * animationProgress
+        val scale = 0.01f * pref_busyIconScale.value
+        angle to scale
+    } else {
+        0f to 1f
+    }
+
+    RoundButton(
+        description = stringResource(id = R.string.refresh),
+        icon = Phosphor.ArrowsClockwise,
+        size = size,
+        tint = if (isBusy) Color.Red else tint,
+        modifier = modifier
+            .scale(scale)
+            .rotate(angle),
+        onClick = onClick
+    )
+}
+
+
+@Preview
+@Composable
+fun RefreshButtonPreview() {
+    OABX.fakeContext = LocalContext.current.applicationContext
+    
+    val level by remember { OABX.busyLevel }
+    val factor = 1.0 / max(1, level)
+
+    Column {
+        Text("factor: $factor")
+        Text("level: $level")
+        Text("time: ${(pref_busyIconTurnTime.value * factor).toInt()}")
+        Row {
+            RefreshButton()
+            ActionButton(text = "hit") {
+                OABX.hitBusy()
+            }
+            ActionButton(text = "begin") {
+                OABX.beginBusy()
+            }
+            ActionButton(text = "end") {
+                OABX.endBusy()
+            }
+        }
     }
 }
 

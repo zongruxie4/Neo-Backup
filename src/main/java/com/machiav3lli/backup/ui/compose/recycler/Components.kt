@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,6 +58,7 @@ import com.machiav3lli.backup.preferences.pref_busyLaserBackground
 import com.machiav3lli.backup.preferences.pref_busyTurnTime
 import com.machiav3lli.backup.preferences.pref_versionOpacity
 import com.machiav3lli.backup.ui.compose.item.ActionChip
+import com.machiav3lli.backup.ui.compose.item.RefreshButton
 import com.machiav3lli.backup.ui.compose.item.SelectionChip
 import com.machiav3lli.backup.ui.item.ChipItem
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
@@ -382,6 +384,7 @@ fun BusyBackground(
     content: @Composable () -> Unit,
 ) {
     val isBusy by remember { busy ?: OABX.busy }
+
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
@@ -406,28 +409,46 @@ fun BusyBackground(
 @Preview
 @Composable
 fun BusyBackgroundPreview() {
-    val busy = remember { mutableStateOf(true) }
+    OABX.fakeContext = LocalContext.current
+
+    val force = remember { mutableStateOf(false) }
+    val busy by remember { OABX.busy }
+    val count by remember { OABX.busyCountDown }
+    val level by remember { OABX.busyLevel }
     //var progress by remember { mutableStateOf(true) }
 
     Column {
         Row {
-            ActionChip(text = "busy ${busy.value}", positive = busy.value) {
-                busy.value = !busy.value
+            ActionChip(text = "force", positive = force.value) {
+                force.value = !force.value
+            }
+            RefreshButton {
+                OABX.hitBusy(5000)
+            }
+            ActionChip(text = "begin", positive = level > 0) {
+                OABX.beginBusy()
+            }
+            ActionChip(text = "end", positive = level > 0) {
+                OABX.endBusy()
             }
         }
         BusyBackground(
             modifier = Modifier
                 .fillMaxSize(),
-            busy = busy
+            busy = if (force.value) force else null
         ) {
             Text(
                 """
-                Hello,
-                here I am
-                to conquer
-                the world
+                force:  ${force.value}
+                busy:   ${busy}
+                count:  ${count}
+                level:  ${level}
+
+                we are
+                very busy
+                today
             """.trimIndent(),
-                fontSize = 48.sp,
+                fontSize = 24.sp,
                 modifier = Modifier
                     .fillMaxSize()
                     .wrapContentSize(align = Alignment.Center)

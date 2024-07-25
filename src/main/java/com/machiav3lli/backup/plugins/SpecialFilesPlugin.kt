@@ -1,53 +1,52 @@
 package com.machiav3lli.backup.plugins
 
-import com.machiav3lli.backup.BuildConfig
+import android.annotation.SuppressLint
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.handler.ShellCommands
+import com.machiav3lli.backup.tracePlugin
 import java.io.File
 
-class SpecialFilesPlugin : Plugin {
+class SpecialFilesPlugin(file: File) : TextPlugin(file) {
 
-    val name : String
-    val icon : Int = -1
-    val files : List<String>
-
-    constructor(file: File) {
-
-        name = file.nameWithoutExtension
-
-        var filesFile : File = file
-        if (file.isDirectory()) {
-            filesFile = file.resolve("files")
+    val files : List<String> get() = text
+        .split("\n")
+        .map { it.trim() }
+        .filterNot {
+            it.isEmpty() || it.startsWith("#")
         }
-        files = filesFile.readLines()
+        .map { replaceVars(it) }
 
-        register[name] = this
+    init {
+        tracePlugin { (listOf("${this.javaClass.simpleName} $name <- ${file.name}") + files).joinToString("\n  ") }
     }
 
-    companion object {
+    companion object : PluginCompanion {
 
-        val register : PluginRegister<SpecialFilesPlugin> = mutableMapOf()
+        override fun klass() = SpecialFilesPlugin::class
+        override fun register() = registerType(name(), Companion, listOf("special_files"))
+        override fun create(file: File) = SpecialFilesPlugin(file)
 
         fun specialInfos() : List<SpecialInfo> {
 
             ensureScanned()
 
-            return register.map { entry->
-                val plugin = entry.value
+            return plugins.filter { it.value is SpecialFilesPlugin }.map {
+                val plugin = it.value as SpecialFilesPlugin
                 val name = plugin.name
                 val label = "$ " + name.replace(".", " ").replace("_", " ")
-                val files = plugin.files.map { replaceVars(it) }
+                val files = plugin.files
                 SpecialInfo(
                     packageName = "special.$name",
                     label = label,
-                    versionName = BuildConfig.VERSION_NAME,
-                    versionCode = BuildConfig.VERSION_CODE,
+                    versionName = "",
+                    versionCode = 0,
                     specialFiles = files.toTypedArray(),
-                    plugin.icon
+                    -1
                 )
             }
         }
 
+        @SuppressLint("SdCardPath")
         fun replaceVars(text: String) : String {
             val userId = ShellCommands.currentProfile
             val replacements = mapOf(
@@ -57,6 +56,11 @@ class SpecialFilesPlugin : Plugin {
                 "userData"      to "/data/system/users/$userId",
                 "systemCeData"  to "/data/system_ce/$userId",
                 "vendorDeData"  to "/data/vendor_de/$userId",
+                "userData"      to "/data/user/$userId",
+                "userDeData"    to "/data/user_de/$userId",
+                "extData"       to "/storage/emulated/$userId/Android/data",
+                "extMedia"      to "/storage/emulated/$userId/Android/media",
+                "extObb"        to "/storage/emulated/$userId/Android/obb",
             )
             var result = text
             replacements.forEach { replacement ->

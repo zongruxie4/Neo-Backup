@@ -121,6 +121,7 @@ android {
 dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.ksp)
+    implementation(libs.kotlin.reflect)
 
     // Libs
     implementation(libs.activity.compose)

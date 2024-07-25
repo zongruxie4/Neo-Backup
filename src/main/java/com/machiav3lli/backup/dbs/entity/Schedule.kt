@@ -32,6 +32,7 @@ import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.items.SpecialFilter
 import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.utils.TraceUtils.canonicalName
 import kotlinx.serialization.Serializable
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -170,7 +171,7 @@ data class Schedule(
                 )
             } catch (e: Throwable) {
                 LogsHandler.unexpectedException(e, exportFile.path)
-                throw Backup.BrokenBackupException("Unable to process ${exportFile.name} at ${exportFile.path}. (${e.javaClass.canonicalName}) $e")
+                throw Backup.BrokenBackupException("Unable to process ${exportFile.name} at ${exportFile.path}. (${e::class.canonicalName}) $e")
             }
         }
 

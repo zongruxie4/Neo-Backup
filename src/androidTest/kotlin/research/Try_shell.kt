@@ -1,11 +1,10 @@
-package research
+package tests.research
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import org.jetbrains.annotations.TestOnly
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import tests.Test_shell
-import tests.Test_shell.Companion.safeCommandLength
+import tests.tests.Test_shell
 import timber.log.Timber
 import kotlin.math.floor
 import kotlin.math.log10
@@ -68,7 +67,7 @@ class Try_shell {
             Timber.i("${it.key.padEnd(20)} -> ${it.value.toString().padStart(10)}")
         }
         assertTrue(
-                results.values.all { it >= safeCommandLength }
+                results.values.all { it >= Test_shell.safeCommandLength }
         )
     }
 
@@ -88,7 +87,7 @@ class Try_shell {
             Timber.i("${it.key.padEnd(20)} -> ${it.value.toString().padStart(10)}")
         }
         assertTrue(
-                results.values.all { it >= safeCommandLength }
+                results.values.all { it >= Test_shell.safeCommandLength }
         )
     }
 

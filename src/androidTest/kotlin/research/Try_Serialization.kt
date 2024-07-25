@@ -1,4 +1,4 @@
-package research
+package tests.research
 
 import androidx.test.platform.app.InstrumentationRegistry
 import junit.framework.TestCase.assertEquals

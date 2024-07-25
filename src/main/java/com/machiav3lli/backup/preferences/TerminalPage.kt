@@ -363,7 +363,7 @@ fun supportInfoLogShare() {
 
 @Composable
 fun TerminalButton(
-    name: String,
+    text: String,
     modifier: Modifier = Modifier,
     important: Boolean = false,
     action: () -> Unit,
@@ -384,7 +384,7 @@ fun TerminalButton(
         Text(
             modifier = Modifier
                 .padding(8.dp, 0.dp),
-            text = name,
+            text = text,
             color = textColor
         )
     }

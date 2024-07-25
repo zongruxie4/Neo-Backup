@@ -1,4 +1,4 @@
-package research
+package tests.research
 
 import com.machiav3lli.backup.handler.ShellHandler.Companion.quote
 import com.machiav3lli.backup.handler.ShellHandler.Companion.utilBoxQ

@@ -31,7 +31,6 @@ import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.ShellHandler
-import com.machiav3lli.backup.handler.ShellHandler.Companion.findScript
 import com.machiav3lli.backup.handler.ShellHandler.Companion.hasPmBypassLowTargetSDKBlock
 import com.machiav3lli.backup.handler.ShellHandler.Companion.quote
 import com.machiav3lli.backup.handler.ShellHandler.Companion.quoteMultiple
@@ -45,6 +44,7 @@ import com.machiav3lli.backup.items.ActionResult
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.RootFile
 import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.plugins.ShellScriptPlugin
 import com.machiav3lli.backup.preferences.pref_delayBeforeRefreshAppInfo
 import com.machiav3lli.backup.preferences.pref_enableSessionInstaller
 import com.machiav3lli.backup.preferences.pref_installationPackage
@@ -121,7 +121,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                 return ActionResult(
                     app,
                     null,
-                    "${e.javaClass.simpleName}: ${e.message}. ${context.getString(R.string.error_pmDataIncompleteException_dataRestoreFailed)}",
+                    "${e::class.simpleName}: ${e.message}. ${context.getString(R.string.error_pmDataIncompleteException_dataRestoreFailed)}",
                     false
                 )
             } catch (e: RestoreFailedException) {
@@ -135,12 +135,12 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                         }
 
                         else                           -> {
-                            "${e.javaClass.simpleName}: ${e.message}"
+                            "${e::class.simpleName}: ${e.message}"
                         }
                     }
                 return ActionResult(app, null, message, false)
             } catch (e: CryptoSetupException) {
-                return ActionResult(app, null, "${e.javaClass.simpleName}: ${e.message}", false)
+                return ActionResult(app, null, "${e::class.simpleName}: ${e.message}", false)
             } finally {
                 work?.setOperation("======")
                 if (killApp) {
@@ -576,7 +576,7 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
                         OABX.assets.DATA_RESTORE_EXCLUDED_BASENAMES
                     )
 
-                    val tarScript = findScript("tar.sh").toString()
+                    val tarScript = ShellScriptPlugin.findScript("tar").toString()
                     val qTarScript = quote(tarScript)
 
                     var options = ""

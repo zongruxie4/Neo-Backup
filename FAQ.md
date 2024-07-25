@@ -299,13 +299,16 @@ In the next Android versions Google will (most probably) force apps more and mor
 * standardized way of accessing files on all storage providers
 * more secure -> apps can only access their own data
 * the ability of NB to backup to external SD card (or cloud providers) comes through SAF
+* virtual file systems can provide some advantages, which seems to be the main purpose, more control
 * ...
 
 <ins>**Con:**</ins>
 
-* Performance, more of Performance and tons of Performance
+* Performance, more of Performance and tons of Performance (with multithreading the pricture is different, SAF is slightly faster than using root commands)
 * obfuscation of the classical path structure
-* unreliable file names (providers can rename the files as they like)
+* unreliable file names (providers can rename the files as they like, meaning a file named xyz can be named 1234)
+* insane strategy if the file already exists, instead of overwriting it, it creates a new file with a number, you need to delete the file, then wait until it's really deleted, then write the new one and hope the caches are updated  
+* you would think that accessing GDrive or other remote storage should be a natural advantage of SAF, but interestingly we don't know any app besides DocumentsUI that can access a GDrive directory via SAF  
 
 ### Below some "performance" or time measuring infos from an older phone
 

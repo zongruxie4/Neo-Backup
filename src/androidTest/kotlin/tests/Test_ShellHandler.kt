@@ -1,4 +1,4 @@
-package tests
+package tests.tests
 
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot

@@ -1,4 +1,4 @@
-package tests_ui
+package tests.tests_ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -131,7 +131,7 @@ class Test_UI_FollowNonStateVariable {
                 ) {
                     item {
                         Text(
-                            "${queue1.javaClass.simpleName}",
+                            "${queue1::class.simpleName}",
                             color = Color.White, fontSize = 10.sp
                         )
                     }
@@ -149,7 +149,7 @@ class Test_UI_FollowNonStateVariable {
                 ) {
                     item {
                         Text(
-                            "${queue2.javaClass.simpleName}",
+                            "${queue2::class.simpleName}",
                             color = Color.White, fontSize = 10.sp
                         )
                     }

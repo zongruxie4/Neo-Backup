@@ -1,4 +1,4 @@
-package research
+package tests.research
 
 import androidx.documentfile.provider.DocumentFile
 import androidx.test.platform.app.InstrumentationRegistry

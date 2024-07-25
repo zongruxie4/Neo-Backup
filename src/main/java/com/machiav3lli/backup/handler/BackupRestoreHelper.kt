@@ -37,6 +37,7 @@ import com.machiav3lli.backup.preferences.pref_paranoidHousekeeping
 import com.machiav3lli.backup.tasks.AppActionWork
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
+import com.machiav3lli.backup.utils.TraceUtils.canonicalName
 import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.utils.suCopyFileToDocument
 import timber.log.Timber
@@ -68,7 +69,7 @@ object BackupRestoreHelper {
                 BackupAppAction(context, work, shell)
             }
         }
-        Timber.d("<${packageItem.packageName}> Using ${action.javaClass.simpleName} class")
+        Timber.d("<${packageItem.packageName}> Using ${action::class.simpleName} class")
 
         // create the new backup
         val result = action.run(packageItem, reBackupMode)
@@ -124,16 +125,16 @@ object BackupRestoreHelper {
                     return false
                 }
             } catch (e: PackageManager.NameNotFoundException) {
-                Timber.wtf("${e.javaClass.canonicalName}! This should never happen! Message: $e")
+                Timber.wtf("${e::class.canonicalName}! This should never happen! Message: $e")
                 return false
             } catch (e: ShellCommandFailedException) {
                 throw IOException(e.shellResult.err.joinToString(" "), e)
             }
         } catch (e: StorageLocationNotConfiguredException) {
-            Timber.e("${e.javaClass.simpleName}: $e")
+            Timber.e("${e::class.simpleName}: $e")
             return false
         } catch (e: BackupLocationInAccessibleException) {
-            Timber.e("${e.javaClass.simpleName}: $e")
+            Timber.e("${e::class.simpleName}: $e")
             return false
         }
         return true

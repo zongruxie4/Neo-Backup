@@ -2,7 +2,6 @@ package com.machiav3lli.backup.dbs.entity
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.room.Entity
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.plugins.SpecialFilesPlugin
@@ -107,10 +106,12 @@ open class SpecialInfo : PackageInfo {
                                 SpecialInfo(
                                     "special.smsmms.json",
                                     specPrefix + context.getString(R.string.spec_smsmmsjson),
-                                    Build.VERSION.RELEASE,
-                                    Build.VERSION.SDK_INT, arrayOf(
+                                    "",
+                                    0,
+                                    arrayOf(
                                         "${context.cacheDir.absolutePath}/special.smsmms.json.json"
-                                    ), R.drawable.ic_sms
+                                    ),
+                                    R.drawable.ic_sms
                                 )
                             )
                         specialInfos
@@ -118,10 +119,12 @@ open class SpecialInfo : PackageInfo {
                                 SpecialInfo(
                                     "special.calllogs.json",
                                     specPrefix + context.getString(R.string.spec_calllogsjson),
-                                    Build.VERSION.RELEASE,
-                                    Build.VERSION.SDK_INT, arrayOf(
+                                    "",
+                                    0,
+                                    arrayOf(
                                         "${context.cacheDir.absolutePath}/special.calllogs.json.json"
-                                    ), R.drawable.ic_call_logs
+                                    ),
+                                    R.drawable.ic_call_logs
                                 )
                             )
                     }

@@ -1,4 +1,4 @@
-package tests
+package tests.tests
 
 import android.net.Uri
 import androidx.core.content.FileProvider

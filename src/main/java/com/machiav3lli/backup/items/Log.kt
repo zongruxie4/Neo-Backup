@@ -21,6 +21,7 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.utils.LocalDateTimeSerializer
+import com.machiav3lli.backup.utils.TraceUtils.canonicalName
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import java.io.FileNotFoundException
@@ -57,7 +58,7 @@ open class Log {
                 //initFromSerialized(text) ||
                 initFromText(text) ||
                         throw Backup.BrokenBackupException(
-                            "$logFile is neither ${OABX.propsSerializer.javaClass.simpleName} nor text header format"
+                            "$logFile is neither ${OABX.propsSerializer::class.simpleName} nor text header format"
                         )
             }
         } catch (e: FileNotFoundException) {
@@ -72,7 +73,7 @@ open class Log {
             )
         } catch (e: Throwable) {
             LogsHandler.unexpectedException(e, logFile)
-            throw Backup.BrokenBackupException("Unable to process $logFile. (${e.javaClass.canonicalName}) $e")
+            throw Backup.BrokenBackupException("Unable to process $logFile. (${e::class.canonicalName}) $e")
         }
     }
 

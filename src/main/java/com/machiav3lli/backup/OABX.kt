@@ -155,6 +155,12 @@ val pref_trace = BooleanPref(
     defaultValue = isDebug || isHg42
 )
 
+val tracePlugin = TraceUtils.TracePref(
+    name = "Plugin",
+    summary = "trace plugins",
+    default = true
+)
+
 val traceSection = TraceUtils.TracePref(
     name = "Section",
     summary = "trace important sections (backup, schedule, etc.)",
@@ -716,24 +722,27 @@ class OABX : Application() {
 
         //------------------------------------------------------------------------------------------ busy
 
-        var busyCountDown = AtomicInteger(0)
-        var busyLevel = AtomicInteger(0)
+        var busyCountDownAtomic = AtomicInteger(0)
+        var busyLevelAtomic = AtomicInteger(0)
         val busyTick = 250
         var busy = mutableStateOf(false)
+        var busyLevel = mutableStateOf(0)
+        var busyCountDown = mutableStateOf(0)
 
         init {
             CoroutineScope(Dispatchers.IO).launch {
                 while (true) {
                     delay(busyTick.toLong())
-                    busyCountDown.getAndUpdate {
+                    busyCountDownAtomic.getAndUpdate {
                         if (it > 0) {
-                            val new = it - 1
-                            if (new == 0)
+                            val next = it - 1
+                            busyCountDown.value = next
+                            busyLevel.value = busyLevelAtomic.get()
+                            if (next == 0)
                                 busy.value = false
-                            else
-                                if (busy.value == false)
-                                    busy.value = true
-                            new
+                            else if (busy.value == false)
+                                busy.value = true
+                            next
                         } else
                             it
                     }
@@ -742,7 +751,7 @@ class OABX : Application() {
         }
 
         fun hitBusy(time: Int = 0) {
-            busyCountDown.set(
+            busyCountDownAtomic.set(
                 max(time.toInt(), pref_busyHitTime.value) / busyTick
             )
         }
@@ -752,17 +761,17 @@ class OABX : Application() {
                 val label = name ?: methodName(1)
                 """*** \ busy $label"""
             }
-            busyLevel.incrementAndGet()
-            hitBusy(10000)
+            busyLevelAtomic.incrementAndGet()
+            hitBusy(60000)
             beginNanoTimer("busy.$name")
         }
 
         fun endBusy(name: String? = null): Long {
             val time = endNanoTimer("busy.$name")
-            if(busyLevel.decrementAndGet() <= 0)
-                busyCountDown.set(100)
-            else
-                hitBusy(pref_busyHitTime.value)
+            busyLevelAtomic.decrementAndGet()
+            if (busyLevelAtomic.get() == 0) {
+                busyCountDownAtomic.set(1)
+            }
             traceBusy {
                 val label = name ?: methodName(1)
                 "*** / busy $label ${"%.3f".format(time / 1E9)} sec"

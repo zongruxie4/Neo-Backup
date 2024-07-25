@@ -36,18 +36,26 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.dbs.entity.Backup
+import com.machiav3lli.backup.dbs.entity.PackageInfo
+import com.machiav3lli.backup.preferences.pref_useNoteIcon
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.NotePencil
 import com.machiav3lli.backup.ui.compose.icons.phosphor.PlusCircle
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.icons.phosphor.XCircle
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -111,35 +119,111 @@ fun TagItem(
 
 @Composable
 fun NoteTagItem(
+    item: Backup,
     modifier: Modifier = Modifier,
-    tag: String,
-    action: Boolean = false,
-    onClick: () -> Unit,
+    useIcon: Boolean = pref_useNoteIcon.value,
+    onNote: ((Backup) -> Unit)? = null,
 ) {
-    Badge(
-        modifier = modifier
-            .widthIn(min = 32.dp, max = 128.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
-            .border(
-                BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                MaterialTheme.shapes.medium
-            ),
-        containerColor = if (action) MaterialTheme.colorScheme.primary
-        else Color.Transparent,
-        contentColor = if (action) MaterialTheme.colorScheme.onPrimary
-        else MaterialTheme.colorScheme.onSurface,
-    ) {
-        Text(
-            modifier = Modifier.padding(2.dp),
-            text = tag.ifEmpty { stringResource(id = R.string.edit_note) },
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+    val tag = item.note
+    val fillChip = useIcon || (tag.isEmpty() && onNote != null)
+    val showIcon = useIcon && tag.isEmpty() && onNote != null
+    val showBadge = tag.isNotEmpty() || (!useIcon && onNote != null)
+
+    if (showIcon) {
+        Icon(
+            modifier = Modifier.clickable { onNote?.let { it(item) } },
+            imageVector = Phosphor.NotePencil,
+            contentDescription = stringResource(id = R.string.edit_note),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    } else if (showBadge) {
+        Badge(
+            modifier = modifier
+                .widthIn(min = 32.dp, max = 128.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(onClick = { onNote?.let { it(item) } })
+                .border(
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                    MaterialTheme.shapes.medium
+                ),
+            containerColor = (
+                    if (fillChip) MaterialTheme.colorScheme.primary
+                    else Color.Transparent),
+            contentColor = (
+                    if (fillChip) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurface),
+        ) {
+            Text(
+                modifier = Modifier.padding(2.dp),
+                text = tag.ifEmpty { stringResource(id = R.string.edit_note) },
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 
+@Preview
+@Composable
+fun NoteTagItemPreview() {
+
+    OABX.fakeContext = LocalContext.current.applicationContext
+
+    val packageInfo = PackageInfo(
+        packageName = "com.machiav3lli.backup",
+        versionName = "1.0",
+        versionCode = 1,
+    )
+    val backup = Backup(
+        base = packageInfo,
+        backupDate = LocalDateTime.parse("2000-01-01T00:00:00"),
+        hasApk = true,
+        hasAppData = true,
+        hasDevicesProtectedData = true,
+        hasExternalData = true,
+        hasObbData = true,
+        hasMediaData = true,
+        compressionType = "zst",
+        cipherType = "aes-256-gcm",
+        iv = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16),
+        cpuArch = "aarch64",
+        permissions = emptyList(),
+        size = 12345,
+        persistent = false,
+        note = "",
+    )
+    val backup_with_note = backup.copy(note = "note text")
+
+    Column {
+        Text("text:")
+        Row {
+            Text("RestoreItem: ")
+            NoteTagItem(useIcon = false, item = backup_with_note)
+            Text("  empty: ")
+            NoteTagItem(useIcon = false, item = backup)
+        }
+        Row {
+            Text("BackupItem: ")
+            NoteTagItem(useIcon = false, item = backup_with_note, onNote = {})
+            Text("  empty: ")
+            NoteTagItem(useIcon = false, item = backup, onNote = {})
+        }
+        Text("icon:")
+        Row {
+            Text("RestoreItem: ")
+            NoteTagItem(useIcon = true, item = backup_with_note)
+            Text("  empty: ")
+            NoteTagItem(useIcon = true, item = backup)
+        }
+        Row {
+            Text("BackupItem: ")
+            NoteTagItem(useIcon = true, item = backup_with_note, onNote = {})
+            Text("  empty: ")
+            NoteTagItem(useIcon = true, item = backup, onNote = {})
+        }
+    }
+}
 
 @Composable
 fun AddTagView(

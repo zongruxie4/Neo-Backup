@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,26 +22,41 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TextField
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.machiav3lli.backup.ERROR_PREFIX
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.OABX
@@ -51,6 +68,10 @@ import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.items.StorageFile
 import com.machiav3lli.backup.items.UndeterminedStorageFile
+import com.machiav3lli.backup.plugins.Plugin
+import com.machiav3lli.backup.plugins.Plugin.Companion.pluginTypes
+import com.machiav3lli.backup.plugins.SpecialFilesPlugin
+import com.machiav3lli.backup.plugins.TextPlugin
 import com.machiav3lli.backup.pref_autoLogAfterSchedule
 import com.machiav3lli.backup.pref_autoLogExceptions
 import com.machiav3lli.backup.pref_autoLogSuspicious
@@ -85,17 +106,19 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
+import java.io.File
 
 var devToolsTab = mutableStateOf("")
 
 val devToolsTabs = listOf<Pair<String, @Composable () -> Any>>(
+    "SUPPORT" to { DevSupportTab() },
     "logs" to { DevLogsTab() },
     "log" to { DevLogTab() },
     "infolog" to { DevInfoLogTab() },
     "tools" to { DevToolsTab() },
     "term" to { TerminalPage() },
     "devsett" to { DevSettingsTab() },
-    "SUPPORT" to { DevSupportTab() },
+    "plugins" to { DevPluginsTab() },
 ) + if (isDebug) listOf<Pair<String, @Composable () -> Any>>(
     //"refreshScreen" to { OABX.context.recreateActivities(); devToolsTab.value = "" },
     //"invBackupLoc" to { FileUtils.invalidateBackupLocation() ; devToolsTab.value = "" },
@@ -141,10 +164,11 @@ fun DevSettingsTab() {
     val color = MaterialTheme.colorScheme.onSurface
 
     Column {
-        TextField(modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp),
+        OutlinedTextField(
             value = search,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp),
             singleLine = true,
             //placeholder = { Text(text = "search", color = Color.Gray) },
             colors = TextFieldDefaults.colors(
@@ -211,6 +235,328 @@ fun DevSettingsTab() {
         }
     }
 }
+
+@Composable
+fun DevDialog(
+    onDismiss: () -> Unit,
+    dialogUI: @Composable (() -> Unit),
+) {
+    Dialog(
+        onDismissRequest = { onDismiss() },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            dialogUI()
+        }
+    }
+}
+
+@Composable
+fun TextInput(name: TextFieldValue, onNameChange: (TextFieldValue) -> Unit) {
+    OutlinedTextField(
+        value = name,
+        onValueChange = onNameChange,
+        placeholder = { Text("Name") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        textStyle = LocalTextStyle.current.copy(fontSize = 18.sp)
+    )
+}
+
+fun fileFor(dir: File, name: String, type: String) =
+    Plugin.pluginExtension.get(type)?.let {
+        dir.resolve("$name.$it")
+    }
+
+fun typeFor(plugin: Plugin?) = plugin?.typeName ?: "Unknown"
+
+const val BUILTIN = "<builtin>"
+const val USER = "<user>"
+
+fun displayPath(path: String): String {
+    var result = path
+    Plugin.builtinDir?.path?.let { builtinDir ->
+        result = result.replace(builtinDir, BUILTIN)
+    }
+    Plugin.userDir?.path?.let { userDir ->
+        result = result.replace(userDir, USER)
+    }
+    return result
+}
+
+@Composable
+fun MenuSelector(selectedOption: String, options: MutableSet<String>, onOptionSelected: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        Button(onClick = { expanded = true }) {
+            Text(selectedOption)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PluginEditor(plugin: Plugin? = null, onSubmit: (plugin: Plugin?) -> Unit) {
+
+    var name by remember { mutableStateOf(TextFieldValue(plugin?.name ?: "")) }
+    var editPlugin by remember { mutableStateOf(plugin) }
+    var selectedClass by remember { mutableStateOf(
+        editPlugin?.let { typeFor(it) } ?: Plugin.DEFAULT_TYPE
+    ) }
+    val where = displayPath(editPlugin?.file?.path ?: "")
+
+    val pluginDir by remember {
+        mutableStateOf(
+            OABX.context.getExternalFilesDir(null)?.resolve("plugin")
+        )
+    }
+
+    fun submit() {
+        if ((plugin != null)
+            && (plugin.name == (editPlugin?.name ?: ""))
+            && (plugin::class != editPlugin?.let { it::class })
+            && (plugin.file.parent == pluginDir?.path)
+        ) {
+            plugin.delete()
+        }
+        editPlugin!!.save()
+        onSubmit(editPlugin)
+    }
+
+    fun cancel() {
+        onSubmit(null)
+    }
+
+    fun delete() {
+        editPlugin?.delete()
+        onSubmit(null)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            MenuSelector(selectedClass, pluginTypes.keys) {
+                selectedClass = it
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            if (editPlugin == null) {
+                TerminalButton("Create") {
+                    if (pluginDir != null) {
+                        val file = fileFor(
+                            dir = pluginDir!!,
+                            name = name.text,
+                            type = selectedClass
+                        )!!
+                        editPlugin = Plugin.createFrom(file = file)
+                    }
+                    editPlugin!!.save()
+                }
+            } else {
+                TerminalButton(if (where.startsWith(BUILTIN)) "Save Copy" else "Save") {
+                    if (editPlugin != null && pluginDir != null) {
+                        val file = fileFor(
+                            dir = pluginDir!!,
+                            name = name.text,
+                            type = selectedClass
+                        )!!
+                        if (typeFor(editPlugin) != selectedClass) {
+                            val text = if (editPlugin is TextPlugin)
+                                (editPlugin as TextPlugin).text
+                            else
+                                null
+                            editPlugin = Plugin.createFrom(file = file)
+                            text?.let { (editPlugin as TextPlugin).text = it }
+                        }
+                        editPlugin!!.file = file
+                    }
+                    submit()
+                }
+            }
+            TerminalButton("Delete") {
+                delete()
+            }
+            TerminalButton("Cancel") {
+                cancel()
+            }
+        }
+        TextInput(name) {
+            name = it
+        }
+        Text(
+            text = where,
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        editPlugin?.Editor()
+    }
+}
+
+
+@Composable
+fun PluginItem(plugin: Plugin, onEdit: (plugin: Plugin) -> Unit) {
+    val path = displayPath(plugin.file.path)
+    Card(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = if (path.startsWith(BUILTIN))
+                MaterialTheme.colorScheme.surfaceVariant
+            else
+                MaterialTheme.colorScheme.primaryContainer
+        ),
+        modifier = Modifier.clickable {
+            onEdit(plugin)
+        }
+    ) {
+        Row {
+            Column(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .weight(1f)
+            ) {
+                Text(
+                    text = plugin.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = path,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PluginsPage() {
+
+    var dialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
+
+    val plugins = remember { mutableStateListOf<Plugin>() }
+
+    fun scan() {
+        Plugin.scan()
+        plugins.clear()
+        plugins.addAll(Plugin.plugins.values)
+    }
+
+    LaunchedEffect(true) {
+        plugins.clear()
+        plugins.addAll(Plugin.plugins.values)
+    }
+
+    fun edit(plugin: Plugin?) {
+        dialog = {
+            DevDialog(onDismiss = { dialog = null }) {
+                PluginEditor(plugin) {
+                    dialog = null
+                    scan()
+                }
+            }
+        }
+    }
+
+    Column {
+        Row {
+            Spacer(modifier = Modifier.weight(1f))
+
+            TerminalButton("New") {
+                edit(null)
+            }
+
+            TerminalButton("Scan") {
+                scan()
+            }
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val scope = this
+            pluginTypes.keys.forEach { type ->
+                val typePlugins = plugins.filter { typeFor(it) == type }.sortedBy { it.name }
+                if (typePlugins.isNotEmpty()) {
+                    scope.apply {
+                        stickyHeader {
+                            Card(
+                                shape = MaterialTheme.shapes.medium,
+                                colors = CardDefaults.outlinedCardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceDim
+                                ),
+                            ) {
+                                Text(
+                                    type,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier
+                                        .padding(horizontal = 4.dp)
+                                )
+                            }
+                        }
+                        items(
+                            typePlugins,
+                            key = { it.name }
+                        ) { plugin ->
+                            PluginItem(plugin) { edit(plugin) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    dialog?.let { it() }
+}
+
+@Preview
+@Composable
+fun PluginsPagePreview() {
+
+    OABX.fakeContext = LocalContext.current.applicationContext
+
+    Plugin.plugins = mutableMapOf(
+        "test_files1" to SpecialFilesPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app1.special_files")),
+        "test_files2" to SpecialFilesPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app2.special_files")),
+        "test_ext" to SpecialFilesPlugin(File("/storage/emulated/Android/data/com.machiav3lli.backup.hg42/files/plugin/test_ext.special_files")),
+    )
+
+    PluginsPage()
+}
+
+@Composable
+fun DevPluginsTab() {
+
+    PluginsPage()
+}
+
 
 val pref_renameDamagedToERROR = LaunchPref(
     key = "dev-tool.renameDamagedToERROR",
@@ -550,7 +896,7 @@ fun DevTools(
             @Composable
             fun TabButton(name: String) {
                 TerminalButton(
-                    name = name,
+                    text = name,
                     important = (tab == name),
                 ) {
                     if (tab != name)
@@ -596,6 +942,15 @@ fun DevTools(
 @Preview
 @Composable
 fun DevToolsPreview() {
+
+    OABX.fakeContext = LocalContext.current.applicationContext
+
+    Plugin.plugins = mutableMapOf(
+        "test_files1" to SpecialFilesPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app1.special_files")),
+        "test_files2" to SpecialFilesPlugin(File("/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app2.special_files")),
+        "test_ext" to SpecialFilesPlugin(File("/storage/emulated/Android/data/com.machiav3lli.backup.hg42/files/plugin/test_ext.special_files")),
+    )
+
     val expanded = remember { mutableStateOf(true) }
     var count by remember { mutableStateOf(0) }
 
