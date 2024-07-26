@@ -50,7 +50,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.preferences.pref_busyFadeTime
@@ -62,6 +61,7 @@ import com.machiav3lli.backup.ui.compose.item.RefreshButton
 import com.machiav3lli.backup.ui.compose.item.SelectionChip
 import com.machiav3lli.backup.ui.item.ChipItem
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
+import com.machiav3lli.backup.utils.SystemUtils.versionName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.PI
@@ -396,7 +396,7 @@ fun BusyBackground(
 
         if (pref_versionOpacity.value > 0)
             Text(
-                text = "${BuildConfig.VERSION_NAME} $applicationIssuer",
+                text = "$versionName $applicationIssuer",
                 fontSize = 8.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = pref_versionOpacity.value / 100f),
                 modifier = Modifier

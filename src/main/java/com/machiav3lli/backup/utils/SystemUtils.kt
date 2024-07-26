@@ -2,6 +2,7 @@ package com.machiav3lli.backup.utils
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
@@ -27,20 +28,31 @@ import java.security.cert.X509Certificate
 
 object SystemUtils {
 
+    fun Context.getApplicationInfos(what: Int = 0): PackageInfo? {
+        val packageManager: PackageManager = getPackageManager()
+        val packageName = BuildConfig.APPLICATION_ID
+        return packageManager.getPackageInfo(packageName, what)
+    }
+
+    @Suppress("DEPRECATION")
     private fun Context.getApplicationIssuer() : String? {
         runCatching {
-            val packageManager: PackageManager = getPackageManager()
-            val packageName = BuildConfig.APPLICATION_ID
-
-            val packageInfo =
-                packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-            val signatures = packageInfo.signatures
+            val signatures = if (OABX.minSDK(28)) {
+                val packageInfo = OABX.context.getApplicationInfos(PackageManager.GET_SIGNING_CERTIFICATES)
+                val signingInfo = packageInfo?.signingInfo
+                signingInfo?.getSigningCertificateHistory() ?: arrayOf()
+            } else {
+                val packageInfo = OABX.context.getApplicationInfos(PackageManager.GET_SIGNATURES)
+                packageInfo?.signatures ?: arrayOf()
+            }
+            if (signatures.isEmpty())
+                return null
             val signature = signatures[0]
             val signatureBytes = signature.toByteArray()
             val cf = CertificateFactory.getInstance("X509")
             val x509Certificate: X509Certificate =
                 cf.generateCertificate(ByteArrayInputStream(signatureBytes)) as X509Certificate
-            var DN = x509Certificate.getIssuerDN().getName()
+            val DN = x509Certificate.getIssuerDN().getName()
             val names = DN.split(",").map {
                 val (field, value) = it.split("=", limit = 2)
                 field to value
@@ -51,7 +63,16 @@ object SystemUtils {
         }
         return null
     }
-    val applicationIssuer = OABX.context.getApplicationIssuer()
+
+    @Suppress("DEPRECATION")
+    val versionCode = if (OABX.minSDK(28)) {
+        OABX.context.getApplicationInfos()?.longVersionCode
+    } else {
+        OABX.context.getApplicationInfos()?.versionCode
+    } ?: 0
+    val versionName = OABX.context.getApplicationInfos()?.versionName ?: "?"
+
+    val applicationIssuer = OABX.context.getApplicationIssuer() ?: "UNKNOWN ISSUER"
 
     val numCores = Runtime.getRuntime().availableProcessors()
 
@@ -185,13 +206,14 @@ object SystemUtils {
         subPath: String,
         isUseablePath: (file: RootFile?) -> Boolean = ::isWritablePath
     ): RootFile? {
-        // only check Android folder and add subFolder even if it does not exist
+        // only check access to Android folder and add subFolder even if it does not exist
         val key = "Android:$user:$subPath"
         return storagePath.getOrElse(key) {
             val baseKey = "Android:$user:"
             storagePath.getOrElse(baseKey) {
                 val possiblePaths = listOf(
                     "/data/media/$user/Android",
+                    "/mnt/pass_through/$user/emulated/$user/Android",
                     "/mnt/user/$user/emulated/$user/Android",
                 )
                 possiblePaths.forEach { path ->
