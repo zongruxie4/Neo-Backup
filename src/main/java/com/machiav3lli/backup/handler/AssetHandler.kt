@@ -7,6 +7,7 @@ import com.machiav3lli.backup.preferences.pref_backupCache
 import com.machiav3lli.backup.preferences.pref_backupNoBackupData
 import com.machiav3lli.backup.preferences.pref_restoreCache
 import com.machiav3lli.backup.preferences.pref_restoreNoBackupData
+import com.machiav3lli.backup.utils.SystemUtils
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
@@ -26,7 +27,7 @@ class AssetHandler(context: Context) {
 
         directory = context.filesDir
         directory.mkdirs()
-        val appVersion = BuildConfig.VERSION_NAME
+        val appVersion = SystemUtils.versionName
         val version = try {
             File(directory, VERSION_FILE).readText()
         } catch (e: Throwable) {

@@ -64,6 +64,7 @@ import com.machiav3lli.backup.ui.compose.item.LegendItem
 import com.machiav3lli.backup.ui.compose.item.LinkItem
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TitleText
+import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import com.machiav3lli.backup.utils.gridItems
 import java.io.IOException
@@ -94,7 +95,7 @@ fun HelpSheet(onDismiss: () -> Unit) {
                             maxLines = 1,
                         )
                         Text(
-                            text = BuildConfig.VERSION_NAME,
+                            text = SystemUtils.versionName,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 2,

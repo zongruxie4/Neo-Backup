@@ -156,8 +156,8 @@ fun appInfo(): List<String> {
     return listOf(
         "------ application",
         "package   = ${BuildConfig.APPLICATION_ID}",
-        "version   = ${BuildConfig.VERSION_NAME}",
-        applicationIssuer?.let { "signed by = $it" } ?: "unsigned",
+        "version   = ${SystemUtils.versionName} : ${SystemUtils.versionCode}",
+        SystemUtils.applicationIssuer?.let { "signed by = $it" } ?: "unsigned",
     )
 }
 

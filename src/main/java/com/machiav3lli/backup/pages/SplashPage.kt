@@ -64,7 +64,7 @@ fun SplashPage() {
             Text(
                 text = listOf(
                     BuildConfig.APPLICATION_ID,
-                    BuildConfig.VERSION_NAME,
+                    SystemUtils.versionName,
                     SystemUtils.applicationIssuer?.let { "signed by $it" } ?: "",
                 ).joinToString("\n"),
                 textAlign = TextAlign.Center,
