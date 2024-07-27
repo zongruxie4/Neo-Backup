@@ -129,6 +129,7 @@ fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
     val at = calculateTimeToRun(schedule, now)
     absTime = ISO_DATE_TIME_FORMAT_MIN.format(at)
     val timeDiff = max(at - now, 0)
+    val remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(timeDiff).toInt()
     val days = TimeUnit.MILLISECONDS.toDays(timeDiff).toInt()
     if (days != 0) {
         relTime +=
@@ -136,7 +137,7 @@ fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
     }
     val hours = TimeUnit.MILLISECONDS.toHours(timeDiff).toInt() % 24
     val minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiff).toInt() % 60
-    if (useSeconds) {
+    if (useSeconds && remainingMinutes < 10) {
         val seconds = TimeUnit.MILLISECONDS.toSeconds(timeDiff).toInt() % 60
         relTime += LocalTime.of(hours, minutes, seconds).toString()
     } else {

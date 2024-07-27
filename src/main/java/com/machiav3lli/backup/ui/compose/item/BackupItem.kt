@@ -6,10 +6,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
@@ -28,16 +32,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.BACKUP_DATE_TIME_SHOW_FORMATTER
+import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Backup
+import com.machiav3lli.backup.dbs.entity.PackageInfo
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Lock
 import com.machiav3lli.backup.ui.compose.icons.phosphor.LockOpen
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
+import java.time.LocalDateTime
 
 @Composable
 fun BackupItem_headlineContent(
@@ -47,14 +55,16 @@ fun BackupItem_headlineContent(
     Row(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
             Text(
                 text = item.versionName ?: "",
                 modifier = Modifier
-                    .align(Alignment.CenterVertically),
+                    .align(Alignment.CenterVertically)
+                    .widthIn(min = 30.dp)
+                    .weight(1f),
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
+                maxLines = 5,
                 style = MaterialTheme.typography.titleMedium
             )
             AnimatedVisibility(visible = (item.cpuArch != android.os.Build.SUPPORTED_ABIS[0])) {
@@ -66,16 +76,17 @@ fun BackupItem_headlineContent(
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
+            NoteTagItem(
+                item,
+                maxLines = 2,
+                onNote = onNote,
+            )
+            Spacer(modifier = Modifier.width(16.dp))
         }
         Row(
             modifier = Modifier.wrapContentWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            NoteTagItem(
-                item,
-                onNote = onNote,
-            )
-            Spacer(modifier = Modifier.width(16.dp))
             BackupLabels(item = item)
         }
     }
@@ -112,7 +123,7 @@ fun BackupItem_supportingContent(item: Backup) {
             Text(
                 text = if (item.backupVersionCode == 0) "old" else "${item.backupVersionCode / 1000}.${item.backupVersionCode % 1000}",
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
+                maxLines = 3,
                 style = MaterialTheme.typography.labelMedium,
             )
             AnimatedVisibility(visible = item.isEncrypted) {
@@ -232,7 +243,6 @@ fun BackupItem(
     )
 }
 
-
 @Composable
 fun RestoreBackupItem(
     item: Backup,
@@ -276,4 +286,64 @@ fun RestoreBackupItem(
         headlineContent = { BackupItem_headlineContent(item, null) },
         supportingContent = { BackupItem_supportingContent(item) },
     )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Preview
+@Composable
+fun BackupRestorePreview() {
+
+    OABX.fakeContext = LocalContext.current.applicationContext
+
+    var note by remember { mutableStateOf("a note text") }
+    var maxLines by remember { mutableStateOf(1) }
+
+    val backup = Backup(
+        base = PackageInfo(
+            packageName = "some.package.name",
+            versionName = "1.2.3.4-some-version",
+            versionCode = 1234,
+        ),
+        backupDate = LocalDateTime.now(),
+        hasApk = true,
+        hasAppData = true,
+        hasDevicesProtectedData = true,
+        hasExternalData = false,
+        hasObbData = false,
+        hasMediaData = false,
+        compressionType = "zst",
+        cipherType = "aes-256-cbc",
+        iv = null,
+        cpuArch = "arm64",
+        permissions = emptyList(),
+        persistent = false,
+        note = note,
+        size = 123456789,
+    )
+
+    Column(modifier = Modifier.width(500.dp)) {
+        FlowRow {
+            ActionButton("none") {
+                note = ""
+            }
+            ActionButton("short") {
+                note = "note text"
+            }
+            ActionButton("middle") {
+                note = "a longer note text"
+            }
+            ActionButton("long") {
+                note = "a very very very long note text"
+            }
+            ActionButton("multiline") {
+                note = "a very very very long note text\nmultiple\nlines"
+            }
+        }
+
+        BackupItem(item = backup)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        RestoreBackupItem(item = backup, index = 3)
+    }
 }

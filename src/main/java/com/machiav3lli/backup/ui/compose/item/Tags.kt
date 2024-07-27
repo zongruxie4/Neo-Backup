@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -122,6 +123,7 @@ fun NoteTagItem(
     item: Backup,
     modifier: Modifier = Modifier,
     useIcon: Boolean = pref_useNoteIcon.value,
+    maxLines: Int = 1,
     onNote: ((Backup) -> Unit)? = null,
 ) {
     val tag = item.note
@@ -139,7 +141,9 @@ fun NoteTagItem(
     } else if (showBadge) {
         Badge(
             modifier = modifier
-                .widthIn(min = 32.dp, max = 128.dp)
+                // max doesn't make sense, restriction depends on outside,
+                // why shorten the note, if there is enough space? and 128.dp is a random value
+                .widthIn(min = 32.dp)
                 .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = { onNote?.let { it(item) } })
                 .border(
@@ -157,70 +161,10 @@ fun NoteTagItem(
                 modifier = Modifier.padding(2.dp),
                 text = tag.ifEmpty { stringResource(id = R.string.edit_note) },
                 style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
+                maxLines = maxLines,
                 overflow = TextOverflow.Ellipsis,
             )
-        }
-    }
-}
-
-@Preview
-@Composable
-fun NoteTagItemPreview() {
-
-    OABX.fakeContext = LocalContext.current.applicationContext
-
-    val packageInfo = PackageInfo(
-        packageName = "com.machiav3lli.backup",
-        versionName = "1.0",
-        versionCode = 1,
-    )
-    val backup = Backup(
-        base = packageInfo,
-        backupDate = LocalDateTime.parse("2000-01-01T00:00:00"),
-        hasApk = true,
-        hasAppData = true,
-        hasDevicesProtectedData = true,
-        hasExternalData = true,
-        hasObbData = true,
-        hasMediaData = true,
-        compressionType = "zst",
-        cipherType = "aes-256-gcm",
-        iv = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16),
-        cpuArch = "aarch64",
-        permissions = emptyList(),
-        size = 12345,
-        persistent = false,
-        note = "",
-    )
-    val backup_with_note = backup.copy(note = "note text")
-
-    Column {
-        Text("text:")
-        Row {
-            Text("RestoreItem: ")
-            NoteTagItem(useIcon = false, item = backup_with_note)
-            Text("  empty: ")
-            NoteTagItem(useIcon = false, item = backup)
-        }
-        Row {
-            Text("BackupItem: ")
-            NoteTagItem(useIcon = false, item = backup_with_note, onNote = {})
-            Text("  empty: ")
-            NoteTagItem(useIcon = false, item = backup, onNote = {})
-        }
-        Text("icon:")
-        Row {
-            Text("RestoreItem: ")
-            NoteTagItem(useIcon = true, item = backup_with_note)
-            Text("  empty: ")
-            NoteTagItem(useIcon = true, item = backup)
-        }
-        Row {
-            Text("BackupItem: ")
-            NoteTagItem(useIcon = true, item = backup_with_note, onNote = {})
-            Text("  empty: ")
-            NoteTagItem(useIcon = true, item = backup, onNote = {})
+            //TODO hg42 Tooltip(text = tag, openPopup = ???)
         }
     }
 }
@@ -293,3 +237,97 @@ fun AddTagView(
         }
     }
 }
+
+
+
+@OptIn(ExperimentalLayoutApi::class)
+@Preview
+@Composable
+fun NoteTagItemPreview() {
+
+    OABX.fakeContext = LocalContext.current.applicationContext
+
+    val packageInfo = PackageInfo(
+        packageName = "com.machiav3lli.backup",
+        versionName = "1.0",
+        versionCode = 1,
+    )
+    val backup = Backup(
+        base = packageInfo,
+        backupDate = LocalDateTime.parse("2000-01-01T00:00:00"),
+        hasApk = true,
+        hasAppData = true,
+        hasDevicesProtectedData = true,
+        hasExternalData = true,
+        hasObbData = true,
+        hasMediaData = true,
+        compressionType = "zst",
+        cipherType = "aes-256-gcm",
+        iv = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16),
+        cpuArch = "aarch64",
+        permissions = emptyList(),
+        size = 12345,
+        persistent = false,
+        note = "",
+    )
+
+    var note by remember { mutableStateOf("note text") }
+    var maxLines by remember { mutableStateOf(1) }
+    val backup_with_note = backup.copy(note = note)
+
+    Column(modifier = Modifier.width(250.dp)) {
+        FlowRow {
+            ActionButton("short") {
+                note = "note text"
+                maxLines = 1
+            }
+            ActionButton("middle") {
+                note = "a longer note text"
+                maxLines = 1
+            }
+            ActionButton("long") {
+                note = "a very very very long note text"
+                maxLines = 1
+            }
+            ActionButton("multiline") {
+                note = "a very very very long note text\nmultiple\nlines"
+                maxLines = 2
+            }
+        }
+        Text("\ntext:\n")
+        Row(modifier = Modifier.padding(4.dp)) {
+            Text("Backup: ")
+            NoteTagItem(useIcon = false, item = backup_with_note, maxLines = maxLines, onNote = {})
+        }
+        Row(modifier = Modifier.padding(4.dp)) {
+            Text("   empty: ")
+            NoteTagItem(useIcon = false, item = backup, maxLines = maxLines, onNote = {})
+        }
+        Row(modifier = Modifier.padding(4.dp)) {
+            Text("Restore: ")
+            NoteTagItem(useIcon = false, item = backup_with_note, maxLines = maxLines)
+        }
+        Row(modifier = Modifier.padding(4.dp)) {
+            Text("   empty: ")
+            NoteTagItem(useIcon = false, item = backup, maxLines = maxLines)
+        }
+        Text("\nicon:\n")
+        Row(modifier = Modifier.padding(4.dp)) {
+            Text("Backup: ")
+            NoteTagItem(useIcon = true, item = backup_with_note, maxLines = maxLines, onNote = {})
+        }
+        Row(modifier = Modifier.padding(4.dp)) {
+            Text("   empty: ")
+            NoteTagItem(useIcon = true, item = backup, maxLines = maxLines, onNote = {})
+        }
+        Row(modifier = Modifier.padding(4.dp)) {
+            Text("Restore: ")
+            NoteTagItem(useIcon = true, item = backup_with_note, maxLines = maxLines)
+        }
+        Row(modifier = Modifier.padding(4.dp)) {
+            Text("   empty: ")
+            NoteTagItem(useIcon = true, item = backup, maxLines = maxLines)
+        }
+    }
+}
+

@@ -314,8 +314,8 @@ fun placeholderIconPainter(
 
 @Composable
 fun ActionButton(
-    modifier: Modifier = Modifier,
     text: String,
+    modifier: Modifier = Modifier,
     positive: Boolean = true,
     iconOnSide: Boolean = false,
     icon: ImageVector? = null,
