@@ -155,15 +155,15 @@ val pref_trace = BooleanPref(
     defaultValue = isDebug || isHg42
 )
 
-val tracePlugin = TraceUtils.TracePref(
-    name = "Plugin",
-    summary = "trace plugins",
+val traceSection = TraceUtils.TracePrefBold(
+    name = "Section",
+    summary = "trace important sections (backup, schedule, etc.)",
     default = true
 )
 
-val traceSection = TraceUtils.TracePref(
-    name = "Section",
-    summary = "trace important sections (backup, schedule, etc.)",
+val tracePlugin = TraceUtils.TracePref(
+    name = "Plugin",
+    summary = "trace plugins",
     default = true
 )
 
@@ -173,15 +173,15 @@ val traceSchedule = TraceUtils.TracePrefBold(
     default = true
 )
 
-val traceFlows = TraceUtils.TracePrefBold(
-    name = "Flows",
-    summary = "trace Kotlin Flows (reactive data streams)",
-    default = true
-)
-
 val tracePrefs = TraceUtils.TracePref(
     name = "Prefs",
     summary = "trace preferences",
+    default = true
+)
+
+val traceFlows = TraceUtils.TracePrefBold(
+    name = "Flows",
+    summary = "trace Kotlin Flows (reactive data streams)",
     default = true
 )
 
