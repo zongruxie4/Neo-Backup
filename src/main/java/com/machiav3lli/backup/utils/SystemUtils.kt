@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.handler.LogsHandler
+import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.items.RootFile
 import com.machiav3lli.backup.items.StorageFile
 import kotlinx.coroutines.CoroutineDispatcher
@@ -202,8 +203,8 @@ object SystemUtils {
     }
 
     fun getAndroidFolder(
-        user: String,
         subPath: String,
+        user: String = ShellCommands.currentProfile.toString(),
         isUseablePath: (file: RootFile?) -> Boolean = ::isWritablePath
     ): RootFile? {
         // only check access to Android folder and add subFolder even if it does not exist

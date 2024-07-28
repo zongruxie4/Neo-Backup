@@ -739,6 +739,7 @@ class ShellHandler {
         private fun runShellCommand(
             shell: RunnableShellCommand,
             command: String,
+            throwFail: Boolean = true,
         ): Shell.Result {
             // defining stdout and stderr on our own
             // otherwise we would have to set the flag redirect stderr to stdout:
@@ -752,19 +753,20 @@ class ShellHandler {
             Timber.d("Command(s) $command ended with ${result.code}")
             if (!result.isSuccess) {
                 addErrorCommand(command)
-                throw ShellCommandFailedException(result, command)
+                if (throwFail)
+                    throw ShellCommandFailedException(result, command)
             }
             return result
         }
 
         @Throws(ShellCommandFailedException::class)
-        fun runAsUser(command: String): Shell.Result {
-            return runShellCommand(ShRunnableShellCommand(), command)
+        fun runAsUser(command: String, throwFail: Boolean = true): Shell.Result {
+            return runShellCommand(ShRunnableShellCommand(), command, throwFail)
         }
 
         @Throws(ShellCommandFailedException::class)
-        fun runAsRoot(command: String): Shell.Result {
-            return runShellCommand(SuRunnableShellCommand(), command)
+        fun runAsRoot(command: String, throwFail: Boolean = true): Shell.Result {
+            return runShellCommand(SuRunnableShellCommand(), command, throwFail)
         }
 
         fun runAsRootPipeInCollectErr(
