@@ -70,7 +70,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -114,7 +113,6 @@ import com.machiav3lli.backup.ui.compose.isAtBottom
 import com.machiav3lli.backup.ui.compose.isAtTop
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TopBar
-import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import com.machiav3lli.backup.utils.TraceUtils.listNanoTiming
@@ -595,6 +593,7 @@ fun TerminalText(
 @Composable
 fun TerminalPage(
     modifier: Modifier = Modifier,
+    title: String? = null
 ) {
     val output = remember { mutableStateListOf<String>() }
     var command by remember { mutableStateOf("") }
@@ -646,7 +645,8 @@ fun TerminalPage(
         modifier = modifier,
         containerColor = Color.Transparent,
         topBar = {
-            TopBar(title = stringResource(id = NavItem.Terminal.title))
+            if (title != null)
+                TopBar(title = title)
         }
     ) { paddingValues ->
         Column(
