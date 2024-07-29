@@ -221,14 +221,16 @@ object SystemUtils {
                     if (isUseablePath(file)) {   //TODO hg42 check with timeout in case of lockups
                         Timber.i("found $key at$file")
                         storagePath.put(baseKey, file)
-                        return file
+                        val targetFile = RootFile(file, subPath)
+                        storagePath.put(key, targetFile)
+                        return targetFile
                     }
                 }
                 return null
             }?.let {
-                val file = RootFile(it, subPath)
-                storagePath.put(key, file)
-                return file
+                val targetFile = RootFile(it, subPath)
+                storagePath.put(key, targetFile)
+                return targetFile
             }
             return null
         }
