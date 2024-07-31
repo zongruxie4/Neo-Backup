@@ -252,6 +252,7 @@ val pref_restoreTarCmd = BooleanPref(
     defaultValue = true
 )
 
+
 //---------------------------------------- developer settings - file handling
 
 val pref_allowShadowingDefault = BooleanPref(
@@ -280,29 +281,6 @@ val pref_cacheFileLists = BooleanPref(
 )
 
 
-//---------------------------------------- developer settings - workarounds
-
-val pref_fixNavBarOverlap = IntPref(
-    key = "dev-hack.fixNavBarOverlap",
-    summary = "fix UI overlapping system navbars [in 'dp', usually needs something like 42]",
-    entries = (0..64).toList(),
-    defaultValue = if (OABX.minSDK(Build.VERSION_CODES.R)) 0 else 42
-)
-
-val pref_delayBeforeRefreshAppInfo = IntPref(
-    key = "dev-hack.delayBeforeRefreshAppInfo",
-    summaryId = R.string.prefs_delaybeforerefreshappinfo_summary,
-    entries = (0..30).toList(),
-    defaultValue = 0
-)
-
-val pref_refreshAppInfoTimeout = IntPref(
-    key = "dev-hack.refreshAppInfoTimeout",
-    summaryId = R.string.prefs_refreshappinfotimeout_summary,
-    entries = ((0..9 step 1) + (10..120 step 10)).toList(),
-    defaultValue = 30
-)
-
 //---------------------------------------- developer settings - implementation alternatives
 
 val pref_useNoteIcon = BooleanPref(
@@ -310,6 +288,7 @@ val pref_useNoteIcon = BooleanPref(
     summary = "use the icon instead of the big fat 'edit note' button",
     defaultValue = false
 )
+
 val pref_paranoidBackupLists = BooleanPref(
     key = "dev-alt.paranoidBackupLists",
     summary = "verify file system after adding or deleting backups (slower, especially remote)",
@@ -427,6 +406,31 @@ val pref_useExpedited = BooleanPref(
     summaryId = R.string.prefs_useexpedited_summary,
     defaultValue = true
 )
+
+
+//---------------------------------------- developer settings - workarounds
+
+val pref_fixNavBarOverlap = IntPref(
+    key = "dev-hack.fixNavBarOverlap",
+    summary = "fix UI overlapping system navbars [in 'dp', usually needs something like 42]",
+    entries = (0..64).toList(),
+    defaultValue = if (OABX.minSDK(Build.VERSION_CODES.R)) 0 else 42
+)
+
+val pref_delayBeforeRefreshAppInfo = IntPref(
+    key = "dev-hack.delayBeforeRefreshAppInfo",
+    summaryId = R.string.prefs_delaybeforerefreshappinfo_summary,
+    entries = (0..30).toList(),
+    defaultValue = 0
+)
+
+val pref_refreshAppInfoTimeout = IntPref(
+    key = "dev-hack.refreshAppInfoTimeout",
+    summaryId = R.string.prefs_refreshappinfotimeout_summary,
+    entries = ((0..9 step 1) + (10..120 step 10)).toList(),
+    defaultValue = 30
+)
+
 
 //---------------------------------------- developer settings - faking
 
