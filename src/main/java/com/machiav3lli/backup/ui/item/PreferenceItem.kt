@@ -36,7 +36,7 @@ open class Pref(
         val prefs get() = prefGroups.values.flatten()
         var lockedActions = 0
 
-        val prefChangeListeners = mutableStateMapOf<Pref, (pref: Pref) -> Unit>()
+        val prefChangeListeners = mutableStateMapOf<Pref, (pref: Pref) -> Unit>()  //TODO not necessary currently, but may be useful in future, empty map doesn't hurt
         private fun onPrefChange(name: String) {
             prefChangeListeners.forEach { (pref, listener) ->
                 listener(pref)
