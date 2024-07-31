@@ -18,7 +18,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,13 +56,12 @@ fun BasePreference(
     bottomWidget: (@Composable (isEnabled: Boolean) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val isEnabled by remember {
-        derivedStateOf { pref.enableIf?.invoke() ?: true }
+    val isEnabled by remember(pref.enableIf?.invoke() ?: true) {
+        mutableStateOf(pref.enableIf?.invoke() ?: true)
     }
 
     val base = index.toFloat() / groupSize
     val rank = (index + 1f) / groupSize
-
 
     ListItem(
         modifier = modifier
