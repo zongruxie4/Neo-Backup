@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -201,12 +202,13 @@ fun PasswordPreference(
         pref = pref,
         titleId = pref.titleId,
         summaryId = pref.summaryId,
-        summary = if (pref.value.isNotEmpty()) "*****" else "-----",
+        summary = if (pref.value.isNotEmpty()) "*********" else "- - - - -",
         icon = {
             pref.icon?.let { icon ->
                 PrefIcon(
                     icon = icon,
                     text = stringResource(id = pref.titleId),
+                    tint = if (pref.value.isNotEmpty()) Color.Green else Color.Red,
                 )
             } ?: run {
                 Spacer(modifier = Modifier.requiredWidth(36.dp))
