@@ -123,6 +123,12 @@ dependencies {
     implementation(libs.ksp)
     implementation(libs.kotlin.reflect)
 
+    // Koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.workmanager)
+    implementation(libs.koin.annotations)
+    ksp(libs.koin.compiler)
+
     // Libs
     implementation(libs.activity.compose)
     implementation(libs.collections.immutable)
