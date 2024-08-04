@@ -83,7 +83,7 @@ sealed class NavItem(
     data object Main :
         NavItem(R.string.main, Phosphor.House, "main")
 
-    data object Settings :
+    data object Prefs :
         NavItem(R.string.prefs_title, Phosphor.GearSix, "settings")
 
     data object UserPrefs :
