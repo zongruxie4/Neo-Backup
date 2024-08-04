@@ -171,19 +171,6 @@ fun Activity.showActionResult(result: ActionResult, saveMethod: DialogInterface.
         }
     }
 
-fun Activity.showError(message: String?) = runOnUiThread {
-    runOnUiThread {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.errorDialogTitle)
-            .setMessage(message)
-            .setPositiveButton(R.string.dialogOK, null)
-            .setNegativeButton(R.string.dialogSave) { _: DialogInterface?, _: Int ->
-                LogsHandler.logErrors(message ?: "ERROR")           //TODO hg42 or that
-            }
-            .show()
-    }
-}
-
 fun Activity.showFatalUiWarning(message: String) = showWarning(
     getString(R.string.app_name),
     message
