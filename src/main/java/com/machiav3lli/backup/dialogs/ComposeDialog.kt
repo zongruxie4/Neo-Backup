@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,7 +29,8 @@ import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.item.ActionButton
-import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
+import com.machiav3lli.backup.ui.compose.item.DialogNegativeButton
+import com.machiav3lli.backup.ui.compose.item.DialogPositiveButton
 
 @Composable
 fun BaseDialog(
@@ -54,7 +54,6 @@ fun ActionsDialogUI(
     primaryIcon: ImageVector? = null,
     primaryAction: (() -> Unit) = {},
     secondaryText: String = "",
-    secondaryIcon: ImageVector? = null,
     secondaryAction: (() -> Unit)? = null,
 ) {
     val scrollState = rememberScrollState()
@@ -88,27 +87,31 @@ fun ActionsDialogUI(
             }
 
             Row(
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
             ) {
                 ActionButton(text = stringResource(id = R.string.dialogCancel)) {
                     openDialogCustom.value = false
                 }
                 Spacer(Modifier.weight(1f))
                 if (secondaryAction != null && secondaryText.isNotEmpty()) {
-                    ElevatedActionButton(
+                    DialogNegativeButton(
                         text = secondaryText,
-                        icon = secondaryIcon,
-                        positive = false
                     ) {
                         secondaryAction()
                         openDialogCustom.value = false
                     }
                     Spacer(Modifier.requiredWidth(8.dp))
                 }
-                ElevatedActionButton(
+                if (primaryIcon != null) DialogPositiveButton(
                     text = primaryText,
                     icon = primaryIcon,
                 ) {
+                    primaryAction()
+                    openDialogCustom.value = false
+                }
+                else DialogPositiveButton(text = primaryText) {
                     primaryAction()
                     openDialogCustom.value = false
                 }

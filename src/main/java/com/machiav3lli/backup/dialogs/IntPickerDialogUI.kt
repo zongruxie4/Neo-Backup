@@ -42,8 +42,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.compose.item.ActionButton
-import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
+import com.machiav3lli.backup.ui.compose.item.DialogNegativeButton
+import com.machiav3lli.backup.ui.compose.item.DialogPositiveButton
 import kotlin.math.roundToInt
 
 @Composable
@@ -101,13 +101,15 @@ fun IntPickerDialogUI(
                 )
             }
             Row(
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                ActionButton(text = stringResource(id = R.string.dialogCancel)) {
+                DialogNegativeButton(text = stringResource(id = R.string.dialogCancel)) {
                     openDialogCustom.value = false
                 }
-                Spacer(Modifier.weight(1f))
-                ElevatedActionButton(text = stringResource(id = R.string.dialogSave)) {
+                DialogPositiveButton(text = stringResource(id = R.string.dialogSave)) {
                     onSave(entries[sliderIndex])
                     openDialogCustom.value = false
                 }

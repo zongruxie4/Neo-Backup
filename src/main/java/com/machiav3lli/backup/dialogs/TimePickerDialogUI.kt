@@ -20,7 +20,6 @@ package com.machiav3lli.backup.dialogs
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -38,8 +37,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.compose.item.ActionButton
-import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
+import com.machiav3lli.backup.ui.compose.item.DialogNegativeButton
+import com.machiav3lli.backup.ui.compose.item.DialogPositiveButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,13 +68,15 @@ fun TimePickerDialogUI(
             )
             TimePicker(state)
             Row(
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                ActionButton(text = stringResource(id = R.string.dialogCancel)) {
+                DialogNegativeButton(text = stringResource(id = R.string.dialogCancel)) {
                     openDialogCustom.value = false
                 }
-                Spacer(Modifier.weight(1f))
-                ElevatedActionButton(text = stringResource(id = R.string.dialogSave)) {
+                DialogPositiveButton(text = stringResource(id = R.string.dialogSave)) {
                     onSave(state.hour, state.minute)
                     openDialogCustom.value = false
                 }
