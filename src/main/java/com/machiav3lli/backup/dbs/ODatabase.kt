@@ -38,6 +38,8 @@ import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Blocklist
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
+import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.module
 
 @Database(
     entities = [
@@ -99,4 +101,14 @@ abstract class ODatabase : RoomDatabase() {
         )
         class AutoMigration6to7 : AutoMigrationSpec
     }
+}
+
+val databaseModule = module {
+    single { ODatabase.getInstance(androidContext()) }
+    factory { get<ODatabase>().getScheduleDao() }
+    factory { get<ODatabase>().getBlocklistDao() }
+    factory { get<ODatabase>().getAppExtrasDao() }
+    factory { get<ODatabase>().getBackupDao() }
+    factory { get<ODatabase>().getAppInfoDao() }
+    factory { get<ODatabase>().getSpecialInfoDao() }
 }
