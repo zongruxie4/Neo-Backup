@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.handler.LogsHandler
+import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.items.RootFile
 import com.machiav3lli.backup.items.StorageFile
 import kotlinx.coroutines.CoroutineDispatcher
@@ -202,8 +203,8 @@ object SystemUtils {
     }
 
     fun getAndroidFolder(
-        user: String,
         subPath: String,
+        user: String = ShellCommands.currentProfile.toString(),
         isUseablePath: (file: RootFile?) -> Boolean = ::isWritablePath
     ): RootFile? {
         // only check access to Android folder and add subFolder even if it does not exist
@@ -221,14 +222,16 @@ object SystemUtils {
                     if (isUseablePath(file)) {   //TODO hg42 check with timeout in case of lockups
                         Timber.i("found $key at$file")
                         storagePath.put(baseKey, file)
-                        return file
+                        val targetFile = RootFile(file, subPath)
+                        storagePath.put(key, targetFile)
+                        return targetFile
                     }
                 }
                 return null
             }?.let {
-                val file = RootFile(it, subPath)
-                storagePath.put(key, file)
-                return file
+                val targetFile = RootFile(it, subPath)
+                storagePath.put(key, targetFile)
+                return targetFile
             }
             return null
         }

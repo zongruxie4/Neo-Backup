@@ -18,7 +18,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -57,13 +57,12 @@ fun BasePreference(
     bottomWidget: (@Composable (isEnabled: Boolean) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val isEnabled by remember {
-        derivedStateOf { pref.enableIf?.invoke() ?: true }
+    val isEnabled by remember(pref.enableIf?.invoke() ?: true) {
+        mutableStateOf(pref.enableIf?.invoke() ?: true)
     }
 
     val base = index.toFloat() / groupSize
     val rank = (index + 1f) / groupSize
-
 
     ListItem(
         modifier = modifier
@@ -203,12 +202,13 @@ fun PasswordPreference(
         pref = pref,
         titleId = pref.titleId,
         summaryId = pref.summaryId,
-        summary = if (pref.value.isNotEmpty()) "*****" else "-----",
+        summary = if (pref.value.isNotEmpty()) "*********" else "- - - - -",
         icon = {
             pref.icon?.let { icon ->
                 PrefIcon(
                     icon = icon,
                     text = stringResource(id = pref.titleId),
+                    tint = if (pref.value.isNotEmpty()) Color.Green else Color.Red,
                 )
             } ?: run {
                 Spacer(modifier = Modifier.requiredWidth(36.dp))

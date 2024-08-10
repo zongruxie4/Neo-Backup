@@ -4,6 +4,7 @@
 *.hprof
 .gradle
 .idea
+.kotlin
 build/
 local.properties
 src/main/jniLibs/

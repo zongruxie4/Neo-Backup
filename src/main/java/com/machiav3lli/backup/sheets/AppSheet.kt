@@ -111,7 +111,6 @@ import com.machiav3lli.backup.ui.compose.recycler.InfoChipsBlock
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.infoChips
 import com.machiav3lli.backup.utils.show
-import com.machiav3lli.backup.utils.showError
 import com.machiav3lli.backup.viewmodels.AppSheetViewModel
 import timber.log.Timber
 

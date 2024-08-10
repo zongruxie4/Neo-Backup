@@ -19,7 +19,6 @@ package com.machiav3lli.backup.activities
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Looper
@@ -28,7 +27,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
@@ -36,8 +34,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.NavHostController
@@ -52,7 +52,9 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.addInfoLogText
 import com.machiav3lli.backup.OABX.Companion.startup
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.dialogs.BaseDialog
+import com.machiav3lli.backup.dialogs.DialogKey
 import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.WorkHandler
@@ -101,6 +103,9 @@ class MainActivityX : BaseActivity() {
     private val mScope: CoroutineScope = MainScope()
     private lateinit var navController: NavHostController
     private lateinit var powerManager: PowerManager
+
+    private lateinit var openDialog: MutableState<Boolean>
+    private lateinit var dialogKey: MutableState<DialogKey?>
 
     val viewModel by viewModels<MainViewModel> {
         MainViewModel.Factory(OABX.db, application)
@@ -204,17 +209,19 @@ class MainActivityX : BaseActivity() {
                     statusBarStyle = SystemBarStyle.auto(
                         android.graphics.Color.TRANSPARENT,
                         android.graphics.Color.TRANSPARENT,
-                    )  { isDarkTheme },
+                    ) { isDarkTheme },
                     navigationBarStyle = SystemBarStyle.auto(
                         android.graphics.Color.TRANSPARENT,
                         android.graphics.Color.TRANSPARENT,
-                    )  { isDarkTheme },
+                    ) { isDarkTheme },
                 )
                 onDispose {}
             }
 
             AppTheme {
                 navController = rememberNavController()
+                openDialog = remember { mutableStateOf(false) }
+                dialogKey = remember { mutableStateOf(null) }
                 val openBlocklist = remember { mutableStateOf(false) }
 
                 LaunchedEffect(viewModel) {
@@ -254,6 +261,39 @@ class MainActivityX : BaseActivity() {
                             ) { newSet ->
                                 viewModel.setBlocklist(newSet)
                             }
+                        }
+                    }
+                }
+
+                if (openDialog.value) {
+                    BaseDialog(openDialogCustom = openDialog) {
+                        when (dialogKey.value) {
+                            is DialogKey.Encryption -> {
+                                ActionsDialogUI(
+                                    titleText = stringResource(id = R.string.enable_encryption_title),
+                                    messageText = stringResource(id = R.string.enable_encryption_message),
+                                    openDialogCustom = openDialog,
+                                    primaryText = stringResource(id = R.string.dialog_approve),
+                                    primaryAction = {
+                                        openDialog.value = false
+                                        moveTo("${NavItem.Prefs.destination}?page=1")
+                                    }
+                                )
+                            }
+
+                            is DialogKey.Error      -> {
+                                val message = (dialogKey.value as DialogKey.Error).message
+                                ActionsDialogUI(
+                                    titleText = stringResource(id = R.string.errorDialogTitle),
+                                    messageText = message,
+                                    openDialogCustom = openDialog,
+                                    primaryText = stringResource(id = R.string.dialogSave),
+                                    primaryAction = { LogsHandler.logErrors(message) },
+                                    secondaryText = stringResource(id = R.string.dialogOK)
+                                )
+                            }
+
+                            else                    -> {}
                         }
                     }
                 }
@@ -302,18 +342,7 @@ class MainActivityX : BaseActivity() {
         if (dontShowCounter > 30) return    // don't increment further (useless touching file)
         persist_skippedEncryptionCounter.value = dontShowCounter + 1
         if (dontShowCounter % 10 == 0) {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.enable_encryption_title)
-                .setMessage(R.string.enable_encryption_message)
-                .setPositiveButton(R.string.dialog_approve) { _: DialogInterface?, _: Int ->
-                    startActivity(
-                        Intent(applicationContext, MainActivityX::class.java).putExtra(
-                            ".toEncryption",
-                            true
-                        )
-                    )
-                }
-                .show()
+            showDialog(DialogKey.Encryption())
         }
     }
 
@@ -331,6 +360,17 @@ class MainActivityX : BaseActivity() {
     }
 
     fun dismissSnackBar() {
+    }
+
+    fun showDialog(key: DialogKey) {
+        dialogKey.value = key
+        openDialog.value = true
+    }
+
+    fun showError(message: String?) {
+        message?.let {
+            showDialog(DialogKey.Error(it))
+        }
     }
 
     fun moveTo(destination: String) {

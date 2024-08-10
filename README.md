@@ -5,7 +5,7 @@
 [![GitHub License](https://img.shields.io/github/license/NeoApplications/Neo-Backup)](https://github.com/NeoApplications/Neo-Backup/blob/master/COPYING)
 [![GitHub All Releases](https://img.shields.io/github/downloads/NeoApplications/Neo-Backup/total.svg)](https://github.com/NeoApplications/Neo-Backup/releases/)
 [![GitHub release](https://img.shields.io/github/v/release/NeoApplications/Neo-Backup?display_name=tag)](https://github.com/NeoApplications/Neo-Backup/releases/latest)
-[![Small translation badge](https://hosted.weblate.org/widgets/neo-backup/-/svg-badge.svg)](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)
+[![Small translation badge](https://hosted.weblate.org/widgets/neo-backup/-/svg-badge.svg)](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)    
 
 Neo Backup (formerly OAndBackupX) is a fork of the famous OAndBackup with the aim to bring OAndBackup to 202X and part of Neo Applications suite. For now the app is already fully rewritten, coming up would be making it robust and adding some lengthily planned features which could ease the backup/restore workflow with any device. Therefore all types of contribution are always welcome.
 
@@ -26,7 +26,7 @@ And here's the project's [FAQ](FAQ.md).
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.machiav3lli.backup/)
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.machiav3lli.backup)
-[<img src="badge_github.png" alt="Get it on GitHub" height="80">](https://github.com/machiav3lli/oandbackupx/releases)
+[<img src="badge_github.png" alt="Get it on GitHub" height="80">](https://github.com/NeoApplications/Neo-Backup/releases)
 
 ## Recommendation
 
@@ -69,11 +69,11 @@ The communication and each contribution in the project community should follow o
 
 ## Building
 
-OAndBackupX is built with gradle, for that you need the android sdk.
+Neo Backup is built with gradle, for that you need the android sdk.
 
 ## Licenses <img align="right" src="agplv3.png" width="64" />
 
-OAndBackupX is licensed under the [GNU's Affero GPL v3](LICENSE.md).
+Neo Backup is licensed under the [GNU's Affero GPL v3](LICENSE.md).
 
 App's icon is based on an Icon made by [Catalin Fertu](https://www.flaticon.com/authors/catalin-fertu) from [www.flaticon.com](https://www.flaticon.com)
 
@@ -87,11 +87,11 @@ All new icons in 7.0.0 based on CC0 icons found on [SVG Repo](https://www.svgrep
 
 [Oliver Pepperell](https://github.com/opepp) for his contribution to the new anniversary design.
 
-Open-Source libs: [FastAdapter](https://github.com/mikepenz/FastAdapter), [RootBeer](https://github.com/scottyab/rootbeer), [NumberPicker](https://github.com/ShawnLin013/NumberPicker), [Apache Commons](https://commons.apache.org).
+[Helena Zheng](https://helenazhang.com/) & [Tobias Fried](https://tobiasfried.com/) for the great [Phosphor Icons](https://phosphoricons.com/), we gladly use.
 
-### Languages: [<img align="right" src="https://hosted.weblate.org/widgets/oandbackupx/-/287x66-white.png" alt="Übersetzungsstatus" />](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)
+### Languages: [<img align="right" src="https://hosted.weblate.org/widgets/neo-backup/-/287x66-white.png" alt="Übersetzungsstatus" />](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)
 
-[<img src="https://hosted.weblate.org/widgets/oandbackupx/-/multi-auto.svg" alt="Übersetzungsstatus" />](https://hosted.weblate.org/engage/neo-backup/)
+[<img src="https://hosted.weblate.org/widgets/neo-backup/-/multi-auto.svg" alt="Übersetzungsstatus" />](https://hosted.weblate.org/engage/neo-backup/)
 
 The Translations are now being hosted by [Weblate.org](https://hosted.weblate.org/engage/neo-backup/).
 

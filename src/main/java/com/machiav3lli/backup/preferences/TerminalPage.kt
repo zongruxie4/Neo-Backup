@@ -70,7 +70,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -84,7 +83,9 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.LogsHandler.Companion.share
+import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.ShellHandler.Companion.needFreshShell
+import com.machiav3lli.backup.handler.ShellHandler.Companion.quoteMultiple
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRootPipeOutCollectErr
 import com.machiav3lli.backup.handler.ShellHandler.Companion.suCommand
@@ -114,10 +115,10 @@ import com.machiav3lli.backup.ui.compose.isAtBottom
 import com.machiav3lli.backup.ui.compose.isAtTop
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TopBar
-import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.SystemUtils
-import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
+import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils.listNanoTiming
+import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -130,26 +131,29 @@ import java.time.LocalDateTime
 //var terminalShell = shellDefaultBuilder().build()
 
 fun shell(command: String, silent: Boolean = false): List<String> {
+    val lines = mutableListOf<String>()
+    var result: Shell.Result? = null
     try {
         //val env = "EPKG=\"${OABX.lastErrorPackage}\" ECMD=\"${OABX.lastErrorCommand}\""
-        //val result = runAsRoot("$env $command")
-        val result = runAsRoot(command)
-        val lines = mutableListOf<String>()
+        //result = runAsRoot("$env $command")
+        result = runAsRoot(command, throwFail = false)
         if (!silent)
             lines += listOf(
-                "--- # $command${if (!result.isSuccess) " -> ${result.code}" else " -> ok"}"
+                "--- # $command${if (!result.isSuccess) "  => ${result.code}" else "  => ok"}"
             )
-        lines += result.err.map { "? $it" }
-        lines += result.out
-        return lines
     } catch (e: Throwable) {
-        return listOfNotNull(
+        lines += listOfNotNull(
             "--- # $command -> ERROR",
             e::class.simpleName,
             e.message,
             e.cause?.message
         )
     }
+    if (result != null) {
+        lines += result.err.map { "? $it" }
+        lines += result.out
+    }
+    return lines
 }
 
 fun appInfo(): List<String> {
@@ -157,7 +161,7 @@ fun appInfo(): List<String> {
         "------ application",
         "package   = ${BuildConfig.APPLICATION_ID}",
         "version   = ${SystemUtils.versionName} : ${SystemUtils.versionCode}",
-        SystemUtils.applicationIssuer?.let { "signed by = $it" } ?: "unsigned",
+        SystemUtils.applicationIssuer.let { "signed by = $it" },
     )
 }
 
@@ -243,17 +247,36 @@ fun accessTest() =
             listOf(
                 "--- not using libsu",
                 "uses: echo command | ${
-                    suCommand.joinToString(" ") { "'$it'" }
+                    quoteMultiple(suCommand)
                 } (used for streaming commands in backup/restore)"
             ) +
-            accessTest1("system app", "\$ANDROID_ASSETS", "packages (system app)") +
-            accessTest1("user app", "\$ANDROID_DATA/app", "packages (user app)") +
-            accessTest1("data", "\$ANDROID_DATA/user/0", "packages (data)") +
-            accessTest1("dedata", "\$ANDROID_DATA/user_de/0", "packages (dedata)") +
-            accessTest1("external", "\$EXTERNAL_STORAGE/Android/data", "packages (external)") +
-            accessTest1("obb", "\$EXTERNAL_STORAGE/Android/obb", "packages (obb)") +
-            accessTest1("media", "\$EXTERNAL_STORAGE/Android/media", "packages (media)") +
-            accessTest1("misc", "\$ANDROID_DATA/misc", "misc data")
+            accessTest1("system app",
+                "\$ANDROID_ASSETS", "packages (system app)"
+            ) +
+            accessTest1("user app",
+                "\$ANDROID_DATA/app", "packages (user app)"
+            ) +
+            accessTest1("data",
+                "\$ANDROID_DATA/user/${ShellCommands.currentProfile}", "packages (data)"
+            ) +
+            accessTest1("dedata",
+                "\$ANDROID_DATA/user_de/${ShellCommands.currentProfile}", "packages (dedata)"
+            ) +
+            accessTest1("external",
+                getAndroidFolder("data")?.path ?: "\$EXTERNAL_STORAGE/Android/data",
+                "packages (external)"
+            ) +
+            accessTest1("obb",
+                getAndroidFolder("obb")?.path ?: "\$EXTERNAL_STORAGE/Android/obb",
+                "packages (obb)"
+            ) +
+            accessTest1("media",
+                getAndroidFolder("media")?.path ?: "\$EXTERNAL_STORAGE/Android/media",
+                "packages (media)"
+            ) +
+            accessTest1("misc",
+                "\$ANDROID_DATA/misc", "misc data"
+            )
 
 
 fun threadsInfo(): List<String> {
@@ -595,6 +618,7 @@ fun TerminalText(
 @Composable
 fun TerminalPage(
     modifier: Modifier = Modifier,
+    title: String? = null
 ) {
     val output = remember { mutableStateListOf<String>() }
     var command by remember { mutableStateOf("") }
@@ -646,7 +670,8 @@ fun TerminalPage(
         modifier = modifier,
         containerColor = Color.Transparent,
         topBar = {
-            TopBar(title = stringResource(id = NavItem.Terminal.title))
+            if (title != null)
+                TopBar(title = title)
         }
     ) { paddingValues ->
         Column(
@@ -745,6 +770,19 @@ fun TerminalPage(
 
 @Preview
 @Composable
+fun PreviewTerminal() {
+
+    Box(
+        modifier = Modifier
+        //.height(500.dp)
+        //.width(500.dp)
+    ) {
+        TerminalPage()
+    }
+}
+
+@Preview
+@Composable
 fun PreviewTerminalText() {
 
     val text = remember {
@@ -834,19 +872,6 @@ fun PreviewTestTextWidth() {
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewTerminal() {
-
-    Box(
-        modifier = Modifier
-        //.height(500.dp)
-        //.width(500.dp)
-    ) {
-        TerminalPage()
     }
 }
 

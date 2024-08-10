@@ -25,6 +25,7 @@ import com.machiav3lli.backup.preferences.pref_maxRetriesPerPackage
 import com.machiav3lli.backup.services.CommandReceiver
 import com.machiav3lli.backup.tasks.AppActionWork
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
+import org.koin.dsl.module
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -555,4 +556,8 @@ class WorkHandler(appContext: Context) {
             }
         }
     }
+}
+
+val workHandlerModule = module {
+    single { WorkHandler(get()) }
 }

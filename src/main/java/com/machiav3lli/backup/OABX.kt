@@ -39,6 +39,7 @@ import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.OABX.Companion.isHg42
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.dbs.ODatabase
+import com.machiav3lli.backup.dbs.databaseModule
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.handler.AssetHandler
@@ -46,6 +47,7 @@ import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.findBackups
+import com.machiav3lli.backup.handler.workHandlerModule
 import com.machiav3lli.backup.plugins.Plugin
 import com.machiav3lli.backup.preferences.pref_busyHitTime
 import com.machiav3lli.backup.preferences.pref_cancelOnStart
@@ -76,6 +78,10 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 import timber.log.Timber
 import java.lang.Integer.max
 import java.lang.ref.WeakReference
@@ -254,7 +260,8 @@ val traceSerialize = TraceUtils.TracePref(
 
 class OABX : Application() {
 
-    var work: WorkHandler? = null
+    val work: WorkHandler by inject()
+    val db: ODatabase by inject()
 
     // TODO Add BroadcastReceiver for (UN)INSTALL_PACKAGE intents
 
@@ -277,10 +284,8 @@ class OABX : Application() {
         //TODO hg42 beginBusy(startupMsg)
         hitBusy(60000)
 
-        initShellHandler()
         Plugin.ensureScanned()
-
-        db = ODatabase.getInstance(applicationContext)
+        initShellHandler()
 
         val result = registerReceiver(
             PackageUnInstalledReceiver(),
@@ -293,14 +298,26 @@ class OABX : Application() {
         )
         Timber.d("registerReceiver: PackageUnInstalledReceiver = $result")
 
-        work = WorkHandler(context)
         if (pref_cancelOnStart.value)
-            work?.cancel()
-        work?.prune()
+            work.cancel()
+        work.prune()
 
         MainScope().launch {
             addInfoLogText("--> click title to keep infobox open")
             addInfoLogText("--> long press title for dev tools")
+        }
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+
+        startKoin {
+            androidLogger()
+            androidContext(this@OABX)
+            modules(
+                workHandlerModule,
+                databaseModule,
+            )
         }
     }
 
@@ -309,7 +326,7 @@ class OABX : Application() {
         // in case the app is terminated too early
         scheduleAlarmsOnce()
 
-        work = work?.release()
+        work.release()
         refNB = WeakReference(null)
         super.onTerminate()
     }
@@ -594,14 +611,7 @@ class OABX : Application() {
         var shellHandler: ShellHandler? = null
             private set
 
-        var dbRef: WeakReference<ODatabase> = WeakReference(null)
-        var db: ODatabase
-            get() {
-                return dbRef.get() ?: ODatabase.getInstance(context)
-            }
-            set(dbInstance) {
-                dbRef = WeakReference(dbInstance)
-            }
+        val db: ODatabase get() = NB.db
 
         fun initShellHandler(): ShellHandler? {
             return try {
@@ -612,7 +622,7 @@ class OABX : Application() {
             }
         }
 
-        val work: WorkHandler get() = NB.work!!
+        val work: WorkHandler get() = NB.work
 
         fun getString(resId: Int) = context.getString(resId)
 
@@ -699,7 +709,7 @@ class OABX : Application() {
         //------------------------------------------------------------------------------------------ section
 
         fun beginLogSection(section: String) {
-            var count : Int
+            var count: Int
             synchronized(logSections) {
                 count = logSections.getValue(section)
                 logSections[section] = count + 1
@@ -711,7 +721,7 @@ class OABX : Application() {
 
         fun endLogSection(section: String) {    //TODO hg42 timer!
             val time = endNanoTimer("section.$section")
-            var count : Int
+            var count: Int
             synchronized(logSections) {
                 count = logSections.getValue(section)
                 logSections[section] = count - 1

@@ -33,8 +33,8 @@ android {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8317
-        versionName = "8.3.7"
+        versionCode = 8318
+        versionName = "8.3.8"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
 
@@ -123,6 +123,12 @@ dependencies {
     implementation(libs.ksp)
     implementation(libs.kotlin.reflect)
 
+    // Koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.workmanager)
+    implementation(libs.koin.annotations)
+    ksp(libs.koin.compiler)
+
     // Libs
     implementation(libs.activity.compose)
     implementation(libs.collections.immutable)
@@ -172,6 +178,11 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.junit4)
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation(libs.compose.ui.test.manifest)
+    //---------------------------------------- hg42
+    // can only be enabled on demand, otherwise it conflicts with compilation
+    // TODO hg42 without thew library the .main.kts script still works, but syntax checking is not working
+    // TODO hg42 and ide complains about script at wrong place
+    //implementation(libs.kotlin.main.kts)
 }
 
 // using a task as a preBuild dependency instead of a function that takes some time insures that it runs
@@ -192,7 +203,7 @@ task("detectAndroidLocals") {
             langsList.add(languageCode)
         }
     }
-    val langsListString = "{${langsList.joinToString(",") { "\"${it}\"" }}}"
+    val langsListString = "{${langsList.sorted().joinToString(",") { "\"${it}\"" }}}"
     android.defaultConfig.buildConfigField("String[]", "DETECTED_LOCALES", langsListString)
 }
 tasks.preBuild.dependsOn("detectAndroidLocals")

@@ -55,6 +55,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PrefsPage(
     navController: NavHostController,
+    pageIndex: Int = 0,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -64,7 +65,7 @@ fun PrefsPage(
         NavItem.AdvancedPrefs,
         NavItem.ToolsPrefs,
     )
-    val pagerState = rememberPagerState(pageCount = { pages.size })
+    val pagerState = rememberPagerState(initialPage = pageIndex, pageCount = { pages.size })
     val currentPage by remember { derivedStateOf { pages[pagerState.currentPage] } }
     val scaffoldState = rememberBottomSheetScaffoldState()
 

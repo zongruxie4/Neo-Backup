@@ -171,7 +171,7 @@ fun MainPage(
                                 RoundButton(
                                     description = stringResource(id = R.string.prefs_title),
                                     icon = Phosphor.GearSix
-                                ) { navController.navigate(NavItem.Settings.destination) }
+                                ) { navController.navigate(NavItem.Prefs.destination) }
                             }
 
                             else                          -> {
@@ -195,7 +195,7 @@ fun MainPage(
                                     RoundButton(
                                         description = stringResource(id = R.string.prefs_title),
                                         icon = Phosphor.GearSix
-                                    ) { navController.navigate(NavItem.Settings.destination) }
+                                    ) { navController.navigate(NavItem.Prefs.destination) }
                                 }
                             }
                         }

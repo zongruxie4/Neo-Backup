@@ -9,11 +9,15 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.pages.LockPage
 import com.machiav3lli.backup.pages.MainPage
@@ -50,8 +54,19 @@ fun MainNavHost(
                 navController = navController
             )
         }
-        slideInComposable(NavItem.Settings.destination) {
+        slideInComposable(
+            "${NavItem.Prefs.destination}?page={page}",
+            args = listOf(
+                navArgument("page") {
+                    type = NavType.IntType
+                    defaultValue = 0
+                }
+            )
+        ) {
+            val args = it.arguments!!
+            val pi = args.getInt("page")
             PrefsPage(
+                pageIndex = pi,
                 navController = navController
             )
         }
@@ -66,17 +81,19 @@ fun MainNavHost(
             }
         }
         slideInComposable(NavItem.Terminal.destination) {
-            TerminalPage()
+            TerminalPage(title = stringResource(id = NavItem.Terminal.title))
         }
     }
 }
 
 fun NavGraphBuilder.slideInComposable(
     route: String,
+    args: List<NamedNavArgument> = emptyList(),
     composable: @Composable (AnimatedVisibilityScope.(NavBackStackEntry) -> Unit),
 ) {
     composable(
         route,
+        args,
         enterTransition = { slideInHorizontally { width -> width } },
         exitTransition = { slideOutHorizontally { width -> -width } },
         popEnterTransition = { slideInHorizontally { width -> -width } },

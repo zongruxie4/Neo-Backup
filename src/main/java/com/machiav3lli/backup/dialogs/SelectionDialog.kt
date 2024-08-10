@@ -3,7 +3,6 @@ package com.machiav3lli.backup.dialogs
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,8 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.blockShadow
-import com.machiav3lli.backup.ui.compose.item.ActionButton
-import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
+import com.machiav3lli.backup.ui.compose.item.DialogNegativeButton
+import com.machiav3lli.backup.ui.compose.item.DialogPositiveButton
 import com.machiav3lli.backup.ui.compose.item.MultiSelectionListItem
 
 @Composable
@@ -78,13 +77,15 @@ fun <T> MultiSelectionDialogUI(
             }
 
             Row(
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                ActionButton(text = stringResource(id = R.string.dialogCancel)) {
+                DialogNegativeButton(text = stringResource(id = R.string.dialogCancel)) {
                     openDialogCustom.value = false
                 }
-                Spacer(Modifier.weight(1f))
-                ElevatedActionButton(text = stringResource(id = R.string.dialogOK)) {
+                DialogPositiveButton(text = stringResource(id = R.string.dialogOK)) {
                     onSave(selected)
                     openDialogCustom.value = false
                 }

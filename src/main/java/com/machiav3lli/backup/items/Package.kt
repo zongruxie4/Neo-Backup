@@ -416,7 +416,7 @@ class Package {
 
     fun getExternalDataPath(): String {
         val user = ShellCommands.currentProfile.toString()
-        return getAndroidFolder(user, "data", SystemUtils::isWritablePath)
+        return getAndroidFolder("data", user, SystemUtils::isWritablePath)
             ?.absolutePath
             ?.plus("${File.separator}$packageName")
             ?: ""
@@ -424,7 +424,7 @@ class Package {
 
     fun getObbFilesPath(): String {
         val user = ShellCommands.currentProfile.toString()
-        return getAndroidFolder(user, "obb", SystemUtils::isWritablePath)
+        return getAndroidFolder("obb", user, SystemUtils::isWritablePath)
             ?.absolutePath
             ?.plus("${File.separator}$packageName")
             ?: ""
@@ -432,7 +432,7 @@ class Package {
 
     fun getMediaFilesPath(): String {
         val user = ShellCommands.currentProfile.toString()
-        return getAndroidFolder(user, "media", SystemUtils::isWritablePath)
+        return getAndroidFolder("media", user, SystemUtils::isWritablePath)
             ?.absolutePath
             ?.plus("${File.separator}$packageName")
             ?: ""

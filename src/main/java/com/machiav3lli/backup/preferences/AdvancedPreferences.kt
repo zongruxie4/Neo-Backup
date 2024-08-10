@@ -64,7 +64,7 @@ fun DevPrefGroups() {
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         PrefsGroupCollapsed(prefs = devUserOptions, heading = "advanced users (those who know)")
-        PrefsGroupCollapsed(prefs = devAltOptions, heading = "alternates (to compare two variants)")
+        PrefsGroupCollapsed(prefs = devAltOptions, heading = "alternatives (to compare two variants)")
         PrefsGroupCollapsed(prefs = devLogOptions, heading = "logging")
         PrefsGroupCollapsed(prefs = devTraceOptions, heading = "tracing")
         PrefsGroupCollapsed(prefs = devFileOptions, heading = "file handling")
@@ -145,6 +145,12 @@ val pref_maxJobs = IntPref(
     defaultValue = 0
 )
 
+val pref_menuButtonAlwaysVisible = BooleanPref(
+    key = "dev-adv.menuButtonAlwaysVisible",
+    summary = "also show context menu button when selection is empty",
+    defaultValue = false
+)
+
 val pref_busyIconTurnTime = IntPref(
     key = "dev-adv.busyIconTurnTime",
     summary = "time for one rotation of busy icon (ms)",
@@ -164,12 +170,6 @@ val pref_busyFadeTime = IntPref(
     summary = "time to fade busy color (ms)",
     entries = (0..5000 step 250).toList(),
     defaultValue = 2000
-)
-
-val pref_menuButtonAlwaysVisible = BooleanPref(
-    key = "dev-adv.menuButtonAlwaysVisible",
-    summary = "also show context menu button when selection is empty",
-    defaultValue = false
 )
 
 val pref_hideBackupLabels = BooleanPref(
@@ -252,6 +252,7 @@ val pref_restoreTarCmd = BooleanPref(
     defaultValue = true
 )
 
+
 //---------------------------------------- developer settings - file handling
 
 val pref_allowShadowingDefault = BooleanPref(
@@ -280,29 +281,6 @@ val pref_cacheFileLists = BooleanPref(
 )
 
 
-//---------------------------------------- developer settings - workarounds
-
-val pref_fixNavBarOverlap = IntPref(
-    key = "dev-hack.fixNavBarOverlap",
-    summary = "fix UI overlapping system navbars [in 'dp', usually needs something like 42]",
-    entries = (0..64).toList(),
-    defaultValue = if (OABX.minSDK(Build.VERSION_CODES.R)) 0 else 42
-)
-
-val pref_delayBeforeRefreshAppInfo = IntPref(
-    key = "dev-hack.delayBeforeRefreshAppInfo",
-    summaryId = R.string.prefs_delaybeforerefreshappinfo_summary,
-    entries = (0..30).toList(),
-    defaultValue = 0
-)
-
-val pref_refreshAppInfoTimeout = IntPref(
-    key = "dev-hack.refreshAppInfoTimeout",
-    summaryId = R.string.prefs_refreshappinfotimeout_summary,
-    entries = ((0..9 step 1) + (10..120 step 10)).toList(),
-    defaultValue = 30
-)
-
 //---------------------------------------- developer settings - implementation alternatives
 
 val pref_useNoteIcon = BooleanPref(
@@ -310,6 +288,7 @@ val pref_useNoteIcon = BooleanPref(
     summary = "use the icon instead of the big fat 'edit note' button",
     defaultValue = false
 )
+
 val pref_paranoidBackupLists = BooleanPref(
     key = "dev-alt.paranoidBackupLists",
     summary = "verify file system after adding or deleting backups (slower, especially remote)",
@@ -427,6 +406,31 @@ val pref_useExpedited = BooleanPref(
     summaryId = R.string.prefs_useexpedited_summary,
     defaultValue = true
 )
+
+
+//---------------------------------------- developer settings - workarounds
+
+val pref_fixNavBarOverlap = IntPref(
+    key = "dev-hack.fixNavBarOverlap",
+    summary = "fix UI overlapping system navbars [in 'dp', usually needs something like 42]",
+    entries = (0..64).toList(),
+    defaultValue = if (OABX.minSDK(Build.VERSION_CODES.R)) 0 else 42
+)
+
+val pref_delayBeforeRefreshAppInfo = IntPref(
+    key = "dev-hack.delayBeforeRefreshAppInfo",
+    summaryId = R.string.prefs_delaybeforerefreshappinfo_summary,
+    entries = (0..30).toList(),
+    defaultValue = 0
+)
+
+val pref_refreshAppInfoTimeout = IntPref(
+    key = "dev-hack.refreshAppInfoTimeout",
+    summaryId = R.string.prefs_refreshappinfotimeout_summary,
+    entries = ((0..9 step 1) + (10..120 step 10)).toList(),
+    defaultValue = 30
+)
+
 
 //---------------------------------------- developer settings - faking
 

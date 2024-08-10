@@ -25,7 +25,7 @@ open class Pref(
     val summary: String? = null,
     @StringRes val summaryId: Int,
     val icon: ImageVector? = null,
-    val iconTint: Color?,
+    var iconTint: Color?,
     val enableIf: (() -> Boolean)? = null,
     val onChanged: ((Pref) -> Unit)? = null,
     var group: String = "",
@@ -36,7 +36,7 @@ open class Pref(
         val prefs get() = prefGroups.values.flatten()
         var lockedActions = 0
 
-        val prefChangeListeners = mutableStateMapOf<Pref, (pref: Pref) -> Unit>()
+        val prefChangeListeners = mutableStateMapOf<Pref, (pref: Pref) -> Unit>()  //TODO not necessary currently, but may be useful in future, empty map doesn't hurt
         private fun onPrefChange(name: String) {
             prefChangeListeners.forEach { (pref, listener) ->
                 listener(pref)
