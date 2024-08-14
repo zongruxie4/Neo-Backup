@@ -608,10 +608,10 @@ class OABX : Application() {
 
         var appsSuspendedChecked = false
 
+        val db: ODatabase get() = NB.db
+
         var shellHandler: ShellHandler? = null
             private set
-
-        val db: ODatabase get() = NB.db
 
         fun initShellHandler(): ShellHandler? {
             return try {
