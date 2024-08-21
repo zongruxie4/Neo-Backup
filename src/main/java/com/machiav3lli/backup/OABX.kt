@@ -317,7 +317,7 @@ class OABX : Application() {
         //TODO hg42 beginBusy(startupMsg)
         hitBusy(60000)
 
-        Plugin.ensureScanned()
+        Plugin.ensureScanned()  // before ShellHandler, because plugins are used there
         initShellHandler()
 
         val result = registerReceiver(
