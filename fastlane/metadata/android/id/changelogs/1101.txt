@@ -1,0 +1,7 @@
+**OAndBackupX 1.1.1**
+* Ditambahkan: pintasan laporan Exodus ke AppSheet
+* Diperbaiki: tidak diluncurkan jika ada aplikasi dengan dimensi ikon <= 0
+* Diubah: default sekarang disetel untuk menyalin OAndBackupX ke folder cadangan induk
+* Ditambahkan: Bahasa Yunani (Kredit @tsiflimagas)
+* Diperbarui: Kapitalisasi dan String Bahasa Inggris (Kredit: @atrate)
+* Diperbarui: menggeneralisasi Bahasa Mandarin, Belanda, Polandia, dan Swedia
