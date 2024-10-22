@@ -55,7 +55,7 @@ fun LogsPage(viewModel: LogsVM = koinViewModel()) {
 }
 
 @Composable
-fun Logs(viewModel: LogsVM, modifier: Modifier) {
+fun Logs(viewModel: LogsVM = koinViewModel(), modifier: Modifier = Modifier) {
 
     val logs = remember(viewModel) { viewModel.logsList }
 
