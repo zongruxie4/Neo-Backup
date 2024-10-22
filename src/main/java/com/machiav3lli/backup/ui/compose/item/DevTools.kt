@@ -87,7 +87,7 @@ import com.machiav3lli.backup.plugins.Plugin.Companion.typeFor
 import com.machiav3lli.backup.plugins.SpecialFilesPlugin
 import com.machiav3lli.backup.plugins.TextPlugin
 import com.machiav3lli.backup.preferences.DevPrefGroups
-import com.machiav3lli.backup.preferences.LogsPage
+import com.machiav3lli.backup.preferences.Logs
 import com.machiav3lli.backup.preferences.Terminal
 import com.machiav3lli.backup.preferences.TerminalText
 import com.machiav3lli.backup.preferences.logRel
@@ -339,7 +339,8 @@ fun DevInfoLogTab() {
 
 @Composable
 fun DevLogsTab() {
-    LogsPage()
+
+    Logs()
 }
 
 @Composable
