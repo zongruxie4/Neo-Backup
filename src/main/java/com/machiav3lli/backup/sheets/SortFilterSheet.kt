@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -61,7 +62,6 @@ import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainBackupModeChipItems
 import com.machiav3lli.backup.mainFilterChipItems
 import com.machiav3lli.backup.sortChipItems
-import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUUpLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
@@ -102,106 +102,120 @@ fun SortFilterSheet(onDismiss: () -> Unit) {
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
-            ListItem(
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent,
-                ),
-                headlineContent = {
-                    Column {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val stats = currentStats()
-                            DoubleVerticalText(
-                                upperText = stats.nApps.toString(),
-                                bottomText = stringResource(id = R.string.stats_apps),
-                                modifier = Modifier.weight(1f)
-                            )
-                            DoubleVerticalText(
-                                upperText = stats.nBackups.toString(),
-                                bottomText = stringResource(id = R.string.stats_backups),
-                                modifier = Modifier.weight(1f)
-                            )
-                            DoubleVerticalText(
-                                upperText = stats.nUpdated.toString(),
-                                bottomText = stringResource(id = R.string.stats_updated),
-                                modifier = Modifier.weight(1f)
-                            )
+            Column(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+            ) {
+                ListItem(
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    ),
+                    headlineContent = {
+                        Column {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val stats = currentStats()
+                                DoubleVerticalText(
+                                    upperText = stats.nApps.toString(),
+                                    bottomText = stringResource(id = R.string.stats_apps),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                DoubleVerticalText(
+                                    upperText = stats.nBackups.toString(),
+                                    bottomText = stringResource(id = R.string.stats_backups),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                DoubleVerticalText(
+                                    upperText = stats.nUpdated.toString(),
+                                    bottomText = stringResource(id = R.string.stats_updated),
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val stats = currentStats()
+                                InfoChipsBlock(
+                                    list = listOf(
+                                        InfoChipItem(
+                                            flag = CHIP_SIZE_APP,
+                                            text = stringResource(id = R.string.app_size) + " " + Formatter.formatFileSize(
+                                                LocalContext.current,
+                                                stats.szApps ?: 0
+                                            ),
+                                        ),
+                                        InfoChipItem(
+                                            flag = CHIP_SIZE_DATA,
+                                            text = stringResource(id = R.string.data_size) + " " + Formatter.formatFileSize(
+                                                LocalContext.current,
+                                                stats.szData ?: 0
+                                            ),
+                                        ),
+                                    )
+                                )
+                            }
                         }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val stats = currentStats()
-                            InfoChipsBlock(list = listOf(
-                                InfoChipItem(
-                                    flag = CHIP_SIZE_APP,
-                                    text = stringResource(id = R.string.app_size) + " " + Formatter.formatFileSize(
-                                        LocalContext.current,
-                                        stats.szApps ?: 0
-                                    ),
-                                ),
-                                InfoChipItem(
-                                    flag = CHIP_SIZE_DATA,
-                                    text = stringResource(id = R.string.data_size) + " " + Formatter.formatFileSize(
-                                        LocalContext.current,
-                                        stats.szData ?: 0
-                                    ),
-                                ),
-                            ))
+                    },
+                    trailingContent = {
+                        RoundButton(icon = Phosphor.CaretDown) {
+                            onDismiss()
                         }
                     }
-                },
-                trailingContent = {
-                    RoundButton(icon = Phosphor.CaretDown) {
-                        onDismiss()
-                    }
-                }
-            )
+                )
+                HorizontalDivider(thickness = 2.dp)
+
+            }
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .navigationBarsPadding(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
             ) {
-                ElevatedActionButton(
-                    text = stringResource(id = R.string.resetFilter),
-                    icon = Phosphor.ArrowUUpLeft,
-                    modifier = Modifier.weight(1f),
-                    fullWidth = true,
-                    positive = false,
-                    onClick = {
-                        sortFilterModel = SortFilterModel()
-                        onDismiss()
-                    }
-                )
-                ElevatedActionButton(
-                    text = stringResource(id = R.string.applyFilter),
-                    icon = Phosphor.Check,
-                    modifier = Modifier.weight(1f),
-                    fullWidth = true,
-                    positive = true,
-                    onClick = {
-                        sortFilterModel = model
-                        onDismiss()
-                    }
-                )
+                HorizontalDivider(thickness = 2.dp)
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .navigationBarsPadding(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ElevatedActionButton(
+                        text = stringResource(id = R.string.resetFilter),
+                        icon = Phosphor.ArrowUUpLeft,
+                        modifier = Modifier.weight(1f),
+                        fullWidth = true,
+                        positive = false,
+                        onClick = {
+                            sortFilterModel = SortFilterModel()
+                            onDismiss()
+                        }
+                    )
+                    ElevatedActionButton(
+                        text = stringResource(id = R.string.applyFilter),
+                        icon = Phosphor.Check,
+                        modifier = Modifier.weight(1f),
+                        fullWidth = true,
+                        positive = true,
+                        onClick = {
+                            sortFilterModel = model
+                            onDismiss()
+                        }
+                    )
+                }
             }
         }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
-                .blockBorder()
                 .nestedScroll(nestedScrollConnection)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
