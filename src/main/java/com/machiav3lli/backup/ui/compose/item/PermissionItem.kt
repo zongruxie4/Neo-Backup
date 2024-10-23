@@ -25,10 +25,11 @@ import com.machiav3lli.backup.ui.item.Permission
 @Composable
 fun PermissionItem(
     item: Permission,
+    modifier: Modifier,
     onClick: () -> Unit = {},
 ) {
     ListItem(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .clickable(onClick = onClick),

@@ -188,7 +188,11 @@ fun PermissionsPage() {
             contentPadding = PaddingValues(8.dp)
         ) {
             items(permissionsList.toList(), key = { it.first.nameId }) { (permission, onClick) ->
-                PermissionItem(permission, onClick)
+                PermissionItem(
+                    item = permission,
+                    modifier = Modifier.animateItem(),
+                    onClick = onClick
+                )
             }
         }
     }
