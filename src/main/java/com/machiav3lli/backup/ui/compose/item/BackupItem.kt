@@ -17,6 +17,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,9 +39,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.PackageInfo
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
-import com.machiav3lli.backup.preferences.pref_useNoteIcon
-import com.machiav3lli.backup.ui.compose.BalancedWrapRow
-import com.machiav3lli.backup.ui.compose.balancedWrap
+import com.machiav3lli.backup.preferences.pref_altBackupDate
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Lock
@@ -51,16 +50,14 @@ import java.time.LocalDateTime
 @Composable
 fun BackupItem_headlineContent(
     item: Backup,
-    onNote: ((Backup) -> Unit)? = null,
 ) {
-    BalancedWrapRow {
+    Row {
         Text(
-            text = "${item.versionName ?: ""} #${item.versionCode}",
-            modifier = Modifier.balancedWrap(),
+            text = "${item.versionName ?: ""} (${item.versionCode})",
             overflow = TextOverflow.Ellipsis,
             maxLines = 5,
-            style = MaterialTheme.typography.labelMedium
         )
+        Spacer(modifier = Modifier.weight(1f))
         AnimatedVisibility(visible = (item.cpuArch != android.os.Build.SUPPORTED_ABIS[0])) {
             Text(
                 text = " ${item.cpuArch} ",
@@ -70,12 +67,6 @@ fun BackupItem_headlineContent(
                 style = MaterialTheme.typography.labelMedium,
             )
         }
-        NoteTagItem(
-            // contains a contitional balancedWrap
-            item,
-            maxLines = 5,
-            onNote = onNote,
-        )
         Spacer(modifier = Modifier.width(8.dp))
         BackupLabels(item = item)
     }
@@ -89,26 +80,12 @@ fun BackupItem_supportingContent(item: Backup) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FlowRow(
-            modifier = Modifier.weight(1f, fill = true)
-        ) {
-            Text(
                 text = item.backupDate.format(BACKUP_DATE_TIME_SHOW_FORMATTER),
-                modifier = Modifier.align(Alignment.Top),
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
-                style = MaterialTheme.typography.labelMedium,
-            )
-            if (item.tag.isNotEmpty())
-                Text(
-                    text = " ${item.tag}",
-                    modifier = Modifier.align(Alignment.Top),
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 3,
-                    style = MaterialTheme.typography.labelMedium,
-                )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            modifier = Modifier.align(Alignment.Top),
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2,
+        )
         FlowRow {
             Text(
                 text = if (item.backupVersionCode == 0)
@@ -116,10 +93,9 @@ fun BackupItem_supportingContent(item: Backup) {
                 else
                     "${item.backupVersionCode / 1000}.${item.backupVersionCode % 1000}",
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 3,
-                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
             )
-            AnimatedVisibility(visible = item.isEncrypted) {
+            if (item.isEncrypted) {
                 val description = "${item.cipherType}"
                 val showTooltip = remember { mutableStateOf(false) }
                 if (showTooltip.value) {
@@ -134,8 +110,7 @@ fun BackupItem_supportingContent(item: Backup) {
                             onLongClick = { showTooltip.value = true }
                         ),
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
-                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
                 )
             }
             val compressionText = if (item.isCompressed) {
@@ -144,15 +119,18 @@ fun BackupItem_supportingContent(item: Backup) {
                 else
                     " ${item.compressionType}"
             } else ""
-            val fileSizeText = if (item.backupVersionCode != 0)
-                " - ${Formatter.formatFileSize(LocalContext.current, item.size)}"
-            else ""
-            Text(
-                text = compressionText + fileSizeText,
-                modifier = Modifier.align(Alignment.Top),
+            if (compressionText.isNotEmpty()) Text(
+                text = compressionText,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.labelMedium,
+            )
+            val fileSizeText = if (item.backupVersionCode != 0)
+                Formatter.formatFileSize(LocalContext.current, item.size)
+            else ""
+            Text(
+                text = " - ${item.directoryTag}$fileSizeText",
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
             )
             AnimatedVisibility(visible = (item.profileId != currentProfile)) {
                 Row {
@@ -165,7 +143,6 @@ fun BackupItem_supportingContent(item: Backup) {
                         color = Color.Red,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
-                        style = MaterialTheme.typography.labelMedium,
                     )
                 }
             }
@@ -188,15 +165,16 @@ fun BackupItem(
         colors = ListItemDefaults.colors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         ),
-        headlineContent = { BackupItem_headlineContent(item, onNote) },
+        headlineContent = { BackupItem_headlineContent(item) },
         supportingContent = {
-            Column {
-
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 BackupItem_supportingContent(item)
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom,
                 ) {
                     var persistent by remember(item.persistent) {
                         mutableStateOf(item.persistent)
@@ -206,33 +184,39 @@ fun BackupItem(
                         rewriteBackup(item, item.copy(persistent = persistent))
                     }
 
-                    if (persistent)
-                        RoundButton(
-                            icon = Phosphor.Lock,
-                            tint = Color.Red,
-                            onClick = togglePersistent
-                        )
-                    else
-                        RoundButton(
-                            icon = Phosphor.LockOpen,
-                            onClick = togglePersistent
-                        )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    ElevatedActionButton(
-                        icon = Phosphor.TrashSimple,
-                        text = stringResource(id = R.string.deleteBackup),
-                        positive = false,
-                        withText = false,
-                        onClick = { onDelete(item) },
+                    NoteTagItem(
+                        item = item,
+                        modifier = Modifier.weight(1f, false),
+                        maxLines = 3,
+                        onNote = onNote,
                     )
-                    ElevatedActionButton(
-                        icon = Phosphor.ClockCounterClockwise,
-                        text = stringResource(id = R.string.restore),
-                        positive = true,
-                        onClick = { onRestore(item) },
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (persistent)
+                            RoundButton(
+                                icon = Phosphor.Lock,
+                                tint = Color.Red,
+                                onClick = togglePersistent
+                            )
+                        else
+                            RoundButton(
+                                icon = Phosphor.LockOpen,
+                                onClick = togglePersistent
+                            )
+                        RoundButton(
+                            icon = Phosphor.TrashSimple,
+                            description = stringResource(id = R.string.deleteBackup),
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            onClick = { onDelete(item) }
+                        )
+                        ElevatedActionButton(
+                            icon = Phosphor.ClockCounterClockwise,
+                            text = stringResource(id = R.string.restore),
+                            positive = true,
+                            onClick = { onRestore(item) },
+                        )
+                    }
                 }
             }
         },
@@ -253,35 +237,37 @@ fun RestoreBackupItem(
     val showApk by remember(item) { mutableStateOf(item.hasApk) }
     val showData by remember(item) { mutableStateOf(item.hasData) }
 
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.large),
-        colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        ),
-        leadingContent = {
-            Row {
-                Checkbox(checked = apkChecked,
-                    enabled = showApk,
-                    onCheckedChange = {
-                        apkChecked = it
-                        onApkClick(item.packageName, it, index)
-                    }
-                )
-                Checkbox(checked = dataChecked,
-                    enabled = showData,
-                    onCheckedChange = {
-                        dataChecked = it
-                        onDataClick(item.packageName, it, index)
-                    }
-                )
-            }
-
-        },
-        headlineContent = { BackupItem_headlineContent(item, null) },
-        supportingContent = { BackupItem_supportingContent(item) },
-    )
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        shape = MaterialTheme.shapes.large,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(checked = apkChecked,
+                enabled = showApk,
+                onCheckedChange = {
+                    apkChecked = it
+                    onApkClick(item.packageName, it, index)
+                }
+            )
+            Checkbox(checked = dataChecked,
+                enabled = showData,
+                onCheckedChange = {
+                    dataChecked = it
+                    onDataClick(item.packageName, it, index)
+                }
+            )
+            ListItem(
+                modifier = Modifier.fillMaxWidth(),
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                ),
+                headlineContent = { BackupItem_headlineContent(item) },
+                supportingContent = { BackupItem_supportingContent(item) },
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -292,7 +278,6 @@ fun BackupRestorePreview() {
     OABX.fakeContext = LocalContext.current.applicationContext
 
     var note by remember { mutableStateOf("a very very very long note text") }
-    var useIcon by remember { mutableStateOf(pref_useNoteIcon.value) }
 
     val backup = Backup(
         base = PackageInfo(
@@ -338,10 +323,6 @@ fun BackupRestorePreview() {
             }
             ActionButton("multiline") {
                 note = "a very very very long note text\nmultiple\nlines"
-            }
-            ActionButton("icon=$useIcon") {
-                useIcon = !useIcon
-                pref_useNoteIcon.value = useIcon
             }
         }
 
