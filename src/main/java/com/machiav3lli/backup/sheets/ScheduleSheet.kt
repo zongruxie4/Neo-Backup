@@ -22,14 +22,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -46,9 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -70,7 +67,6 @@ import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainFilterChipItems
 import com.machiav3lli.backup.scheduleBackupModeChipItems
 import com.machiav3lli.backup.traceDebug
-import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CheckCircle
@@ -121,7 +117,6 @@ fun ScheduleSheet(
     val customList by viewModel.customList.collectAsState(emptySet())
     val blockList by viewModel.blockList.collectAsState(emptySet())
     val allTags by viewModel.allTags.collectAsState()
-    val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
     schedule?.let { schedule ->
         val (absTime, relTime) = timeLeft(schedule, CoroutineScope(Dispatchers.Default))
@@ -133,55 +128,60 @@ fun ScheduleSheet(
             rescheduleBoolean: Boolean,
         ) = viewModel.updateSchedule(schedule, rescheduleBoolean)
 
-
         Scaffold(
             containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onSurface,
             topBar = {
-                ListItem(
-                    colors = ListItemDefaults.colors(
-                        containerColor = Color.Transparent,
-                    ),
-                    leadingContent = {
-                        TitleText(R.string.sched_name)
-                    },
-                    headlineContent = {
-                        OutlinedCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.outlinedCardColors(
-                                containerColor = Color.Transparent
-                            ),
-                            shape = MaterialTheme.shapes.large,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                            onClick = {
-                                dialogProps.value = Pair(DIALOG_SCHEDULENAME, schedule)
-                                openDialog.value = true
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+                ) {
+                    ListItem(
+                        colors = ListItemDefaults.colors(
+                            containerColor = Color.Transparent,
+                        ),
+                        leadingContent = {
+                            TitleText(R.string.sched_name)
+                        },
+                        headlineContent = {
+                            OutlinedCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.outlinedCardColors(
+                                    containerColor = Color.Transparent
+                                ),
+                                shape = MaterialTheme.shapes.large,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                onClick = {
+                                    dialogProps.value = Pair(DIALOG_SCHEDULENAME, schedule)
+                                    openDialog.value = true
+                                }
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 16.dp),
+                                    text = schedule.name,
+                                    textAlign = TextAlign.Center,
+                                )
                             }
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 16.dp),
-                                text = schedule.name,
-                                textAlign = TextAlign.Center,
+                        },
+                        trailingContent = {
+                            RoundButton(
+                                icon = Phosphor.CaretDown,
+                                description = stringResource(id = R.string.dismiss),
+                                onClick = { onDismiss() }
                             )
                         }
-                    },
-                    trailingContent = {
-                        RoundButton(
-                            icon = Phosphor.CaretDown,
-                            description = stringResource(id = R.string.dismiss),
-                            onClick = { onDismiss() }
-                        )
-                    }
-                )
+                    )
+                    HorizontalDivider(thickness = 2.dp)
+                }
             },
             bottomBar = {
                 Column(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .navigationBarsPadding(),
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
                 ) {
+                    HorizontalDivider(thickness = 2.dp)
                     Row {
                         if (schedule.enabled) {
                             Text(text = "🕒 $absTime    ⏳ $relTime") // TODO replace by resource icons
@@ -189,7 +189,11 @@ fun ScheduleSheet(
                             Text(text = "🕒 $absTime") // TODO replace by resource icons
                         }
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
                         CheckChip(
                             checked = schedule.enabled,
                             textId = R.string.sched_checkbox,
@@ -201,7 +205,6 @@ fun ScheduleSheet(
                                 )
                             }
                         )
-                        Spacer(modifier = Modifier.weight(1f))
                         ElevatedActionButton(
                             text = stringResource(id = R.string.delete),
                             icon = Phosphor.TrashSimple,
@@ -225,8 +228,6 @@ fun ScheduleSheet(
             LazyColumn(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .blockBorder()
-                    .nestedScroll(nestedScrollConnection)
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(8.dp)
