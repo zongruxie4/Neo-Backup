@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +38,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -56,9 +56,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -86,7 +84,6 @@ import com.machiav3lli.backup.preferences.pref_useWorkManagerForSingleManualJob
 import com.machiav3lli.backup.tasks.BackupActionTask
 import com.machiav3lli.backup.tasks.RestoreActionTask
 import com.machiav3lli.backup.traceCompose
-import com.machiav3lli.backup.ui.compose.blockBorder
 import com.machiav3lli.backup.ui.compose.icons.Icon
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.icon.Exodus
@@ -148,7 +145,6 @@ fun AppSheet(
     val dismissNow by viewModel.dismissNow
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarVisible = snackbarText.isNotEmpty()
-    val nestedScrollConnection = rememberNestedScrollInteropConnection()
     val coroutineScope = rememberCoroutineScope()
     val columns = 2
 
@@ -182,11 +178,8 @@ fun AppSheet(
             contentColor = MaterialTheme.colorScheme.onSurface,
             topBar = {
                 Column(
-                    modifier = Modifier.padding(
-                        start = 8.dp,
-                        end = 8.dp,
-                        top = 8.dp,
-                    )
+                    modifier = Modifier.padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -265,7 +258,6 @@ fun AppSheet(
                         )
                     }
                     InfoChipsBlock(list = pkg.infoChips())
-                    Spacer(Modifier.height(8.dp))
                     if (snackbarVisible)
                         LinearProgressIndicator(
                             modifier = Modifier
@@ -274,6 +266,10 @@ fun AppSheet(
                             trackColor = MaterialTheme.colorScheme.surface,
                             color = MaterialTheme.colorScheme.primary,
                         )
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
                 }
             },
             snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -281,8 +277,6 @@ fun AppSheet(
             LazyVerticalGrid(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .blockBorder()
-                    .nestedScroll(nestedScrollConnection)
                     .fillMaxSize(),
                 columns = GridCells.Fixed(columns),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -386,9 +380,10 @@ fun AppSheet(
                     }
                 }
                 item(span = { GridItemSpan(columns) }) {
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         TitleText(textId = R.string.title_tags)
-                        Spacer(modifier = Modifier.height(8.dp))
                         TagsBlock(
                             tags = appExtras.customTags,
                             onRemove = {
@@ -406,9 +401,10 @@ fun AppSheet(
                     }
                 }
                 item(span = { GridItemSpan(columns) }) {
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         TitleText(textId = R.string.title_note)
-                        Spacer(modifier = Modifier.height(8.dp))
                         OutlinedCard(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.outlinedCardColors(
