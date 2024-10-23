@@ -247,7 +247,7 @@ data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::cla
             return field
         }
 
-    val tag: String
+    val directoryTag: String
         get() {
             val pkg = "📦" // "📁"
             return (dir?.path

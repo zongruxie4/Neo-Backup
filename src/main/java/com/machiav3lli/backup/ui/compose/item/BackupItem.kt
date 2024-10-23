@@ -45,6 +45,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Lock
 import com.machiav3lli.backup.ui.compose.icons.phosphor.LockOpen
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
+import com.machiav3lli.backup.utils.getFormattedDate
 import java.time.LocalDateTime
 
 @Composable
@@ -80,8 +81,10 @@ fun BackupItem_supportingContent(item: Backup) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-                text = item.backupDate.format(BACKUP_DATE_TIME_SHOW_FORMATTER),
         Text(
+            text = if (pref_altBackupDate.value)
+                item.backupDate.format(BACKUP_DATE_TIME_SHOW_FORMATTER)
+            else item.backupDate.getFormattedDate(true),
             modifier = Modifier.align(Alignment.Top),
             overflow = TextOverflow.Ellipsis,
             maxLines = 2,
