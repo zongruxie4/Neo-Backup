@@ -61,6 +61,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import timber.log.Timber
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
     private val db: ODatabase,
     private val appContext: Application,
@@ -104,7 +105,6 @@ class MainViewModel(
                 emptyList()
             )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val backupsMapDb =
         //------------------------------------------------------------------------------------------ backupsMap
         db.getBackupDao().getAllFlow()
@@ -145,7 +145,6 @@ class MainViewModel(
             null
         )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val appExtrasMap =
         //------------------------------------------------------------------------------------------ appExtrasMap
         db.getAppExtrasDao().getAllFlow()
@@ -157,7 +156,6 @@ class MainViewModel(
                 emptyMap()
             )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val packageList =
         //========================================================================================== packageList
         combine(db.getAppInfoDao().getAllFlow(), backupsMapDb) { appinfos, backups ->
@@ -187,7 +185,6 @@ class MainViewModel(
                 emptyList()
             )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val packageMap =
         //------------------------------------------------------------------------------------------ packageMap
         packageList
@@ -199,7 +196,6 @@ class MainViewModel(
                 emptyMap()
             )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val notBlockedList =
         //========================================================================================== notBlockedList
         combine(packageList, blocklist) { pkgs, blocked ->
@@ -240,7 +236,6 @@ class MainViewModel(
             "modelSortFilter"
         )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val filteredList =
         //========================================================================================== filteredList
         combine(
@@ -282,7 +277,6 @@ class MainViewModel(
                 emptyList()
             )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val updatedPackages =
         //------------------------------------------------------------------------------------------ updatedPackages
         notBlockedList

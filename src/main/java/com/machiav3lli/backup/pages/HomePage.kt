@@ -90,7 +90,7 @@ import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.viewmodels.AppSheetViewModel
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // TODO remove Scaffold
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun HomePage() {

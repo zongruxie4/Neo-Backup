@@ -30,6 +30,7 @@ import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -72,7 +73,6 @@ import com.machiav3lli.backup.ui.compose.item.DevTools
 import com.machiav3lli.backup.ui.compose.theme.AppTheme
 import com.machiav3lli.backup.ui.navigation.MainNavHost
 import com.machiav3lli.backup.ui.navigation.NavItem
-import com.machiav3lli.backup.ui.navigation.clearBackStack
 import com.machiav3lli.backup.ui.navigation.safeNavigate
 import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
 import com.machiav3lli.backup.utils.SystemUtils
@@ -94,9 +94,7 @@ import com.machiav3lli.backup.viewmodels.SchedulerViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
 
@@ -108,6 +106,7 @@ fun Rescue() {
     }
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 class MainActivityX : BaseActivity() {
 
     private val mScope: CoroutineScope = MainScope()
@@ -314,14 +313,6 @@ class MainActivityX : BaseActivity() {
                         }
                     }
                 }
-            }
-
-            LaunchedEffect(true) {
-                withTimeoutOrNull(5000) {
-                    while (navController.graph.nodes.size() < 2)
-                        delay(100)
-                }
-                doIntent(intent, "afterContent")
             }
         }
     }

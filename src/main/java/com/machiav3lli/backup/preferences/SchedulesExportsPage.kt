@@ -32,7 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.compose.blockBorder
+import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarPlus
 import com.machiav3lli.backup.ui.compose.item.TopBar
@@ -82,7 +82,7 @@ fun SchedulesExports(viewModel: ExportsViewModel, modifier: Modifier = Modifier)
 
         ExportedScheduleRecycler(
             modifier = modifier
-                .blockBorder()
+                .blockBorderBottom()
                 .fillMaxSize(),
             productsList = exports,
             onImport = { viewModel.importSchedule(it) },

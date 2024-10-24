@@ -426,15 +426,6 @@ val pref_cacheFileLists = BooleanPref(
 
 //---------------------------------------- developer settings - implementation alternatives
 
-val pref_useNoteIcon = BooleanPref(
-    key = "dev-alt.useNoteIcon",
-    summary = """
-        use icon instead of 'edit note' button and color note background
-        to emphasize the note instead of the always existent edit button
-        """.trimIndent().replace("\n", " ").trim(),
-    defaultValue = false
-)
-
 val pref_paranoidBackupLists = BooleanPref(
     key = "dev-alt.paranoidBackupLists",
     summary = "verify file system after adding or deleting backups (slower, especially remote)",

@@ -55,7 +55,8 @@ import androidx.core.text.HtmlCompat
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.legendList
 import com.machiav3lli.backup.linksList
-import com.machiav3lli.backup.ui.compose.blockBorder
+import com.machiav3lli.backup.ui.compose.blockBorderBottom
+import com.machiav3lli.backup.ui.compose.blockBorderTop
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretUp
@@ -80,6 +81,7 @@ fun HelpSheet(onDismiss: () -> Unit) {
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
             ListItem(
+                modifier = Modifier.blockBorderTop(),
                 colors = ListItemDefaults.colors(
                     containerColor = Color.Transparent,
                 ),
@@ -124,7 +126,7 @@ fun HelpSheet(onDismiss: () -> Unit) {
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
-                .blockBorder()
+                .blockBorderBottom()
                 .nestedScroll(nestedScrollConnection)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
