@@ -29,13 +29,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -86,19 +86,19 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
     }
     val workList = filteredList.filter(filterPredicate)
 
-    var allApkChecked by remember(workList, viewModel.apkBackupCheckedList) {
-        mutableStateOf(
-            viewModel.apkBackupCheckedList.size == workList
+    val allApkChecked by remember(workList, viewModel.apkBackupCheckedList) {
+        derivedStateOf {
+            viewModel.apkBackupCheckedList.filterValues { it != -1 }.size == workList
                 .filter { !it.isSpecial && (backupBoolean || it.latestBackup?.hasApk == true) }
                 .size
-        )
+        }
     }
-    var allDataChecked by remember(workList, viewModel.dataBackupCheckedList) {
-        mutableStateOf(
-            viewModel.dataBackupCheckedList.size == workList
+    val allDataChecked by remember(workList, viewModel.dataBackupCheckedList) {
+        derivedStateOf {
+            viewModel.dataBackupCheckedList.filterValues { it != -1 }.size == workList
                 .filter { backupBoolean || it.latestBackup?.hasData == true }
                 .size
-        )
+        }
     }
 
     val selection = remember { mutableStateMapOf<Package, Boolean>() }
@@ -175,21 +175,11 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                     if (b) viewModel.apkBackupCheckedList[packageName] = i
                     else if (viewModel.apkBackupCheckedList[packageName] == i)
                         viewModel.apkBackupCheckedList[packageName] = -1
-                    allApkChecked =
-                        viewModel.apkBackupCheckedList.filterValues { it == 0 }.size ==
-                                workList.filter { ai ->
-                                    backupBoolean || ai.latestBackup?.hasApk ?: false
-                                }.size
                 },
                 onBackupDataClick = { packageName: String, b: Boolean, i: Int ->
                     if (b) viewModel.dataBackupCheckedList[packageName] = i
                     else if (viewModel.dataBackupCheckedList[packageName] == i)
                         viewModel.dataBackupCheckedList[packageName] = -1
-                    allDataChecked =
-                        viewModel.dataBackupCheckedList.filterValues { it == 0 }.size ==
-                                workList.filter { ai ->
-                                    backupBoolean || ai.latestBackup?.hasData ?: false
-                                }.size
                 },
             ) { item, checkApk, checkData ->
                 when (checkApk) {
@@ -200,12 +190,6 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                     true -> viewModel.dataBackupCheckedList[item.packageName] = 0
                     else -> viewModel.dataBackupCheckedList[item.packageName] = -1
                 }
-                allApkChecked = viewModel.apkBackupCheckedList.size == workList
-                    .filter { !it.isSpecial && (backupBoolean || it.latestBackup?.hasApk == true) }
-                    .size
-                allDataChecked = viewModel.dataBackupCheckedList.size == workList
-                    .filter { backupBoolean || it.latestBackup?.hasData == true }
-                    .size
             }
             HorizontalDivider(
                 thickness = 2.dp,
@@ -225,7 +209,6 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                     count = 2,
                 ) {
                     val checkBoolean = !allApkChecked
-                    allApkChecked = checkBoolean
                     when {
                         checkBoolean -> workList
                             .filter { (backupBoolean && !it.isSpecial) || it.latestBackup?.hasApk == true }
@@ -251,7 +234,6 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                     count = 2,
                 ) {
                     val checkBoolean = !allDataChecked
-                    allDataChecked = checkBoolean
                     when {
                         checkBoolean -> workList
                             .filter { backupBoolean || it.latestBackup?.hasData == true }
