@@ -285,7 +285,7 @@ open class StorageFile {
             if (pref_shadowRootFile.value && allowShadowing) {
                 try {
                     val last =
-                        //uri.lastPathSegment // docs say: last segment of the decoded(!) path, not the encoded one
+                    //uri.lastPathSegment // docs say: last segment of the decoded(!) path, not the encoded one
                         // so make it explicit:
                         URLDecoder.decode(uri.encodedPath?.split("/")?.last() ?: "", "UTF-8")
                     Timber.i("SAF: last=$last uri=$uri")

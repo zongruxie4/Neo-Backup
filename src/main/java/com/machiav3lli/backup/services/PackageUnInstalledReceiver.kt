@@ -45,7 +45,7 @@ class PackageUnInstalledReceiver : BroadcastReceiver() {
                 when (intent.action.orEmpty()) {
                     Intent.ACTION_PACKAGE_ADDED,
                     Intent.ACTION_PACKAGE_REPLACED,
-                    -> {
+                        -> {
                         context.packageManager.getPackageInfo(
                             packageName,
                             PackageManager.GET_PERMISSIONS
@@ -58,7 +58,7 @@ class PackageUnInstalledReceiver : BroadcastReceiver() {
                     }
 
                     Intent.ACTION_PACKAGE_REMOVED,
-                    -> {
+                        -> {
                         GlobalScope.launch(Dispatchers.IO) {
                             val backups = db.getBackupDao().get(packageName)
                             if (backups.isEmpty())

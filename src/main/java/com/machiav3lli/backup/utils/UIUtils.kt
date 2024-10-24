@@ -278,7 +278,7 @@ val secondaryColor
 fun Context.restartApp(data: String? = null) {
     Timber.w(
         "restarting application${
-            data?.let { " at $data" } ?: { "" } 
+            data?.let { " at $data" } ?: { "" }
         }"
     )
     val context = this.applicationContext

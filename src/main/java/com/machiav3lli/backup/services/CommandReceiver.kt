@@ -31,6 +31,7 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                 OABX.addInfoLogText("$command $batchName")
                 OABX.work.cancel(batchName)
             }
+
             ACTION_SCHEDULE   -> {
                 intent.getStringExtra("name")?.let { name ->
                     OABX.addInfoLogText("$command $name")
@@ -47,6 +48,7 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                     }.start()
                 }
             }
+
             ACTION_RESCHEDULE -> {
                 intent.getStringExtra("name")?.let { name ->
                     val now = SystemUtils.now
@@ -70,9 +72,11 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                     }.start()
                 }
             }
+
             ACTION_CRASH      -> {
                 throw Exception("this is a crash via command intent")
             }
+
             null              -> {}
             else              -> {
                 OABX.addInfoLogText("Command: command '$command'")

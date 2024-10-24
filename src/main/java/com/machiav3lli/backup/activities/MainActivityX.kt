@@ -29,7 +29,6 @@ import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -100,7 +99,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.dsl.module
 import timber.log.Timber
 
-
 @Composable
 fun Rescue() {
     AppTheme {
@@ -109,7 +107,6 @@ fun Rescue() {
     }
 }
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 class MainActivityX : BaseActivity() {
 
     private val mScope: CoroutineScope = MainScope()

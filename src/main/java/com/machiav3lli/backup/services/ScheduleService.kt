@@ -221,7 +221,7 @@ open class ScheduleService : Service() {
                                                     WorkInfo.State.SUCCEEDED,
                                                     WorkInfo.State.FAILED,
                                                     WorkInfo.State.CANCELLED,
-                                                    -> {
+                                                         -> {
                                                         finished += 1
                                                         val succeeded =
                                                             value.outputData.getBoolean(
@@ -252,6 +252,7 @@ open class ScheduleService : Service() {
                                                                 intent
                                                             )
                                                     }
+
                                                     else -> {}
                                                 }
                                             }
