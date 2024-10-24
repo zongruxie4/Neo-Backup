@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -98,7 +97,6 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.machiav3lli.backup.ENABLED_FILTER_DISABLED
 import com.machiav3lli.backup.ICON_SIZE_LARGE
-import com.machiav3lli.backup.ICON_SIZE_MEDIUM
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.LATEST_FILTER_NEW
 import com.machiav3lli.backup.LAUNCHABLE_FILTER_NOT
@@ -531,7 +529,7 @@ fun RefreshButton(
 @Composable
 fun RefreshButtonPreview() {
     OABX.fakeContext = LocalContext.current.applicationContext
-    
+
     val level by remember { OABX.busyLevel }
     val factor = 1.0 / max(1, level)
 

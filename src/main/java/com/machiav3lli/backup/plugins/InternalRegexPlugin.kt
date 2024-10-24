@@ -28,7 +28,7 @@ class InternalRegexPlugin(file: File) : TextPlugin(file) {
                 Regex("T-h-I-s--S-h-O-u-L-d--N-e-V-e-R--m-A-t-C-h")
             }
 
-        fun replaceVars(text: String, replacements: Map<String, String> = mapOf()) : String {
+        fun replaceVars(text: String, replacements: Map<String, String> = mapOf()): String {
             var result = text
             replacements.forEach { replacement ->
                 result = result.replace(replacement.key, replacement.value)

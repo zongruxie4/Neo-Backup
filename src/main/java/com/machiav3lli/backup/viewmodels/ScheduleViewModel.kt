@@ -19,8 +19,6 @@ package com.machiav3lli.backup.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
@@ -99,18 +97,6 @@ class ScheduleViewModel(
     private suspend fun deleteS() {
         withContext(Dispatchers.IO) {
             scheduleDB.deleteById(id)
-        }
-    }
-
-    class Factory(
-        private val id: Long, private val scheduleDB: ScheduleDao,
-    ) : ViewModelProvider.Factory {
-        @Suppress("unchecked_cast")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(ScheduleViewModel::class.java)) {
-                return ScheduleViewModel(id, scheduleDB) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }

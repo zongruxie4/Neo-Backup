@@ -52,10 +52,10 @@ sealed class NavItem(
         NavItem(
             R.string.home,
             when {
-                isNeo   -> Phosphor.Infinity
+                isNeo -> Phosphor.Infinity
                 isDebug -> Phosphor.Bug
-                isHg42  -> Phosphor.Detective
-                else    -> Phosphor.House
+                isHg42 -> Phosphor.Detective
+                else -> Phosphor.House
             },
             "home",
             { HomePage() }
@@ -88,18 +88,18 @@ sealed class NavItem(
         })
 
     data object ServicePrefs :
-        NavItem(R.string.prefs_service_short, Phosphor.SlidersHorizontal, "prefs_service",{
+        NavItem(R.string.prefs_service_short, Phosphor.SlidersHorizontal, "prefs_service", {
             ServicePrefsPage()
         })
 
     data object AdvancedPrefs :
-        NavItem(R.string.prefs_advanced_short, Phosphor.Flask, "prefs_advanced",{
+        NavItem(R.string.prefs_advanced_short, Phosphor.Flask, "prefs_advanced", {
             AdvancedPrefsPage()
         })
 
     data object ToolsPrefs : NavItem(R.string.prefs_tools_short, Phosphor.Wrench, "prefs_tools", {
-            ToolsPrefsPage()
-        })
+        ToolsPrefsPage()
+    })
 
     data object Terminal :
         NavItem(R.string.prefs_tools_terminal, Phosphor.Bug, "prefs_tools/terminal")
