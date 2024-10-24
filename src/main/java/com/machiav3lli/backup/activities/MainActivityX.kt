@@ -604,7 +604,7 @@ class MainActivityX : BaseActivity() {
         when {
             !persist_beenWelcomed.value
                  -> if (!navController.currentDestination?.route?.equals(NavItem.Welcome.destination)!!) {
-                navController.clearBackStack()
+                navController.clearBackStack<NavItem.Welcome>()
                 navController.safeNavigate(NavItem.Welcome.destination)
             }
 
