@@ -52,11 +52,12 @@ import com.machiav3lli.backup.viewmodels.ScheduleViewModel
 import com.machiav3lli.backup.viewmodels.SchedulerViewModel
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
+import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // TODO remove Scaffold
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun SchedulerPage(viewModel: SchedulerViewModel) {
+fun SchedulerPage(viewModel: SchedulerViewModel = koinViewModel()) {
     val scope = rememberCoroutineScope()
     val schedules by viewModel.schedules.collectAsState(emptyList())
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()

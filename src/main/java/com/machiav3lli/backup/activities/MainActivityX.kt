@@ -24,7 +24,6 @@ import android.os.PowerManager
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
@@ -86,15 +85,19 @@ import com.machiav3lli.backup.utils.isDarkTheme
 import com.machiav3lli.backup.utils.isDeviceLockEnabled
 import com.machiav3lli.backup.utils.isEncryptionEnabled
 import com.machiav3lli.backup.utils.isLikeRoot
-import com.machiav3lli.backup.viewmodels.BatchViewModel
+import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.ExportsViewModel
 import com.machiav3lli.backup.viewmodels.LogViewModel
 import com.machiav3lli.backup.viewmodels.MainViewModel
+import com.machiav3lli.backup.viewmodels.RestoreBatchVM
 import com.machiav3lli.backup.viewmodels.SchedulerViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.dsl.module
 import timber.log.Timber
 
 
@@ -116,24 +119,7 @@ class MainActivityX : BaseActivity() {
     private lateinit var openDialog: MutableState<Boolean>
     private lateinit var dialogKey: MutableState<DialogKey?>
 
-    val viewModel by viewModels<MainViewModel> {
-        MainViewModel.Factory(OABX.db, application)
-    }
-    val backupViewModel: BatchViewModel by viewModels {
-        BatchViewModel.Factory(application)
-    }
-    val restoreViewModel: BatchViewModel by viewModels {
-        BatchViewModel.Factory(application)
-    }
-    val schedulerViewModel: SchedulerViewModel by viewModels {
-        SchedulerViewModel.Factory(OABX.db.getScheduleDao(), application)
-    }
-    val exportsViewModel: ExportsViewModel by viewModels {
-        ExportsViewModel.Factory(OABX.db.getScheduleDao(), application)
-    }
-    val logsViewModel: LogViewModel by viewModels {
-        LogViewModel.Factory(application)
-    }
+    val viewModel: MainViewModel by viewModel()
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -657,4 +643,13 @@ class MainActivityX : BaseActivity() {
                 }
             })
     }
+}
+
+val viewModelsModule = module {
+    viewModel { MainViewModel(get(), get()) }
+    viewModel { BackupBatchVM() }
+    viewModel { RestoreBatchVM() }
+    viewModel { SchedulerViewModel(get(), get()) }
+    viewModel { ExportsViewModel(get(), get()) }
+    viewModel { LogViewModel() }
 }
