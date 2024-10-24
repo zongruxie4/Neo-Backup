@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-fun LocalDateTime.getFormattedDate(withTime: Boolean): String? {
+fun LocalDateTime.getFormattedDate(withTime: Boolean): String {
     val dtf = if (withTime) DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
     else DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
     return format(dtf)

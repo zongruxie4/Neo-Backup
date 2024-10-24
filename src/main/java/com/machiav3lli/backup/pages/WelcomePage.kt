@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.linksList
-import com.machiav3lli.backup.ui.compose.blockBorder
+import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowRight
 import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
@@ -84,7 +84,7 @@ fun WelcomePage() {
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .blockBorder(),
+                .blockBorderBottom(),
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),

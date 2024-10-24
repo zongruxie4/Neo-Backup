@@ -352,7 +352,8 @@ fun BalancedWrapRow(
                     else
                         0
                 }.sum()
-                val addSpace = if (nBWraps > 0) (maxBWrapWidth - finalTotalBWrapWidth) / nBWraps else 0
+                val addSpace =
+                    if (nBWraps > 0) (maxBWrapWidth - finalTotalBWrapWidth) / nBWraps else 0
                 measurables.map { measurable ->
                     val width = (widths[measurable] ?: 0)
                     val adjustedWidth = if (isBWrap[measurable] == true)
@@ -402,9 +403,9 @@ fun BalancedWrapRow(
 }
 
 fun Color.mix(with: Color, factor: Float = 0.5f) = Color(
-    red = (red * (1f-factor) + with.red*factor).coerceIn(0f, 1f),
-    green = (green * (1f-factor) + with.green*factor).coerceIn(0f, 1f),
-    blue = (blue * (1f-factor) + with.blue*factor).coerceIn(0f, 1f),
+    red = (red * (1f - factor) + with.red * factor).coerceIn(0f, 1f),
+    green = (green * (1f - factor) + with.green * factor).coerceIn(0f, 1f),
+    blue = (blue * (1f - factor) + with.blue * factor).coerceIn(0f, 1f),
     alpha = alpha
 )
 

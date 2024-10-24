@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +37,6 @@ import com.machiav3lli.backup.preferences.pref_altNavBarItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SlidePager(
     modifier: Modifier = Modifier,
@@ -61,7 +59,6 @@ fun SlidePager(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PagerNavBar(pageItems: List<NavItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()

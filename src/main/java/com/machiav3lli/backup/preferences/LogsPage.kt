@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.items.Log
-import com.machiav3lli.backup.ui.compose.blockBorder
+import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.item.TopBar
 import com.machiav3lli.backup.ui.compose.recycler.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
@@ -65,7 +65,7 @@ fun Logs(viewModel: LogViewModel, modifier: Modifier) {
     InnerBackground(modifier = modifier.fillMaxSize()) {
         LogRecycler(
             modifier = Modifier
-                .blockBorder()
+                .blockBorderBottom()
                 .fillMaxSize(),
             productsList = logs.sortedByDescending(Log::logDate),
             onShare = { viewModel.shareLog(it, pref_shareAsFile.value) },

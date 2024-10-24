@@ -57,7 +57,7 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
-import com.machiav3lli.backup.ui.compose.blockBorder
+import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.item.PermissionItem
 import com.machiav3lli.backup.ui.compose.item.TopBar
 import com.machiav3lli.backup.ui.item.Permission
@@ -182,7 +182,7 @@ fun PermissionsPage() {
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
-                .blockBorder()
+                .blockBorderBottom()
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(8.dp)
