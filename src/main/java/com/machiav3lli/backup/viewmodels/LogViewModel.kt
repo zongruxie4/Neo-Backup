@@ -17,11 +17,8 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.LogsHandler.Companion.share
@@ -30,7 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LogViewModel(private val appContext: Application) : AndroidViewModel(appContext) {
+class LogViewModel : ViewModel() {
 
     var logsList = mutableStateListOf<Log>()
 
@@ -71,16 +68,6 @@ class LogViewModel(private val appContext: Application) : AndroidViewModel(appCo
     private suspend fun delete(log: Log) {
         withContext(Dispatchers.IO) {
             log.delete()
-        }
-    }
-
-    class Factory(private val application: Application) : ViewModelProvider.Factory {
-        @Suppress("unchecked_cast")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(LogViewModel::class.java)) {
-                return LogViewModel(application) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }
