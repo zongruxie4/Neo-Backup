@@ -17,27 +17,13 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import android.app.Application
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import kotlinx.coroutines.flow.MutableStateFlow
 
-class BatchViewModel(appContext: Application) : AndroidViewModel(appContext) {
-    val apkBackupCheckedList = SnapshotStateMap<String,Int>()
-    val dataBackupCheckedList = SnapshotStateMap<String,Int>()
-    private val progress = MutableStateFlow(Pair(true, 0.0f))
-
-    class Factory(
-        private val application: Application
-    ) : ViewModelProvider.Factory {
-        @Suppress("unchecked_cast")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(BatchViewModel::class.java)) {
-                return BatchViewModel(application) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
+open class BatchViewModel : ViewModel() {
+    val apkBackupCheckedList = SnapshotStateMap<String, Int>()
+    val dataBackupCheckedList = SnapshotStateMap<String, Int>()
 }
+
+class BackupBatchVM : BatchViewModel()
+class RestoreBatchVM : BatchViewModel()
