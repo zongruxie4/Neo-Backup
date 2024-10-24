@@ -18,9 +18,7 @@
 package com.machiav3lli.backup.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.Schedule
@@ -28,15 +26,12 @@ import com.machiav3lli.backup.preferences.traceSchedule
 import com.machiav3lli.backup.utils.cancelAlarm
 import com.machiav3lli.backup.utils.scheduleAlarm
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SchedulerViewModel(val database: ScheduleDao, appContext: Application) :
-    AndroidViewModel(appContext) {
-
+class SchedulerViewModel(val database: ScheduleDao, private val appContext: Application) :
+    ViewModel() {
     var schedules = database.getAllFlow()
-    private val progress = MutableStateFlow(Pair(true,0.0f))
 
     fun addSchedule(withSpecial: Boolean) {
         viewModelScope.launch {
@@ -55,6 +50,7 @@ class SchedulerViewModel(val database: ScheduleDao, appContext: Application) :
         }
     }
 
+    // TODO revamp
     fun updateSchedule(schedule: Schedule?, rescheduleBoolean: Boolean) {
         viewModelScope.launch {
             schedule?.let { updateS(it, rescheduleBoolean) }
@@ -65,27 +61,16 @@ class SchedulerViewModel(val database: ScheduleDao, appContext: Application) :
         withContext(Dispatchers.IO) {
             database.update(schedule)
             if (schedule.enabled) {
-                traceSchedule { "[${schedule.id}] SchedulerViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule"}
+                traceSchedule { "[${schedule.id}] SchedulerViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
                 scheduleAlarm(
-                    getApplication<Application>().baseContext,
+                    appContext.baseContext,
                     schedule.id,
                     rescheduleBoolean
                 )
             } else {
-                traceSchedule { "[${schedule.id}] SchedulerViewModel.updateS -> cancelAlarm"}
-                cancelAlarm(getApplication<Application>().baseContext, schedule.id)
+                traceSchedule { "[${schedule.id}] SchedulerViewModel.updateS -> cancelAlarm" }
+                cancelAlarm(appContext.baseContext, schedule.id)
             }
-        }
-    }
-
-    class Factory(private val dataSource: ScheduleDao, private val application: Application) :
-        ViewModelProvider.Factory {
-        @Suppress("unchecked_cast")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(SchedulerViewModel::class.java)) {
-                return SchedulerViewModel(dataSource, application) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }
