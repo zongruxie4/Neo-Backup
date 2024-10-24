@@ -20,9 +20,7 @@ package com.machiav3lli.backup.viewmodels
 import android.app.Application
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.getBackups
@@ -65,8 +63,7 @@ import timber.log.Timber
 class MainViewModel(
     private val db: ODatabase,
     private val appContext: Application,
-) : AndroidViewModel(appContext) {
-
+) : ViewModel() {
     init {
         Timber.w("==================== ${classAndId(this)}")
     }
@@ -81,7 +78,8 @@ class MainViewModel(
     //   then with f_in > f_proc the results will only come out with about f_proc
     // mapLatest: (use mapLatest { it } as an equivalent form similar to conflate())
     //   kills processing the item, when a new one comes in
-    //   so, as long as items come in faster than processing time, there won't be results, in short:
+    //   so, as long as items come
+    //   in faster than processing time, there won't be results, in short:
     //   if f_in > f_proc, then there is no output at all
     //   this is much like processing on idle only
 
@@ -416,18 +414,5 @@ class MainViewModel(
         withContext(Dispatchers.IO) {
             db.getBlocklistDao().updateList(PACKAGES_LIST_GLOBAL_ID, newList)
         }
-
-    class Factory(
-        private val database: ODatabase,
-        private val application: Application,
-    ) : ViewModelProvider.Factory {
-        @Suppress("unchecked_cast")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-                return MainViewModel(database, application) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
 }
 
