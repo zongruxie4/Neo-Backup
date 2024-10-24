@@ -26,9 +26,9 @@ import com.machiav3lli.backup.OABX.Companion.hitBusy
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.items.Log
 import com.machiav3lli.backup.items.StorageFile
-import com.machiav3lli.backup.pref_autoLogExceptions
-import com.machiav3lli.backup.pref_maxLogCount
 import com.machiav3lli.backup.preferences.onErrorInfo
+import com.machiav3lli.backup.preferences.pref_autoLogExceptions
+import com.machiav3lli.backup.preferences.pref_maxLogCount
 import com.machiav3lli.backup.preferences.textLog
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException

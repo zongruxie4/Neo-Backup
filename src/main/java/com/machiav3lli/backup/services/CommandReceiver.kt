@@ -8,7 +8,7 @@ import com.machiav3lli.backup.ACTION_CRASH
 import com.machiav3lli.backup.ACTION_RESCHEDULE
 import com.machiav3lli.backup.ACTION_SCHEDULE
 import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.traceSchedule
+import com.machiav3lli.backup.preferences.traceSchedule
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.scheduleAlarm
 import timber.log.Timber

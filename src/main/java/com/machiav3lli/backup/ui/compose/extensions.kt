@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.machiav3lli.backup.preferences.pref_altBlockLayout
-import com.machiav3lli.backup.traceFlows
+import com.machiav3lli.backup.preferences.traceFlows
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow

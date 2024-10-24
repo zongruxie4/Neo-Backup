@@ -3,7 +3,7 @@ package com.machiav3lli.backup.plugins
 import androidx.compose.runtime.Composable
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
-import com.machiav3lli.backup.tracePlugin
+import com.machiav3lli.backup.preferences.tracePlugin
 import timber.log.Timber
 import java.io.File
 import kotlin.reflect.KClass

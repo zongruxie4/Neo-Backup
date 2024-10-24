@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.preferences.publicPreferences
-import com.machiav3lli.backup.traceDebug
-import com.machiav3lli.backup.tracePrefs
+import com.machiav3lli.backup.preferences.traceDebug
+import com.machiav3lli.backup.preferences.tracePrefs
 import com.machiav3lli.backup.ui.compose.item.BooleanPreference
 import com.machiav3lli.backup.ui.compose.item.EnumPreference
 import com.machiav3lli.backup.ui.compose.item.IntPreference

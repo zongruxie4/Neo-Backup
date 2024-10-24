@@ -68,9 +68,9 @@ import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_languages
 import com.machiav3lli.backup.preferences.pref_menuButtonAlwaysVisible
+import com.machiav3lli.backup.preferences.traceCompose
 import com.machiav3lli.backup.sheets.AppSheet
 import com.machiav3lli.backup.sheets.SortFilterSheet
-import com.machiav3lli.backup.traceCompose
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CircleWavyWarning

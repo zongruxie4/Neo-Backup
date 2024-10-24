@@ -54,7 +54,7 @@ import com.machiav3lli.backup.THEME_LIGHT
 import com.machiav3lli.backup.THEME_SYSTEM_BLACK
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.items.ActionResult
-import com.machiav3lli.backup.traceDebug
+import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.ui.compose.theme.ApricotOrange
 import com.machiav3lli.backup.ui.compose.theme.ArcticCyan
 import com.machiav3lli.backup.ui.compose.theme.AzureBlue

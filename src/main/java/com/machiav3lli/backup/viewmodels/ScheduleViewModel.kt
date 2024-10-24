@@ -26,7 +26,7 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Schedule
-import com.machiav3lli.backup.traceSchedule
+import com.machiav3lli.backup.preferences.traceSchedule
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.cancelAlarm
 import com.machiav3lli.backup.utils.scheduleAlarm

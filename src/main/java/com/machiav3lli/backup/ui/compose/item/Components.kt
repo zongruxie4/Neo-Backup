@@ -121,7 +121,7 @@ import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_busyIconScale
 import com.machiav3lli.backup.preferences.pref_busyIconTurnTime
-import com.machiav3lli.backup.traceDebug
+import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowSquareOut
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsClockwise

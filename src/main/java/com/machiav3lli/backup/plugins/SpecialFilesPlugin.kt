@@ -2,7 +2,7 @@ package com.machiav3lli.backup.plugins
 
 import android.annotation.SuppressLint
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
-import com.machiav3lli.backup.tracePlugin
+import com.machiav3lli.backup.preferences.tracePlugin
 import java.io.File
 
 class SpecialFilesPlugin(file: File) : TextPlugin(file) {

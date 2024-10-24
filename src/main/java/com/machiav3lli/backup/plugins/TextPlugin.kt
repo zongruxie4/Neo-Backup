@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import com.machiav3lli.backup.tracePlugin
+import com.machiav3lli.backup.preferences.tracePlugin
 import java.io.File
 
 @Composable

@@ -65,8 +65,8 @@ import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.latestFilterChipItems
 import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainFilterChipItems
+import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.scheduleBackupModeChipItems
-import com.machiav3lli.backup.traceDebug
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CheckCircle
