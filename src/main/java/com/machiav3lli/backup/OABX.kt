@@ -42,11 +42,11 @@ import com.machiav3lli.backup.dbs.databaseModule
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.handler.AssetHandler
+import com.machiav3lli.backup.handler.ExportsHandler
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.findBackups
-import com.machiav3lli.backup.handler.workHandlerModule
 import com.machiav3lli.backup.plugins.Plugin
 import com.machiav3lli.backup.preferences.pref_busyHitTime
 import com.machiav3lli.backup.preferences.pref_cancelOnStart
@@ -90,6 +90,7 @@ import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -183,7 +184,7 @@ class OABX : Application() {
             androidLogger()
             androidContext(this@OABX)
             modules(
-                workHandlerModule,
+                handlersModule,
                 databaseModule,
             )
         }
@@ -735,4 +736,9 @@ class OABX : Application() {
             emptyBackupsForAllPackages(installedNames)
         }
     }
+}
+
+val handlersModule = module {
+    single { WorkHandler(get()) }
+    single { ExportsHandler(get()) }
 }
