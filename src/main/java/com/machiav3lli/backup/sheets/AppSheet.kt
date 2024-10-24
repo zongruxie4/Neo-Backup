@@ -81,9 +81,9 @@ import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_numBackupRevisions
 import com.machiav3lli.backup.preferences.pref_useWorkManagerForSingleManualJob
+import com.machiav3lli.backup.preferences.traceCompose
 import com.machiav3lli.backup.tasks.BackupActionTask
 import com.machiav3lli.backup.tasks.RestoreActionTask
-import com.machiav3lli.backup.traceCompose
 import com.machiav3lli.backup.ui.compose.icons.Icon
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.icon.Exodus

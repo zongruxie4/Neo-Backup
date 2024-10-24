@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.machiav3lli.backup.BUTTON_SIZE_MEDIUM
 import com.machiav3lli.backup.ICON_SIZE_MEDIUM
-import com.machiav3lli.backup.traceDebug
+import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.ui.compose.item.ExpandableBlock
 import com.machiav3lli.backup.ui.item.Pref
 import kotlinx.collections.immutable.ImmutableList

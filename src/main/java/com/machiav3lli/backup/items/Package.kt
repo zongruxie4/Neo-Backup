@@ -32,7 +32,7 @@ import com.machiav3lli.backup.handler.getPackageStorageStats
 import com.machiav3lli.backup.preferences.pref_flatStructure
 import com.machiav3lli.backup.preferences.pref_ignoreLockedInHousekeeping
 import com.machiav3lli.backup.preferences.pref_paranoidBackupLists
-import com.machiav3lli.backup.traceBackups
+import com.machiav3lli.backup.preferences.traceBackups
 import com.machiav3lli.backup.utils.FileUtils
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils

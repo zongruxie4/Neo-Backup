@@ -39,15 +39,15 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.handler.ShellCommands
-import com.machiav3lli.backup.pref_autoLogSuspicious
 import com.machiav3lli.backup.preferences.onErrorInfo
+import com.machiav3lli.backup.preferences.pref_autoLogSuspicious
 import com.machiav3lli.backup.preferences.pref_fakeScheduleMin
 import com.machiav3lli.backup.preferences.pref_useAlarmClock
 import com.machiav3lli.backup.preferences.pref_useExactAlarm
 import com.machiav3lli.backup.preferences.textLog
+import com.machiav3lli.backup.preferences.traceSchedule
 import com.machiav3lli.backup.services.AlarmReceiver
 import com.machiav3lli.backup.services.ScheduleService
-import com.machiav3lli.backup.traceSchedule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

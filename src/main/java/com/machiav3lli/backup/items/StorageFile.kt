@@ -18,7 +18,7 @@ import com.machiav3lli.backup.preferences.pref_allowShadowingDefault
 import com.machiav3lli.backup.preferences.pref_cacheFileLists
 import com.machiav3lli.backup.preferences.pref_cacheUris
 import com.machiav3lli.backup.preferences.pref_shadowRootFile
-import com.machiav3lli.backup.traceDebug
+import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.utils.SystemUtils.getShadowPath
 import com.machiav3lli.backup.utils.SystemUtils.isWritablePath
 import timber.log.Timber

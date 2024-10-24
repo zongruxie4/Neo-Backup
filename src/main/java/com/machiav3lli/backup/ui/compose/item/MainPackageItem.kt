@@ -62,8 +62,8 @@ import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_fixNavBarOverlap
-import com.machiav3lli.backup.traceContextMenu
-import com.machiav3lli.backup.traceTiming
+import com.machiav3lli.backup.preferences.traceContextMenu
+import com.machiav3lli.backup.preferences.traceTiming
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Check

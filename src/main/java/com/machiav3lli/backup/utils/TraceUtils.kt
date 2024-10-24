@@ -1,9 +1,9 @@
 package com.machiav3lli.backup.utils
 
 import com.machiav3lli.backup.dbs.entity.Backup
-import com.machiav3lli.backup.pref_trace
-import com.machiav3lli.backup.traceFlows
-import com.machiav3lli.backup.traceTiming
+import com.machiav3lli.backup.preferences.pref_trace
+import com.machiav3lli.backup.preferences.traceFlows
+import com.machiav3lli.backup.preferences.traceTiming
 import com.machiav3lli.backup.ui.item.BooleanPref
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach

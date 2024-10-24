@@ -36,8 +36,8 @@ import com.machiav3lli.backup.handler.toPackageList
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.Package.Companion.invalidateCacheForPackage
 import com.machiav3lli.backup.preferences.pref_newAndUpdatedNotification
-import com.machiav3lli.backup.traceBackups
-import com.machiav3lli.backup.traceFlows
+import com.machiav3lli.backup.preferences.traceBackups
+import com.machiav3lli.backup.preferences.traceFlows
 import com.machiav3lli.backup.ui.compose.MutableComposableFlow
 import com.machiav3lli.backup.ui.compose.item.IconCache
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
