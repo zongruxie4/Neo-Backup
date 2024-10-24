@@ -18,9 +18,7 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.activities.MainActivityX
@@ -48,7 +46,7 @@ class AppSheetViewModel(
     app: Package?,
     private val database: ODatabase,
     private var shellCommands: ShellCommands,
-) : AndroidViewModel(OABX.NB) {
+) : ViewModel() {
 
     var thePackage = flow<Package?> { app }.stateIn(
         viewModelScope,
@@ -184,7 +182,9 @@ class AppSheetViewModel(
             if (appExtras != null)
                 database.getAppExtrasDao().replaceInsert(appExtras)
             else
-                thePackage.value?.let { database.getAppExtrasDao().deleteByPackageName(it.packageName) }
+                thePackage.value?.let {
+                    database.getAppExtrasDao().deleteByPackageName(it.packageName)
+                }
         }
     }
 
@@ -197,20 +197,6 @@ class AppSheetViewModel(
     private suspend fun rewriteBackupSuspendable(backup: Backup, changedBackup: Backup) {
         withContext(Dispatchers.IO) {
             thePackage.value?.rewriteBackup(backup, changedBackup)
-        }
-    }
-
-    class Factory(
-        private val packageInfo: Package?,
-        private val database: ODatabase,
-        private val shellCommands: ShellCommands,
-    ) : ViewModelProvider.Factory {
-        @Suppress("unchecked_cast")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(AppSheetViewModel::class.java)) {
-                return AppSheetViewModel(packageInfo, database, shellCommands) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }
