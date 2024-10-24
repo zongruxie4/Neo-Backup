@@ -17,7 +17,6 @@
  */
 package com.machiav3lli.backup.pages
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +34,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,13 +48,18 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BatchActionDialogUI
+import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_singularBackupRestore
 import com.machiav3lli.backup.sheets.BatchPrefsSheet
+import com.machiav3lli.backup.sheets.SortFilterSheet
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.DiamondsFour
+import com.machiav3lli.backup.ui.compose.icons.phosphor.FunnelSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.HardDrives
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Nut
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
+import com.machiav3lli.backup.ui.compose.item.ActionChip
 import com.machiav3lli.backup.ui.compose.item.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.StateChip
@@ -65,7 +70,6 @@ import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.viewmodels.BatchViewModel
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
@@ -73,7 +77,9 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
     val scope = rememberCoroutineScope()
     val filteredList by main.viewModel.filteredList.collectAsState(emptyList())
     val scaffoldState = rememberBottomSheetScaffoldState()
-    val openDialog = remember { mutableStateOf(false) }
+    val openBatchDialog = remember { mutableStateOf(false) }
+    val openBlocklist = rememberSaveable { mutableStateOf(false) }
+    val prefsNotFilter = remember { mutableStateOf(false) }
 
     val filterPredicate = { item: Package ->
         if (backupBoolean) item.isInstalled else item.hasBackups
@@ -107,10 +113,50 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
         sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        sheetShape = MaterialTheme.shapes.extraSmall,
         sheetContent = {
-            BatchPrefsSheet(
-                backupBoolean = backupBoolean
+            if (prefsNotFilter.value) BatchPrefsSheet(backupBoolean)
+            else SortFilterSheet(
+                onDismiss = {
+                    scope.launch {
+                        scaffoldState.bottomSheetState.partialExpand()
+                    }
+                },
             )
+        },
+        topBar = {
+            Column {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ActionChip(
+                        modifier = Modifier.weight(1f),
+                        icon = Phosphor.Prohibit,
+                        text = stringResource(id = R.string.sched_blocklist),
+                        positive = false,
+                        fullWidth = true,
+                    ) {
+                        openBlocklist.value = true
+                    }
+                    ActionChip(
+                        modifier = Modifier.weight(1f),
+                        icon = Phosphor.FunnelSimple,
+                        text = stringResource(id = R.string.sort_and_filter),
+                        positive = true,
+                        fullWidth = true,
+                    ) {
+                        scope.launch {
+                            prefsNotFilter.value = false
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
+                }
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+            }
         }
     ) {
         Column(
@@ -163,6 +209,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
             }
             HorizontalDivider(
                 thickness = 2.dp,
+                modifier = Modifier.padding(horizontal = 8.dp),
             )
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
@@ -223,6 +270,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                 }
                 RoundButton(icon = Phosphor.Nut) {
                     scope.launch {
+                        prefsNotFilter.value = true
                         scaffoldState.bottomSheetState.expand()
                     }
                 }
@@ -233,12 +281,21 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                 ) {
                     if (viewModel.apkBackupCheckedList.filterValues { it != -1 }.isNotEmpty()
                         || viewModel.dataBackupCheckedList.filterValues { it != -1 }.isNotEmpty()
-                    ) openDialog.value = true
+                    ) openBatchDialog.value = true
                 }
             }
         }
 
-        if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+        if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
+            GlobalBlockListDialogUI(
+                currentBlocklist = OABX.main?.viewModel?.getBlocklist()?.toSet()
+                    ?: emptySet(),
+                openDialogCustom = openBlocklist,
+            ) { newSet ->
+                OABX.main?.viewModel?.setBlocklist(newSet)
+            }
+        }
+        if (openBatchDialog.value) BaseDialog(openDialogCustom = openBatchDialog) {
             val selectedApk = viewModel.apkBackupCheckedList.filterValues { it != -1 }
             val selectedData = viewModel.dataBackupCheckedList.filterValues { it != -1 }
             val selectedPackageNames = selectedApk.keys.plus(selectedData.keys).distinct()
@@ -250,7 +307,7 @@ fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
                     .map(Package::packageInfo),
                 selectedApk = selectedApk,
                 selectedData = selectedData,
-                openDialogCustom = openDialog,
+                openDialogCustom = openBatchDialog,
             ) {
                 if (pref_singularBackupRestore.value && !backupBoolean) main.startBatchRestoreAction(
                     selectedPackageNames = selectedPackageNames,
