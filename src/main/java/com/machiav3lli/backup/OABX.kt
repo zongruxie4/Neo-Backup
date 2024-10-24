@@ -37,6 +37,7 @@ import com.charleskorn.kaml.Yaml
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.viewModelsModule
 import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.databaseModule
 import com.machiav3lli.backup.dbs.entity.Backup
@@ -186,6 +187,7 @@ class OABX : Application() {
             modules(
                 handlersModule,
                 databaseModule,
+                viewModelsModule,
             )
         }
     }
