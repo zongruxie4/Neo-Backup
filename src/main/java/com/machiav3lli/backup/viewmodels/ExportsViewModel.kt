@@ -18,9 +18,7 @@
 package com.machiav3lli.backup.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
@@ -35,14 +33,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class ExportsViewModel(val database: ScheduleDao, private val appContext: Application) :
-    AndroidViewModel(appContext) {
+    ViewModel(), KoinComponent {
 
     private val _exportsList =
         MutableStateFlow<MutableList<Pair<Schedule, StorageFile>>>(mutableListOf())
     val exportsList = _exportsList.asStateFlow()
-    val handler = ExportsHandler(appContext)
+    val handler: ExportsHandler by inject()
 
     fun refreshList() {
         viewModelScope.launch {
@@ -84,6 +84,7 @@ class ExportsViewModel(val database: ScheduleDao, private val appContext: Applic
     fun importSchedule(export: Schedule) {
         viewModelScope.launch {
             import(export)
+            // TODO move out
             showNotification(
                 appContext, MainActivityX::class.java, SystemUtils.now.toInt(),
                 appContext.getString(R.string.sched_imported), export.name, false
@@ -99,17 +100,6 @@ class ExportsViewModel(val database: ScheduleDao, private val appContext: Applic
                     .import(export)
                     .build()
             )
-        }
-    }
-
-    class Factory(private val dataSource: ScheduleDao, private val application: Application) :
-        ViewModelProvider.Factory {
-        @Suppress("unchecked_cast")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(ExportsViewModel::class.java)) {
-                return ExportsViewModel(dataSource, application) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }
