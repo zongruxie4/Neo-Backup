@@ -32,7 +32,7 @@ import com.machiav3lli.backup.BUTTON_SIZE_MEDIUM
 import com.machiav3lli.backup.ICON_SIZE_MEDIUM
 import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.ui.compose.item.ExpandableBlock
-import com.machiav3lli.backup.ui.item.Pref
+import com.machiav3lli.backup.entity.Pref
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable

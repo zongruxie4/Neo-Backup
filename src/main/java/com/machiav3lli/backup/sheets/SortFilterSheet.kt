@@ -76,8 +76,8 @@ import com.machiav3lli.backup.ui.compose.item.SwitchChip
 import com.machiav3lli.backup.ui.compose.recycler.InfoChipsBlock
 import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
-import com.machiav3lli.backup.ui.item.ChipItem
-import com.machiav3lli.backup.ui.item.InfoChipItem
+import com.machiav3lli.backup.entity.ChipItem
+import com.machiav3lli.backup.entity.InfoChipItem
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getStats

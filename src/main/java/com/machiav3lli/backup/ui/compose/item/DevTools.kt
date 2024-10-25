@@ -108,10 +108,10 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Pencil
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
-import com.machiav3lli.backup.ui.item.LaunchPref
-import com.machiav3lli.backup.ui.item.Pref
-import com.machiav3lli.backup.ui.item.Pref.Companion.preferencesFromSerialized
-import com.machiav3lli.backup.ui.item.Pref.Companion.preferencesToSerialized
+import com.machiav3lli.backup.entity.LaunchPref
+import com.machiav3lli.backup.entity.Pref
+import com.machiav3lli.backup.entity.Pref.Companion.preferencesFromSerialized
+import com.machiav3lli.backup.entity.Pref.Companion.preferencesToSerialized
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.getBackupRoot

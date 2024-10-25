@@ -39,8 +39,8 @@ import com.machiav3lli.backup.ui.compose.show
 import com.machiav3lli.backup.ui.compose.theme.ColorDeData
 import com.machiav3lli.backup.ui.compose.theme.ColorExodus
 import com.machiav3lli.backup.ui.compose.theme.ColorExtDATA
-import com.machiav3lli.backup.ui.item.LinkPref
-import com.machiav3lli.backup.ui.item.Pref
+import com.machiav3lli.backup.entity.LinkPref
+import com.machiav3lli.backup.entity.Pref
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.SystemUtils

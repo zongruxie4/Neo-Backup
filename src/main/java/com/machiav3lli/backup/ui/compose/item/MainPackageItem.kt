@@ -69,7 +69,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Check
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Play
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
-import com.machiav3lli.backup.ui.item.IntPref
+import com.machiav3lli.backup.entity.IntPref
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.SystemUtils.runParallel
 import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer

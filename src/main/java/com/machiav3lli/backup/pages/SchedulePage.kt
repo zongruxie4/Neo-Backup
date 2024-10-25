@@ -84,7 +84,7 @@ import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TitleText
 import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
-import com.machiav3lli.backup.ui.item.ChipItem
+import com.machiav3lli.backup.entity.ChipItem
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.cancelAlarm
 import com.machiav3lli.backup.utils.specialBackupsEnabled

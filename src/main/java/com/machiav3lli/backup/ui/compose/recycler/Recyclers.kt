@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.imageLoader
 import com.machiav3lli.backup.dbs.entity.Schedule
+import com.machiav3lli.backup.entity.ChipItem
+import com.machiav3lli.backup.entity.InfoChipItem
 import com.machiav3lli.backup.items.Log
 import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.items.StorageFile

@@ -1,4 +1,4 @@
-package com.machiav3lli.backup.ui.item
+package com.machiav3lli.backup.entity
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
