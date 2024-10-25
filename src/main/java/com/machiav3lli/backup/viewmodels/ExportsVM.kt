@@ -36,7 +36,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ExportsViewModel(val database: ScheduleDao, private val appContext: Application) :
+class ExportsVM(val database: ScheduleDao, private val appContext: Application) :
     ViewModel(), KoinComponent {
 
     private val _exportsList =

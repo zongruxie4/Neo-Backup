@@ -85,11 +85,11 @@ import com.machiav3lli.backup.utils.isDeviceLockEnabled
 import com.machiav3lli.backup.utils.isEncryptionEnabled
 import com.machiav3lli.backup.utils.isLikeRoot
 import com.machiav3lli.backup.viewmodels.BackupBatchVM
-import com.machiav3lli.backup.viewmodels.ExportsViewModel
-import com.machiav3lli.backup.viewmodels.LogViewModel
-import com.machiav3lli.backup.viewmodels.MainViewModel
+import com.machiav3lli.backup.viewmodels.ExportsVM
+import com.machiav3lli.backup.viewmodels.LogsVM
+import com.machiav3lli.backup.viewmodels.MainVM
 import com.machiav3lli.backup.viewmodels.RestoreBatchVM
-import com.machiav3lli.backup.viewmodels.SchedulerViewModel
+import com.machiav3lli.backup.viewmodels.SchedulesVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -116,7 +116,7 @@ class MainActivityX : BaseActivity() {
     private lateinit var openDialog: MutableState<Boolean>
     private lateinit var dialogKey: MutableState<DialogKey?>
 
-    val viewModel: MainViewModel by viewModel()
+    val viewModel: MainVM by viewModel()
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -643,10 +643,10 @@ class MainActivityX : BaseActivity() {
 }
 
 val viewModelsModule = module {
-    viewModel { MainViewModel(get(), get()) }
+    viewModel { MainVM(get(), get()) }
     viewModel { BackupBatchVM() }
     viewModel { RestoreBatchVM() }
-    viewModel { SchedulerViewModel(get(), get()) }
-    viewModel { ExportsViewModel(get(), get()) }
-    viewModel { LogViewModel() }
+    viewModel { SchedulesVM(get(), get()) }
+    viewModel { ExportsVM(get(), get()) }
+    viewModel { LogsVM() }
 }

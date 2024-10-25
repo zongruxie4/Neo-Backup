@@ -69,7 +69,6 @@ import com.machiav3lli.backup.items.Package
 import com.machiav3lli.backup.preferences.pref_languages
 import com.machiav3lli.backup.preferences.pref_menuButtonAlwaysVisible
 import com.machiav3lli.backup.preferences.traceCompose
-import com.machiav3lli.backup.sheets.AppSheet
 import com.machiav3lli.backup.sheets.SortFilterSheet
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
@@ -87,7 +86,7 @@ import com.machiav3lli.backup.ui.compose.item.cachedAsyncImagePainter
 import com.machiav3lli.backup.ui.compose.recycler.HomePackageRecycler
 import com.machiav3lli.backup.ui.compose.recycler.UpdatedPackageRecycler
 import com.machiav3lli.backup.utils.altModeToMode
-import com.machiav3lli.backup.viewmodels.AppSheetViewModel
+import com.machiav3lli.backup.viewmodels.AppVM
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // TODO remove Scaffold
@@ -123,7 +122,7 @@ fun HomePage() {
     val appSheetVM by remember(appSheetPackage) {
         mutableStateOf(
             appSheetPackage?.let {
-                AppSheetViewModel(
+                AppVM(
                     appSheetPackage,
                     OABX.db,
                     ShellCommands()
@@ -355,7 +354,7 @@ fun HomePage() {
 
             appSheetVM?.let { vm ->
                 AnimatedPane {
-                    AppSheet(
+                    AppPage(
                         viewModel = vm,
                         packageName = appSheetPN.value ?: "",
                         onDismiss = onDismiss,

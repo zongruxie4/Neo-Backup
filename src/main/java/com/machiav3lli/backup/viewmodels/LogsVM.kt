@@ -27,7 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LogViewModel : ViewModel() {
+class LogsVM : ViewModel() {
 
     var logsList = mutableStateListOf<Log>()
 

@@ -34,12 +34,12 @@ import com.machiav3lli.backup.ui.compose.recycler.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
 import com.machiav3lli.backup.ui.compose.recycler.LogRecycler
 import com.machiav3lli.backup.ui.navigation.NavItem
-import com.machiav3lli.backup.viewmodels.LogViewModel
+import com.machiav3lli.backup.viewmodels.LogsVM
 import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LogsPage(viewModel: LogViewModel = koinViewModel()) {
+fun LogsPage(viewModel: LogsVM = koinViewModel()) {
 
     FullScreenBackground {
         Scaffold(
@@ -55,7 +55,7 @@ fun LogsPage(viewModel: LogViewModel = koinViewModel()) {
 }
 
 @Composable
-fun Logs(viewModel: LogViewModel, modifier: Modifier) {
+fun Logs(viewModel: LogsVM, modifier: Modifier) {
 
     val logs = remember(viewModel) { viewModel.logsList }
 

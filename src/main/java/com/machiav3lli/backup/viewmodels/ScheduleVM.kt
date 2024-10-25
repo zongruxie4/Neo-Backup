@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 
-class ScheduleViewModel(
+class ScheduleVM(
     val id: Long,
     private val scheduleDB: ScheduleDao,
 ) : AndroidViewModel(OABX.NB) {
