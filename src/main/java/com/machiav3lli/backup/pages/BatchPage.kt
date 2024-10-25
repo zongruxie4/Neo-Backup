@@ -20,12 +20,15 @@ package com.machiav3lli.backup.pages
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -115,14 +118,22 @@ fun BatchPage(viewModel: BatchVM, backupBoolean: Boolean) {
         sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         sheetShape = MaterialTheme.shapes.extraSmall,
         sheetContent = {
-            if (prefsNotFilter.value) BatchPrefsSheet(backupBoolean)
-            else SortFilterSheet(
-                onDismiss = {
-                    scope.launch {
-                        scaffoldState.bottomSheetState.partialExpand()
-                    }
-                },
-            )
+            // bottom sheets even recomposit when hidden
+            // which is bad when they contain live content
+            if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
+                if (prefsNotFilter.value) BatchPrefsSheet(backupBoolean)
+                else SortFilterSheet(
+                    onDismiss = {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.partialExpand()
+                        }
+                    },
+                )
+            } else {
+                // inexpensive and small placeholder while hidden
+                // necessary because empty sheets are kept hidden
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         },
         topBar = {
             Column {

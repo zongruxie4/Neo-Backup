@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.BottomSheetScaffold
@@ -33,6 +35,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
@@ -64,8 +67,8 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
-import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.entity.Package
+import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.preferences.pref_languages
 import com.machiav3lli.backup.preferences.pref_menuButtonAlwaysVisible
 import com.machiav3lli.backup.preferences.traceCompose
@@ -170,13 +173,21 @@ fun HomePage() {
                 sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
                 sheetShape = MaterialTheme.shapes.extraSmall,
                 sheetContent = {
-                    SortFilterSheet(
-                        onDismiss = {
-                            scope.launch {
-                                scaffoldState.bottomSheetState.partialExpand()
-                            }
-                        },
-                    )
+                    // bottom sheets even recomposit when hidden
+                    // which is bad when they contain live content
+                    if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
+                        SortFilterSheet(
+                            onDismiss = {
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.partialExpand()
+                                }
+                            },
+                        )
+                    } else {
+                        // inexpensive and small placeholder while hidden
+                        // necessary because empty sheets are kept hidden
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 },
                 topBar = {
                     Column {
