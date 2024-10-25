@@ -18,7 +18,6 @@
 package com.machiav3lli.backup.handler
 
 import android.content.Context
-import com.machiav3lli.backup.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.LOGS_FOLDER_NAME
 import com.machiav3lli.backup.LOG_INSTANCE
 import com.machiav3lli.backup.OABX
@@ -30,6 +29,7 @@ import com.machiav3lli.backup.preferences.onErrorInfo
 import com.machiav3lli.backup.preferences.pref_autoLogExceptions
 import com.machiav3lli.backup.preferences.pref_maxLogCount
 import com.machiav3lli.backup.preferences.textLog
+import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
