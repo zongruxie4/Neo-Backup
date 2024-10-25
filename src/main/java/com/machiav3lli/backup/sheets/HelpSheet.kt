@@ -57,6 +57,7 @@ import com.machiav3lli.backup.legendList
 import com.machiav3lli.backup.linksList
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.blockBorderTop
+import com.machiav3lli.backup.ui.compose.gridItems
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretUp
@@ -66,7 +67,6 @@ import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TitleText
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
-import com.machiav3lli.backup.utils.gridItems
 import java.io.IOException
 import java.io.InputStream
 import java.util.Scanner

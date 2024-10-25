@@ -2,10 +2,18 @@ package com.machiav3lli.backup.ui.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
@@ -16,12 +24,14 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.machiav3lli.backup.preferences.pref_altBlockLayout
 import com.machiav3lli.backup.preferences.traceFlows
@@ -412,3 +422,67 @@ fun Color.mix(with: Color, factor: Float = 0.5f) = Color(
 @Composable
 fun Color.flatten(factor: Float = 0.5f, surface: Color = MaterialTheme.colorScheme.surface) =
     mix(surface, factor)
+
+fun Color.brighter(rate: Float): Color {
+    val hslVal = FloatArray(3)
+    ColorUtils.colorToHSL(this.toArgb(), hslVal)
+    hslVal[2] += rate * (1 - hslVal[2])
+    hslVal[2] = hslVal[2].coerceIn(0f..1f)
+    return Color(ColorUtils.HSLToColor(hslVal))
+}
+
+fun Color.darker(rate: Float): Color {
+    val hslVal = FloatArray(3)
+    ColorUtils.colorToHSL(this.toArgb(), hslVal)
+    hslVal[2] -= rate * hslVal[2]
+    hslVal[2] = hslVal[2].coerceIn(0f..1f)
+    return Color(ColorUtils.HSLToColor(hslVal))
+}
+
+fun <T> LazyListScope.gridItems(
+    items: List<T>,
+    columns: Int,
+    modifier: Modifier = Modifier,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
+    itemContent: @Composable BoxScope.(T) -> Unit,
+) {
+    val itemsCount = items.count()
+    val rows = when {
+        itemsCount >= 1 -> 1 + (itemsCount - 1) / columns
+        else            -> 0
+    }
+    items(rows, key = { it.hashCode() }) { rowIndex ->
+        Row(
+            horizontalArrangement = horizontalArrangement,
+            modifier = modifier
+        ) {
+            (0 until columns).forEach { columnIndex ->
+                val itemIndex = columns * rowIndex + columnIndex
+                if (itemIndex < itemsCount) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        propagateMinConstraints = true
+                    ) {
+                        itemContent(items[itemIndex])
+                    }
+                } else {
+                    Spacer(Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+// TODO make easy callable from different contexts
+fun SnackbarHostState.show(
+    coroutineScope: CoroutineScope,
+    message: String,
+    actionText: String? = null,
+    onAction: () -> Unit = {},
+) {
+    coroutineScope.launch {
+        showSnackbar(message = message, actionLabel = actionText, withDismissAction = true).apply {
+            if (this == SnackbarResult.ActionPerformed) onAction()
+        }
+    }
+}

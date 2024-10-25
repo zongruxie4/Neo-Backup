@@ -105,9 +105,9 @@ import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TagsBlock
 import com.machiav3lli.backup.ui.compose.item.TitleText
 import com.machiav3lli.backup.ui.compose.recycler.InfoChipsBlock
+import com.machiav3lli.backup.ui.compose.show
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.infoChips
-import com.machiav3lli.backup.utils.show
 import com.machiav3lli.backup.viewmodels.AppVM
 import timber.log.Timber
 
