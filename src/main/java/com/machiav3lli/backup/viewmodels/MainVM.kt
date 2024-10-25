@@ -36,7 +36,7 @@ import com.machiav3lli.backup.entity.Package.Companion.invalidateCacheForPackage
 import com.machiav3lli.backup.preferences.pref_newAndUpdatedNotification
 import com.machiav3lli.backup.preferences.traceBackups
 import com.machiav3lli.backup.preferences.traceFlows
-import com.machiav3lli.backup.ui.compose.MutableComposableFlow
+import com.machiav3lli.backup.ui.compose.MutableComposableStateFlow
 import com.machiav3lli.backup.ui.compose.item.IconCache
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.formatSortedBackups
@@ -78,8 +78,7 @@ class MainVM(
     //   then with f_in > f_proc the results will only come out with about f_proc
     // mapLatest: (use mapLatest { it } as an equivalent form similar to conflate())
     //   kills processing the item, when a new one comes in
-    //   so, as long as items come
-    //   in faster than processing time, there won't be results, in short:
+    //   so, as long as items come in faster than processing time, there won't be results, in short:
     //   if f_in > f_proc, then there is no output at all
     //   this is much like processing on idle only
 
@@ -220,7 +219,7 @@ class MainVM(
 
     val searchQuery =
         //------------------------------------------------------------------------------------------ searchQuery
-        MutableComposableFlow(
+        MutableComposableStateFlow(
             "",
             viewModelScope + Dispatchers.IO,
             "searchQuery"
@@ -228,7 +227,7 @@ class MainVM(
 
     val modelSortFilter =
         //------------------------------------------------------------------------------------------ modelSortFilter
-        MutableComposableFlow(
+        MutableComposableStateFlow(
             sortFilterModel,
             viewModelScope + Dispatchers.IO,
             "modelSortFilter"
