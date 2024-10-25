@@ -21,8 +21,8 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.ShellHandler
-import com.machiav3lli.backup.items.ActionResult
-import com.machiav3lli.backup.items.Package
+import com.machiav3lli.backup.entity.ActionResult
+import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlin.system.measureTimeMillis
 

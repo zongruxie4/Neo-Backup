@@ -41,10 +41,10 @@ import com.machiav3lli.backup.handler.ShellHandler.Companion.utilBoxQ
 import com.machiav3lli.backup.handler.ShellHandler.ShellCommandFailedException
 import com.machiav3lli.backup.handler.ShellHandler.UnexpectedCommandResult
 import com.machiav3lli.backup.handler.findBackups
-import com.machiav3lli.backup.items.ActionResult
-import com.machiav3lli.backup.items.Package
-import com.machiav3lli.backup.items.RootFile
-import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.entity.ActionResult
+import com.machiav3lli.backup.entity.Package
+import com.machiav3lli.backup.entity.RootFile
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.plugins.InternalShellScriptPlugin
 import com.machiav3lli.backup.preferences.pref_delayBeforeRefreshAppInfo
 import com.machiav3lli.backup.preferences.pref_enableSessionInstaller

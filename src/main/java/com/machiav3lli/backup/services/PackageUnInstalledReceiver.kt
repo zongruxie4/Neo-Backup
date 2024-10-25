@@ -24,7 +24,7 @@ import android.content.pm.PackageManager
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
-import com.machiav3lli.backup.items.Package
+import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.preferences.pref_autoLogUnInstallBroadcast
 import com.machiav3lli.backup.preferences.supportLog
 import kotlinx.coroutines.Dispatchers

@@ -26,7 +26,7 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.regexPackageFolder
-import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.utils.LocalDateTimeSerializer
 import com.machiav3lli.backup.utils.getBackupRoot
 import kotlinx.serialization.Serializable

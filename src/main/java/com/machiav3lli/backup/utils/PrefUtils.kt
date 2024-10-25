@@ -30,7 +30,7 @@ import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.PREFS_SHARED_PRIVATE
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.items.SortFilterModel
+import com.machiav3lli.backup.entity.SortFilterModel
 import com.machiav3lli.backup.preferences.persist_salt
 import com.machiav3lli.backup.preferences.persist_sortFilter
 import com.machiav3lli.backup.preferences.persist_specialFilters

@@ -56,7 +56,7 @@ import com.machiav3lli.backup.SPECIAL_FILTER_ALL
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.installedFilterChipItems
-import com.machiav3lli.backup.items.SortFilterModel
+import com.machiav3lli.backup.entity.SortFilterModel
 import com.machiav3lli.backup.latestFilterChipItems
 import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainBackupModeChipItems

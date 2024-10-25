@@ -24,7 +24,7 @@ import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.getInstalledPackageList
-import com.machiav3lli.backup.items.Package
+import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.utils.FileUtils
 import com.machiav3lli.backup.utils.FileUtils.ensureBackups
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException

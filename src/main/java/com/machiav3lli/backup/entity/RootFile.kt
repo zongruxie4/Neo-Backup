@@ -1,4 +1,4 @@
-package com.machiav3lli.backup.items
+package com.machiav3lli.backup.entity
 
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot

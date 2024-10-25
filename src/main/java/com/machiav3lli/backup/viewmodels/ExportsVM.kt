@@ -26,7 +26,7 @@ import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.handler.ExportsHandler
 import com.machiav3lli.backup.handler.showNotification
-import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

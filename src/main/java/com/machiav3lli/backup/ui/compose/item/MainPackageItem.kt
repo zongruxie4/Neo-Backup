@@ -60,7 +60,7 @@ import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
-import com.machiav3lli.backup.items.Package
+import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.preferences.pref_fixNavBarOverlap
 import com.machiav3lli.backup.preferences.traceContextMenu
 import com.machiav3lli.backup.preferences.traceTiming
