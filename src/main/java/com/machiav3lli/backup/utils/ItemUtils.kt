@@ -31,7 +31,7 @@ import com.machiav3lli.backup.CHIP_VERSION
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.handler.LogsHandler
-import com.machiav3lli.backup.items.Package
+import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CircleWavyWarning

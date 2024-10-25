@@ -50,9 +50,9 @@ import com.machiav3lli.backup.UPDATED_FILTER_NEW
 import com.machiav3lli.backup.UPDATED_FILTER_NOT
 import com.machiav3lli.backup.UPDATED_FILTER_UPDATED
 import com.machiav3lli.backup.dbs.entity.AppExtras
-import com.machiav3lli.backup.items.Package
-import com.machiav3lli.backup.items.SortFilterModel
-import com.machiav3lli.backup.items.SpecialFilter
+import com.machiav3lli.backup.entity.Package
+import com.machiav3lli.backup.entity.SortFilterModel
+import com.machiav3lli.backup.entity.SpecialFilter
 import com.machiav3lli.backup.possibleMainFilters
 import com.machiav3lli.backup.preferences.pref_oldBackups
 import java.text.Collator

@@ -1,4 +1,4 @@
-package com.machiav3lli.backup.items
+package com.machiav3lli.backup.entity
 
 import android.content.Context
 import android.database.Cursor

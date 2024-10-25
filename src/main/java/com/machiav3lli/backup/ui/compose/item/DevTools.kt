@@ -76,8 +76,8 @@ import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.PREFS_BACKUP_FILE
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.findBackups
-import com.machiav3lli.backup.items.StorageFile
-import com.machiav3lli.backup.items.UndeterminedStorageFile
+import com.machiav3lli.backup.entity.StorageFile
+import com.machiav3lli.backup.entity.UndeterminedStorageFile
 import com.machiav3lli.backup.plugins.Plugin
 import com.machiav3lli.backup.plugins.Plugin.Companion.displayPath
 import com.machiav3lli.backup.plugins.Plugin.Companion.fileFor

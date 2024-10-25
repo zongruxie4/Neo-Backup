@@ -49,7 +49,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
-import com.machiav3lli.backup.items.Package
+import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.preferences.pref_singularBackupRestore
 import com.machiav3lli.backup.sheets.BatchPrefsSheet
 import com.machiav3lli.backup.sheets.SortFilterSheet

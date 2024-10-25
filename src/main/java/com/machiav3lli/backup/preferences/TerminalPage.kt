@@ -90,8 +90,8 @@ import com.machiav3lli.backup.handler.ShellHandler.FileInfo.Companion.utilBoxInf
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.handler.maxThreads
 import com.machiav3lli.backup.handler.usedThreadsByName
-import com.machiav3lli.backup.items.Log
-import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.entity.Log
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowDown

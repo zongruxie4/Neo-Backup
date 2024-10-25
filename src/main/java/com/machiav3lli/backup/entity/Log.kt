@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.machiav3lli.backup.items
+package com.machiav3lli.backup.entity
 
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.entity.Backup

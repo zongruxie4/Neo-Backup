@@ -18,9 +18,9 @@ import coil.imageLoader
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.entity.ChipItem
 import com.machiav3lli.backup.entity.InfoChipItem
-import com.machiav3lli.backup.items.Log
-import com.machiav3lli.backup.items.Package
-import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.entity.Log
+import com.machiav3lli.backup.entity.Package
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.preferences.pref_multilineInfoChips
 import com.machiav3lli.backup.preferences.pref_singularBackupRestore
 import com.machiav3lli.backup.ui.compose.item.BatchPackageItem

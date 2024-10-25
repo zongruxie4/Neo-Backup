@@ -28,10 +28,10 @@ import com.machiav3lli.backup.actions.RestoreSpecialAction
 import com.machiav3lli.backup.actions.RestoreSystemAppAction
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.ShellHandler.ShellCommandFailedException
-import com.machiav3lli.backup.items.ActionResult
-import com.machiav3lli.backup.items.Package
-import com.machiav3lli.backup.items.RootFile
-import com.machiav3lli.backup.items.StorageFile.Companion.invalidateCache
+import com.machiav3lli.backup.entity.ActionResult
+import com.machiav3lli.backup.entity.Package
+import com.machiav3lli.backup.entity.RootFile
+import com.machiav3lli.backup.entity.StorageFile.Companion.invalidateCache
 import com.machiav3lli.backup.preferences.pref_numBackupRevisions
 import com.machiav3lli.backup.preferences.pref_paranoidHousekeeping
 import com.machiav3lli.backup.tasks.AppActionWork

@@ -46,9 +46,9 @@ import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
-import com.machiav3lli.backup.items.Package
-import com.machiav3lli.backup.items.Package.Companion.invalidateBackupCacheForPackage
-import com.machiav3lli.backup.items.StorageFile
+import com.machiav3lli.backup.entity.Package
+import com.machiav3lli.backup.entity.Package.Companion.invalidateBackupCacheForPackage
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.preferences.pref_backupSuspendApps
 import com.machiav3lli.backup.preferences.pref_earlyEmptyBackups
 import com.machiav3lli.backup.preferences.pref_lookForEmptyBackups
@@ -272,8 +272,8 @@ suspend fun scanBackups(
     }
 
    suspend fun handleDirectory(
-        file: StorageFile,
-        collector: FlowCollector<StorageFile>? = null
+       file: StorageFile,
+       collector: FlowCollector<StorageFile>? = null
     ): Boolean {
 
         hitBusy()
