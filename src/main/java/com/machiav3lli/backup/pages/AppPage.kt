@@ -64,7 +64,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dialogs.ActionsDialogUI
@@ -72,13 +71,13 @@ import com.machiav3lli.backup.dialogs.BackupDialogUI
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.RestoreDialogUI
 import com.machiav3lli.backup.dialogs.StringInputDialogUI
+import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.exodusUrl
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
-import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.preferences.pref_numBackupRevisions
 import com.machiav3lli.backup.preferences.pref_useWorkManagerForSingleManualJob
 import com.machiav3lli.backup.preferences.traceCompose
@@ -131,7 +130,7 @@ fun AppPage(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    val mActivity = context as MainActivityX
+    val mActivity = OABX.main!!
     val openDialog = remember { mutableStateOf(false) }
     val dialogProps: MutableState<Pair<Int, Any>> = remember {
         mutableStateOf(Pair(DIALOG_NONE, Schedule()))
