@@ -57,42 +57,6 @@ const val PREFS_BACKUP_FILE = "${ADMIN_PREFIX}app.preferences"
 const val PROP_NAME = "properties"
 const val LOG_INSTANCE = "%s.log.txt"
 
-const val ISO_LIKE_DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss"
-const val ISO_LIKE_DATE_TIME_MIN_PATTERN = "yyyy-MM-dd HH:mm"
-const val ISO_LIKE_DATE_TIME_MS_PATTERN = "yyyy-MM-dd HH:mm:ss:SSS"
-const val FILE_DATE_TIME_MS_PATTERN = "yyyy-MM-dd-HH-mm-ss-SSS"
-const val FILE_DATE_TIME_PATTERN = "yyyy-MM-dd-HH-mm-ss"
-const val DATE_TIME_AS_VERSION_CODE_PATTERN = "yyMMddHH"
-
-val ISO_DATE_TIME_FORMAT
-    get() = SimpleDateFormat(
-        ISO_LIKE_DATE_TIME_PATTERN,
-        Locale.getDefault()
-    )
-
-val ISO_DATE_TIME_FORMAT_MIN
-    get() = SimpleDateFormat(
-        ISO_LIKE_DATE_TIME_MIN_PATTERN,
-        Locale.getDefault()
-    )
-
-val ISO_DATE_TIME_FORMAT_MS
-    get() = SimpleDateFormat(
-        ISO_LIKE_DATE_TIME_MS_PATTERN,
-        Locale.getDefault()
-    )
-
-// must be ISO time format for sane sorting yyyy, MM, dd, ...
-// and only allowed file name characters (on all systems, Windows has the smallest set)
-// not used any more, because we don't create old format
-// and detection handles millisec as optional
-//val BACKUP_DATE_TIME_FORMATTER_OLD = DateTimeFormatter.ofPattern(FILE_DATE_TIME_PATTERN)
-
-// use millisec, because computers (and users) can be faster than a sec
-val BACKUP_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(FILE_DATE_TIME_MS_PATTERN)
-val BACKUP_DATE_TIME_SHOW_FORMATTER = DateTimeFormatter.ofPattern(ISO_LIKE_DATE_TIME_PATTERN)
-val DATE_TIME_AS_VERSION_CODE_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_AS_VERSION_CODE_PATTERN)
-
 // optional millisec to include old format
 const val BACKUP_INSTANCE_REGEX_PATTERN = """\d\d\d\d-\d\d-\d\d-\d\d-\d\d-\d\d(-\d\d\d)?-user_\d+"""
 
