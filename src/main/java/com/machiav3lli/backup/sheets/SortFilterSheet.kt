@@ -53,10 +53,11 @@ import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.SPECIAL_FILTER_ALL
-import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.enabledFilterChipItems
-import com.machiav3lli.backup.installedFilterChipItems
+import com.machiav3lli.backup.entity.ChipItem
+import com.machiav3lli.backup.entity.InfoChipItem
 import com.machiav3lli.backup.entity.SortFilterModel
+import com.machiav3lli.backup.installedFilterChipItems
 import com.machiav3lli.backup.latestFilterChipItems
 import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainBackupModeChipItems
@@ -76,8 +77,6 @@ import com.machiav3lli.backup.ui.compose.item.SwitchChip
 import com.machiav3lli.backup.ui.compose.recycler.InfoChipsBlock
 import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
-import com.machiav3lli.backup.entity.ChipItem
-import com.machiav3lli.backup.entity.InfoChipItem
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getStats
@@ -87,7 +86,7 @@ import com.machiav3lli.backup.utils.specialBackupsEnabled
 @Composable
 fun SortFilterSheet(onDismiss: () -> Unit) { // TODO add key for each page (HOME, BACKUP, RESTORE)
     val context = LocalContext.current
-    val mActivity = context as MainActivityX
+    val mActivity = OABX.main!!
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
     val packageList by mActivity.viewModel.notBlockedList.collectAsState()
     var model by rememberSaveable { mutableStateOf(sortFilterModel) }
