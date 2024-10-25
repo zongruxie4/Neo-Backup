@@ -20,6 +20,8 @@ package com.machiav3lli.backup.sheets
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +35,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -101,7 +102,7 @@ const val DIALOG_TIMEPICKER = 3
 const val DIALOG_INTERVALSETTER = 4
 const val DIALOG_SCHEDULENAME = 5
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ScheduleSheet(
     viewModel: ScheduleViewModel,
@@ -128,109 +129,60 @@ fun ScheduleSheet(
             rescheduleBoolean: Boolean,
         ) = viewModel.updateSchedule(schedule, rescheduleBoolean)
 
-        Scaffold(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            topBar = {
-                Column(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
-                ) {
-                    ListItem(
-                        colors = ListItemDefaults.colors(
-                            containerColor = Color.Transparent,
-                        ),
-                        leadingContent = {
-                            TitleText(R.string.sched_name)
-                        },
-                        headlineContent = {
-                            OutlinedCard(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.outlinedCardColors(
-                                    containerColor = Color.Transparent
-                                ),
-                                shape = MaterialTheme.shapes.large,
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                                onClick = {
-                                    dialogProps.value = Pair(DIALOG_SCHEDULENAME, schedule)
-                                    openDialog.value = true
-                                }
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp, vertical = 16.dp),
-                                    text = schedule.name,
-                                    textAlign = TextAlign.Center,
-                                )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                ListItem(
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    ),
+                    leadingContent = {
+                        TitleText(R.string.sched_name)
+                    },
+                    headlineContent = {
+                        OutlinedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.outlinedCardColors(
+                                containerColor = Color.Transparent
+                            ),
+                            shape = MaterialTheme.shapes.large,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                            onClick = {
+                                dialogProps.value = Pair(DIALOG_SCHEDULENAME, schedule)
+                                openDialog.value = true
                             }
-                        },
-                        trailingContent = {
-                            RoundButton(
-                                icon = Phosphor.CaretDown,
-                                description = stringResource(id = R.string.dismiss),
-                                onClick = { onDismiss() }
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 16.dp),
+                                text = schedule.name,
+                                textAlign = TextAlign.Center,
                             )
                         }
-                    )
-                    HorizontalDivider(thickness = 2.dp)
-                }
-            },
-            bottomBar = {
-                Column(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
-                ) {
-                    HorizontalDivider(thickness = 2.dp)
-                    Row {
-                        if (schedule.enabled) {
-                            Text(text = "🕒 $absTime    ⏳ $relTime") // TODO replace by resource icons
-                        } else {
-                            Text(text = "🕒 $absTime") // TODO replace by resource icons
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        CheckChip(
-                            checked = schedule.enabled,
-                            textId = R.string.sched_checkbox,
-                            checkedTextId = R.string.enabled,
-                            onCheckedChange = { checked ->
-                                refresh(
-                                    schedule.copy(enabled = checked),
-                                    true,
-                                )
-                            }
+                    },
+                    trailingContent = {
+                        RoundButton(
+                            icon = Phosphor.CaretDown,
+                            description = stringResource(id = R.string.dismiss),
+                            onClick = { onDismiss() }
                         )
-                        ElevatedActionButton(
-                            text = stringResource(id = R.string.delete),
-                            icon = Phosphor.TrashSimple,
-                            positive = false,
-                            fullWidth = false
-                        ) {
-                            viewModel.deleteSchedule()
-                            cancelAlarm(context, scheduleId)
-                            onDismiss()
-                        }
                     }
-                    ElevatedActionButton(
-                        text = stringResource(id = R.string.sched_activateButton),
-                        icon = Phosphor.Play,
-                        fullWidth = true,
-                        onClick = { startSchedule(schedule) }
-                    )
-                }
+                )
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
             }
-        ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+                    .weight(1f, true)
+                    .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(8.dp)
+                contentPadding = PaddingValues(8.dp),
             ) {
                 item {
                     Row(
@@ -405,76 +357,132 @@ fun ScheduleSheet(
                     }
                 }
             }
-
-
-            if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
-                dialogProps.value.let { (dialogMode, schedule) ->
-                    when (dialogMode) {
-                        DIALOG_BLOCKLIST      -> BlockListDialogUI(
-                            schedule = schedule,
-                            openDialogCustom = openDialog,
-                        ) { newSet ->
+            HorizontalDivider(
+                thickness = 2.dp,
+                modifier = Modifier.padding(horizontal = 8.dp),
+            )
+            Column(
+                modifier = Modifier.padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CheckChip(
+                        checked = schedule.enabled,
+                        textId = R.string.sched_checkbox,
+                        checkedTextId = R.string.enabled,
+                        onCheckedChange = { checked ->
                             refresh(
-                                schedule.copy(blockList = newSet),
-                                rescheduleBoolean = false,
+                                schedule.copy(enabled = checked),
+                                true,
                             )
                         }
-
-                        DIALOG_CUSTOMLIST,
-                                              -> CustomListDialogUI(
-                            schedule = schedule,
-                            openDialogCustom = openDialog,
-                        ) { newSet ->
-                            refresh(
-                                schedule.copy(customList = newSet),
-                                rescheduleBoolean = false,
-                            )
-                        }
-
-                        DIALOG_TIMEPICKER     -> {
-                            TimePickerDialogUI(
-                                state = rememberTimePickerState(
-                                    initialHour = schedule.timeHour,
-                                    initialMinute = schedule.timeMinute,
-                                ),
-                                openDialogCustom = openDialog,
-                            ) { hour, minute ->
-                                refresh(
-                                    schedule.copy(timeHour = hour, timeMinute = minute),
-                                    rescheduleBoolean = true,
-                                )
-                            }
-                        }
-
-                        DIALOG_INTERVALSETTER -> {
-                            IntPickerDialogUI(
-                                value = schedule.interval,
-                                defaultValue = 1,
-                                entries = (1..30).toList(),
-                                openDialogCustom = openDialog,
-                            ) {
-                                refresh(
-                                    schedule.copy(interval = it),
-                                    rescheduleBoolean = true,
-                                )
-                            }
-                        }
-
-                        DIALOG_SCHEDULENAME   -> {
-                            StringInputDialogUI(
-                                titleText = stringResource(id = R.string.sched_name),
-                                initValue = schedule.name,
-                                openDialogCustom = openDialog
-                            ) {
-                                refresh(
-                                    schedule.copy(name = it),
-                                    rescheduleBoolean = false,
-                                )
-                            }
-                        }
-
-                        else                  -> {}
+                    )
+                    FlowRow(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        maxLines = 2
+                    ) {
+                        Text(text = "🕒 $absTime")
+                        if (schedule.enabled) Text(text = "⏳ $relTime") // TODO replace by resource icons
                     }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    ElevatedActionButton(
+                        text = stringResource(id = R.string.delete),
+                        icon = Phosphor.TrashSimple,
+                        positive = false,
+                        fullWidth = false
+                    ) {
+                        viewModel.deleteSchedule()
+                        cancelAlarm(context, scheduleId)
+                        onDismiss()
+                    }
+                    ElevatedActionButton(
+                        text = stringResource(id = R.string.sched_activateButton),
+                        icon = Phosphor.Play,
+                        fullWidth = true,
+                        onClick = { startSchedule(schedule) }
+                    )
+                }
+            }
+        }
+
+        if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+            dialogProps.value.let { (dialogMode, schedule) ->
+                when (dialogMode) {
+                    DIALOG_BLOCKLIST      -> BlockListDialogUI(
+                        schedule = schedule,
+                        openDialogCustom = openDialog,
+                    ) { newSet ->
+                        refresh(
+                            schedule.copy(blockList = newSet),
+                            rescheduleBoolean = false,
+                        )
+                    }
+
+                    DIALOG_CUSTOMLIST,
+                                          -> CustomListDialogUI(
+                        schedule = schedule,
+                        openDialogCustom = openDialog,
+                    ) { newSet ->
+                        refresh(
+                            schedule.copy(customList = newSet),
+                            rescheduleBoolean = false,
+                        )
+                    }
+
+                    DIALOG_TIMEPICKER     -> {
+                        TimePickerDialogUI(
+                            state = rememberTimePickerState(
+                                initialHour = schedule.timeHour,
+                                initialMinute = schedule.timeMinute,
+                            ),
+                            openDialogCustom = openDialog,
+                        ) { hour, minute ->
+                            refresh(
+                                schedule.copy(timeHour = hour, timeMinute = minute),
+                                rescheduleBoolean = true,
+                            )
+                        }
+                    }
+
+                    DIALOG_INTERVALSETTER -> {
+                        IntPickerDialogUI(
+                            value = schedule.interval,
+                            defaultValue = 1,
+                            entries = (1..30).toList(),
+                            openDialogCustom = openDialog,
+                        ) {
+                            refresh(
+                                schedule.copy(interval = it),
+                                rescheduleBoolean = true,
+                            )
+                        }
+                    }
+
+                    DIALOG_SCHEDULENAME   -> {
+                        StringInputDialogUI(
+                            titleText = stringResource(id = R.string.sched_name),
+                            initValue = schedule.name,
+                            openDialogCustom = openDialog
+                        ) {
+                            refresh(
+                                schedule.copy(name = it),
+                                rescheduleBoolean = false,
+                            )
+                        }
+                    }
+
+                    else                  -> {}
                 }
             }
         }
