@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.machiav3lli.backup.sheets
+package com.machiav3lli.backup.pages
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -90,7 +90,7 @@ import com.machiav3lli.backup.utils.cancelAlarm
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.utils.startSchedule
 import com.machiav3lli.backup.utils.timeLeft
-import com.machiav3lli.backup.viewmodels.ScheduleViewModel
+import com.machiav3lli.backup.viewmodels.ScheduleVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.time.LocalTime
@@ -104,8 +104,8 @@ const val DIALOG_SCHEDULENAME = 5
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun ScheduleSheet(
-    viewModel: ScheduleViewModel,
+fun SchedulePage(
+    viewModel: ScheduleVM,
     scheduleId: Long,
     onDismiss: () -> Unit,
 ) {

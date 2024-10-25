@@ -29,7 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SchedulerViewModel(val database: ScheduleDao, private val appContext: Application) :
+class SchedulesVM(val database: ScheduleDao, private val appContext: Application) :
     ViewModel() {
     var schedules = database.getAllFlow()
 

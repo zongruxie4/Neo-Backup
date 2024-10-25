@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.machiav3lli.backup.sheets
+package com.machiav3lli.backup.pages
 
 import android.content.Intent
 import android.net.Uri
@@ -108,7 +108,7 @@ import com.machiav3lli.backup.ui.compose.recycler.InfoChipsBlock
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.infoChips
 import com.machiav3lli.backup.utils.show
-import com.machiav3lli.backup.viewmodels.AppSheetViewModel
+import com.machiav3lli.backup.viewmodels.AppVM
 import timber.log.Timber
 
 const val DIALOG_BACKUP = 1
@@ -125,8 +125,8 @@ const val DIALOG_ENFORCE_LIMIT = 11
 const val DIALOG_NOTE_BACKUP = 12
 
 @Composable
-fun AppSheet(
-    viewModel: AppSheetViewModel,
+fun AppPage(
+    viewModel: AppVM,
     packageName: String,
     onDismiss: () -> Unit,
 ) {

@@ -17,7 +17,6 @@
  */
 package com.machiav3lli.backup.pages
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -43,28 +42,26 @@ import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
-import com.machiav3lli.backup.sheets.ScheduleSheet
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarPlus
 import com.machiav3lli.backup.ui.compose.recycler.ScheduleRecycler
 import com.machiav3lli.backup.utils.specialBackupsEnabled
-import com.machiav3lli.backup.viewmodels.ScheduleViewModel
-import com.machiav3lli.backup.viewmodels.SchedulerViewModel
+import com.machiav3lli.backup.viewmodels.ScheduleVM
+import com.machiav3lli.backup.viewmodels.SchedulesVM
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import org.koin.androidx.compose.koinViewModel
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // TODO remove Scaffold
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun SchedulerPage(viewModel: SchedulerViewModel = koinViewModel()) {
+fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
     val scope = rememberCoroutineScope()
     val schedules by viewModel.schedules.collectAsState(emptyList())
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val scheduleSheetId = remember { mutableLongStateOf(-1L) }
     val scheduleSheetVM by remember {
         derivedStateOf {
-            if (scheduleSheetId.longValue != -1L) ScheduleViewModel(
+            if (scheduleSheetId.longValue != -1L) ScheduleVM(
                 scheduleSheetId.longValue,
                 OABX.db.getScheduleDao(),
             ) else null
@@ -114,7 +111,7 @@ fun SchedulerPage(viewModel: SchedulerViewModel = koinViewModel()) {
 
             scheduleSheetVM?.let { vm ->
                 AnimatedPane {
-                    ScheduleSheet(
+                    SchedulePage(
                         viewModel = vm,
                         scheduleId = scheduleSheetId.longValue,
                         onDismiss = {

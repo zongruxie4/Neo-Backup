@@ -60,7 +60,7 @@ import kotlinx.coroutines.yield
 import timber.log.Timber
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class MainViewModel(
+class MainVM(
     private val db: ODatabase,
     private val appContext: Application,
 ) : ViewModel() {

@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class AppSheetViewModel(
+class AppVM(
     app: Package?,
     private val database: ODatabase,
     private var shellCommands: ShellCommands,

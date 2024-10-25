@@ -67,12 +67,12 @@ import com.machiav3lli.backup.ui.compose.recycler.BatchPackageRecycler
 import com.machiav3lli.backup.ui.compose.theme.ColorAPK
 import com.machiav3lli.backup.ui.compose.theme.ColorData
 import com.machiav3lli.backup.utils.altModeToMode
-import com.machiav3lli.backup.viewmodels.BatchViewModel
+import com.machiav3lli.backup.viewmodels.BatchVM
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BatchPage(viewModel: BatchViewModel, backupBoolean: Boolean) {
+fun BatchPage(viewModel: BatchVM, backupBoolean: Boolean) {
     val main = OABX.main!!
     val scope = rememberCoroutineScope()
     val filteredList by main.viewModel.filteredList.collectAsState(emptyList())
