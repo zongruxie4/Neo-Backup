@@ -54,12 +54,12 @@ import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
 import com.machiav3lli.backup.ui.compose.theme.ColorDeData
 import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
 import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
-import com.machiav3lli.backup.ui.item.BooleanPref
-import com.machiav3lli.backup.ui.item.IntPref
-import com.machiav3lli.backup.ui.item.LaunchPref
-import com.machiav3lli.backup.ui.item.Pref
-import com.machiav3lli.backup.ui.item.PrefUI
-import com.machiav3lli.backup.ui.item.StringPref
+import com.machiav3lli.backup.entity.BooleanPref
+import com.machiav3lli.backup.entity.IntPref
+import com.machiav3lli.backup.entity.LaunchPref
+import com.machiav3lli.backup.entity.Pref
+import com.machiav3lli.backup.entity.PrefUI
+import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.sortFilterModel
 import kotlinx.collections.immutable.persistentListOf
@@ -218,7 +218,7 @@ class SuCommandPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
+    ui = UI ?: { pref, onDialogUI, index, groupSize ->
         SuCommandPreference(pref = pref as SuCommandPref, index = index, groupSize = groupSize)
     },
     icon = icon,

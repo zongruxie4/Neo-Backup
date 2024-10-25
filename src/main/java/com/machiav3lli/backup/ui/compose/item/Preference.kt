@@ -48,14 +48,14 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.FolderNotch
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.ifThen
 import com.machiav3lli.backup.ui.compose.theme.ColorExtDATA
-import com.machiav3lli.backup.ui.item.BooleanPref
-import com.machiav3lli.backup.ui.item.EnumPref
-import com.machiav3lli.backup.ui.item.IntPref
-import com.machiav3lli.backup.ui.item.ListPref
-import com.machiav3lli.backup.ui.item.PasswordPref
-import com.machiav3lli.backup.ui.item.Pref
-import com.machiav3lli.backup.ui.item.StringEditPref
-import com.machiav3lli.backup.ui.item.StringPref
+import com.machiav3lli.backup.entity.BooleanPref
+import com.machiav3lli.backup.entity.EnumPref
+import com.machiav3lli.backup.entity.IntPref
+import com.machiav3lli.backup.entity.ListPref
+import com.machiav3lli.backup.entity.PasswordPref
+import com.machiav3lli.backup.entity.Pref
+import com.machiav3lli.backup.entity.StringEditPref
+import com.machiav3lli.backup.entity.StringPref
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 

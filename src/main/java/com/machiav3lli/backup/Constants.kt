@@ -22,12 +22,9 @@ import android.content.Intent
 import android.provider.DocumentsContract
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.dbs.entity.PackageInfo
-import com.machiav3lli.backup.ui.item.ChipItem
-import com.machiav3lli.backup.ui.item.Legend
-import com.machiav3lli.backup.ui.item.Link
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import com.machiav3lli.backup.entity.ChipItem
+import com.machiav3lli.backup.entity.Legend
+import com.machiav3lli.backup.entity.Link
 
 const val PREFS_SHARED_PRIVATE = "com.machiav3lli.backup"
 

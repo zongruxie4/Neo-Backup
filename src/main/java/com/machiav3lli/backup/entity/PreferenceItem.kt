@@ -1,4 +1,4 @@
-package com.machiav3lli.backup.ui.item
+package com.machiav3lli.backup.entity
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
@@ -65,7 +65,7 @@ open class Pref(
     @StringRes val titleId: Int,
     @StringRes val summaryId: Int,
     var summary: String? = null,
-    val UI: PrefUI? = null,
+    val ui: PrefUI? = null,
     val icon: ImageVector? = null,
     var iconTint: Color?,
     val enableIf: (() -> Boolean)? = null,
@@ -296,7 +296,9 @@ class BooleanPref(
     @StringRes summaryId: Int = -1,
     @StringRes titleId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI = { pref, onDialogUI, index, groupSize ->
+        BooleanPreference(pref = pref as BooleanPref, index = index, groupSize = groupSize)
+    },
     icon: ImageVector? = null,
     iconTint: Color? = null,
     enableIf: (() -> Boolean)? = null,
@@ -308,9 +310,7 @@ class BooleanPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        BooleanPreference(pref = pref as BooleanPref, index = index, groupSize = groupSize)
-    },
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
@@ -338,7 +338,9 @@ class IntPref(
     @StringRes titleId: Int = -1,
     @StringRes summaryId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI = { pref, onDialogUI, index, groupSize ->
+        IntPreference(pref = pref as IntPref, index = index, groupSize = groupSize)
+    },
     icon: ImageVector? = null,
     iconTint: Color? = null,
     val entries: List<Int>,
@@ -351,9 +353,7 @@ class IntPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        IntPreference(pref = pref as IntPref, index = index, groupSize = groupSize)
-    },
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
@@ -381,7 +381,11 @@ open class StringPref(
     @StringRes titleId: Int = -1,
     @StringRes summaryId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI = { pref, onDialogUI, index, groupSize ->
+        StringPreference(pref = pref as StringPref, index = index, groupSize = groupSize) {
+            onDialogUI(pref)
+        }
+    },
     icon: ImageVector? = null,
     iconTint: Color? = null,
     enableIf: (() -> Boolean)? = null,
@@ -393,11 +397,7 @@ open class StringPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        StringPreference(pref = pref as StringPref, index = index, groupSize = groupSize) {
-            onDialogUI(pref)
-        }
-    },
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
@@ -425,7 +425,9 @@ class StringEditPref(
     @StringRes titleId: Int = -1,
     @StringRes summaryId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI = { pref, onDialogUI, index, groupSize ->
+        StringEditPreference(pref = pref as StringEditPref, index = index, groupSize = groupSize)
+    },
     icon: ImageVector? = null,
     iconTint: Color? = null,
     enableIf: (() -> Boolean)? = null,
@@ -437,9 +439,7 @@ class StringEditPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        StringEditPreference(pref = pref as StringEditPref, index = index, groupSize = groupSize)
-    },
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
@@ -454,7 +454,11 @@ class PasswordPref(
     @StringRes titleId: Int = -1,
     @StringRes summaryId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI = { pref, onDialogUI, index, groupSize ->
+        PasswordPreference(pref = pref as PasswordPref, index = index, groupSize = groupSize) {
+            onDialogUI(pref)
+        }
+    },
     icon: ImageVector? = null,
     iconTint: Color? = null,
     enableIf: (() -> Boolean)? = null,
@@ -466,11 +470,7 @@ class PasswordPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        PasswordPreference(pref = pref as PasswordPref, index = index, groupSize = groupSize) {
-            onDialogUI(pref)
-        }
-    },
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
@@ -485,7 +485,11 @@ class ListPref(
     @StringRes titleId: Int = -1,
     @StringRes summaryId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI = { pref, onDialogUI, index, groupSize ->
+        ListPreference(pref = pref as ListPref, index = index, groupSize = groupSize) {
+            onDialogUI(pref)
+        }
+    },
     icon: ImageVector? = null,
     iconTint: Color? = null,
     val entries: Map<String, String>,
@@ -498,17 +502,12 @@ class ListPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        ListPreference(pref = pref as ListPref, index = index, groupSize = groupSize) {
-            onDialogUI(pref)
-        }
-    },
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
     onChanged = onChanged
 )
-
 
 class EnumPref(
     key: String,
@@ -517,7 +516,11 @@ class EnumPref(
     @StringRes titleId: Int = -1,
     @StringRes summaryId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI = { pref, onDialogUI, index, groupSize ->
+        EnumPreference(pref = pref as EnumPref, index = index, groupSize = groupSize) {
+            onDialogUI(pref)
+        }
+    },
     icon: ImageVector? = null,
     iconTint: Color? = null,
     val entries: Map<Int, Int>,
@@ -530,11 +533,7 @@ class EnumPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        EnumPreference(pref = pref as EnumPref, index = index, groupSize = groupSize) {
-            onDialogUI(pref)
-        }
-    },
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
@@ -555,14 +554,13 @@ class EnumPref(
     override fun toString(): String = value.toString()
 }
 
-
 class LinkPref(
     key: String,
     private: Boolean = false,
     @StringRes titleId: Int = -1,
     @StringRes summaryId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI? = null,
     icon: ImageVector? = null,
     iconTint: Color? = null,
     enableIf: (() -> Boolean)? = null,
@@ -574,13 +572,12 @@ class LinkPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI,
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
     onChanged = onChanged
 )
-
 
 class LaunchPref(
     key: String,
@@ -588,7 +585,15 @@ class LaunchPref(
     @StringRes titleId: Int = -1,
     @StringRes summaryId: Int = -1,
     summary: String? = null,
-    UI: PrefUI? = null,
+    ui: PrefUI = { pref, onDialogUI, index, groupSize ->
+        LaunchPreference(
+            pref = pref as LaunchPref,
+            index = index,
+            groupSize = groupSize,
+            summary = pref.summary,
+            onClick = pref.onClick
+        )
+    },
     icon: ImageVector? = null,
     iconTint: Color? = null,
     enableIf: (() -> Boolean)? = null,
@@ -601,15 +606,7 @@ class LaunchPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        LaunchPreference(
-            pref = pref as LaunchPref,
-            index = index,
-            groupSize = groupSize,
-            summary = pref.summary,
-            onClick = pref.onClick
-        )
-    },
+    ui = ui,
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,

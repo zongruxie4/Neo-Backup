@@ -4,7 +4,7 @@ import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.preferences.pref_trace
 import com.machiav3lli.backup.preferences.traceFlows
 import com.machiav3lli.backup.preferences.traceTiming
-import com.machiav3lli.backup.ui.item.BooleanPref
+import com.machiav3lli.backup.entity.BooleanPref
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber

@@ -3,8 +3,8 @@ package com.machiav3lli.backup.preferences
 import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.OABX.Companion.isHg42
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.item.BooleanPref
-import com.machiav3lli.backup.ui.item.IntPref
+import com.machiav3lli.backup.entity.BooleanPref
+import com.machiav3lli.backup.entity.IntPref
 import com.machiav3lli.backup.utils.TraceUtils
 
 //---------------------------------------- developer settings - logging

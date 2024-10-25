@@ -60,7 +60,7 @@ import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.item.PermissionItem
 import com.machiav3lli.backup.ui.compose.item.TopBar
-import com.machiav3lli.backup.ui.item.Permission
+import com.machiav3lli.backup.entity.Permission
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.checkBatteryOptimization
 import com.machiav3lli.backup.utils.checkCallLogsPermission

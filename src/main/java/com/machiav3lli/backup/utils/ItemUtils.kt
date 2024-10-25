@@ -43,7 +43,7 @@ import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
 import com.machiav3lli.backup.ui.compose.theme.ColorSystem
 import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.ui.compose.theme.ColorUser
-import com.machiav3lli.backup.ui.item.InfoChipItem
+import com.machiav3lli.backup.entity.InfoChipItem
 
 data class AppStats(
     val nApps: Int,
