@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import com.machiav3lli.backup.MODE_ALL
 import com.machiav3lli.backup.MODE_UNSET
+import com.machiav3lli.backup.MenuAction
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.addInfoLogText
 import com.machiav3lli.backup.OABX.Companion.beginBusy
@@ -228,7 +229,7 @@ fun TextInputMenuItem(
 
 @Composable
 fun Selections(
-    action: String,
+    action: MenuAction,
     selection: List<String> = emptyList(),
     onAction: (List<String>) -> Unit = {},
 ) {
@@ -253,17 +254,17 @@ fun Selections(
                     text = { Text("  $name") },
                     onClick = {
                         when (action) {
-                            "get" -> {
+                            MenuAction.GET -> {
                                 val newSelection = file.readText().lines()
                                 onAction(newSelection)
                             }
 
-                            "put" -> {
+                            MenuAction.PUT -> {
                                 file.writeText(selection.joinToString("\n"))
                                 onAction(selection)
                             }
 
-                            "del" -> {
+                            MenuAction.DEL -> {
                                 file.delete()
                                 onAction(selection)
                             }
@@ -274,7 +275,7 @@ fun Selections(
         }
     }
 
-    if (action in listOf("get", "put")) {
+    if (action != MenuAction.DEL) {
         val scheduleDao = OABX.db.getScheduleDao()
         val schedules = OABX.main?.viewModel?.schedules?.value ?: emptyList()
         if (schedules.isEmpty())
@@ -293,12 +294,12 @@ fun Selections(
                         text = { Text("  $name") },
                         onClick = {
                             when (action) {
-                                "get" -> {
+                                MenuAction.GET -> {
                                     val newSelection = schedule.customList.toList()
                                     onAction(newSelection)
                                 }
 
-                                "put" -> {
+                                MenuAction.PUT -> {
                                     Thread {
                                         scheduleDao.update(
                                             schedule.copy(customList = selection.toSet())
@@ -306,6 +307,8 @@ fun Selections(
                                     }.start()
                                     onAction(selection)
                                 }
+
+                                else           -> {}
                             }
                         }
                     )
@@ -321,12 +324,12 @@ fun Selections(
                         text = { Text("  $name") },
                         onClick = {
                             when (action) {
-                                "get" -> {
+                                MenuAction.GET -> {
                                     val newSelection = schedule.blockList.toList()
                                     onAction(newSelection)
                                 }
 
-                                "put" -> {
+                                MenuAction.PUT -> {
                                     Thread {
                                         scheduleDao.update(
                                             schedule.copy(blockList = selection.toSet())
@@ -334,6 +337,8 @@ fun Selections(
                                     }.start()
                                     onAction(selection)
                                 }
+
+                                else           -> {}
                             }
                         }
                     )
@@ -348,17 +353,19 @@ fun Selections(
             text = { Text("  blocklist") },
             onClick = {
                 when (action) {
-                    "get" -> {
+                    MenuAction.GET -> {
                         val newSelection =
                             OABX.main?.viewModel?.getBlocklist()
                                 ?: emptyList()
                         onAction(newSelection)
                     }
 
-                    "put" -> {
+                    MenuAction.PUT -> {
                         OABX.main?.viewModel?.setBlocklist(selection.toSet())
                         onAction(selection)
                     }
+
+                    else           -> {}
                 }
             }
         )
@@ -369,7 +376,7 @@ fun Selections(
 fun SelectionGetMenu(
     onAction: (List<String>) -> Unit = {},
 ) {
-    Selections(action = "get", onAction = onAction)
+    Selections(action = MenuAction.GET, onAction = onAction)
 }
 
 @Composable
@@ -392,14 +399,14 @@ fun SelectionPutMenu(
         onAction()
     }
 
-    Selections(action = "put", selection = selection) { onAction() }
+    Selections(action = MenuAction.PUT, selection = selection) { onAction() }
 }
 
 @Composable
 fun SelectionRemoveMenu(
     onAction: () -> Unit = {},
 ) {
-    Selections(action = "del") { onAction() }
+    Selections(action = MenuAction.DEL) { onAction() }
 }
 
 fun openSubMenu(
