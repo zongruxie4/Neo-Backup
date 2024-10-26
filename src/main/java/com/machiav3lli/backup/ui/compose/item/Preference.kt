@@ -2,27 +2,30 @@ package com.machiav3lli.backup.ui.compose.item
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,13 +44,6 @@ import com.machiav3lli.backup.ICON_SIZE_MEDIUM
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.preferences.traceDebug
-import com.machiav3lli.backup.ui.compose.flatten
-import com.machiav3lli.backup.ui.compose.icons.Phosphor
-import com.machiav3lli.backup.ui.compose.icons.phosphor.FolderNotch
-import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
-import com.machiav3lli.backup.ui.compose.ifThen
-import com.machiav3lli.backup.ui.compose.theme.ColorExtDATA
 import com.machiav3lli.backup.entity.BooleanPref
 import com.machiav3lli.backup.entity.EnumPref
 import com.machiav3lli.backup.entity.IntPref
@@ -56,6 +52,13 @@ import com.machiav3lli.backup.entity.PasswordPref
 import com.machiav3lli.backup.entity.Pref
 import com.machiav3lli.backup.entity.StringEditPref
 import com.machiav3lli.backup.entity.StringPref
+import com.machiav3lli.backup.preferences.traceDebug
+import com.machiav3lli.backup.ui.compose.flatten
+import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.FolderNotch
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
+import com.machiav3lli.backup.ui.compose.ifThen
+import com.machiav3lli.backup.ui.compose.theme.ColorExtDATA
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -502,6 +505,7 @@ fun BooleanPreference(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeekBarPreference(
     pref: IntPref,
@@ -511,27 +515,17 @@ fun SeekBarPreference(
     groupSize: Int = 1,
     onValueChange: (Int) -> Unit = {},
 ) {
-    var sliderPosition by remember {    //TODO hg42 remove remember ???
-        mutableIntStateOf(
-            pref.entries.indexOfFirst { it >= pref.value }.let {
-                if (it < 0)
-                    pref.entries.indexOfFirst { it >= (pref.defaultValue as Int) }
-                else
-                    it
-            }.let {
-                if (it < 0)
-                    0
-                else
-                    it
-            }
+    val sliderState = remember {
+        SliderState(
+            value = pref.entries.indexOf(pref.value).toFloat(),
+            valueRange = 0f..pref.entries.lastIndex.toFloat(),
+            steps = pref.entries.size - 2
         )
     }
-    val savePosition = { pos: Int ->
-        val value = pref.entries[pos]
-        pref.value = value
-        sliderPosition = pos
+    sliderState.onValueChangeFinished = {
+        pref.value = pref.entries[sliderState.value.roundToInt()]
+        onValueChange(sliderState.value.roundToInt())
     }
-    val last = pref.entries.size - 1
 
     BasePreference(
         modifier = modifier,
@@ -543,22 +537,19 @@ fun SeekBarPreference(
         index = index,
         groupSize = groupSize,
         bottomWidget = { isEnabled ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Slider(
-                    modifier = Modifier.weight(1f, false),
-                    value = sliderPosition.toFloat(),
-                    valueRange = 0.toFloat()..last.toFloat(),
-                    onValueChange = { sliderPosition = it.roundToInt() },
-                    onValueChangeFinished = {
-                        onValueChange(sliderPosition)
-                        savePosition(sliderPosition)
-                    },
-                    steps = last - 1,
+                    state = sliderState,
+                    modifier = Modifier
+                        .requiredHeight(24.dp)
+                        .weight(1f),
                     enabled = isEnabled
                 )
-                Spacer(modifier = Modifier.requiredWidth(8.dp))
                 Text(
-                    text = pref.entries[sliderPosition].toString(),
+                    text = pref.entries[sliderState.value.roundToInt()].toString(),
                     modifier = Modifier.widthIn(min = 48.dp)
                 )
             }
