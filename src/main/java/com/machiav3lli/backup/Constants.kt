@@ -54,6 +54,8 @@ const val PREFS_BACKUP_FILE = "${ADMIN_PREFIX}app.preferences"
 const val PROP_NAME = "properties"
 const val LOG_INSTANCE = "%s.log.txt"
 
+enum class MenuAction { PUT, GET, DEL }
+
 // optional millisec to include old format
 const val BACKUP_INSTANCE_REGEX_PATTERN = """\d\d\d\d-\d\d-\d\d-\d\d-\d\d-\d\d(-\d\d\d)?-user_\d+"""
 
