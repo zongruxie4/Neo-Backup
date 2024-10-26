@@ -90,16 +90,17 @@ import com.machiav3lli.backup.ui.compose.recycler.HomePackageRecycler
 import com.machiav3lli.backup.ui.compose.recycler.UpdatedPackageRecycler
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.viewmodels.AppVM
+import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // TODO remove Scaffold
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun HomePage() {
+fun HomePage(viewModel: MainVM = koinViewModel()) {
     // TODO include tags in search
     val mActivity = OABX.main!!
     val scope = rememberCoroutineScope()
-    val viewModel = mActivity.viewModel
     val scaffoldState = rememberBottomSheetScaffoldState()
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
@@ -377,11 +378,10 @@ fun HomePage() {
 
     if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
         GlobalBlockListDialogUI(
-            currentBlocklist = OABX.main?.viewModel?.getBlocklist()?.toSet()
-                ?: emptySet(),
+            currentBlocklist = viewModel.getBlocklist().toSet(),
             openDialogCustom = openBlocklist,
         ) { newSet ->
-            OABX.main?.viewModel?.setBlocklist(newSet)
+            viewModel.setBlocklist(newSet)
         }
     }
     if (openBatchDialog.value) BaseDialog(openDialogCustom = openBatchDialog) {

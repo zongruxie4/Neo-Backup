@@ -53,12 +53,15 @@ import com.machiav3lli.backup.ui.compose.recycler.FullScreenBackground
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.NeoNavigationSuiteScaffold
 import com.machiav3lli.backup.ui.navigation.SlidePager
+import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainPage(
     navController: NavHostController,
+    viewModel: MainVM = koinViewModel(),
 ) {
     val scope = rememberCoroutineScope()
     val pages = persistentListOf(
@@ -76,7 +79,7 @@ fun MainPage(
 
     var query by rememberSaveable {
         mutableStateOf(
-            OABX.main?.viewModel?.searchQuery?.value ?: ""
+            viewModel.searchQuery.value ?: ""
         )
     }
 
@@ -122,11 +125,11 @@ fun MainPage(
                                         onQueryChanged = { newQuery ->
                                             //if (newQuery != query)  // empty string doesn't work...
                                             query = newQuery
-                                            OABX.main?.viewModel?.searchQuery?.value = query
+                                            viewModel.searchQuery?.value = query
                                         },
                                         onClose = {
                                             query = ""
-                                            OABX.main?.viewModel?.searchQuery?.value = ""
+                                            viewModel.searchQuery.value = ""
                                         }
                                     )
                                     AnimatedVisibility(!searchExpanded.value) {
@@ -156,11 +159,10 @@ fun MainPage(
 
             if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
                 GlobalBlockListDialogUI(
-                    currentBlocklist = OABX.main?.viewModel?.getBlocklist()?.toSet()
-                        ?: emptySet(),
+                    currentBlocklist = viewModel.getBlocklist().toSet(),
                     openDialogCustom = openBlocklist,
                 ) { newSet ->
-                    OABX.main?.viewModel?.setBlocklist(newSet)
+                    viewModel.setBlocklist(newSet)
                 }
             }
         }

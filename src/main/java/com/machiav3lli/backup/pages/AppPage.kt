@@ -108,6 +108,8 @@ import com.machiav3lli.backup.ui.compose.show
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.infoChips
 import com.machiav3lli.backup.viewmodels.AppVM
+import com.machiav3lli.backup.viewmodels.MainVM
+import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
 const val DIALOG_BACKUP = 1
@@ -127,6 +129,7 @@ const val DIALOG_NOTE_BACKUP = 12
 fun AppPage(
     viewModel: AppVM,
     packageName: String,
+    mainVM: MainVM = koinViewModel(),
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -136,7 +139,7 @@ fun AppPage(
         mutableStateOf(Pair(DIALOG_NONE, Schedule()))
     }
 
-    val thePackages by mActivity.viewModel.packageMap.collectAsState()
+    val thePackages by mainVM.packageMap.collectAsState()
     val thePackage: Package? = thePackages[packageName]
     val snackbarText by viewModel.snackbarText.flow.collectAsState("")
     val appExtras by viewModel.appExtras.collectAsState()
@@ -305,7 +308,7 @@ fun AppPage(
                         icon = Phosphor.Prohibit,
                         description = stringResource(id = R.string.global_blocklist_add)
                     ) {
-                        mActivity.viewModel.addToBlocklist(
+                        mainVM.addToBlocklist(
                             pkg.packageName
                         )
                     }
