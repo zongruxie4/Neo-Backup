@@ -71,14 +71,20 @@ import com.machiav3lli.backup.ui.compose.theme.ColorAPK
 import com.machiav3lli.backup.ui.compose.theme.ColorData
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.viewmodels.BatchVM
+import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BatchPage(viewModel: BatchVM, backupBoolean: Boolean) {
+fun BatchPage(
+    viewModel: BatchVM,
+    mainVM: MainVM = koinViewModel(),
+    backupBoolean: Boolean
+) {
     val main = OABX.main!!
     val scope = rememberCoroutineScope()
-    val filteredList by main.viewModel.filteredList.collectAsState(emptyList())
+    val filteredList by mainVM.filteredList.collectAsState(emptyList())
     val scaffoldState = rememberBottomSheetScaffoldState()
     val openBatchDialog = remember { mutableStateOf(false) }
     val openBlocklist = rememberSaveable { mutableStateOf(false) }
@@ -281,11 +287,11 @@ fun BatchPage(viewModel: BatchVM, backupBoolean: Boolean) {
 
         if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
             GlobalBlockListDialogUI(
-                currentBlocklist = OABX.main?.viewModel?.getBlocklist()?.toSet()
+                currentBlocklist = mainVM.getBlocklist()?.toSet()
                     ?: emptySet(),
                 openDialogCustom = openBlocklist,
             ) { newSet ->
-                OABX.main?.viewModel?.setBlocklist(newSet)
+                mainVM.setBlocklist(newSet)
             }
         }
         if (openBatchDialog.value) BaseDialog(openDialogCustom = openBatchDialog) {

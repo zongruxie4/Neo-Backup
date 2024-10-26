@@ -82,13 +82,16 @@ import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getStats
 import com.machiav3lli.backup.utils.sortFilterModel
 import com.machiav3lli.backup.utils.specialBackupsEnabled
+import com.machiav3lli.backup.viewmodels.MainVM
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SortFilterSheet(onDismiss: () -> Unit) { // TODO add key for each page (HOME, BACKUP, RESTORE)
-    val context = LocalContext.current
-    val mActivity = OABX.main!!
+fun SortFilterSheet(
+    viewModel: MainVM = koinViewModel(),
+    onDismiss: () -> Unit,
+) { // TODO add key for each page (HOME, BACKUP, RESTORE)
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
-    val packageList by mActivity.viewModel.notBlockedList.collectAsState()
+    val packageList by viewModel.notBlockedList.collectAsState()
     var model by rememberSaveable { mutableStateOf(sortFilterModel) }
     fun currentStats() = getStats(
         packageList.applyFilter(
