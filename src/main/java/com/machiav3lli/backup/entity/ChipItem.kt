@@ -2,24 +2,13 @@ package com.machiav3lli.backup.entity
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.machiav3lli.backup.ENABLED_FILTER_DISABLED
-import com.machiav3lli.backup.ENABLED_FILTER_ENABLED
-import com.machiav3lli.backup.INSTALLED_FILTER_INSTALLED
-import com.machiav3lli.backup.INSTALLED_FILTER_NOT
-import com.machiav3lli.backup.LATEST_FILTER_NEW
-import com.machiav3lli.backup.LATEST_FILTER_OLD
-import com.machiav3lli.backup.LAUNCHABLE_FILTER_LAUNCHABLE
-import com.machiav3lli.backup.LAUNCHABLE_FILTER_NOT
+import com.machiav3lli.backup.EnabledFilter
+import com.machiav3lli.backup.InstalledFilter
+import com.machiav3lli.backup.LatestFilter
+import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_SPECIAL
 import com.machiav3lli.backup.MAIN_FILTER_SYSTEM
 import com.machiav3lli.backup.MAIN_FILTER_USER
-import com.machiav3lli.backup.MAIN_SORT_APPDATASIZE
-import com.machiav3lli.backup.MAIN_SORT_APPSIZE
-import com.machiav3lli.backup.MAIN_SORT_BACKUPDATE
-import com.machiav3lli.backup.MAIN_SORT_BACKUPSIZE
-import com.machiav3lli.backup.MAIN_SORT_DATASIZE
-import com.machiav3lli.backup.MAIN_SORT_LABEL
-import com.machiav3lli.backup.MAIN_SORT_PACKAGENAME
 import com.machiav3lli.backup.MODE_APK
 import com.machiav3lli.backup.MODE_DATA
 import com.machiav3lli.backup.MODE_DATA_DE
@@ -28,10 +17,8 @@ import com.machiav3lli.backup.MODE_DATA_MEDIA
 import com.machiav3lli.backup.MODE_DATA_OBB
 import com.machiav3lli.backup.MODE_NONE
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.SPECIAL_FILTER_ALL
-import com.machiav3lli.backup.UPDATED_FILTER_NEW
-import com.machiav3lli.backup.UPDATED_FILTER_NOT
-import com.machiav3lli.backup.UPDATED_FILTER_UPDATED
+import com.machiav3lli.backup.Sort
+import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowSquareOut
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
@@ -112,97 +99,97 @@ data class ChipItem(
             Phosphor.AsteriskSimple
         )
         val All = ChipItem(
-            SPECIAL_FILTER_ALL,
+            0,
             R.string.radio_all,
             Phosphor.Checks
         )
         val Launchable = ChipItem(
-            LAUNCHABLE_FILTER_LAUNCHABLE,
+            LaunchableFilter.LAUNCHABLE.ordinal,
             R.string.radio_launchable,
             Phosphor.ArrowSquareOut
         )
         val NotLaunchable = ChipItem(
-            LAUNCHABLE_FILTER_NOT,
+            LaunchableFilter.NOT.ordinal,
             R.string.radio_notlaunchable,
             Phosphor.ProhibitInset
         )
         val UpdatedApps = ChipItem(
-            UPDATED_FILTER_UPDATED,
+            UpdatedFilter.UPDATED.ordinal,
             R.string.show_updated_apps,
             Phosphor.CircleWavyWarning
         )
         val NewApps = ChipItem(
-            UPDATED_FILTER_NEW,
+            UpdatedFilter.NEW.ordinal,
             R.string.show_new_apps,
             Phosphor.Star
         )
         val OldApps = ChipItem(
-            UPDATED_FILTER_NOT,
+            UpdatedFilter.NOT.ordinal,
             R.string.show_old_apps,
             Phosphor.Clock
         )
         val OldBackups = ChipItem(
-            LATEST_FILTER_OLD,
+            LatestFilter.OLD.ordinal,
             R.string.showOldBackups,
             Phosphor.Clock
         )
         val NewBackups = ChipItem(
-            LATEST_FILTER_NEW,
+            LatestFilter.NEW.ordinal,
             R.string.show_new_backups,
             Phosphor.CircleWavyWarning
         )
         val Enabled = ChipItem(
-            ENABLED_FILTER_ENABLED,
+            EnabledFilter.ENABLED.ordinal,
             R.string.show_enabled_apps,
             Phosphor.Leaf
         )
         val Disabled = ChipItem(
-            ENABLED_FILTER_DISABLED,
+            EnabledFilter.DISABLED.ordinal,
             R.string.showDisabled,
             Phosphor.ProhibitInset
         )
         val Installed = ChipItem(
-            INSTALLED_FILTER_INSTALLED,
+            InstalledFilter.INSTALLED.ordinal,
             R.string.show_installed_apps,
             Phosphor.DiamondsFour,
         )
         val NotInstalled = ChipItem(
-            INSTALLED_FILTER_NOT,
+            InstalledFilter.NOT.ordinal,
             R.string.showNotInstalled,
             Phosphor.TrashSimple,
         )
         val Label = ChipItem(
-            MAIN_SORT_LABEL,
+            Sort.LABEL.ordinal,
             R.string.sortByLabel,
             Phosphor.TagSimple
         )
         val PackageName = ChipItem(
-            MAIN_SORT_PACKAGENAME,
+            Sort.PACKAGENAME.ordinal,
             R.string.sortPackageName,
             Phosphor.Placeholder
         )
         val AppSize = ChipItem(
-            MAIN_SORT_APPSIZE,
+            Sort.APP_SIZE.ordinal,
             R.string.sortAppSize,
             Phosphor.DiamondsFour
         )
         val DataSize = ChipItem(
-            MAIN_SORT_DATASIZE,
+            Sort.DATA_SIZE.ordinal,
             R.string.sortDataSize,
             Phosphor.HardDrives
         )
         val AppDataSize = ChipItem(
-            MAIN_SORT_APPDATASIZE,
+            Sort.APPDATA_SIZE.ordinal,
             R.string.sortAppDataSize,
             Phosphor.FloppyDisk
         )
         val BackupSize = ChipItem(
-            MAIN_SORT_BACKUPSIZE,
+            Sort.BACKUP_SIZE.ordinal,
             R.string.sortBackupSize,
             Phosphor.FolderNotch
         )
         val BackupDate = ChipItem(
-            MAIN_SORT_BACKUPDATE,
+            Sort.BACKUP_DATE.ordinal,
             R.string.sortBackupDate,
             Phosphor.Clock
         )

@@ -20,20 +20,24 @@ package com.machiav3lli.backup.entity
 import android.os.Parcel
 import android.os.Parcelable
 import com.machiav3lli.backup.BACKUP_FILTER_DEFAULT
+import com.machiav3lli.backup.EnabledFilter
+import com.machiav3lli.backup.InstalledFilter
+import com.machiav3lli.backup.LatestFilter
+import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
-import com.machiav3lli.backup.MAIN_SORT_LABEL
-import com.machiav3lli.backup.SPECIAL_FILTER_ALL
+import com.machiav3lli.backup.Sort
+import com.machiav3lli.backup.UpdatedFilter
 
 data class SortFilterModel(
-    var sort: Int = MAIN_SORT_LABEL,
+    var sort: Int = Sort.LABEL.ordinal,
     var sortAsc: Boolean = true,
     var mainFilter: Int = MAIN_FILTER_DEFAULT,
     var backupFilter: Int = BACKUP_FILTER_DEFAULT,
-    var installedFilter: Int = SPECIAL_FILTER_ALL,
-    var launchableFilter: Int = SPECIAL_FILTER_ALL,
-    var updatedFilter: Int = SPECIAL_FILTER_ALL,
-    var latestFilter: Int = SPECIAL_FILTER_ALL,
-    var enabledFilter: Int = SPECIAL_FILTER_ALL,
+    var installedFilter: Int = InstalledFilter.ALL.ordinal,
+    var launchableFilter: Int = LaunchableFilter.ALL.ordinal,
+    var updatedFilter: Int = UpdatedFilter.ALL.ordinal,
+    var latestFilter: Int = LatestFilter.ALL.ordinal,
+    var enabledFilter: Int = EnabledFilter.ALL.ordinal,
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -105,9 +109,9 @@ data class SortFilterModel(
 }
 
 class SpecialFilter(
-    val installedFilter: Int = SPECIAL_FILTER_ALL,
-    val launchableFilter: Int = SPECIAL_FILTER_ALL,
-    val updatedFilter: Int = SPECIAL_FILTER_ALL,
-    val latestFilter: Int = SPECIAL_FILTER_ALL,
-    val enabledFilter: Int = SPECIAL_FILTER_ALL,
+    val installedFilter: Int = InstalledFilter.ALL.ordinal,
+    val launchableFilter: Int = LaunchableFilter.ALL.ordinal,
+    val updatedFilter: Int = UpdatedFilter.ALL.ordinal,
+    val latestFilter: Int = LatestFilter.ALL.ordinal,
+    val enabledFilter: Int = EnabledFilter.ALL.ordinal,
 )
