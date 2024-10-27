@@ -17,10 +17,9 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Schedule
@@ -37,11 +36,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
 
 class ScheduleVM(
     val id: Long,
-    private val scheduleDB: ScheduleDao,
-) : AndroidViewModel(OABX.NB) {
+    database: ODatabase,
+) : ViewModel(), KoinComponent {
+    private val scheduleDB: ScheduleDao = database.getScheduleDao()
 
     val schedule: StateFlow<Schedule?> = scheduleDB.getScheduleFlow(id)
         //TODO hg42 .trace { "*** schedule <<- ${it}" }     // what can here be null? (something is null that is not declared as nullable)
@@ -56,7 +57,7 @@ class ScheduleVM(
     @OptIn(ExperimentalCoroutinesApi::class)
     val allTags =
         //------------------------------------------------------------------------------------------ allTags
-        OABX.db.getAppExtrasDao().getAllFlow()
+        database.getAppExtrasDao().getAllFlow()
             .mapLatest { it.flatMap(AppExtras::customTags) }
             .trace { "*** tags <<- ${it.size}" }
             .stateIn(
@@ -77,13 +78,13 @@ class ScheduleVM(
             if (schedule.enabled) {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
                 scheduleAlarm(
-                    getApplication<Application>().baseContext,
+                    getKoin().get(),
                     schedule.id,
                     rescheduleBoolean
                 )
             } else {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> cancelAlarm" }
-                cancelAlarm(getApplication<Application>().baseContext, schedule.id)
+                cancelAlarm(getKoin().get(), schedule.id)
             }
         }
     }

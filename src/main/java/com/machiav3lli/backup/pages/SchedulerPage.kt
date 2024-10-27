@@ -63,7 +63,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
         derivedStateOf {
             if (scheduleSheetId.longValue != -1L) ScheduleVM(
                 scheduleSheetId.longValue,
-                OABX.db.getScheduleDao(),
+                OABX.db,
             ) else null
         }
     }
