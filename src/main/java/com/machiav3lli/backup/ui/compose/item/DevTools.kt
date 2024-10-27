@@ -74,10 +74,14 @@ import com.machiav3lli.backup.OABX.Companion.endBusy
 import com.machiav3lli.backup.OABX.Companion.hitBusy
 import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.PREFS_BACKUP_FILE
-import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
-import com.machiav3lli.backup.handler.findBackups
+import com.machiav3lli.backup.entity.LaunchPref
+import com.machiav3lli.backup.entity.Pref
+import com.machiav3lli.backup.entity.Pref.Companion.preferencesFromSerialized
+import com.machiav3lli.backup.entity.Pref.Companion.preferencesToSerialized
 import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.entity.UndeterminedStorageFile
+import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
+import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.plugins.Plugin
 import com.machiav3lli.backup.plugins.Plugin.Companion.displayPath
 import com.machiav3lli.backup.plugins.Plugin.Companion.fileFor
@@ -108,14 +112,11 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Pencil
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
-import com.machiav3lli.backup.entity.LaunchPref
-import com.machiav3lli.backup.entity.Pref
-import com.machiav3lli.backup.entity.Pref.Companion.preferencesFromSerialized
-import com.machiav3lli.backup.entity.Pref.Companion.preferencesToSerialized
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.utils.recreateActivities
+import com.machiav3lli.backup.utils.restartApp
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -1085,6 +1086,12 @@ fun DevTools(
                         "          close          "
                     ) {
                         expanded.value = false
+                        try {
+                            if (OABX.main?.navController != null)
+                                ;
+                        } catch (e: Throwable) {
+                            OABX.main?.restartApp()
+                        }
                     }
                 }
 
