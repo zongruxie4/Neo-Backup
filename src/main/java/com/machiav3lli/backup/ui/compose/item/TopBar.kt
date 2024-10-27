@@ -1,5 +1,9 @@
 package com.machiav3lli.backup.ui.compose.item
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -225,6 +229,98 @@ fun TopBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun MainTopBar(
+    title: String,
+    expanded: MutableState<Boolean>,
+    query: String,
+    onQueryChanged: (String) -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+    actions: @Composable() (RowScope.() -> Unit) = {},
+) {
+    val showDevTools = remember { mutableStateOf(false) }
+    val tempShowInfo = remember { mutableStateOf(false) }
+    val showInfo =
+        !showDevTools.value && (OABX.showInfoLog || tempShowInfo.value) && pref_showInfoLogBar.value
+    val (isExpanded, onExpanded) = remember { expanded }
+    val enterPositive = expandHorizontally(expandFrom = Alignment.End)
+    val exitPositive = shrinkHorizontally(shrinkTowards = Alignment.End)
+    val enterNegative = expandHorizontally(expandFrom = Alignment.Start)
+    val exitNegative = shrinkHorizontally(shrinkTowards = Alignment.Start)
+
+    Box { // overlay TopBar and indicators
+        ListItem(
+            modifier = modifier
+                .windowInsetsPadding(TopAppBarDefaults.windowInsets)
+                .height(72.dp)
+                .blockBorderTop()
+                .fillMaxWidth(),
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent,
+            ),
+            headlineContent = {
+                AnimatedVisibility(
+                    visible = !isExpanded,
+                    enter = enterNegative,
+                    exit = exitNegative,
+                ) {
+                    TitleOrInfoLog(
+                        title = title,
+                        showInfo = showInfo,
+                        tempShowInfo = tempShowInfo,
+                        modifier = Modifier
+                            .combinedClickable(
+                                onClick = {
+                                    if (pref_showInfoLogBar.value) {
+                                        OABX.showInfoLog = !OABX.showInfoLog
+                                    }
+                                    if (!OABX.showInfoLog)
+                                        tempShowInfo.value = false
+                                },
+                                onLongClick = {
+                                    showDevTools.value = true
+                                }
+                            )
+                    )
+                }
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = enterPositive,
+                    exit = exitPositive,
+                ) {
+                    ExpandedSearchView(
+                        query = query,
+                        modifier = modifier,
+                        onClose = onClose,
+                        onExpanded = onExpanded,
+                        onQueryChanged = onQueryChanged
+                    )
+                }
+                if (showDevTools.value) {
+                    BaseDialog(openDialogCustom = showDevTools) {
+                        DevTools(expanded = showDevTools)
+                    }
+                }
+            },
+            trailingContent = {
+                AnimatedVisibility(
+                    visible = !isExpanded,
+                    enter = enterPositive,
+                    exit = exitPositive,
+                ) {
+                    Row { actions() }
+                }
+            }
+        )
+
+        // must be second item to overlay first
+        GlobalIndicators()
+
+    }
+}
+
 @Composable
 fun ExpandableSearchAction(
     query: String,
@@ -279,7 +375,6 @@ fun ExpandedSearchView(
             onQueryChanged(it.text)
         },
         modifier = modifier
-            .padding(horizontal = 8.dp)
             .fillMaxWidth()
             .focusRequester(textFieldFocusRequester),
         singleLine = true,
