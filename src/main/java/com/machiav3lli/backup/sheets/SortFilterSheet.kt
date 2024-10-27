@@ -49,10 +49,14 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.BACKUP_FILTER_DEFAULT
 import com.machiav3lli.backup.CHIP_SIZE_APP
 import com.machiav3lli.backup.CHIP_SIZE_DATA
+import com.machiav3lli.backup.EnabledFilter
+import com.machiav3lli.backup.InstalledFilter
+import com.machiav3lli.backup.LatestFilter
+import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.SPECIAL_FILTER_ALL
+import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.entity.ChipItem
 import com.machiav3lli.backup.entity.InfoChipItem
@@ -276,7 +280,7 @@ fun SortFilterSheet(
             item {
                 ExpandableBlock(
                     heading = stringResource(id = R.string.filters_installed),
-                    preExpanded = model.installedFilter != SPECIAL_FILTER_ALL,
+                    preExpanded = model.installedFilter != InstalledFilter.ALL.ordinal,
                 ) {
                     SelectableChipGroup(
                         list = installedFilterChipItems,
@@ -289,7 +293,7 @@ fun SortFilterSheet(
             item {
                 ExpandableBlock(
                     heading = stringResource(id = R.string.filters_launchable),
-                    preExpanded = model.launchableFilter != SPECIAL_FILTER_ALL,
+                    preExpanded = model.launchableFilter != LaunchableFilter.ALL.ordinal,
                 ) {
                     SelectableChipGroup(
                         list = launchableFilterChipItems,
@@ -302,7 +306,7 @@ fun SortFilterSheet(
             item {
                 ExpandableBlock(
                     heading = stringResource(id = R.string.filters_updated),
-                    preExpanded = model.updatedFilter != SPECIAL_FILTER_ALL,
+                    preExpanded = model.updatedFilter != UpdatedFilter.ALL.ordinal,
                 ) {
                     SelectableChipGroup(
                         list = updatedFilterChipItems,
@@ -315,7 +319,7 @@ fun SortFilterSheet(
             item {
                 ExpandableBlock(
                     heading = stringResource(id = R.string.filters_latest),
-                    preExpanded = model.latestFilter != SPECIAL_FILTER_ALL,
+                    preExpanded = model.latestFilter != LatestFilter.ALL.ordinal,
                 ) {
                     SelectableChipGroup(
                         list = latestFilterChipItems,
@@ -328,7 +332,7 @@ fun SortFilterSheet(
             item {
                 ExpandableBlock(
                     heading = stringResource(id = R.string.filters_enabled),
-                    preExpanded = model.enabledFilter != SPECIAL_FILTER_ALL,
+                    preExpanded = model.enabledFilter != EnabledFilter.ALL.ordinal,
                 ) {
                     SelectableChipGroup(
                         list = enabledFilterChipItems,

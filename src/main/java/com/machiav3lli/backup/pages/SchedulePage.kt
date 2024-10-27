@@ -50,11 +50,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.machiav3lli.backup.EnabledFilter
+import com.machiav3lli.backup.LatestFilter
+import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
 import com.machiav3lli.backup.MODE_APK
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.SPECIAL_FILTER_ALL
+import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BlockListDialogUI
@@ -279,7 +282,7 @@ fun SchedulePage(
                 item {
                     ExpandableBlock(
                         heading = stringResource(id = R.string.filters_launchable),
-                        preExpanded = schedule.launchableFilter != SPECIAL_FILTER_ALL,
+                        preExpanded = schedule.launchableFilter != LaunchableFilter.ALL.ordinal,
                     ) {
                         SelectableChipGroup(
                             list = launchableFilterChipItems,
@@ -295,7 +298,7 @@ fun SchedulePage(
                 item {
                     ExpandableBlock(
                         heading = stringResource(id = R.string.filters_updated),
-                        preExpanded = schedule.updatedFilter != SPECIAL_FILTER_ALL,
+                        preExpanded = schedule.updatedFilter != UpdatedFilter.ALL.ordinal,
                     ) {
                         SelectableChipGroup(
                             list = updatedFilterChipItems,
@@ -311,7 +314,7 @@ fun SchedulePage(
                 item {
                     ExpandableBlock(
                         heading = stringResource(id = R.string.filters_latest),
-                        preExpanded = schedule.latestFilter != SPECIAL_FILTER_ALL,
+                        preExpanded = schedule.latestFilter != LatestFilter.ALL.ordinal,
                     ) {
                         SelectableChipGroup(
                             list = latestFilterChipItems,
@@ -327,7 +330,7 @@ fun SchedulePage(
                 item {
                     ExpandableBlock(
                         heading = stringResource(id = R.string.filters_enabled),
-                        preExpanded = schedule.enabledFilter != SPECIAL_FILTER_ALL,
+                        preExpanded = schedule.enabledFilter != EnabledFilter.ALL.ordinal,
                     ) {
                         SelectableChipGroup(
                             list = enabledFilterChipItems,

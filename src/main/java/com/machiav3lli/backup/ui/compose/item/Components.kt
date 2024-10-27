@@ -65,11 +65,11 @@ import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Size
-import com.machiav3lli.backup.ENABLED_FILTER_DISABLED
+import com.machiav3lli.backup.EnabledFilter
 import com.machiav3lli.backup.ICON_SIZE_LARGE
 import com.machiav3lli.backup.ICON_SIZE_SMALL
-import com.machiav3lli.backup.LATEST_FILTER_NEW
-import com.machiav3lli.backup.LAUNCHABLE_FILTER_NOT
+import com.machiav3lli.backup.LatestFilter
+import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_SPECIAL
 import com.machiav3lli.backup.MAIN_FILTER_SYSTEM
 import com.machiav3lli.backup.MAIN_FILTER_USER
@@ -80,9 +80,7 @@ import com.machiav3lli.backup.MODE_DATA_EXT
 import com.machiav3lli.backup.MODE_DATA_MEDIA
 import com.machiav3lli.backup.MODE_DATA_OBB
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.SPECIAL_FILTER_ALL
-import com.machiav3lli.backup.UPDATED_FILTER_NEW
-import com.machiav3lli.backup.UPDATED_FILTER_NOT
+import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.entity.Package
@@ -618,59 +616,59 @@ fun ScheduleFilters(
             tint = ColorSpecial
         )
     }
-    AnimatedVisibility(visible = item.launchableFilter != SPECIAL_FILTER_ALL) {
+    AnimatedVisibility(visible = item.launchableFilter != LaunchableFilter.ALL.ordinal) {
         ButtonIcon(
             when (item.launchableFilter) {
-                LAUNCHABLE_FILTER_NOT -> Phosphor.ProhibitInset
-                else                  -> Phosphor.ArrowSquareOut // LAUNCHABLE_FILTER_LAUNCHABLE
+                LaunchableFilter.NOT.ordinal -> Phosphor.ProhibitInset
+                else                         -> Phosphor.ArrowSquareOut // LaunchableFilter.LAUNCHABLE
             },
 
             when (item.launchableFilter) {
-                LAUNCHABLE_FILTER_NOT -> R.string.radio_notlaunchable
-                else                  -> R.string.radio_launchable // LAUNCHABLE_FILTER_LAUNCHABLE
+                LaunchableFilter.NOT.ordinal -> R.string.radio_notlaunchable
+                else                         -> R.string.radio_launchable // LaunchableFilter.LAUNCHABLE
             },
             tint = ColorOBB,
         )
     }
-    AnimatedVisibility(visible = item.updatedFilter != SPECIAL_FILTER_ALL) {
+    AnimatedVisibility(visible = item.updatedFilter != UpdatedFilter.ALL.ordinal) {
         ButtonIcon(
             when (item.updatedFilter) {
-                UPDATED_FILTER_NEW -> Phosphor.Star
-                UPDATED_FILTER_NOT -> Phosphor.Clock
-                else               -> Phosphor.CircleWavyWarning // UPDATED_FILTER_UPDATED
+                UpdatedFilter.NEW.ordinal -> Phosphor.Star
+                UpdatedFilter.NOT.ordinal -> Phosphor.Clock
+                else                      -> Phosphor.CircleWavyWarning // UpdatedFilter.UPDATED
             },
             when (item.updatedFilter) {
-                UPDATED_FILTER_NOT -> R.string.show_old_apps
-                UPDATED_FILTER_NEW -> R.string.show_new_apps
-                else               -> R.string.show_updated_apps // UPDATED_FILTER_UPDATED
+                UpdatedFilter.NOT.ordinal -> R.string.show_old_apps
+                UpdatedFilter.NEW.ordinal -> R.string.show_new_apps
+                else                      -> R.string.show_updated_apps // UpdatedFilter.UPDATED
             },
             tint = ColorUpdated,
         )
     }
-    AnimatedVisibility(visible = item.enabledFilter != SPECIAL_FILTER_ALL) {
+    AnimatedVisibility(visible = item.enabledFilter != EnabledFilter.ALL.ordinal) {
         ButtonIcon(
             when (item.enabledFilter) {
-                ENABLED_FILTER_DISABLED -> Phosphor.ProhibitInset
-                else                    -> Phosphor.Leaf // ENABLED_FILTER_ENABLED
+                EnabledFilter.DISABLED.ordinal -> Phosphor.ProhibitInset
+                else                           -> Phosphor.Leaf // EnabledFilter.ENABLED
             },
 
             when (item.enabledFilter) {
-                ENABLED_FILTER_DISABLED -> R.string.showDisabled
-                else                    -> R.string.show_enabled_apps // ENABLED_FILTER_ENABLED
+                EnabledFilter.DISABLED.ordinal -> R.string.showDisabled
+                else                           -> R.string.show_enabled_apps // EnabledFilter.ENABLED
             },
             tint = ColorDeData,
         )
     }
-    AnimatedVisibility(visible = item.latestFilter != SPECIAL_FILTER_ALL) {
+    AnimatedVisibility(visible = item.latestFilter != LatestFilter.ALL.ordinal) {
         ButtonIcon(
             when (item.latestFilter) {
-                LATEST_FILTER_NEW -> Phosphor.CircleWavyWarning
-                else              -> Phosphor.Clock // LATEST_FILTER_OLD
+                LatestFilter.NEW.ordinal -> Phosphor.CircleWavyWarning
+                else                     -> Phosphor.Clock // LatestFilter.OLD
             },
 
             when (item.latestFilter) {
-                LATEST_FILTER_NEW -> R.string.show_new_backups
-                else              -> R.string.showOldBackups // LATEST_FILTER_OLD
+                LatestFilter.NEW.ordinal -> R.string.show_new_backups
+                else                     -> R.string.showOldBackups // LatestFilter.OLD
             },
             tint = ColorExodus,
         )
