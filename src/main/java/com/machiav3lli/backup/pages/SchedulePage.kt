@@ -55,7 +55,6 @@ import com.machiav3lli.backup.LatestFilter
 import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
-import com.machiav3lli.backup.MODE_APK
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.dbs.entity.Schedule
@@ -66,6 +65,7 @@ import com.machiav3lli.backup.dialogs.IntPickerDialogUI
 import com.machiav3lli.backup.dialogs.StringInputDialogUI
 import com.machiav3lli.backup.dialogs.TimePickerDialogUI
 import com.machiav3lli.backup.enabledFilterChipItems
+import com.machiav3lli.backup.entity.ChipItem
 import com.machiav3lli.backup.latestFilterChipItems
 import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainFilterChipItems
@@ -87,7 +87,6 @@ import com.machiav3lli.backup.ui.compose.item.RoundButton
 import com.machiav3lli.backup.ui.compose.item.TitleText
 import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
-import com.machiav3lli.backup.entity.ChipItem
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.cancelAlarm
 import com.machiav3lli.backup.utils.specialBackupsEnabled
@@ -244,6 +243,23 @@ fun SchedulePage(
                 }
                 item {
                     ExpandableBlock(
+                        heading = stringResource(id = R.string.filters_backup),
+                        preExpanded = true,
+                    ) {
+                        MultiSelectableChipGroup(
+                            list = scheduleBackupModeChipItems,
+                            selectedFlags = schedule.mode
+                        ) { flags, flag ->
+                            traceDebug { "*** onClick mode ${schedule.mode} xor $flag -> $flags (${schedule.mode xor flag})" }
+                            refresh(
+                                schedule.copy(mode = flags),
+                                false,
+                            )
+                        }
+                    }
+                }
+                item {
+                    ExpandableBlock(
                         heading = stringResource(id = R.string.filters_app),
                         preExpanded = schedule.filter != if (specialBackupsEnabled) MAIN_FILTER_DEFAULT
                         else MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL,
@@ -257,23 +273,6 @@ fun SchedulePage(
                         ) { flags, flag ->
                             refresh(
                                 schedule.copy(filter = flags),
-                                false,
-                            )
-                        }
-                    }
-                }
-                item {
-                    ExpandableBlock(
-                        heading = stringResource(id = R.string.filters_backup),
-                        preExpanded = schedule.mode != MODE_APK,
-                    ) {
-                        MultiSelectableChipGroup(
-                            list = scheduleBackupModeChipItems,
-                            selectedFlags = schedule.mode
-                        ) { flags, flag ->
-                            traceDebug { "*** onClick mode ${schedule.mode} xor $flag -> $flags (${schedule.mode xor flag})" }
-                            refresh(
-                                schedule.copy(mode = flags),
                                 false,
                             )
                         }
