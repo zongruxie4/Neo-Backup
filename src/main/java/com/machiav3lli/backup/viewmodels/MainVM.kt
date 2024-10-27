@@ -46,12 +46,15 @@ import com.machiav3lli.backup.utils.sortFilterModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
@@ -217,13 +220,8 @@ class MainVM(
                 emptyList()
             )
 
-    val searchQuery =
-        //------------------------------------------------------------------------------------------ searchQuery
-        MutableComposableStateFlow(
-            "",
-            viewModelScope + Dispatchers.IO,
-            "searchQuery"
-        )
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
 
     val modelSortFilter =
         //------------------------------------------------------------------------------------------ modelSortFilter
@@ -238,7 +236,7 @@ class MainVM(
         combine(
             notBlockedList,
             modelSortFilter.flow,
-            searchQuery.flow,
+            searchQuery,
             appExtrasMap
         ) { pkgs, filter, search, extras ->
 
@@ -295,27 +293,14 @@ class MainVM(
                 emptyList()
             )
 
-    //---------------------------------------------------------------------------------------------- retriggerFlowsForUI
-
-    fun retriggerFlowsForUI() {
-        traceFlows { "******************** retriggerFlowsForUI" }
-        runBlocking {
-            val saved = searchQuery.value
-            // in case same value isn't triggering
-            val retrigger = saved + "<RETRIGGERING>"
-            searchQuery.value = retrigger
-            // wait until we really get that value
-            while (searchQuery.value != retrigger)
-                yield()
-            // now switch back
-            searchQuery.value = saved
-        }
-    }
-
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS end
 
     val selection = mutableStateMapOf<String, Boolean>()
     val menuExpanded = mutableStateOf(false)
+
+    fun setSearchQuery(value: String) {
+        viewModelScope.launch { _searchQuery.update { value } }
+    }
 
     fun updatePackage(packageName: String) {
         viewModelScope.launch {
