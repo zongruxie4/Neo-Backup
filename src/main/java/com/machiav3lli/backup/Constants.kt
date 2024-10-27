@@ -31,7 +31,7 @@ const val PREFS_SHARED_PRIVATE = "com.machiav3lli.backup"
 const val ADMIN_PREFIX = "!-"
 
 val COMPRESSION_TYPES = mapOf(
-    "gz"  to "Gzip Compression",    // TODO translation?
+    "gz" to "Gzip Compression",    // TODO translation?
     "zst" to "Zstd Compression",    // TODO translation?
     "no" to "No Compression"      // TODO translation?
 )
