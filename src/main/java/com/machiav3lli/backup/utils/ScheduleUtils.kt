@@ -54,6 +54,8 @@ import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
+// TODO revamp scheduling fully
+
 fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
     val c = Calendar.getInstance()
     c.timeInMillis = schedule.timePlaced
