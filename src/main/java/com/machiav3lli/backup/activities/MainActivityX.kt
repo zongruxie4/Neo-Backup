@@ -89,6 +89,7 @@ import com.machiav3lli.backup.viewmodels.ExportsVM
 import com.machiav3lli.backup.viewmodels.LogsVM
 import com.machiav3lli.backup.viewmodels.MainVM
 import com.machiav3lli.backup.viewmodels.RestoreBatchVM
+import com.machiav3lli.backup.viewmodels.ScheduleVM
 import com.machiav3lli.backup.viewmodels.SchedulesVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -647,6 +648,7 @@ val viewModelsModule = module {
     viewModel { BackupBatchVM() }
     viewModel { RestoreBatchVM() }
     viewModel { SchedulesVM(get(), get()) }
+    viewModel { ScheduleVM(get()) }
     viewModel { ExportsVM(get(), get()) }
     viewModel { LogsVM() }
 }

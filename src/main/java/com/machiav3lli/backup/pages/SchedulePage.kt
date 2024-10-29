@@ -38,6 +38,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -93,8 +94,7 @@ import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.utils.startSchedule
 import com.machiav3lli.backup.utils.timeLeft
 import com.machiav3lli.backup.viewmodels.ScheduleVM
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import org.koin.androidx.compose.koinViewModel
 import java.time.LocalTime
 
 const val DIALOG_NONE = 0
@@ -107,8 +107,8 @@ const val DIALOG_SCHEDULENAME = 5
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SchedulePage(
-    viewModel: ScheduleVM,
     scheduleId: Long,
+    viewModel: ScheduleVM = koinViewModel(),
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -121,8 +121,12 @@ fun SchedulePage(
     val blockList by viewModel.blockList.collectAsState(emptySet())
     val allTags by viewModel.allTags.collectAsState()
 
+    LaunchedEffect(scheduleId) {
+        viewModel.setSchedule(scheduleId)
+    }
+
     schedule?.let { schedule ->
-        val (absTime, relTime) = timeLeft(schedule, CoroutineScope(Dispatchers.Default))
+        val (absTime, relTime) = timeLeft(schedule)
             .collectAsState().value
 
 

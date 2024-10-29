@@ -30,7 +30,6 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -39,14 +38,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.ICON_SIZE_SMALL
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarPlus
 import com.machiav3lli.backup.ui.compose.recycler.ScheduleRecycler
 import com.machiav3lli.backup.utils.specialBackupsEnabled
-import com.machiav3lli.backup.viewmodels.ScheduleVM
 import com.machiav3lli.backup.viewmodels.SchedulesVM
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
@@ -59,14 +56,6 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
     val schedules by viewModel.schedules.collectAsState(emptyList())
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val scheduleSheetId = remember { mutableLongStateOf(-1L) }
-    val scheduleSheetVM by remember {
-        derivedStateOf {
-            if (scheduleSheetId.longValue != -1L) ScheduleVM(
-                scheduleSheetId.longValue,
-                OABX.db,
-            ) else null
-        }
-    }
 
     NavigableListDetailPaneScaffold(
         navigator = paneNavigator,
@@ -109,11 +98,10 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
                 ?.takeIf { it.pane == this.role }?.content
                 .toString().toLongOrDefault(-1L)
 
-            scheduleSheetVM?.let { vm ->
+            scheduleSheetId.longValue.takeIf { it != -1L }?.let { id ->
                 AnimatedPane {
                     SchedulePage(
-                        viewModel = vm,
-                        scheduleId = scheduleSheetId.longValue,
+                        scheduleId = id,
                         onDismiss = {
                             scope.launch {
                                 paneNavigator.navigateTo(ListDetailPaneScaffoldRole.List)
