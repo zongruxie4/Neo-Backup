@@ -29,30 +29,42 @@ import com.machiav3lli.backup.utils.cancelAlarm
 import com.machiav3lli.backup.utils.scheduleAlarm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 
-class ScheduleVM(
-    val id: Long,
-    database: ODatabase,
-) : ViewModel(), KoinComponent {
+class ScheduleVM(database: ODatabase) : ViewModel(), KoinComponent {
+    private val cc = Dispatchers.IO
     private val scheduleDB: ScheduleDao = database.getScheduleDao()
 
-    val schedule: StateFlow<Schedule?> = scheduleDB.getScheduleFlow(id)
-        //TODO hg42 .trace { "*** schedule <<- ${it}" }     // what can here be null? (something is null that is not declared as nullable)
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            Schedule(0)
-        )
-    val customList = scheduleDB.getCustomListFlow(id)
-    val blockList = scheduleDB.getBlockListFlow(id)
+    private val _scheduleID = MutableStateFlow(-1L)
+
+    val schedule: StateFlow<Schedule?> =
+        combine(_scheduleID, scheduleDB.getScheduleFlow(_scheduleID.value)) { id, schedule ->
+            withContext(cc) { scheduleDB.getSchedule(id) }
+        }
+            //TODO hg42 .trace { "*** schedule <<- ${it}" }     // what can here be null? (something is null that is not declared as nullable)
+            .stateIn(
+                viewModelScope,
+                SharingStarted.Eagerly,
+                Schedule(0)
+            )
+
+    val customList =
+        combine(_scheduleID, scheduleDB.getCustomListFlow(_scheduleID.value)) { id, bl ->
+            withContext(cc) { scheduleDB.getCustomList(id) }
+        }
+    val blockList = combine(_scheduleID, scheduleDB.getBlockListFlow(_scheduleID.value)) { id, bl ->
+        withContext(cc) { scheduleDB.getBlockList(id) }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allTags =
@@ -65,6 +77,10 @@ class ScheduleVM(
                 SharingStarted.Eagerly,
                 emptyList()
             )
+
+    fun setSchedule(value: Long) {
+        viewModelScope.launch { _scheduleID.update { value } }
+    }
 
     fun updateSchedule(schedule: Schedule?, rescheduleBoolean: Boolean) {
         viewModelScope.launch {
@@ -97,7 +113,7 @@ class ScheduleVM(
 
     private suspend fun deleteS() {
         withContext(Dispatchers.IO) {
-            scheduleDB.deleteById(id)
+            scheduleDB.deleteById(_scheduleID.value)
         }
     }
 }
