@@ -23,7 +23,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Play
-import com.machiav3lli.backup.utils.startSchedule
+import com.machiav3lli.backup.utils.showStartScheduleDialog
 import com.machiav3lli.backup.utils.timeLeft
 
 @Composable
@@ -85,7 +85,7 @@ fun ScheduleItem(
         },
         trailingContent = {
             IconButton(onClick = {
-                startSchedule(schedule)
+                showStartScheduleDialog(schedule)
             }) {
                 Icon(
                     imageVector = Phosphor.Play,
