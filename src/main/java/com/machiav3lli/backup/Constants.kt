@@ -86,6 +86,7 @@ const val PACKAGES_LIST_GLOBAL_ID = -1L
 
 const val ACTION_CANCEL = "cancel"
 const val ACTION_SCHEDULE = "schedule"
+const val ACTION_CANCEL_SCHEDULE = "cancel_schedule"
 const val ACTION_RESCHEDULE = "reschedule"
 const val ACTION_CRASH = "crash"
 
