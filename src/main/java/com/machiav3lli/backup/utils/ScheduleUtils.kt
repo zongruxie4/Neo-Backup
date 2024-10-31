@@ -146,22 +146,15 @@ fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
     return Pair(absTime, relTime)
 }
 
-@Composable
 fun timeLeft(
     schedule: Schedule,
-    scope: CoroutineScope,
-): MutableStateFlow<Pair<String, String>> {
-    val state = MutableStateFlow(calcTimeLeft(schedule))
-
-    LaunchedEffect(state) {
-        delay(updateInterval)
-        state.emit(calcTimeLeft(schedule))
-    }
-
-    //traceDebug { state.value.let { "⏳ ${it[0]}  🕒 ${it[1]}" } }
-
-    return state
-}
+): StateFlow<Pair<String, String>> = MutableStateFlow(calcTimeLeft(schedule))
+    .debounce(updateInterval)
+    .stateIn(
+        scope = CoroutineScope(Dispatchers.IO),
+        started = SharingStarted.Lazily,
+        initialValue = calcTimeLeft(schedule)
+    )
 
 
 fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean) {

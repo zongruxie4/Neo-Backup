@@ -25,8 +25,6 @@ import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Play
 import com.machiav3lli.backup.utils.startSchedule
 import com.machiav3lli.backup.utils.timeLeft
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun ScheduleItem(
@@ -35,7 +33,7 @@ fun ScheduleItem(
     onCheckChanged: (Schedule, Boolean) -> Unit = { _: Schedule, _: Boolean -> },
 ) {
     val (checked, check) = mutableStateOf(schedule.enabled)
-    val (absTime, relTime) = timeLeft(schedule, CoroutineScope(Dispatchers.Default))
+    val (absTime, relTime) = timeLeft(schedule)
         .collectAsState().value
 
     ListItem(
