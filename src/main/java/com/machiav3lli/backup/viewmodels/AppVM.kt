@@ -25,42 +25,34 @@ import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Backup
+import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.showNotification
-import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.ui.compose.MutableComposableStateFlow
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class AppVM(
-    app: Package?,
-    private val database: ODatabase,
-    private var shellCommands: ShellCommands,
-) : ViewModel() {
-
-    var thePackage = flow<Package?> { app }.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        app
-    )
+class AppVM(private val database: ODatabase) : ViewModel() {
+    private val thePackage: MutableStateFlow<Package?> = MutableStateFlow(null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    var appExtras = database.getAppExtrasDao().getFlow(app?.packageName).mapLatest {
-        it ?: AppExtras(app?.packageName ?: "")
+    var appExtras = database.getAppExtrasDao().getFlow(thePackage.value?.packageName).mapLatest {
+        it ?: AppExtras(thePackage.value?.packageName ?: "")
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        AppExtras(app?.packageName ?: "")
+        AppExtras(thePackage.value?.packageName ?: "")
     )
 
     val snackbarText = MutableComposableStateFlow(
@@ -72,6 +64,10 @@ class AppVM(
     private var notificationId: Int = SystemUtils.now.toInt()
     val refreshNow = mutableStateOf(true)
     val dismissNow = mutableStateOf(false)
+
+    fun setApp(app: Package) {
+        viewModelScope.launch { thePackage.update { app } }
+    }
 
     fun uninstallApp() {
         viewModelScope.launch {

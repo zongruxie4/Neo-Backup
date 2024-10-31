@@ -47,6 +47,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -127,8 +128,9 @@ const val DIALOG_NOTE_BACKUP = 12
 
 @Composable
 fun AppPage(
-    viewModel: AppVM,
     packageName: String,
+    app: Package,
+    viewModel: AppVM = koinViewModel(),
     mainVM: MainVM = koinViewModel(),
     onDismiss: () -> Unit,
 ) {
@@ -149,6 +151,10 @@ fun AppPage(
     val snackbarVisible = snackbarText.isNotEmpty()
     val coroutineScope = rememberCoroutineScope()
     val columns = 2
+
+    LaunchedEffect(packageName) {
+        viewModel.setApp(app)
+    }
 
     thePackage?.let { pkg ->
 

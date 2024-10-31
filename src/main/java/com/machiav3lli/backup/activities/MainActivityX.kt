@@ -84,6 +84,7 @@ import com.machiav3lli.backup.utils.isDarkTheme
 import com.machiav3lli.backup.utils.isDeviceLockEnabled
 import com.machiav3lli.backup.utils.isEncryptionEnabled
 import com.machiav3lli.backup.utils.isLikeRoot
+import com.machiav3lli.backup.viewmodels.AppVM
 import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.ExportsVM
 import com.machiav3lli.backup.viewmodels.LogsVM
@@ -649,6 +650,7 @@ val viewModelsModule = module {
     viewModel { RestoreBatchVM() }
     viewModel { SchedulesVM(get(), get()) }
     viewModel { ScheduleVM(get()) }
+    viewModel { AppVM(get()) }
     viewModel { ExportsVM(get(), get()) }
     viewModel { LogsVM() }
 }
