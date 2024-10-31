@@ -9,8 +9,9 @@ import com.machiav3lli.backup.ACTION_RESCHEDULE
 import com.machiav3lli.backup.ACTION_SCHEDULE
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.preferences.traceSchedule
+import com.machiav3lli.backup.tasks.ScheduleWork
 import com.machiav3lli.backup.utils.SystemUtils
-import com.machiav3lli.backup.utils.scheduleAlarm
+import com.machiav3lli.backup.utils.scheduleNext
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -37,13 +38,9 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                     OABX.addInfoLogText("$command $name")
                     Timber.d("################################################### command intent schedule -------------> name=$name")
                     Thread {
-                        val now = SystemUtils.now
-                        val serviceIntent = Intent(context, ScheduleService::class.java)
                         val scheduleDao = OABX.db.getScheduleDao()
                         scheduleDao.getSchedule(name)?.let { schedule ->
-                            serviceIntent.putExtra("scheduleId", schedule.id)
-                            serviceIntent.putExtra("name", schedule.getBatchName(now))
-                            context.startService(serviceIntent)
+                            ScheduleWork.schedule(context, schedule, true)
                         }
                     }.start()
                 }
@@ -67,7 +64,7 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                                 timeMinute = minute,
                             )
                             scheduleDao.update(newSched)
-                            scheduleAlarm(context, newSched.id, true)
+                            scheduleNext(context, newSched.id, true)
                         }
                     }.start()
                 }

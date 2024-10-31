@@ -23,8 +23,8 @@ import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.preferences.traceSchedule
-import com.machiav3lli.backup.utils.cancelAlarm
-import com.machiav3lli.backup.utils.scheduleAlarm
+import com.machiav3lli.backup.tasks.ScheduleWork
+import com.machiav3lli.backup.utils.scheduleNext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,14 +62,14 @@ class SchedulesVM(val database: ScheduleDao, private val appContext: Application
             database.update(schedule)
             if (schedule.enabled) {
                 traceSchedule { "[${schedule.id}] SchedulerViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
-                scheduleAlarm(
+                scheduleNext(
                     appContext.baseContext,
                     schedule.id,
                     rescheduleBoolean
                 )
             } else {
                 traceSchedule { "[${schedule.id}] SchedulerViewModel.updateS -> cancelAlarm" }
-                cancelAlarm(appContext.baseContext, schedule.id)
+                ScheduleWork.cancel(appContext.baseContext, schedule.id)
             }
         }
     }

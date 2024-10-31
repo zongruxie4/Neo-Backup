@@ -17,44 +17,29 @@
  */
 package com.machiav3lli.backup.utils
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.icu.util.Calendar
-import android.os.Build
 import androidx.appcompat.app.AlertDialog
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.getString
-import com.machiav3lli.backup.OABX.Companion.isDebug
-import com.machiav3lli.backup.OABX.Companion.isHg42
-import com.machiav3lli.backup.OABX.Companion.runningSchedules
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.Schedule
-import com.machiav3lli.backup.handler.ShellCommands
-import com.machiav3lli.backup.preferences.onErrorInfo
-import com.machiav3lli.backup.preferences.pref_autoLogSuspicious
 import com.machiav3lli.backup.preferences.pref_fakeScheduleMin
-import com.machiav3lli.backup.preferences.pref_useAlarmClock
-import com.machiav3lli.backup.preferences.pref_useExactAlarm
-import com.machiav3lli.backup.preferences.textLog
 import com.machiav3lli.backup.preferences.traceSchedule
-import com.machiav3lli.backup.services.AlarmReceiver
-import com.machiav3lli.backup.services.ScheduleService
+import com.machiav3lli.backup.tasks.ScheduleWork
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
 import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
-
-// TODO revamp scheduling fully
 
 fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
     val c = Calendar.getInstance()
@@ -156,102 +141,31 @@ fun timeLeft(
         initialValue = calcTimeLeft(schedule)
     )
 
-
-fun scheduleAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean) {
+// TODO clean up fully
+fun scheduleNext(context: Context, scheduleId: Long, rescheduleBoolean: Boolean) {
     if (scheduleId >= 0) {
-        Thread {
-            val scheduleDao = OABX.db.getScheduleDao()
-            var schedule = scheduleDao.getSchedule(scheduleId)
-            if (schedule?.enabled == true) {
+        val scheduleDao = OABX.db.getScheduleDao()
+        var schedule = scheduleDao.getSchedule(scheduleId)
 
-                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (schedule?.enabled == true) {
+            val now = SystemUtils.now
 
-                val now = SystemUtils.now
-                val timeToRun = calculateTimeToRun(schedule, now)
-                val timeLeft = timeToRun - now
-
-                if (rescheduleBoolean) {
-                    schedule = schedule.copy(
-                        timePlaced = now,
-                        timeToRun = timeToRun
-                    )
-                    traceSchedule { "[${schedule?.id}] re-scheduling $schedule" }
-                    scheduleDao.update(schedule)
-                } else {
-                    if (timeLeft <= TimeUnit.MINUTES.toMillis(1)) {
-                        schedule = schedule.copy(
-                            timeToRun = now + TimeUnit.MINUTES.toMillis(1)
-                        )
-                        scheduleDao.update(schedule)
-                        val message =
-                            "timeLeft < 1 min -> set schedule $schedule"
-                        traceSchedule { "[${schedule.id}] **************************************** $message" }
-                        if (isDebug || isHg42 || pref_autoLogSuspicious.value)
-                            textLog(
-                                listOf(
-                                    message,
-                                    ""
-                                ) + onErrorInfo()
-                            )
-                    }
-                }
-
-                val hasPermission: Boolean =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        alarmManager.canScheduleExactAlarms()
-                    } else {
-                        true
-                    }
-
-                val pendingIntent = createPendingIntent(context, scheduleId)
-
-                if (hasPermission && pref_useAlarmClock.value) {
-                    traceSchedule { "[${schedule.id}] alarmManager.setAlarmClock $schedule" }
-                    alarmManager.setAlarmClock(
-                        AlarmManager.AlarmClockInfo(schedule.timeToRun, null),
-                        pendingIntent
-                    )
-                } else {
-                    if (hasPermission && pref_useExactAlarm.value) {
-                        traceSchedule { "[${schedule.id}] alarmManager.setExactAndAllowWhileIdle $schedule" }
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            schedule.timeToRun,
-                            pendingIntent
-                        )
-                    } else {
-                        traceSchedule { "[${schedule.id}] alarmManager.setAndAllowWhileIdle $schedule" }
-                        alarmManager.setAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            schedule.timeToRun,
-                            pendingIntent
-                        )
-                    }
-                }
-                traceSchedule {
-                    "[$scheduleId] schedule starting in: ${
-                        TimeUnit.MILLISECONDS.toMinutes(schedule.timeToRun - SystemUtils.now)
-                    } minutes name=${schedule.name}"
-                }
-            } else
-                traceSchedule { "[$scheduleId] schedule is disabled. Nothing to schedule!" }
-        }.start()
+            if (rescheduleBoolean) {
+                schedule = schedule.copy(timePlaced = now)
+                traceSchedule { "[${schedule?.id}] re-scheduling $schedule" }
+                scheduleDao.update(schedule)
+            }
+            ScheduleWork.schedule(context, schedule)
+        }
     } else {
         Timber.e("[$scheduleId] got id from $context")
     }
 }
 
-fun cancelAlarm(context: Context, scheduleId: Long) {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    val pendingIntent = createPendingIntent(context, scheduleId)
-    alarmManager.cancel(pendingIntent)
-    pendingIntent.cancel()
-    traceSchedule { "[$scheduleId] cancelled schedule" }
-}
-
 var alarmsHaveBeenScheduled = false
 
-fun scheduleAlarmsOnce() {
+// TODO clean up fully
+fun scheduleAlarmsOnce() { // TODO replace with ScheduleWorker.scheduleAll()
 
     // schedule alarms only once
     // whichever event comes first:
@@ -263,55 +177,12 @@ fun scheduleAlarmsOnce() {
     if (alarmsHaveBeenScheduled)
         return
     alarmsHaveBeenScheduled = true
-
-    Thread {
-        val scheduleDao = OABX.db.getScheduleDao()
-        scheduleDao.getAll()
-            .forEach {
-                // do not set or cancel schedules that are just going to be started
-                // (on boot or fresh start from an alarm)
-                // setting a past time as alarm will start it immediately
-                val scheduleAlreadyRuns = runningSchedules[it.id] == true
-                when {
-                    scheduleAlreadyRuns -> {
-                        traceSchedule { "[${it.id}] *** scheduleAlarms: ignore $it" }
-                    }
-
-                    it.enabled          -> {
-                        traceSchedule { "[${it.id}] *** scheduleAlarms: enable $it" }
-                        scheduleAlarm(OABX.context, it.id, false)
-                    }
-
-                    else                -> {
-                        traceSchedule { "[${it.id}] *** scheduleAlarms: cancel $it" }
-                        cancelAlarm(OABX.context, it.id)
-                    }
-                }
-            }
-    }.start()
+    ScheduleWork.scheduleAll(OABX.context)
 }
 
-fun createPendingIntent(context: Context, scheduleId: Long): PendingIntent {
-    val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
-        action = "schedule"
-        putExtra("scheduleId", scheduleId)
-        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-    }
-    return PendingIntent.getBroadcast(
-        context,
-        scheduleId.toInt(),
-        alarmIntent,
-        PendingIntent.FLAG_IMMUTABLE
-    )
-}
-
-
-fun startSchedule(schedule: Schedule) {
-
+// TODO replace dialog with composable
+fun showStartScheduleDialog(schedule: Schedule) {
     OABX.main?.let {
-
-        val database = OABX.db
-
         val message = StringBuilder()
 
         message.append(
@@ -364,31 +235,11 @@ fun startSchedule(schedule: Schedule) {
             .setTitle("${schedule.name}: ${getString(R.string.sched_activateButton)}?")
             .setMessage(message)
             .setPositiveButton(R.string.dialogOK) { _: DialogInterface?, _: Int ->
-                if (schedule.mode != MODE_UNSET)
-                    StartSchedule(OABX.context, database.getScheduleDao(), schedule.id).execute()
+                if (schedule.mode != MODE_UNSET) {
+                    ScheduleWork.schedule(OABX.context, schedule, true)
+                }
             }
             .setNegativeButton(R.string.dialogCancel) { _: DialogInterface?, _: Int -> }
             .show()
     }
 }
-
-internal class StartSchedule(
-    val context: Context,
-    val scheduleDao: ScheduleDao,
-    private val scheduleId: Long,
-) :
-    ShellCommands.Command {
-
-    override fun execute() {
-        Thread {
-            val now = SystemUtils.now
-            val serviceIntent = Intent(context, ScheduleService::class.java)
-            scheduleDao.getSchedule(scheduleId)?.let { schedule ->
-                serviceIntent.putExtra("scheduleId", scheduleId)
-                serviceIntent.putExtra("name", schedule.getBatchName(now))
-                context.startService(serviceIntent)
-            }
-        }.start()
-    }
-}
-

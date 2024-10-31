@@ -24,9 +24,9 @@ import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.preferences.traceSchedule
+import com.machiav3lli.backup.tasks.ScheduleWork
 import com.machiav3lli.backup.utils.TraceUtils.trace
-import com.machiav3lli.backup.utils.cancelAlarm
-import com.machiav3lli.backup.utils.scheduleAlarm
+import com.machiav3lli.backup.utils.scheduleNext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,14 +93,14 @@ class ScheduleVM(database: ODatabase) : ViewModel(), KoinComponent {
             scheduleDB.update(schedule)
             if (schedule.enabled) {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
-                scheduleAlarm(
+                scheduleNext(
                     getKoin().get(),
                     schedule.id,
                     rescheduleBoolean
                 )
             } else {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> cancelAlarm" }
-                cancelAlarm(getKoin().get(), schedule.id)
+                ScheduleWork.cancel(getKoin().get(), schedule.id)
             }
         }
     }

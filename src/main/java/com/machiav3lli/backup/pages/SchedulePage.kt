@@ -72,6 +72,7 @@ import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainFilterChipItems
 import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.scheduleBackupModeChipItems
+import com.machiav3lli.backup.tasks.ScheduleWork
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CheckCircle
@@ -89,9 +90,8 @@ import com.machiav3lli.backup.ui.compose.item.TitleText
 import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
 import com.machiav3lli.backup.updatedFilterChipItems
-import com.machiav3lli.backup.utils.cancelAlarm
 import com.machiav3lli.backup.utils.specialBackupsEnabled
-import com.machiav3lli.backup.utils.startSchedule
+import com.machiav3lli.backup.utils.showStartScheduleDialog
 import com.machiav3lli.backup.utils.timeLeft
 import com.machiav3lli.backup.viewmodels.ScheduleVM
 import org.koin.androidx.compose.koinViewModel
@@ -409,14 +409,14 @@ fun SchedulePage(
                         fullWidth = false
                     ) {
                         viewModel.deleteSchedule()
-                        cancelAlarm(context, scheduleId)
+                        ScheduleWork.cancel(context, scheduleId)
                         onDismiss()
                     }
                     ElevatedActionButton(
                         text = stringResource(id = R.string.sched_activateButton),
                         icon = Phosphor.Play,
                         fullWidth = true,
-                        onClick = { startSchedule(schedule) }
+                        onClick = { showStartScheduleDialog(schedule) }
                     )
                 }
             }
