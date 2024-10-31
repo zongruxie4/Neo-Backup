@@ -68,7 +68,6 @@ import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.entity.Package
-import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.preferences.pref_languages
 import com.machiav3lli.backup.preferences.pref_menuButtonAlwaysVisible
 import com.machiav3lli.backup.preferences.traceCompose
@@ -89,7 +88,6 @@ import com.machiav3lli.backup.ui.compose.item.cachedAsyncImagePainter
 import com.machiav3lli.backup.ui.compose.recycler.HomePackageRecycler
 import com.machiav3lli.backup.ui.compose.recycler.UpdatedPackageRecycler
 import com.machiav3lli.backup.utils.altModeToMode
-import com.machiav3lli.backup.viewmodels.AppVM
 import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -121,17 +119,6 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
     val appSheetPackage by remember(appSheetPN.value) {
         mutableStateOf(
             packagesList.find { it.packageName == appSheetPN.value }
-        )
-    }
-    val appSheetVM by remember(appSheetPackage) {
-        mutableStateOf(
-            appSheetPackage?.let {
-                AppVM(
-                    appSheetPackage,
-                    OABX.db,
-                    ShellCommands()
-                )
-            }
         )
     }
 
@@ -364,11 +351,11 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
             appSheetPN.value = paneNavigator.currentDestination
                 ?.takeIf { it.pane == this.role }?.content?.toString()
 
-            appSheetVM?.let { vm ->
+            appSheetPackage?.let { app ->
                 AnimatedPane {
                     AppPage(
-                        viewModel = vm,
                         packageName = appSheetPN.value ?: "",
+                        app = app,
                         onDismiss = onDismiss,
                     )
                 }
