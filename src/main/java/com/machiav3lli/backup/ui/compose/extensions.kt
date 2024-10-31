@@ -37,11 +37,8 @@ import com.machiav3lli.backup.preferences.pref_altBlockLayout
 import com.machiav3lli.backup.preferences.traceFlows
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -170,44 +167,6 @@ fun ObservedEffect(onChange: () -> Unit) {
         lcOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             onChange()
         }
-    }
-}
-
-
-class MutableComposableSharedFlow<T>(
-    var initial: T,
-    val scope: CoroutineScope,
-    val label: String = "ComposableSharedFlow",
-) {
-    var flow = MutableSharedFlow<T>()
-
-    var state = flow
-        .stateIn(
-            scope,
-            SharingStarted.Eagerly,
-            initial
-        )
-
-    var value: T
-        get() {
-            val value = state.value
-            if (value is String)
-                traceFlows { "*** $label => '$value'" }
-            else
-                traceFlows { "*** $label => $value" }
-            return value
-        }
-        set(value: T) {
-            if (value is String)
-                traceFlows { "*** $label <= '$value'" }
-            else
-                traceFlows { "*** $label <= $value" }
-            initial = value
-            scope.launch { flow.emit(value) }
-        }
-
-    init {
-        value = initial
     }
 }
 

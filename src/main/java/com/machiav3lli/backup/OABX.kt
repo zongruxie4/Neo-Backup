@@ -64,7 +64,6 @@ import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.preferences.traceSection
 import com.machiav3lli.backup.preferences.traceSerialize
 import com.machiav3lli.backup.services.PackageUnInstalledReceiver
-import com.machiav3lli.backup.services.ScheduleService
 import com.machiav3lli.backup.utils.ISO_DATE_TIME_FORMAT_MS
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer
@@ -399,16 +398,6 @@ class OABX : Application() {
                 if (assetsRef.get() == null)
                     assetsRef = WeakReference(AssetHandler(context))
                 return assetsRef.get()!!
-            }
-
-        // service might be null
-        var serviceRef: WeakReference<ScheduleService> = WeakReference(null)
-        var service: ScheduleService?
-            get() {
-                return serviceRef.get()
-            }
-            set(service) {
-                serviceRef = WeakReference(service)
             }
 
         // activity might be null

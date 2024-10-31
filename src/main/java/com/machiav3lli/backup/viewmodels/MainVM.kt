@@ -30,9 +30,9 @@ import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Blocklist
-import com.machiav3lli.backup.handler.toPackageList
 import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.entity.Package.Companion.invalidateCacheForPackage
+import com.machiav3lli.backup.handler.toPackageList
 import com.machiav3lli.backup.preferences.pref_newAndUpdatedNotification
 import com.machiav3lli.backup.preferences.traceBackups
 import com.machiav3lli.backup.preferences.traceFlows
@@ -57,9 +57,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import timber.log.Timber
 
 @OptIn(ExperimentalCoroutinesApi::class)

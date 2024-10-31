@@ -107,12 +107,6 @@ class WorkHandler(appContext: Context) {
 
         Timber.d("%%%%% ALL DONE")
 
-        OABX.service?.let {
-            traceBold { """%%%%% ------------------------------------------ service stopping...\""" }
-            it.stopSelf()
-            traceBold { """%%%%% ------------------------------------------ service stopped.../""" }
-        }
-
         OABX.wakelock(false)
     }
 

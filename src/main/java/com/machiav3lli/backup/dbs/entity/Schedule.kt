@@ -64,7 +64,7 @@ data class Schedule(
     @ColumnInfo(defaultValue = "0")
     val enabledFilter: Int = EnabledFilter.ALL.ordinal,
 
-    val timeToRun: Long = 0,        //TODO should this be in hashCode and equals ???
+    @Deprecated("to be removed.") val timeToRun: Long = 0,
 
     val customList: Set<String> = setOf(),
 
