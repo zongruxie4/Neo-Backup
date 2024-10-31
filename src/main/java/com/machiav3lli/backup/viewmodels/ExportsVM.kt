@@ -24,13 +24,14 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.Schedule
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.handler.ExportsHandler
 import com.machiav3lli.backup.handler.showNotification
-import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -46,7 +47,7 @@ class ExportsVM(val database: ScheduleDao, private val appContext: Application) 
 
     fun refreshList() {
         viewModelScope.launch {
-            _exportsList.emit(recreateExportsList())
+            _exportsList.update { recreateExportsList() }
         }
     }
 

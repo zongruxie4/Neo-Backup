@@ -17,6 +17,7 @@
  */
 package com.machiav3lli.backup.pages
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -49,6 +50,7 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import org.koin.androidx.compose.koinViewModel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
@@ -75,7 +77,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
                         onClick = { viewModel.addSchedule(specialBackupsEnabled) }
                     )
                 }
-            ) {
+            ) { _ ->
                 ScheduleRecycler(
                     modifier = Modifier.fillMaxSize(),
                     productsList = schedules,

@@ -97,6 +97,7 @@ const val PREFS_LANGUAGES_SYSTEM = "system"
 const val EXTRA_PACKAGE_NAME = "packageName"
 const val EXTRA_BACKUP_BOOLEAN = "backupBoolean"
 const val EXTRA_SCHEDULE_ID = "scheduleId"
+const val EXTRA_NAME = "name"
 const val EXTRA_STATS = "stats"
 
 const val THEME_LIGHT = 0
