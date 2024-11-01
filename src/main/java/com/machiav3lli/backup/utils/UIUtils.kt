@@ -39,8 +39,8 @@ import com.machiav3lli.backup.THEME_DYNAMIC_DARK
 import com.machiav3lli.backup.THEME_DYNAMIC_LIGHT
 import com.machiav3lli.backup.THEME_LIGHT
 import com.machiav3lli.backup.THEME_SYSTEM_BLACK
-import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.entity.ActionResult
+import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.preferences.traceDebug
 import com.machiav3lli.backup.ui.compose.theme.ApricotOrange
 import com.machiav3lli.backup.ui.compose.theme.ArcticCyan
@@ -156,24 +156,6 @@ fun Activity.showActionResult(result: ActionResult, saveMethod: DialogInterface.
             builder.show()
         }
     }
-
-fun Activity.showFatalUiWarning(message: String) = showWarning(
-    getString(R.string.app_name),
-    message
-) { _: DialogInterface?, _: Int -> finishAffinity() }
-
-fun Activity.showWarning(
-    title: String,
-    message: String,
-    callback: DialogInterface.OnClickListener?,
-) = runOnUiThread {
-    AlertDialog.Builder(this)
-        .setTitle(title)
-        .setMessage(message)
-        .setNeutralButton(R.string.dialogOK, callback)
-        .setCancelable(false)
-        .show()
-}
 
 fun getThemeStyleX(theme: Int) = when (theme) {
     THEME_LIGHT,

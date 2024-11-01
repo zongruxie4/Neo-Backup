@@ -39,7 +39,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +52,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.ActionsDialogUI
@@ -91,8 +91,8 @@ fun PermissionsPage() {
     val mainActivity = OABX.main!!
     val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     val openDialog = remember { mutableStateOf(false) }
-    val dialogProp: MutableState<Int> = remember {
-        mutableIntStateOf(DIALOG_NONE)
+    val dialogProp: MutableState<DialogMode> = remember {
+        mutableStateOf(DialogMode.NONE)
     }
 
     val permissionsList = remember {
@@ -127,7 +127,7 @@ fun PermissionsPage() {
                     if (!context.isStorageDirSetAndOk && none { it.key == Permission.StorageLocation })
                         set(Permission.StorageLocation) {
                             requireStorageLocation(askForDirectory) {
-                                dialogProp.value = DIALOG_NO_SAF
+                                dialogProp.value = DialogMode.NO_SAF
                                 openDialog.value = true
                             }
                         }
@@ -136,31 +136,31 @@ fun PermissionsPage() {
                         && none { it.key == Permission.BatteryOptimization }
                     )
                         set(Permission.BatteryOptimization) {
-                            dialogProp.value = DIALOG_PERMISSION_BATTERY_OPTIMIZATION
+                            dialogProp.value = DialogMode.PERMISSION_BATTERY_OPTIMIZATION
                             openDialog.value = true
                         }
 
                     if (!context.checkUsageStatsPermission && none { it.key == Permission.UsageStats })
                         set(Permission.UsageStats) {
-                            dialogProp.value = DIALOG_PERMISSION_USAGE_STATS
+                            dialogProp.value = DialogMode.PERMISSION_USAGE_STATS
                             openDialog.value = true
                         }
 
                     if (!context.checkSMSMMSPermission && none { it.key == Permission.SMSMMS })
                         set(Permission.SMSMMS) {
-                            dialogProp.value = DIALOG_PERMISSION_SMS_MMS
+                            dialogProp.value = DialogMode.PERMISSION_SMS_MMS
                             openDialog.value = true
                         }
 
                     if (!context.checkCallLogsPermission && none { it.key == Permission.CallLogs })
                         set(Permission.CallLogs) {
-                            dialogProp.value = DIALOG_PERMISSION_CALL_LOGS
+                            dialogProp.value = DialogMode.PERMISSION_CALL_LOGS
                             openDialog.value = true
                         }
 
                     if (!context.checkContactsPermission && none { it.key == Permission.Contacts })
                         set(Permission.Contacts) {
-                            dialogProp.value = DIALOG_PERMISSION_CONTACTS
+                            dialogProp.value = DialogMode.PERMISSION_CONTACTS
                             openDialog.value = true
                         }
 
@@ -223,7 +223,8 @@ fun PermissionsPage() {
     if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
         dialogProp.value.let { dialogMode ->
             when (dialogMode) {
-                DIALOG_NO_SAF                          -> ActionsDialogUI(
+                DialogMode.NO_SAF
+                     -> ActionsDialogUI(
                     titleText = stringResource(R.string.no_file_manager_title),
                     messageText = stringResource(R.string.no_file_manager_message),
                     openDialogCustom = openDialog,
@@ -233,7 +234,8 @@ fun PermissionsPage() {
                     },
                 )
 
-                DIALOG_PERMISSION_USAGE_STATS          -> ActionsDialogUI(
+                DialogMode.PERMISSION_USAGE_STATS
+                     -> ActionsDialogUI(
                     titleText = stringResource(R.string.grant_usage_access_title),
                     messageText = stringResource(R.string.grant_usage_access_message),
                     openDialogCustom = openDialog,
@@ -243,7 +245,8 @@ fun PermissionsPage() {
                     },
                 )
 
-                DIALOG_PERMISSION_SMS_MMS              -> ActionsDialogUI(
+                DialogMode.PERMISSION_SMS_MMS
+                     -> ActionsDialogUI(
                     titleText = stringResource(R.string.smsmms_permission_title),
                     messageText = stringResource(R.string.grant_smsmms_message),
                     openDialogCustom = openDialog,
@@ -253,7 +256,8 @@ fun PermissionsPage() {
                     },
                 )
 
-                DIALOG_PERMISSION_CALL_LOGS            -> ActionsDialogUI(
+                DialogMode.PERMISSION_CALL_LOGS
+                     -> ActionsDialogUI(
                     titleText = stringResource(R.string.calllogs_permission_title),
                     messageText = stringResource(R.string.grant_calllogs_message),
                     openDialogCustom = openDialog,
@@ -263,7 +267,8 @@ fun PermissionsPage() {
                     },
                 )
 
-                DIALOG_PERMISSION_CONTACTS             -> ActionsDialogUI(
+                DialogMode.PERMISSION_CONTACTS
+                     -> ActionsDialogUI(
                     titleText = stringResource(R.string.contacts_permission_title),
                     messageText = stringResource(R.string.grant_contacts_message),
                     openDialogCustom = openDialog,
@@ -273,7 +278,8 @@ fun PermissionsPage() {
                     },
                 )
 
-                DIALOG_PERMISSION_BATTERY_OPTIMIZATION -> ActionsDialogUI(
+                DialogMode.PERMISSION_BATTERY_OPTIMIZATION
+                     -> ActionsDialogUI(
                     titleText = stringResource(R.string.ignore_battery_optimization_title),
                     messageText = stringResource(R.string.ignore_battery_optimization_message),
                     openDialogCustom = openDialog,
@@ -296,6 +302,8 @@ fun PermissionsPage() {
                         }
                     },
                 )
+
+                else -> {}
             }
         }
     }

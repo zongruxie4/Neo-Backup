@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.OABX
@@ -66,8 +67,8 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val openDialog = remember { mutableStateOf(false) }
-    val dialogProps: MutableState<Pair<Int, Schedule>> = remember {
-        mutableStateOf(Pair(DIALOG_NONE, Schedule()))
+    val dialogProps: MutableState<Pair<DialogMode, Schedule>> = remember {
+        mutableStateOf(Pair(DialogMode.NONE, Schedule()))
     }
 
     val schedules by viewModel.schedules.collectAsState(emptyList())
@@ -102,7 +103,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
                         }
                     },
                     onRun = { item ->
-                        dialogProps.value = Pair(DIALOG_SCHEDULE_RUN, item)
+                        dialogProps.value = Pair(DialogMode.SCHEDULE_RUN, item)
                         openDialog.value = true
                     },
                     onCheckChanged = { item: Schedule, b: Boolean ->
@@ -137,7 +138,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
     if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
         dialogProps.value.let { (dialogMode, schedule) ->
             when (dialogMode) {
-                DIALOG_SCHEDULE_RUN
+                DialogMode.SCHEDULE_RUN
                     -> ActionsDialogUI(
                     titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
                     messageText = context.getStartScheduleMessage(schedule),

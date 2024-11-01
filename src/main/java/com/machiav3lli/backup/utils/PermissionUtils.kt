@@ -18,21 +18,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.R
-import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
 
 // Getters
-
-fun Activity.isLikeRoot(showDialogOnError: Boolean = false): Boolean {
-    val isRooted = ShellHandler.checkRootEquivalent()
-    if (!isRooted) {
-        if (showDialogOnError)
-            showFatalUiWarning(getString(R.string.noSu))
-        return false
-    }
-    return true
-}
 
 val Context.allPermissionsGranted: Boolean
     get() {

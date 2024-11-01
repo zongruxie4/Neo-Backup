@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
@@ -31,9 +32,6 @@ import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.entity.Pref
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.showNotification
-import com.machiav3lli.backup.pages.DIALOG_NONE
-import com.machiav3lli.backup.pages.DIALOG_TOOL_DELETE_BACKUP_UNINSTALLED
-import com.machiav3lli.backup.pages.DIALOG_TOOL_SAVE_APPS_LIST
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
@@ -71,8 +69,8 @@ fun ToolsPrefsPage() {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val openDialog = remember { mutableStateOf(false) }
-    val dialogProps: MutableState<Triple<Int, Any?, Any?>> = remember {
-        mutableStateOf(Triple(DIALOG_NONE, null, null))
+    val dialogProps: MutableState<Triple<DialogMode, Any?, Any?>> = remember {
+        mutableStateOf(Triple(DialogMode.NONE, null, null))
     }
 
     val prefs = Pref.prefGroups["tool"] ?: listOf()
@@ -101,41 +99,41 @@ fun ToolsPrefsPage() {
                                 groupSize = size,
                             ) {
                                 when (pref) {
-                                    pref_batchDelete -> context.onClickUninstalledBackupsDelete(
+                                    pref_batchDelete           -> context.onClickUninstalledBackupsDelete(
                                         snackbarHostState,
                                         coroutineScope
                                     ) { message, action ->
                                         dialogProps.value =
                                             Triple(
-                                                DIALOG_TOOL_DELETE_BACKUP_UNINSTALLED,
+                                                DialogMode.TOOL_DELETE_BACKUP_UNINSTALLED,
                                                 message,
                                                 action
                                             )
                                         openDialog.value = true
                                     }
 
-                                    pref_copySelfApk -> context.onClickCopySelf(
+                                    pref_copySelfApk           -> context.onClickCopySelf(
                                         snackbarHostState,
                                         coroutineScope
                                     )
 
                                     pref_schedulesExportImport -> neoActivity.moveTo(NavItem.Exports.destination)
 
-                                    pref_saveAppsList -> context.onClickSaveAppsList(
+                                    pref_saveAppsList          -> context.onClickSaveAppsList(
                                         snackbarHostState,
                                         coroutineScope
                                     ) { primaryAction, secondaryAction ->
                                         dialogProps.value = Triple(
-                                            DIALOG_TOOL_SAVE_APPS_LIST,
+                                            DialogMode.TOOL_SAVE_APPS_LIST,
                                             primaryAction,
                                             secondaryAction
                                         )
                                         openDialog.value = true
                                     }
 
-                                    pref_logViewer -> neoActivity.moveTo(NavItem.Logs.destination)
+                                    pref_logViewer             -> neoActivity.moveTo(NavItem.Logs.destination)
 
-                                    pref_terminal -> neoActivity.moveTo(NavItem.Terminal.destination)
+                                    pref_terminal              -> neoActivity.moveTo(NavItem.Terminal.destination)
                                 }
                             }
                             if (index < size - 1) Spacer(modifier = Modifier.height(4.dp))
@@ -149,8 +147,8 @@ fun ToolsPrefsPage() {
     if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
         dialogProps.value.let { (dialogMode, primary, second) ->
             when (dialogMode) {
-                DIALOG_TOOL_DELETE_BACKUP_UNINSTALLED
-                    -> ActionsDialogUI(
+                DialogMode.TOOL_DELETE_BACKUP_UNINSTALLED
+                     -> ActionsDialogUI(
                     titleText = stringResource(R.string.prefs_batchdelete),
                     messageText = primary.toString(),
                     openDialogCustom = openDialog,
@@ -158,8 +156,8 @@ fun ToolsPrefsPage() {
                     primaryAction = second as () -> Unit,
                 )
 
-                DIALOG_TOOL_SAVE_APPS_LIST
-                    -> ActionsDialogUI(
+                DialogMode.TOOL_SAVE_APPS_LIST
+                     -> ActionsDialogUI(
                     titleText = stringResource(R.string.prefs_saveappslist),
                     messageText = stringResource(R.string.prefs_saveappslist_summary),
                     openDialogCustom = openDialog,
@@ -168,6 +166,8 @@ fun ToolsPrefsPage() {
                     secondaryText = stringResource(R.string.filtered_list),
                     secondaryAction = second as () -> Unit,
                 )
+
+                else -> {}
             }
         }
     }
