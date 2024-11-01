@@ -113,6 +113,8 @@ const val DIALOG_PERMISSION_SMS_MMS = 9
 const val DIALOG_PERMISSION_CALL_LOGS = 10
 const val DIALOG_PERMISSION_CONTACTS = 11
 const val DIALOG_PERMISSION_BATTERY_OPTIMIZATION = 12
+const val DIALOG_TOOL_DELETE_BACKUP_UNINSTALLED = 13
+const val DIALOG_TOOL_SAVE_APPS_LIST = 14
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
