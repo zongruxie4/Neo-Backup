@@ -63,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Backup
@@ -113,19 +114,6 @@ import com.machiav3lli.backup.viewmodels.MainVM
 import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
-const val DIALOG_BACKUP = 1
-const val DIALOG_RESTORE = 2
-const val DIALOG_DELETE = 3
-const val DIALOG_DELETEALL = 4
-const val DIALOG_CLEANCACHE = 5
-const val DIALOG_FORCEKILL = 6
-const val DIALOG_ENABLEDISABLE = 7
-const val DIALOG_UNINSTALL = 8
-const val DIALOG_ADDTAG = 9
-const val DIALOG_NOTE = 10
-const val DIALOG_ENFORCE_LIMIT = 11
-const val DIALOG_NOTE_BACKUP = 12
-
 @Composable
 fun AppPage(
     packageName: String,
@@ -137,8 +125,8 @@ fun AppPage(
     val context = LocalContext.current
     val mActivity = OABX.main!!
     val openDialog = remember { mutableStateOf(false) }
-    val dialogProps: MutableState<Pair<Int, Any>> = remember {
-        mutableStateOf(Pair(DIALOG_NONE, Schedule()))
+    val dialogProps: MutableState<Pair<DialogMode, Any>> = remember {
+        mutableStateOf(Pair(DialogMode.NONE, Schedule()))
     }
 
     val thePackages by mainVM.packageMap.collectAsState()
@@ -345,7 +333,7 @@ fun AppPage(
                             contentColor = colorResource(id = R.color.ic_updated),
                             description = stringResource(id = R.string.forceKill)
                         ) {
-                            dialogProps.value = Pair(DIALOG_FORCEKILL, pkg)
+                            dialogProps.value = Pair(DialogMode.FORCE_KILL, pkg)
                             openDialog.value = true
                         }
                     }
@@ -365,7 +353,8 @@ fun AppPage(
                                 else R.string.disablePackage
                             ),
                             onClick = {
-                                dialogProps.value = Pair(DIALOG_ENABLEDISABLE, pkg.isDisabled)
+                                dialogProps.value =
+                                    Pair(DialogMode.ENABLE_DISABLE, pkg.isDisabled)
                                 openDialog.value = true
                             }
                         )
@@ -381,7 +370,7 @@ fun AppPage(
                             contentColor = MaterialTheme.colorScheme.tertiary,
                             description = stringResource(id = R.string.uninstall),
                             onClick = {
-                                dialogProps.value = Pair(DIALOG_UNINSTALL, pkg)
+                                dialogProps.value = Pair(DialogMode.UNINSTALL, pkg)
                                 openDialog.value = true
                             }
                         )
@@ -402,7 +391,7 @@ fun AppPage(
                                 )
                             },
                             onAdd = {
-                                dialogProps.value = Pair(DIALOG_ADDTAG, "")
+                                dialogProps.value = Pair(DialogMode.ADD_TAG, "")
                                 openDialog.value = true
                             }
                         )
@@ -421,7 +410,7 @@ fun AppPage(
                             shape = MaterialTheme.shapes.large,
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                             onClick = {
-                                dialogProps.value = Pair(DIALOG_NOTE, appExtras.note)
+                                dialogProps.value = Pair(DialogMode.NOTE, appExtras.note)
                                 openDialog.value = true
                             }
                         ) {
@@ -447,7 +436,7 @@ fun AppPage(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         ) {
-                            dialogProps.value = Pair(DIALOG_BACKUP, pkg)
+                            dialogProps.value = Pair(DialogMode.BACKUP, pkg)
                             openDialog.value = true
                         }
                     }
@@ -462,7 +451,7 @@ fun AppPage(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.clear_cache),
                         ) {
-                            dialogProps.value = Pair(DIALOG_CLEANCACHE, pkg)
+                            dialogProps.value = Pair(DialogMode.CLEAN_CACHE, pkg)
                             openDialog.value = true
                         }
                     }
@@ -475,7 +464,7 @@ fun AppPage(
                             enabled = !snackbarVisible,
                             contentColor = MaterialTheme.colorScheme.tertiary,
                         ) {
-                            dialogProps.value = Pair(DIALOG_DELETEALL, pkg)
+                            dialogProps.value = Pair(DialogMode.DELETE_ALL, pkg)
                             openDialog.value = true
                         }
                     }
@@ -490,7 +479,7 @@ fun AppPage(
                             enabled = !snackbarVisible,
                             contentColor = colorResource(id = R.color.ic_updated),
                         ) {
-                            dialogProps.value = Pair(DIALOG_ENFORCE_LIMIT, pkg)
+                            dialogProps.value = Pair(DialogMode.ENFORCE_LIMIT, pkg)
                             openDialog.value = true
                         }
                     }
@@ -523,17 +512,17 @@ fun AppPage(
                                         message = context.getString(R.string.notInstalledModeDataWarning)
                                     )
                                 } else {
-                                    dialogProps.value = Pair(DIALOG_RESTORE, item)
+                                    dialogProps.value = Pair(DialogMode.RESTORE, item)
                                     openDialog.value = true
                                 }
                             }
                         },
                         onDelete = { item ->
-                            dialogProps.value = Pair(DIALOG_DELETE, item)
+                            dialogProps.value = Pair(DialogMode.DELETE, item)
                             openDialog.value = true
                         },
                         onNote = { item ->
-                            dialogProps.value = Pair(DIALOG_NOTE_BACKUP, item)
+                            dialogProps.value = Pair(DialogMode.NOTE_BACKUP, item)
                             openDialog.value = true
                         },
                         rewriteBackup = { backup, changedBackup ->
@@ -546,7 +535,7 @@ fun AppPage(
             if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
                 dialogProps.value.let { (dialogMode, obj) ->
                     when (dialogMode) {
-                        DIALOG_BACKUP        -> {
+                        DialogMode.BACKUP         -> {
                             BackupDialogUI(
                                 appPackage = thePackage,
                                 openDialogCustom = openDialog,
@@ -567,7 +556,7 @@ fun AppPage(
                             }
                         }
 
-                        DIALOG_RESTORE       -> {
+                        DialogMode.RESTORE        -> {
                             RestoreDialogUI(
                                 appPackage = thePackage,
                                 backup = obj as Backup,
@@ -592,7 +581,7 @@ fun AppPage(
                             }
                         }
 
-                        DIALOG_DELETE        -> {
+                        DialogMode.DELETE         -> {
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.deleteBackupDialogMessage),
@@ -616,7 +605,7 @@ fun AppPage(
                             )
                         }
 
-                        DIALOG_DELETEALL     -> {
+                        DialogMode.DELETE_ALL     -> {
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.delete_all_backups),
@@ -636,7 +625,7 @@ fun AppPage(
                             )
                         }
 
-                        DIALOG_CLEANCACHE    -> {
+                        DialogMode.CLEAN_CACHE    -> {
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.clear_cache),
@@ -667,7 +656,7 @@ fun AppPage(
                             )
                         }
 
-                        DIALOG_FORCEKILL     -> {
+                        DialogMode.FORCE_KILL     -> {
                             val profileId = currentProfile
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
@@ -683,7 +672,7 @@ fun AppPage(
                             )
                         }
 
-                        DIALOG_ENABLEDISABLE -> {
+                        DialogMode.ENABLE_DISABLE -> {
                             val enable = dialogProps.value.second as Boolean
 
                             ActionsDialogUI(
@@ -705,7 +694,7 @@ fun AppPage(
                             )
                         }
 
-                        DIALOG_UNINSTALL     -> {
+                        DialogMode.UNINSTALL      -> {
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.uninstallDialogMessage),
@@ -725,7 +714,7 @@ fun AppPage(
                             )
                         }
 
-                        DIALOG_NOTE          -> {
+                        DialogMode.NOTE           -> {
                             StringInputDialogUI(
                                 titleText = stringResource(id = R.string.edit_note),
                                 initValue = dialogProps.value.second as String,
@@ -735,7 +724,7 @@ fun AppPage(
                             }
                         }
 
-                        DIALOG_NOTE_BACKUP   -> {
+                        DialogMode.NOTE_BACKUP    -> {
                             val backup = dialogProps.value.second as Backup
 
                             StringInputDialogUI(
@@ -747,7 +736,7 @@ fun AppPage(
                             }
                         }
 
-                        DIALOG_ENFORCE_LIMIT -> {
+                        DialogMode.ENFORCE_LIMIT  -> {
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(
@@ -763,7 +752,7 @@ fun AppPage(
                             )
                         }
 
-                        DIALOG_ADDTAG        -> {
+                        DialogMode.ADD_TAG        -> {
                             StringInputDialogUI(
                                 titleText = stringResource(id = R.string.add_tag),
                                 initValue = dialogProps.value.second as String,
@@ -777,7 +766,7 @@ fun AppPage(
                             }
                         }
 
-                        else                 -> {}
+                        else                      -> {}
                     }
                 }
             }

@@ -57,6 +57,7 @@ import com.machiav3lli.backup.dialogs.DialogKey
 import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
+import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.handler.updateAppTables
@@ -83,7 +84,6 @@ import com.machiav3lli.backup.utils.isBiometricLockEnabled
 import com.machiav3lli.backup.utils.isDarkTheme
 import com.machiav3lli.backup.utils.isDeviceLockEnabled
 import com.machiav3lli.backup.utils.isEncryptionEnabled
-import com.machiav3lli.backup.utils.isLikeRoot
 import com.machiav3lli.backup.viewmodels.AppVM
 import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.ExportsVM
@@ -190,7 +190,7 @@ class MainActivityX : BaseActivity() {
         if (doIntent(intent, "beforeContent"))
             return
 
-        if (!isLikeRoot()) {
+        if (!ShellHandler.checkRootEquivalent()) {
             setContent {
                 AppTheme {
                     RootMissing(this)

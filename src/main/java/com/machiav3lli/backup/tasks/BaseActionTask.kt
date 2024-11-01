@@ -71,7 +71,7 @@ abstract class BaseActionTask(
                         ?: ""
                 )
             }
-            if (!(result?.succeeded ?: false))
+            if (result?.succeeded != true)
                 OABX.lastErrorPackage = app.packageName
             mainActivityX.updatePackage(app.packageName)
             mainActivityX.dismissSnackBar()

@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.EnabledFilter
 import com.machiav3lli.backup.LatestFilter
 import com.machiav3lli.backup.LaunchableFilter
@@ -100,22 +101,6 @@ import com.machiav3lli.backup.viewmodels.ScheduleVM
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalTime
 
-const val DIALOG_NONE = 0
-const val DIALOG_BLOCKLIST = 1
-const val DIALOG_CUSTOMLIST = 2
-const val DIALOG_TIMEPICKER = 3
-const val DIALOG_INTERVALSETTER = 4
-const val DIALOG_SCHEDULENAME = 5
-const val DIALOG_SCHEDULE_RUN = 6
-const val DIALOG_NO_SAF = 7
-const val DIALOG_PERMISSION_USAGE_STATS = 8
-const val DIALOG_PERMISSION_SMS_MMS = 9
-const val DIALOG_PERMISSION_CALL_LOGS = 10
-const val DIALOG_PERMISSION_CONTACTS = 11
-const val DIALOG_PERMISSION_BATTERY_OPTIMIZATION = 12
-const val DIALOG_TOOL_DELETE_BACKUP_UNINSTALLED = 13
-const val DIALOG_TOOL_SAVE_APPS_LIST = 14
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SchedulePage(
@@ -125,8 +110,8 @@ fun SchedulePage(
 ) {
     val context = LocalContext.current
     val openDialog = remember { mutableStateOf(false) }
-    val dialogProps: MutableState<Pair<Int, Schedule>> = remember {
-        mutableStateOf(Pair(DIALOG_NONE, Schedule()))
+    val dialogProps: MutableState<Pair<DialogMode, Schedule>> = remember {
+        mutableStateOf(Pair(DialogMode.NONE, Schedule()))
     }
     val schedule by viewModel.schedule.collectAsState(null)
     val customList by viewModel.customList.collectAsState(emptySet())
@@ -169,7 +154,7 @@ fun SchedulePage(
                             shape = MaterialTheme.shapes.large,
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                             onClick = {
-                                dialogProps.value = Pair(DIALOG_SCHEDULENAME, schedule)
+                                dialogProps.value = Pair(DialogMode.SCHEDULE_NAME, schedule)
                                 openDialog.value = true
                             }
                         ) {
@@ -217,7 +202,7 @@ fun SchedulePage(
                                 )
                             }",
                         ) {
-                            dialogProps.value = Pair(DIALOG_TIMEPICKER, schedule)
+                            dialogProps.value = Pair(DialogMode.TIME_PICKER, schedule)
                             openDialog.value = true
                         }
                         CardButton(
@@ -226,7 +211,7 @@ fun SchedulePage(
                             contentColor = MaterialTheme.colorScheme.inverseSurface,
                             description = "${stringResource(id = R.string.sched_interval)} ${schedule.interval}",
                         ) {
-                            dialogProps.value = Pair(DIALOG_INTERVALSETTER, schedule)
+                            dialogProps.value = Pair(DialogMode.INTERVAL_SETTER, schedule)
                             openDialog.value = true
                         }
                     }
@@ -242,7 +227,7 @@ fun SchedulePage(
                             containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.tertiaryContainer,
                         ) {
-                            dialogProps.value = Pair(DIALOG_CUSTOMLIST, schedule)
+                            dialogProps.value = Pair(DialogMode.CUSTOMLIST, schedule)
                             openDialog.value = true
                         }
                         CardButton(
@@ -252,7 +237,7 @@ fun SchedulePage(
                             containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.tertiaryContainer,
                         ) {
-                            dialogProps.value = Pair(DIALOG_BLOCKLIST, schedule)
+                            dialogProps.value = Pair(DialogMode.BLOCKLIST, schedule)
                             openDialog.value = true
                         }
                     }
@@ -429,7 +414,7 @@ fun SchedulePage(
                         icon = Phosphor.Play,
                         fullWidth = true,
                         onClick = {
-                            dialogProps.value = Pair(DIALOG_SCHEDULE_RUN, schedule)
+                            dialogProps.value = Pair(DialogMode.SCHEDULE_RUN, schedule)
                             openDialog.value = true
                         }
                     )
@@ -440,7 +425,7 @@ fun SchedulePage(
         if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
             dialogProps.value.let { (dialogMode, schedule) ->
                 when (dialogMode) {
-                    DIALOG_BLOCKLIST
+                    DialogMode.BLOCKLIST
                         -> BlockListDialogUI(
                         schedule = schedule,
                         openDialogCustom = openDialog,
@@ -451,7 +436,7 @@ fun SchedulePage(
                         )
                     }
 
-                    DIALOG_CUSTOMLIST
+                    DialogMode.CUSTOMLIST
                         -> CustomListDialogUI(
                         schedule = schedule,
                         openDialogCustom = openDialog,
@@ -462,7 +447,7 @@ fun SchedulePage(
                         )
                     }
 
-                    DIALOG_TIMEPICKER
+                    DialogMode.TIME_PICKER
                         -> TimePickerDialogUI(
                         state = rememberTimePickerState(
                             initialHour = schedule.timeHour,
@@ -476,7 +461,7 @@ fun SchedulePage(
                         )
                     }
 
-                    DIALOG_INTERVALSETTER
+                    DialogMode.INTERVAL_SETTER
                         -> IntPickerDialogUI(
                         value = schedule.interval,
                         defaultValue = 1,
@@ -489,7 +474,7 @@ fun SchedulePage(
                         )
                     }
 
-                    DIALOG_SCHEDULENAME
+                    DialogMode.SCHEDULE_NAME
                         -> StringInputDialogUI(
                         titleText = stringResource(id = R.string.sched_name),
                         initValue = schedule.name,
@@ -501,7 +486,7 @@ fun SchedulePage(
                         )
                     }
 
-                    DIALOG_SCHEDULE_RUN
+                    DialogMode.SCHEDULE_RUN
                         -> ActionsDialogUI(
                         titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
                         messageText = context.getStartScheduleMessage(schedule),
