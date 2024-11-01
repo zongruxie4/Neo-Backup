@@ -107,6 +107,12 @@ const val DIALOG_TIMEPICKER = 3
 const val DIALOG_INTERVALSETTER = 4
 const val DIALOG_SCHEDULENAME = 5
 const val DIALOG_SCHEDULE_RUN = 6
+const val DIALOG_NO_SAF = 7
+const val DIALOG_PERMISSION_USAGE_STATS = 8
+const val DIALOG_PERMISSION_SMS_MMS = 9
+const val DIALOG_PERMISSION_CALL_LOGS = 10
+const val DIALOG_PERMISSION_CONTACTS = 11
+const val DIALOG_PERMISSION_BATTERY_OPTIMIZATION = 12
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

@@ -21,7 +21,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -30,8 +29,6 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,27 +38,32 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.dialogs.ActionsDialogUI
+import com.machiav3lli.backup.dialogs.BaseDialog
+import com.machiav3lli.backup.entity.Permission
 import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.item.PermissionItem
 import com.machiav3lli.backup.ui.compose.item.TopBar
-import com.machiav3lli.backup.entity.Permission
 import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.utils.SystemUtils.packageName
 import com.machiav3lli.backup.utils.checkBatteryOptimization
 import com.machiav3lli.backup.utils.checkCallLogsPermission
 import com.machiav3lli.backup.utils.checkContactsPermission
@@ -88,6 +90,11 @@ fun PermissionsPage() {
     val mScope = CoroutineScope(Dispatchers.Main)
     val mainActivity = OABX.main!!
     val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+    val openDialog = remember { mutableStateOf(false) }
+    val dialogProp: MutableState<Int> = remember {
+        mutableIntStateOf(DIALOG_NONE)
+    }
+
     val permissionsList = remember {
         mutableStateMapOf<Permission, () -> Unit>()
     }
@@ -119,27 +126,43 @@ fun PermissionsPage() {
 
                     if (!context.isStorageDirSetAndOk && none { it.key == Permission.StorageLocation })
                         set(Permission.StorageLocation) {
-                            mainActivity.requireStorageLocation(askForDirectory)
+                            requireStorageLocation(askForDirectory) {
+                                dialogProp.value = DIALOG_NO_SAF
+                                openDialog.value = true
+                            }
                         }
 
                     if (!context.checkBatteryOptimization(powerManager)
                         && none { it.key == Permission.BatteryOptimization }
                     )
                         set(Permission.BatteryOptimization) {
-                            mainActivity.showBatteryOptimizationDialog(powerManager)
+                            dialogProp.value = DIALOG_PERMISSION_BATTERY_OPTIMIZATION
+                            openDialog.value = true
                         }
 
                     if (!context.checkUsageStatsPermission && none { it.key == Permission.UsageStats })
-                        set(Permission.UsageStats) { mainActivity.usageStatsPermission }
+                        set(Permission.UsageStats) {
+                            dialogProp.value = DIALOG_PERMISSION_USAGE_STATS
+                            openDialog.value = true
+                        }
 
                     if (!context.checkSMSMMSPermission && none { it.key == Permission.SMSMMS })
-                        set(Permission.SMSMMS) { mainActivity.smsmmsPermission }
+                        set(Permission.SMSMMS) {
+                            dialogProp.value = DIALOG_PERMISSION_SMS_MMS
+                            openDialog.value = true
+                        }
 
                     if (!context.checkCallLogsPermission && none { it.key == Permission.CallLogs })
-                        set(Permission.CallLogs) { mainActivity.callLogsPermission }
+                        set(Permission.CallLogs) {
+                            dialogProp.value = DIALOG_PERMISSION_CALL_LOGS
+                            openDialog.value = true
+                        }
 
                     if (!context.checkContactsPermission && none { it.key == Permission.Contacts })
-                        set(Permission.Contacts) { mainActivity.contactsPermission }
+                        set(Permission.Contacts) {
+                            dialogProp.value = DIALOG_PERMISSION_CONTACTS
+                            openDialog.value = true
+                        }
 
                     if (permissionStatePostNotifications?.status?.isGranted == false
                         && none { it.key == Permission.PostNotifications }
@@ -196,84 +219,84 @@ fun PermissionsPage() {
             }
         }
     }
-}
 
-val AppCompatActivity.usageStatsPermission: Unit
-    get() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.grant_usage_access_title)
-            .setMessage(R.string.grant_usage_access_message)
-            .setPositiveButton(R.string.dialog_approve) { _: DialogInterface?, _: Int ->
-                startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-            }
-            .setNeutralButton(getString(R.string.dialog_refuse)) { _: DialogInterface?, _: Int -> }
-            .setCancelable(false)
-            .show()
-    }
+    if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+        dialogProp.value.let { dialogMode ->
+            when (dialogMode) {
+                DIALOG_NO_SAF                          -> ActionsDialogUI(
+                    titleText = stringResource(R.string.no_file_manager_title),
+                    messageText = stringResource(R.string.no_file_manager_message),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.dialogOK),
+                    primaryAction = {
+                        mainActivity.finishAffinity()
+                    },
+                )
 
-val AppCompatActivity.smsmmsPermission: Unit
-    get() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.smsmms_permission_title)
-            .setMessage(R.string.grant_smsmms_message)
-            .setPositiveButton(R.string.dialog_approve) { _: DialogInterface?, _: Int ->
-                requireSMSMMSPermission()
-            }
-            .setNeutralButton(getString(R.string.dialog_refuse)) { _: DialogInterface?, _: Int -> }
-            .setCancelable(false)
-            .show()
-    }
+                DIALOG_PERMISSION_USAGE_STATS          -> ActionsDialogUI(
+                    titleText = stringResource(R.string.grant_usage_access_title),
+                    messageText = stringResource(R.string.grant_usage_access_message),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.dialog_approve),
+                    primaryAction = {
+                        mainActivity.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                    },
+                )
 
-val AppCompatActivity.callLogsPermission: Unit
-    get() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.calllogs_permission_title)
-            .setMessage(R.string.grant_calllogs_message)
-            .setPositiveButton(R.string.dialog_approve) { _: DialogInterface?, _: Int ->
-                this.requireCallLogsPermission()
-            }
-            .setNeutralButton(getString(R.string.dialog_refuse)) { _: DialogInterface?, _: Int -> }
-            .setCancelable(false)
-            .show()
-    }
+                DIALOG_PERMISSION_SMS_MMS              -> ActionsDialogUI(
+                    titleText = stringResource(R.string.smsmms_permission_title),
+                    messageText = stringResource(R.string.grant_smsmms_message),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.dialog_approve),
+                    primaryAction = {
+                        mainActivity.requireSMSMMSPermission()
+                    },
+                )
 
-val AppCompatActivity.contactsPermission: Unit
-    get() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.contacts_permission_title)
-            .setMessage(R.string.grant_contacts_message)
-            .setPositiveButton(R.string.dialog_approve) { _: DialogInterface?, _: Int ->
-                this.requireContactsPermission()
-            }
-            .setNeutralButton(getString(R.string.dialog_refuse)) { _: DialogInterface?, _: Int -> }
-            .setCancelable(false)
-            .show()
-    }
+                DIALOG_PERMISSION_CALL_LOGS            -> ActionsDialogUI(
+                    titleText = stringResource(R.string.calllogs_permission_title),
+                    messageText = stringResource(R.string.grant_calllogs_message),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.dialog_approve),
+                    primaryAction = {
+                        mainActivity.requireCallLogsPermission()
+                    },
+                )
 
-fun AppCompatActivity.showBatteryOptimizationDialog(powerManager: PowerManager?) {
-    AlertDialog.Builder(this)
-        .setTitle(R.string.ignore_battery_optimization_title)
-        .setMessage(R.string.ignore_battery_optimization_message)
-        .setPositiveButton(R.string.dialog_approve) { _: DialogInterface?, _: Int ->
-            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-            intent.data = Uri.parse("package:$packageName")
-            try {
-                startActivity(intent)
-                persist_ignoreBatteryOptimization.value =
-                    powerManager?.isIgnoringBatteryOptimizations(packageName) == true
-            } catch (e: ActivityNotFoundException) {
-                Timber.w(e, "Ignore battery optimizations not supported")
-                Toast.makeText(
-                    this,
-                    R.string.ignore_battery_optimization_not_supported,
-                    Toast.LENGTH_LONG
-                ).show()
-                persist_ignoreBatteryOptimization.value = true
+                DIALOG_PERMISSION_CONTACTS             -> ActionsDialogUI(
+                    titleText = stringResource(R.string.contacts_permission_title),
+                    messageText = stringResource(R.string.grant_contacts_message),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.dialog_approve),
+                    primaryAction = {
+                        mainActivity.requireContactsPermission()
+                    },
+                )
+
+                DIALOG_PERMISSION_BATTERY_OPTIMIZATION -> ActionsDialogUI(
+                    titleText = stringResource(R.string.ignore_battery_optimization_title),
+                    messageText = stringResource(R.string.ignore_battery_optimization_message),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.dialog_approve),
+                    primaryAction = {
+                        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                        intent.data = Uri.parse("package:$packageName")
+                        try {
+                            mainActivity.startActivity(intent)
+                            persist_ignoreBatteryOptimization.value =
+                                powerManager.isIgnoringBatteryOptimizations(packageName) == true
+                        } catch (e: ActivityNotFoundException) {
+                            Timber.w(e, "Ignore battery optimizations not supported")
+                            Toast.makeText(
+                                context,
+                                R.string.ignore_battery_optimization_not_supported,
+                                Toast.LENGTH_LONG
+                            ).show()
+                            persist_ignoreBatteryOptimization.value = true
+                        }
+                    },
+                )
             }
         }
-        .setNeutralButton(R.string.dialog_refuse) { _: DialogInterface?, _: Int ->
-            persist_ignoreBatteryOptimization.value = true
-        }
-        .setCancelable(false)
-        .show()
+    }
 }
