@@ -2,8 +2,6 @@ package com.machiav3lli.backup.preferences
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.DialogInterface
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -14,20 +12,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.dialogs.ActionsDialogUI
+import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.entity.LinkPref
 import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.entity.Pref
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.showNotification
+import com.machiav3lli.backup.pages.DIALOG_NONE
+import com.machiav3lli.backup.pages.DIALOG_TOOL_DELETE_BACKUP_UNINSTALLED
+import com.machiav3lli.backup.pages.DIALOG_TOOL_SAVE_APPS_LIST
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
@@ -64,6 +70,10 @@ fun ToolsPrefsPage() {
     val neoActivity = OABX.main!!
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val openDialog = remember { mutableStateOf(false) }
+    val dialogProps: MutableState<Triple<Int, Any?, Any?>> = remember {
+        mutableStateOf(Triple(DIALOG_NONE, null, null))
+    }
 
     val prefs = Pref.prefGroups["tool"] ?: listOf()
 
@@ -91,11 +101,18 @@ fun ToolsPrefsPage() {
                                 groupSize = size,
                             ) {
                                 when (pref) {
-                                    // TODO use only compose dialogs
                                     pref_batchDelete -> context.onClickUninstalledBackupsDelete(
                                         snackbarHostState,
                                         coroutineScope
-                                    )
+                                    ) { message, action ->
+                                        dialogProps.value =
+                                            Triple(
+                                                DIALOG_TOOL_DELETE_BACKUP_UNINSTALLED,
+                                                message,
+                                                action
+                                            )
+                                        openDialog.value = true
+                                    }
 
                                     pref_copySelfApk -> context.onClickCopySelf(
                                         snackbarHostState,
@@ -107,7 +124,14 @@ fun ToolsPrefsPage() {
                                     pref_saveAppsList -> context.onClickSaveAppsList(
                                         snackbarHostState,
                                         coroutineScope
-                                    )
+                                    ) { primaryAction, secondaryAction ->
+                                        dialogProps.value = Triple(
+                                            DIALOG_TOOL_SAVE_APPS_LIST,
+                                            primaryAction,
+                                            secondaryAction
+                                        )
+                                        openDialog.value = true
+                                    }
 
                                     pref_logViewer -> neoActivity.moveTo(NavItem.Logs.destination)
 
@@ -118,6 +142,32 @@ fun ToolsPrefsPage() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+        dialogProps.value.let { (dialogMode, primary, second) ->
+            when (dialogMode) {
+                DIALOG_TOOL_DELETE_BACKUP_UNINSTALLED
+                    -> ActionsDialogUI(
+                    titleText = stringResource(R.string.prefs_batchdelete),
+                    messageText = primary.toString(),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.dialogYes),
+                    primaryAction = second as () -> Unit,
+                )
+
+                DIALOG_TOOL_SAVE_APPS_LIST
+                    -> ActionsDialogUI(
+                    titleText = stringResource(R.string.prefs_saveappslist),
+                    messageText = stringResource(R.string.prefs_saveappslist_summary),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.radio_all),
+                    primaryAction = primary as () -> Unit,
+                    secondaryText = stringResource(R.string.filtered_list),
+                    secondaryAction = second as () -> Unit,
+                )
             }
         }
     }
@@ -134,6 +184,7 @@ val pref_batchDelete = LinkPref(
 private fun Context.onClickUninstalledBackupsDelete(
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
+    showDialog: (String, () -> Unit) -> Unit,
 ): Boolean {
     val deleteList = ArrayList<Package>()
     val message = StringBuilder()
@@ -148,15 +199,9 @@ private fun Context.onClickUninstalledBackupsDelete(
     }
     if (packageList.isNotEmpty()) {
         if (deleteList.isNotEmpty()) {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.prefs_batchdelete)
-                .setMessage(message.toString().trim { it <= ' ' })
-                .setPositiveButton(R.string.dialogYes) { _: DialogInterface?, _: Int ->
-                    deleteBackups(deleteList)
-                    //invalidateBackupLocation()    //TODO hg42 deletebackups *should* be sufficient (to be proved)
-                }
-                .setNegativeButton(R.string.dialogNo, null)
-                .show()
+            showDialog(message.toString().trim { it <= ' ' }) {
+                deleteBackups(deleteList)
+            }
         } else {
             snackbarHostState.show(
                 coroutineScope,
@@ -269,27 +314,26 @@ val pref_saveAppsList = LinkPref(
 private fun Context.onClickSaveAppsList(
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
+    showDialog: (() -> Unit, () -> Unit) -> Unit
 ): Boolean {
     val packageList = OABX.main?.viewModel?.packageList?.value ?: emptyList()
     if (packageList.isNotEmpty()) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.prefs_saveappslist)
-            .setPositiveButton(R.string.radio_all) { _: DialogInterface, _: Int ->
+        showDialog(
+            {
                 writeAppsListFile(packageList
                     .filter { it.isSystem }
                     .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     false  //TODO hg42 name first because of ":", better for scripts
                 )
-            }
-            .setNeutralButton(R.string.filtered_list) { _: DialogInterface, _: Int ->
+            },
+            {
                 writeAppsListFile(
                     packageList.applyFilter(sortFilterModel, this)
                         .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     true
                 )
             }
-            .setNegativeButton(R.string.dialogNo, null)
-            .show()
+        )
     } else {
         snackbarHostState.show(
             coroutineScope,
