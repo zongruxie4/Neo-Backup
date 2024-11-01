@@ -56,9 +56,12 @@ import com.machiav3lli.backup.LatestFilter
 import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
+import com.machiav3lli.backup.MODE_UNSET
+import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.dbs.entity.Schedule
+import com.machiav3lli.backup.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BlockListDialogUI
 import com.machiav3lli.backup.dialogs.CustomListDialogUI
@@ -90,8 +93,8 @@ import com.machiav3lli.backup.ui.compose.item.TitleText
 import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
 import com.machiav3lli.backup.updatedFilterChipItems
+import com.machiav3lli.backup.utils.getStartScheduleMessage
 import com.machiav3lli.backup.utils.specialBackupsEnabled
-import com.machiav3lli.backup.utils.showStartScheduleDialog
 import com.machiav3lli.backup.utils.timeLeft
 import com.machiav3lli.backup.viewmodels.ScheduleVM
 import org.koin.androidx.compose.koinViewModel
@@ -103,6 +106,7 @@ const val DIALOG_CUSTOMLIST = 2
 const val DIALOG_TIMEPICKER = 3
 const val DIALOG_INTERVALSETTER = 4
 const val DIALOG_SCHEDULENAME = 5
+const val DIALOG_SCHEDULE_RUN = 6
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -416,7 +420,10 @@ fun SchedulePage(
                         text = stringResource(id = R.string.sched_activateButton),
                         icon = Phosphor.Play,
                         fullWidth = true,
-                        onClick = { showStartScheduleDialog(schedule) }
+                        onClick = {
+                            dialogProps.value = Pair(DIALOG_SCHEDULE_RUN, schedule)
+                            openDialog.value = true
+                        }
                     )
                 }
             }
@@ -425,7 +432,8 @@ fun SchedulePage(
         if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
             dialogProps.value.let { (dialogMode, schedule) ->
                 when (dialogMode) {
-                    DIALOG_BLOCKLIST      -> BlockListDialogUI(
+                    DIALOG_BLOCKLIST
+                        -> BlockListDialogUI(
                         schedule = schedule,
                         openDialogCustom = openDialog,
                     ) { newSet ->
@@ -435,8 +443,8 @@ fun SchedulePage(
                         )
                     }
 
-                    DIALOG_CUSTOMLIST,
-                                          -> CustomListDialogUI(
+                    DIALOG_CUSTOMLIST
+                        -> CustomListDialogUI(
                         schedule = schedule,
                         openDialogCustom = openDialog,
                     ) { newSet ->
@@ -446,49 +454,58 @@ fun SchedulePage(
                         )
                     }
 
-                    DIALOG_TIMEPICKER     -> {
-                        TimePickerDialogUI(
-                            state = rememberTimePickerState(
-                                initialHour = schedule.timeHour,
-                                initialMinute = schedule.timeMinute,
-                            ),
-                            openDialogCustom = openDialog,
-                        ) { hour, minute ->
-                            refresh(
-                                schedule.copy(timeHour = hour, timeMinute = minute),
-                                rescheduleBoolean = true,
-                            )
-                        }
+                    DIALOG_TIMEPICKER
+                        -> TimePickerDialogUI(
+                        state = rememberTimePickerState(
+                            initialHour = schedule.timeHour,
+                            initialMinute = schedule.timeMinute,
+                        ),
+                        openDialogCustom = openDialog,
+                    ) { hour, minute ->
+                        refresh(
+                            schedule.copy(timeHour = hour, timeMinute = minute),
+                            rescheduleBoolean = true,
+                        )
                     }
 
-                    DIALOG_INTERVALSETTER -> {
-                        IntPickerDialogUI(
-                            value = schedule.interval,
-                            defaultValue = 1,
-                            entries = (1..30).toList(),
-                            openDialogCustom = openDialog,
-                        ) {
-                            refresh(
-                                schedule.copy(interval = it),
-                                rescheduleBoolean = true,
-                            )
-                        }
+                    DIALOG_INTERVALSETTER
+                        -> IntPickerDialogUI(
+                        value = schedule.interval,
+                        defaultValue = 1,
+                        entries = (1..30).toList(),
+                        openDialogCustom = openDialog,
+                    ) {
+                        refresh(
+                            schedule.copy(interval = it),
+                            rescheduleBoolean = true,
+                        )
                     }
 
-                    DIALOG_SCHEDULENAME   -> {
-                        StringInputDialogUI(
-                            titleText = stringResource(id = R.string.sched_name),
-                            initValue = schedule.name,
-                            openDialogCustom = openDialog
-                        ) {
-                            refresh(
-                                schedule.copy(name = it),
-                                rescheduleBoolean = false,
-                            )
-                        }
+                    DIALOG_SCHEDULENAME
+                        -> StringInputDialogUI(
+                        titleText = stringResource(id = R.string.sched_name),
+                        initValue = schedule.name,
+                        openDialogCustom = openDialog
+                    ) {
+                        refresh(
+                            schedule.copy(name = it),
+                            rescheduleBoolean = false,
+                        )
                     }
 
-                    else                  -> {}
+                    DIALOG_SCHEDULE_RUN
+                        -> ActionsDialogUI(
+                        titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
+                        messageText = context.getStartScheduleMessage(schedule),
+                        openDialogCustom = openDialog,
+                        primaryText = stringResource(R.string.dialogOK),
+                        primaryAction = {
+                            if (schedule.mode != MODE_UNSET)
+                                ScheduleWork.schedule(OABX.context, schedule, true)
+                        },
+                    )
+
+                    else -> {}
                 }
             }
         }

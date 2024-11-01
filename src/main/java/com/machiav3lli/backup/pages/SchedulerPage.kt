@@ -30,20 +30,29 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.ICON_SIZE_SMALL
+import com.machiav3lli.backup.MODE_UNSET
+import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
+import com.machiav3lli.backup.dialogs.ActionsDialogUI
+import com.machiav3lli.backup.dialogs.BaseDialog
+import com.machiav3lli.backup.tasks.ScheduleWork
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarPlus
 import com.machiav3lli.backup.ui.compose.recycler.ScheduleRecycler
+import com.machiav3lli.backup.utils.getStartScheduleMessage
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.viewmodels.SchedulesVM
 import kotlinx.coroutines.launch
@@ -54,7 +63,13 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val openDialog = remember { mutableStateOf(false) }
+    val dialogProps: MutableState<Pair<Int, Schedule>> = remember {
+        mutableStateOf(Pair(DIALOG_NONE, Schedule()))
+    }
+
     val schedules by viewModel.schedules.collectAsState(emptyList())
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val scheduleSheetId = remember { mutableLongStateOf(-1L) }
@@ -86,6 +101,10 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
                             paneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, item.id)
                         }
                     },
+                    onRun = { item ->
+                        dialogProps.value = Pair(DIALOG_SCHEDULE_RUN, item)
+                        openDialog.value = true
+                    },
                     onCheckChanged = { item: Schedule, b: Boolean ->
                         viewModel.updateSchedule(
                             item.copy(enabled = b),
@@ -114,4 +133,24 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
             }
         }
     )
+
+    if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+        dialogProps.value.let { (dialogMode, schedule) ->
+            when (dialogMode) {
+                DIALOG_SCHEDULE_RUN
+                    -> ActionsDialogUI(
+                    titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
+                    messageText = context.getStartScheduleMessage(schedule),
+                    openDialogCustom = openDialog,
+                    primaryText = stringResource(R.string.dialogOK),
+                    primaryAction = {
+                        if (schedule.mode != MODE_UNSET)
+                            ScheduleWork.schedule(OABX.context, schedule, true)
+                    },
+                )
+
+                else -> {}
+            }
+        }
+    }
 }

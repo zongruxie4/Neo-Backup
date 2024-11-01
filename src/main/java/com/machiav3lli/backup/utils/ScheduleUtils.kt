@@ -18,12 +18,8 @@
 package com.machiav3lli.backup.utils
 
 import android.content.Context
-import android.content.DialogInterface
 import android.icu.util.Calendar
-import androidx.appcompat.app.AlertDialog
-import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.getString
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.preferences.pref_fakeScheduleMin
@@ -181,65 +177,51 @@ fun scheduleAlarmsOnce() { // TODO replace with ScheduleWorker.scheduleAll()
 }
 
 // TODO replace dialog with composable
-fun showStartScheduleDialog(schedule: Schedule) {
-    OABX.main?.let {
-        val message = StringBuilder()
-
-        message.append(
-            "\n${getString(R.string.sched_mode)} ${
-                modesToString(
-                    OABX.context,
-                    modeToModes(schedule.mode)
-                )
-            }"
-        )
-        message.append(
-            "\n${getString(R.string.backup_filters)} ${
-                filterToString(
-                    OABX.context,
-                    schedule.filter
-                )
-            }"
-        )
-        message.append(
-            "\n${getString(R.string.other_filters_options)} ${
-                specialFilterToString(
-                    OABX.context,
-                    schedule.specialFilter
-                )
-            }"
-        )
-        // TODO list the CL packages
-        message.append(
-            "\n${getString(R.string.customListTitle)}: ${
-                if (schedule.customList.isNotEmpty()) getString(
-                    R.string.dialogYes
-                ) else getString(R.string.dialogNo)
-            }"
-        )
-        // TODO list the BL packages
-        message.append(
-            "\n${getString(R.string.sched_blocklist)}: ${
-                if (schedule.blockList.isNotEmpty()) getString(
-                    R.string.dialogYes
-                ) else getString(R.string.dialogNo)
-            }"
-        )
-        message.append(
-            "\n${getString(R.string.filters_tags)}: ${
-                if (schedule.tagsList.isNotEmpty()) schedule.tagsList.joinToString(",")
-                else getString(R.string.dialogNo)
-            }"
-        )
-        AlertDialog.Builder(it)
-            .setTitle("${schedule.name}: ${getString(R.string.sched_activateButton)}?")
-            .setMessage(message)
-            .setPositiveButton(R.string.dialogOK) { _: DialogInterface?, _: Int ->
-                if (schedule.mode != MODE_UNSET) {
-                    ScheduleWork.schedule(OABX.context, schedule, true)
-                }
-            }
-            .setNegativeButton(R.string.dialogCancel) { _: DialogInterface?, _: Int -> }
-            .show()
-    }
-}
+fun Context.getStartScheduleMessage(schedule: Schedule) = StringBuilder()
+    .append(
+        "\n${getString(R.string.sched_mode)} ${
+            modesToString(
+                this,
+                modeToModes(schedule.mode)
+            )
+        }"
+    )
+    .append(
+        "\n${getString(R.string.backup_filters)} ${
+            filterToString(
+                this,
+                schedule.filter
+            )
+        }"
+    )
+    .append(
+        "\n${getString(R.string.other_filters_options)} ${
+            specialFilterToString(
+                this,
+                schedule.specialFilter
+            )
+        }"
+    )
+    // TODO list the CL packages
+    .append(
+        "\n${getString(R.string.customListTitle)}: ${
+            if (schedule.customList.isNotEmpty()) getString(
+                R.string.dialogYes
+            ) else getString(R.string.dialogNo)
+        }"
+    )
+    // TODO list the BL packages
+    .append(
+        "\n${getString(R.string.sched_blocklist)}: ${
+            if (schedule.blockList.isNotEmpty()) getString(
+                R.string.dialogYes
+            ) else getString(R.string.dialogNo)
+        }"
+    )
+    .append(
+        "\n${getString(R.string.filters_tags)}: ${
+            if (schedule.tagsList.isNotEmpty()) schedule.tagsList.joinToString(",")
+            else getString(R.string.dialogNo)
+        }"
+    )
+    .toString()

@@ -129,13 +129,14 @@ fun ScheduleRecycler(
     modifier: Modifier = Modifier,
     productsList: List<Schedule>?,
     onClick: (Schedule) -> Unit = {},
+    onRun: (Schedule) -> Unit = {},
     onCheckChanged: (Schedule, Boolean) -> Unit = { _: Schedule, _: Boolean -> },
 ) {
     InnerBackground(modifier) {
         VerticalItemList(
             list = productsList
         ) {
-            ScheduleItem(it, onClick, onCheckChanged)
+            ScheduleItem(it, onClick, onRun, onCheckChanged)
         }
     }
 }
