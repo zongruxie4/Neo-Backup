@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.AppOpsManager
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -209,17 +208,15 @@ fun Context.checkBatteryOptimization(powerManager: PowerManager)
 
 // Actions
 
-fun Activity.requireStorageLocation(activityResultLauncher: ActivityResultLauncher<Intent>) {
+fun requireStorageLocation(
+    activityResultLauncher: ActivityResultLauncher<Intent>,
+    failCallback: () -> Unit,
+) {
     val intent = BACKUP_DIRECTORY_INTENT
     try {
         activityResultLauncher.launch(intent)
     } catch (e: ActivityNotFoundException) {
-        showWarning(
-            getString(R.string.no_file_manager_title),
-            getString(R.string.no_file_manager_message)
-        ) { _: DialogInterface?, _: Int ->
-            finishAffinity()
-        }
+        failCallback()
     }
 }
 
