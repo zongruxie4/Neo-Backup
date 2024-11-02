@@ -18,6 +18,7 @@
 package com.machiav3lli.backup.pages
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -147,6 +148,10 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
             cachedAsyncImagePainter(model = pkg.iconData)
         }
         //endNanoTimer("prefetchIcons")
+    }
+
+    BackHandler(scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+        scope.launch { scaffoldState.bottomSheetState.partialExpand() }
     }
 
     NavigableListDetailPaneScaffold(
