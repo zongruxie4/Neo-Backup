@@ -17,7 +17,6 @@
  */
 package com.machiav3lli.backup.entity
 
-import android.os.Parcel
 import android.os.Parcelable
 import com.machiav3lli.backup.BACKUP_FILTER_DEFAULT
 import com.machiav3lli.backup.EnabledFilter
@@ -27,85 +26,28 @@ import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.Sort
 import com.machiav3lli.backup.UpdatedFilter
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class SortFilterModel(
-    var sort: Int = Sort.LABEL.ordinal,
-    var sortAsc: Boolean = true,
-    var mainFilter: Int = MAIN_FILTER_DEFAULT,
-    var backupFilter: Int = BACKUP_FILTER_DEFAULT,
-    var installedFilter: Int = InstalledFilter.ALL.ordinal,
-    var launchableFilter: Int = LaunchableFilter.ALL.ordinal,
-    var updatedFilter: Int = UpdatedFilter.ALL.ordinal,
-    var latestFilter: Int = LatestFilter.ALL.ordinal,
-    var enabledFilter: Int = EnabledFilter.ALL.ordinal,
+    val sort: Int = Sort.LABEL.ordinal,
+    val sortAsc: Boolean = true,
+    val mainFilter: Int = MAIN_FILTER_DEFAULT,
+    val backupFilter: Int = BACKUP_FILTER_DEFAULT,
+    val installedFilter: Int = InstalledFilter.ALL.ordinal,
+    val launchableFilter: Int = LaunchableFilter.ALL.ordinal,
+    val updatedFilter: Int = UpdatedFilter.ALL.ordinal,
+    val latestFilter: Int = LatestFilter.ALL.ordinal,
+    val enabledFilter: Int = EnabledFilter.ALL.ordinal,
 ) : Parcelable {
-
-    constructor(parcel: Parcel) : this(
-        parcel.readInt(),
-        parcel.readByte() != 0.toByte(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
-    ) {
-    }
-
-    constructor(sortFilterCode: String?, specialFilterCode: String?) : this() {
-        sortFilterCode?.let {
-            sort = sortFilterCode[0].digitToInt()
-            sortAsc = sortFilterCode[1].digitToInt() == 1
-            mainFilter = sortFilterCode[2].digitToInt()
-            backupFilter = sortFilterCode.substring(4).toInt()
-        }
-        specialFilterCode?.let {
-            installedFilter = specialFilterCode[0].digitToInt()
-            launchableFilter = specialFilterCode[1].digitToInt()
-            updatedFilter = specialFilterCode[2].digitToInt()
-            latestFilter = specialFilterCode[3].digitToInt()
-            enabledFilter = specialFilterCode[4].digitToInt()
-        }
-    }
-
     val specialFilter: SpecialFilter
         get() = SpecialFilter(
             installedFilter,
             launchableFilter,
             updatedFilter,
             latestFilter,
-            enabledFilter
+            enabledFilter,
         )
-
-    override fun toString(): String =
-        "$sort${sortAsc.compareTo(false)}${mainFilter}0$backupFilter,$installedFilter$launchableFilter$updatedFilter$latestFilter$enabledFilter"
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(sort)
-        parcel.writeByte(if (sortAsc) 1 else 0)
-        parcel.writeInt(mainFilter)
-        parcel.writeInt(backupFilter)
-        parcel.writeInt(installedFilter)
-        parcel.writeInt(launchableFilter)
-        parcel.writeInt(updatedFilter)
-        parcel.writeInt(latestFilter)
-        parcel.writeInt(enabledFilter)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<SortFilterModel> {
-        override fun createFromParcel(parcel: Parcel): SortFilterModel {
-            return SortFilterModel(parcel)
-        }
-
-        override fun newArray(size: Int): Array<SortFilterModel?> {
-            return arrayOfNulls(size)
-        }
-    }
 }
 
 class SpecialFilter(
