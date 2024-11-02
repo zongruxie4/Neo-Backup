@@ -49,6 +49,7 @@ import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.plugins.Plugin
+import com.machiav3lli.backup.preferences.NeoPrefs.Companion.prefsModule
 import com.machiav3lli.backup.preferences.pref_busyHitTime
 import com.machiav3lli.backup.preferences.pref_cancelOnStart
 import com.machiav3lli.backup.preferences.pref_catchUncaughtException
@@ -187,6 +188,7 @@ class OABX : Application() {
             modules(
                 handlersModule,
                 databaseModule,
+                prefsModule,
                 viewModelsModule,
             )
         }
