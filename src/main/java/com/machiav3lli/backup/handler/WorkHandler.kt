@@ -253,13 +253,13 @@ class WorkHandler(appContext: Context) {
 
         var lockProgress = object {}
 
-        fun onProgress(handler: WorkHandler, workInfos: MutableList<WorkInfo>? = null) {
+        fun onProgress(handler: WorkHandler, workInfos: List<WorkInfo>? = null) {
             synchronized(lockProgress) {
                 onProgressNoSync(handler, workInfos)
             }
         }
 
-        fun onProgressNoSync(handler: WorkHandler, workInfos: MutableList<WorkInfo>? = null) {
+        fun onProgressNoSync(handler: WorkHandler, workInfos: List<WorkInfo>? = null) {
 
             val manager = handler.manager
             val work = workInfos

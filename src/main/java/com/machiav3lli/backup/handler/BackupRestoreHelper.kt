@@ -108,10 +108,15 @@ object BackupRestoreHelper {
             val apkFile = backupRoot.findFile(filename)
             apkFile?.delete()
             try {
-                val myInfo = context.packageManager.getPackageInfo(SystemUtils.packageName, 0) // TODO 'getPackageInfo(String, Int): PackageInfo!' is deprecated
+                val apkDir = (
+                        context.packageManager.getPackageInfo(
+                            SystemUtils.packageName,
+                            0
+                        ).applicationInfo
+                            ?: context.applicationInfo).sourceDir
                 val fileInfos =
-                    shell.suGetDetailedDirectoryContents(myInfo.applicationInfo.sourceDir, false)
-                if (fileInfos.size != 1) {
+                    shell.suGetDetailedDirectoryContents(apkDir, false)
+                if (apkDir == null || fileInfos.size != 1) {
                     throw FileNotFoundException("Could not find Neo Backup's own apk file")
                 }
                 //TODO wech suCopyFileToDocument(fileInfos[0], backupRoot)
