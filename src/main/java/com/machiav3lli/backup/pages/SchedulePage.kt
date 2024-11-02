@@ -343,7 +343,7 @@ fun SchedulePage(
                         }
                     }
                 }
-                item {
+                if (allTags.isNotEmpty()) item {
                     ExpandableBlock(
                         heading = stringResource(id = R.string.filters_tags),
                         preExpanded = schedule.tagsList.isNotEmpty(),
