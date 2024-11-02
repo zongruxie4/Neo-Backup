@@ -32,17 +32,17 @@ import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Blocklist
 import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.entity.Package.Companion.invalidateCacheForPackage
+import com.machiav3lli.backup.entity.SortFilterModel
 import com.machiav3lli.backup.handler.toPackageList
+import com.machiav3lli.backup.preferences.NeoPrefs
 import com.machiav3lli.backup.preferences.pref_newAndUpdatedNotification
 import com.machiav3lli.backup.preferences.traceBackups
 import com.machiav3lli.backup.preferences.traceFlows
-import com.machiav3lli.backup.ui.compose.MutableComposableStateFlow
 import com.machiav3lli.backup.ui.compose.item.IconCache
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.formatSortedBackups
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.applyFilter
-import com.machiav3lli.backup.utils.sortFilterModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -63,6 +63,7 @@ import timber.log.Timber
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainVM(
     private val db: ODatabase,
+    private val prefs: NeoPrefs,
     private val appContext: Application,
 ) : ViewModel() {
     init {
@@ -82,6 +83,35 @@ class MainVM(
     //   so, as long as items come in faster than processing time, there won't be results, in short:
     //   if f_in > f_proc, then there is no output at all
     //   this is much like processing on idle only
+
+    val sortFilterModel: StateFlow<SortFilterModel> = combine(
+        prefs.sortHome.get(),
+        prefs.sortAscHome.get(),
+        prefs.mainFilterHome.get(),
+        prefs.backupFilterHome.get(),
+        prefs.installedFilterHome.get(),
+        prefs.launchableFilterHome.get(),
+        prefs.updatedFilterHome.get(),
+        prefs.latestFilterHome.get(),
+        prefs.enabledFilterHome.get(),
+    ) { args ->
+        SortFilterModel(
+            args[0] as Int,
+            args[1] as Boolean,
+            args[2] as Int,
+            args[3] as Int,
+            args[4] as Int,
+            args[5] as Int,
+            args[6] as Int,
+            args[7] as Int,
+            args[8] as Int,
+        )
+    }
+        .stateIn(
+            viewModelScope + Dispatchers.IO,
+            SharingStarted.Lazily,
+            SortFilterModel()
+        )
 
     val schedules =
         //------------------------------------------------------------------------------------------ blocklist
@@ -221,19 +251,11 @@ class MainVM(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    val modelSortFilter =
-        //------------------------------------------------------------------------------------------ modelSortFilter
-        MutableComposableStateFlow(
-            sortFilterModel,
-            viewModelScope + Dispatchers.IO,
-            "modelSortFilter"
-        )
-
     val filteredList =
         //========================================================================================== filteredList
         combine(
             notBlockedList,
-            modelSortFilter.flow,
+            sortFilterModel,
             searchQuery,
             appExtrasMap
         ) { pkgs, filter, search, extras ->
@@ -298,6 +320,18 @@ class MainVM(
 
     fun setSearchQuery(value: String) {
         viewModelScope.launch { _searchQuery.update { value } }
+    }
+
+    fun setSortFilter(value: SortFilterModel) = viewModelScope.launch {
+        prefs.sortHome.value = value.sort
+        prefs.sortAscHome.value = value.sortAsc
+        prefs.mainFilterHome.value = value.mainFilter
+        prefs.backupFilterHome.value = value.backupFilter
+        prefs.installedFilterHome.value = value.installedFilter
+        prefs.launchableFilterHome.value = value.launchableFilter
+        prefs.updatedFilterHome.value = value.updatedFilter
+        prefs.latestFilterHome.value = value.latestFilter
+        prefs.enabledFilterHome.value = value.enabledFilter
     }
 
     fun updatePackage(packageName: String) {

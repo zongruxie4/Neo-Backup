@@ -654,7 +654,7 @@ class MainActivityX : BaseActivity() {
 }
 
 val viewModelsModule = module {
-    viewModel { MainVM(get(), get()) }
+    viewModel { MainVM(get(), get(), get()) }
     viewModel { BackupBatchVM() }
     viewModel { RestoreBatchVM() }
     viewModel { SchedulesVM(get(), get()) }

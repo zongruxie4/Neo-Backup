@@ -50,11 +50,12 @@ import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getBackupRoot
-import com.machiav3lli.backup.utils.sortFilterModel
+import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 import java.io.BufferedOutputStream
 import java.io.IOException
@@ -63,7 +64,7 @@ import java.time.LocalDateTime
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ToolsPrefsPage() {
+fun ToolsPrefsPage(viewModel: MainVM = koinViewModel()) {
     val context = LocalContext.current
     val neoActivity = OABX.main!!
     val snackbarHostState = remember { SnackbarHostState() }
@@ -100,6 +101,7 @@ fun ToolsPrefsPage() {
                             ) {
                                 when (pref) {
                                     pref_batchDelete           -> context.onClickUninstalledBackupsDelete(
+                                        viewModel,
                                         snackbarHostState,
                                         coroutineScope
                                     ) { message, action ->
@@ -120,6 +122,7 @@ fun ToolsPrefsPage() {
                                     pref_schedulesExportImport -> neoActivity.moveTo(NavItem.Exports.destination)
 
                                     pref_saveAppsList          -> context.onClickSaveAppsList(
+                                        viewModel,
                                         snackbarHostState,
                                         coroutineScope
                                     ) { primaryAction, secondaryAction ->
@@ -182,13 +185,14 @@ val pref_batchDelete = LinkPref(
 )
 
 private fun Context.onClickUninstalledBackupsDelete(
+    viewModel: MainVM,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
     showDialog: (String, () -> Unit) -> Unit,
 ): Boolean {
     val deleteList = ArrayList<Package>()
     val message = StringBuilder()
-    val packageList = OABX.main?.viewModel?.packageList?.value ?: emptyList()
+    val packageList = viewModel.packageList.value
     if (packageList.isNotEmpty()) {
         packageList.forEach { appInfo ->
             if (!appInfo.isInstalled) {
@@ -312,11 +316,12 @@ val pref_saveAppsList = LinkPref(
 
 
 private fun Context.onClickSaveAppsList(
+    viewModel: MainVM,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
     showDialog: (() -> Unit, () -> Unit) -> Unit
 ): Boolean {
-    val packageList = OABX.main?.viewModel?.packageList?.value ?: emptyList()
+    val packageList = viewModel.packageList.value
     if (packageList.isNotEmpty()) {
         showDialog(
             {
@@ -328,7 +333,7 @@ private fun Context.onClickSaveAppsList(
             },
             {
                 writeAppsListFile(
-                    packageList.applyFilter(sortFilterModel, this)
+                    packageList.applyFilter(viewModel.sortFilterModel.value, this)
                         .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     true
                 )
