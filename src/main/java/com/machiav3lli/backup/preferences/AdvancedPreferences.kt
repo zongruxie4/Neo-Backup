@@ -33,6 +33,12 @@ import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.OABX.Companion.isHg42
 import com.machiav3lli.backup.OABX.Companion.isRelease
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.entity.BooleanPref
+import com.machiav3lli.backup.entity.IntPref
+import com.machiav3lli.backup.entity.LaunchPref
+import com.machiav3lli.backup.entity.Pref
+import com.machiav3lli.backup.entity.PrefUI
+import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.handler.ShellHandler.Companion.findSuCommand
 import com.machiav3lli.backup.handler.ShellHandler.Companion.isLikeRoot
 import com.machiav3lli.backup.handler.ShellHandler.Companion.suCommand
@@ -54,14 +60,7 @@ import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
 import com.machiav3lli.backup.ui.compose.theme.ColorDeData
 import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
 import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
-import com.machiav3lli.backup.entity.BooleanPref
-import com.machiav3lli.backup.entity.IntPref
-import com.machiav3lli.backup.entity.LaunchPref
-import com.machiav3lli.backup.entity.Pref
-import com.machiav3lli.backup.entity.PrefUI
-import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.utils.SystemUtils.numCores
-import com.machiav3lli.backup.utils.sortFilterModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
@@ -111,11 +110,7 @@ fun AdvancedPrefsPage() {
         ) {
             item {
                 PrefsGroup(prefs = prefs) { pref ->
-                    if (pref == pref_enableSpecialBackups) {        //TODO hg42 encapsulate in pref
-                        val newModel = sortFilterModel
-                        newModel.mainFilter = newModel.mainFilter and MAIN_FILTER_DEFAULT
-                        sortFilterModel = newModel
-                    }
+                    // TODO do things
                 }
             }
             item {
@@ -227,7 +222,8 @@ class SuCommandPref(
     onChanged = onChanged
 )
 
-val suCommand_summary get() = """
+val suCommand_summary
+    get() = """
         the command used to elevate the shell to a 'root' shell (in our sense),
         the whole command must be a shell, reading commands from stdin and executing them,
         there are also builtin fallback commands
@@ -261,8 +257,8 @@ val pref_suCommand = SuCommandPref(
         Color.Red
     }
     pref.summary = suCommand_summary
-    traceDebug  { "summary: ${pref.summary}" }
-    traceDebug  { "pref: ${pref.dirty} ${pref.key} -> ${pref.icon?.name} ${pref.iconTint} (launch)" }
+    traceDebug { "summary: ${pref.summary}" }
+    traceDebug { "pref: ${pref.dirty} ${pref.key} -> ${pref.icon?.name} ${pref.iconTint} (launch)" }
     pref.dirty.value = true
 }
 
@@ -618,7 +614,12 @@ val pref_enableSpecialBackups = BooleanPref(
     summaryId = R.string.prefs_enablespecial_summary,
     icon = Phosphor.AsteriskSimple,
     iconTint = ColorSpecial,
-    defaultValue = false
+    defaultValue = false,
+    onChanged = {
+        NeoPrefs.getInstance().let {
+            it.mainFilterHome.value = it.mainFilterHome.value and MAIN_FILTER_DEFAULT
+        }
+    }
 )
 
 val pref_disableVerification = BooleanPref(
@@ -663,16 +664,6 @@ val persist_beenWelcomed = BooleanPref(
 val persist_ignoreBatteryOptimization = BooleanPref(
     key = "persist.ignoreBatteryOptimization",
     defaultValue = false
-)
-
-val persist_sortFilter = StringPref(
-    key = "persist.sortFilter",
-    defaultValue = ""
-)
-
-val persist_specialFilters = StringPref(
-    key = "persist.specialFilters",
-    defaultValue = ""
 )
 
 val persist_salt = StringPref(

@@ -84,6 +84,7 @@ class MainVM(
     //   if f_in > f_proc, then there is no output at all
     //   this is much like processing on idle only
 
+    // TODO different models for different pages
     val sortFilterModel: StateFlow<SortFilterModel> = combine(
         prefs.sortHome.get(),
         prefs.sortAscHome.get(),

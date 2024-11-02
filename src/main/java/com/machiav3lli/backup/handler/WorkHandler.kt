@@ -24,7 +24,6 @@ import com.machiav3lli.backup.preferences.pref_maxRetriesPerPackage
 import com.machiav3lli.backup.services.CommandReceiver
 import com.machiav3lli.backup.tasks.AppActionWork
 import com.machiav3lli.backup.utils.SystemUtils
-import com.machiav3lli.backup.utils.TraceUtils.traceBold
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -353,8 +352,8 @@ class WorkHandler(appContext: Context) {
                             workRunning++
                             packageName?.let { packagesState.put(it, operation ?: "") }
                             when (operation) {
-                                "" -> queued++
-                                else  -> {
+                                ""   -> queued++
+                                else -> {
                                     running++
                                     val shortPackageName =
                                         packageName
