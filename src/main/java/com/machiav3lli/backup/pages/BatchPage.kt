@@ -17,6 +17,7 @@
  */
 package com.machiav3lli.backup.pages
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -113,6 +114,10 @@ fun BatchPage(
     val selection = remember { mutableStateMapOf<Package, Boolean>() }
     filteredList.forEach {
         selection.putIfAbsent(it, false)
+    }
+
+    BackHandler(scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+        scope.launch { scaffoldState.bottomSheetState.partialExpand() }
     }
 
     BottomSheetScaffold(
