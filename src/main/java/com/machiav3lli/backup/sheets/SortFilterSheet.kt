@@ -84,7 +84,6 @@ import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getStats
-import com.machiav3lli.backup.utils.sortFilterModel
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.viewmodels.MainVM
 import org.koin.androidx.compose.koinViewModel
@@ -96,7 +95,7 @@ fun SortFilterSheet(
 ) { // TODO add key for each page (HOME, BACKUP, RESTORE)
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
     val packageList by viewModel.notBlockedList.collectAsState()
-    var model by rememberSaveable { mutableStateOf(sortFilterModel) }
+    var model by rememberSaveable { mutableStateOf(viewModel.sortFilterModel.value) }
     fun currentStats() = getStats(
         packageList.applyFilter(
             model,
@@ -200,7 +199,7 @@ fun SortFilterSheet(
                         fullWidth = true,
                         positive = false,
                         onClick = {
-                            sortFilterModel = SortFilterModel()
+                            viewModel.setSortFilter(SortFilterModel())
                             onDismiss()
                         }
                     )
@@ -211,7 +210,7 @@ fun SortFilterSheet(
                         fullWidth = true,
                         positive = true,
                         onClick = {
-                            sortFilterModel = model
+                            viewModel.setSortFilter(model)
                             onDismiss()
                         }
                     )
