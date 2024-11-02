@@ -26,14 +26,10 @@ import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.PREFS_SHARED_PRIVATE
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.entity.SortFilterModel
 import com.machiav3lli.backup.preferences.persist_salt
-import com.machiav3lli.backup.preferences.persist_sortFilter
-import com.machiav3lli.backup.preferences.persist_specialFilters
 import com.machiav3lli.backup.preferences.pref_allowDowngrade
 import com.machiav3lli.backup.preferences.pref_appAccentColor
 import com.machiav3lli.backup.preferences.pref_appSecondaryColor
@@ -181,22 +177,6 @@ val isRestoreAllPermissions: Boolean
 
 val isAllowDowngrade: Boolean
     get() = pref_allowDowngrade.value
-
-var sortFilterModel: SortFilterModel
-    get() {
-        val sortFilterPref = persist_sortFilter.value
-        val specialFiltersPref = persist_specialFilters.value
-        return SortFilterModel(
-            sortFilterPref.takeIf { it.isNotEmpty() },
-            specialFiltersPref.takeIf { it.isNotEmpty() },
-        )
-    }
-    set(value) {
-        val modelString = value.toString().split(",")
-        persist_sortFilter.value = modelString.first()
-        persist_specialFilters.value = modelString.last()
-        OABX.main?.viewModel?.modelSortFilter?.value = value   //setSortFilter(value)
-    }
 
 class StorageLocationNotConfiguredException : Exception("Storage Location has not been configured")
 

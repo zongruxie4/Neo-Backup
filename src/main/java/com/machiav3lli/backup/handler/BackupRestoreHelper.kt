@@ -27,11 +27,11 @@ import com.machiav3lli.backup.actions.RestoreAppAction
 import com.machiav3lli.backup.actions.RestoreSpecialAction
 import com.machiav3lli.backup.actions.RestoreSystemAppAction
 import com.machiav3lli.backup.dbs.entity.Backup
-import com.machiav3lli.backup.handler.ShellHandler.ShellCommandFailedException
 import com.machiav3lli.backup.entity.ActionResult
 import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.entity.RootFile
 import com.machiav3lli.backup.entity.StorageFile.Companion.invalidateCache
+import com.machiav3lli.backup.handler.ShellHandler.ShellCommandFailedException
 import com.machiav3lli.backup.preferences.pref_numBackupRevisions
 import com.machiav3lli.backup.preferences.pref_paranoidHousekeeping
 import com.machiav3lli.backup.tasks.AppActionWork
@@ -66,7 +66,8 @@ object BackupRestoreHelper {
                 }
                 BackupSpecialAction(context, work, shell)
             }
-            else -> {
+
+            else                  -> {
                 BackupAppAction(context, work, shell)
             }
         }
@@ -92,8 +93,8 @@ object BackupRestoreHelper {
     ): ActionResult {
         val action: RestoreAppAction = when {
             appInfo.isSpecial -> RestoreSpecialAction(context, work, shellHandler)
-            appInfo.isSystem -> RestoreSystemAppAction(context, work, shellHandler)
-            else -> RestoreAppAction(context, work, shellHandler)
+            appInfo.isSystem  -> RestoreSystemAppAction(context, work, shellHandler)
+            else              -> RestoreAppAction(context, work, shellHandler)
         }
         val result = action.run(appInfo, backup, mode)
         Timber.i("<${appInfo.packageName}> Restore succeeded: ${result.succeeded}")
@@ -120,7 +121,11 @@ object BackupRestoreHelper {
                     throw FileNotFoundException("Could not find Neo Backup's own apk file")
                 }
                 //TODO wech suCopyFileToDocument(fileInfos[0], backupRoot)
-                copyRootFileToDocument(fileInfos[0].absolutePath, backupRoot, RootFile(fileInfos[0].absolutePath).name)
+                copyRootFileToDocument(
+                    fileInfos[0].absolutePath,
+                    backupRoot,
+                    RootFile(fileInfos[0].absolutePath).name
+                )
                 // Invalidating cache, otherwise the next call will fail
                 // Can cost a lot time, but this function won't be run that often
                 invalidateCache() //TODO hg42 how to filter only the apk? or eliminate the need to invalidate
