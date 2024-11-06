@@ -88,11 +88,13 @@ fun PrefIcon(
 fun PrefIcon(
     pref: Pref,
 ) {
-    val p by remember(pref.icon, pref.iconTint) { mutableStateOf(pref) }
+    val icon = pref.icon
+    val iconTint = pref.iconTint?.invoke(pref)
+    val p by remember(icon, iconTint) { mutableStateOf(pref) }
     PrefIcon(
-        icon = p.icon,
+        icon = icon,
         titleId = p.titleId,
-        tint = p.iconTint
+        tint = iconTint
     )
 }
 
@@ -215,7 +217,7 @@ fun LaunchPreference(
     index: Int = 0,
     groupSize: Int = 1,
     summary: String? = null,
-    onClick: (() -> Unit) = {},
+    onClick: (() -> Unit)? = null,
 ) {
     BasePreference(
         modifier = modifier,
@@ -237,7 +239,7 @@ fun StringPreference(
     dirty: Boolean = pref.dirty.value,
     index: Int = 0,
     groupSize: Int = 1,
-    onClick: (() -> Unit) = {},
+    onClick: (() -> Unit)? = null,
 ) {
     BasePreference(
         modifier = modifier,
@@ -256,11 +258,14 @@ fun StringPreference(
 @Preview
 @Composable
 fun StringPreferencePreview() {
+
+    //OABX.fakeContext = LocalContext.current.applicationContext
+
     val pref_pathBackupFolder = StringPref(
         key = "user.pathBackupFolder",
         titleId = R.string.prefs_pathbackupfolder,
         icon = Phosphor.FolderNotch,
-        iconTint = ColorExtDATA,
+        iconTint = { ColorExtDATA },
         defaultValue = "path/to/backup/folder",
     )
 
@@ -271,13 +276,13 @@ fun StringPreferencePreview() {
 
 @Composable
 fun StringEditPreference(
-    pref: StringPref,
+    pref: StringEditPref,
     modifier: Modifier = Modifier,
     dirty: Boolean = pref.dirty.value,
     index: Int = 0,
     groupSize: Int = 1,
+    onClick: (() -> Unit)? = null,
 ) {
-    //traceCompose { "StringEditPreference: $pref" }
     BasePreference(
         modifier = modifier,
         pref = pref,
@@ -291,33 +296,37 @@ fun StringEditPreference(
             TextInput(
                 pref.value,
                 modifier = Modifier.fillMaxWidth(),
+                onClick = onClick,
             ) {
                 pref.value = it
             }
         },
+        onClick = onClick,
     )
 }
 
 @Preview
 @Composable
 fun StringEditPreferencePreview() {
+
+    //OABX.fakeContext = LocalContext.current.applicationContext
+
     val pref_suCommand = StringEditPref(
         key = "user.suCommand",
         icon = Phosphor.Hash,
-        iconTint = Color.Gray,
+        iconTint = {
+            val pref = it as StringEditPref
+            if (pref.value == "test") Color.Green
+            else if (pref.value == "test2") Color.Red
+            else Color.Gray
+        },
         defaultValue = "su --mount-master",
     )
 
-    val pref by remember { mutableStateOf(pref_suCommand) }
+    val pref = pref_suCommand
 
     Column {
         Row {
-            ActionButton(text = "red") {
-                pref.iconTint = Color.Red
-            }
-            ActionButton(text = "green") {
-                pref.iconTint = Color.Green
-            }
             ActionButton(text = "test") {
                 pref.value = "test"
             }
@@ -329,6 +338,18 @@ fun StringEditPreferencePreview() {
             pref = pref
         )
     }
+
+    val pref_pathBackupFolder = StringEditPref(
+        key = "user.pathBackupFolder",
+        titleId = R.string.prefs_pathbackupfolder,
+        icon = Phosphor.FolderNotch,
+        iconTint = { ColorExtDATA },
+        defaultValue = "path/to/backup/folder",
+    )
+
+    StringEditPreference(
+        pref = pref_pathBackupFolder,
+    )
 }
 
 @Composable
@@ -338,7 +359,7 @@ fun PasswordPreference(
     dirty: Boolean = pref.dirty.value,
     index: Int = 0,
     groupSize: Int = 1,
-    onClick: () -> Unit = {},
+    onClick: (() -> Unit)? = null,
 ) {
     val valueShown = if (pref.value.isNotEmpty()) "*********" else UNDEFINED_VALUE
     BasePreference(
@@ -362,7 +383,7 @@ fun EnumPreference(
     dirty: Boolean = pref.dirty.value,
     index: Int = 0,
     groupSize: Int = 1,
-    onClick: () -> Unit = {},
+    onClick: (() -> Unit)? = null,
 ) {
     val valueShown = pref.entries[pref.value]?.let { stringResource(id = it) } ?: UNDEFINED_VALUE
     BasePreference(
