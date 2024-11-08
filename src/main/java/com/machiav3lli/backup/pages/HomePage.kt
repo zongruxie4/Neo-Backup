@@ -368,7 +368,7 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
         }
     )
 
-    if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
+    if (openBlocklist.value) BaseDialog(onDismiss = { openBlocklist.value = false }) {
         GlobalBlockListDialogUI(
             currentBlocklist = viewModel.getBlocklist().toSet(),
             openDialogCustom = openBlocklist,
@@ -376,7 +376,7 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
             viewModel.setBlocklist(newSet)
         }
     }
-    if (openBatchDialog.value) BaseDialog(openDialogCustom = openBatchDialog) {
+    if (openBatchDialog.value) BaseDialog(onDismiss = { openBatchDialog.value = false }) {
         val selectedList = updatedPackages
             .map { it.packageInfo }
             .toCollection(ArrayList())
@@ -416,7 +416,7 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
             selectedPackageInfos = selectedList,
             selectedApk = selectedApk,
             selectedData = selectedData,
-            openDialogCustom = openBatchDialog,
+            onDismiss = { openBatchDialog.value = false },
         ) {
             mActivity.startBatchAction(
                 true,

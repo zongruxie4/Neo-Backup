@@ -26,6 +26,12 @@ import com.machiav3lli.backup.accentColorItems
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
 import com.machiav3lli.backup.dialogs.ListPrefDialogUI
+import com.machiav3lli.backup.entity.BooleanPref
+import com.machiav3lli.backup.entity.EnumPref
+import com.machiav3lli.backup.entity.IntPref
+import com.machiav3lli.backup.entity.ListPref
+import com.machiav3lli.backup.entity.Pref
+import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.secondaryColorItems
 import com.machiav3lli.backup.themeItems
@@ -52,12 +58,6 @@ import com.machiav3lli.backup.ui.compose.theme.ColorOBB
 import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
 import com.machiav3lli.backup.ui.compose.theme.ColorSystem
 import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
-import com.machiav3lli.backup.entity.BooleanPref
-import com.machiav3lli.backup.entity.EnumPref
-import com.machiav3lli.backup.entity.IntPref
-import com.machiav3lli.backup.entity.ListPref
-import com.machiav3lli.backup.entity.Pref
-import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.backupDirConfigured
@@ -126,7 +126,7 @@ fun UserPrefsPage() {
         if (dialogsPref == pref_pathBackupFolder) {
             openDialog.value = false
             launcher.launch(BACKUP_DIRECTORY_INTENT)
-        } else BaseDialog(openDialogCustom = openDialog) {
+        } else BaseDialog(onDismiss = { openDialog.value = false }) {
             when (dialogsPref) {  //TODO hg42 encapsulate in pref
                 //pref_languages,
                 is ListPref -> ListPrefDialogUI(

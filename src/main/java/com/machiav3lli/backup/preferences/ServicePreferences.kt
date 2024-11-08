@@ -76,7 +76,7 @@ fun ServicePrefsPage() {
     }
 
     if (openDialog.value) {
-        BaseDialog(openDialogCustom = openDialog) {
+        BaseDialog(onDismiss = { openDialog.value = false }) {
             when (dialogsPref) {                            //TODO hg42 encapsulate in pref
 
                 is ListPref     -> ListPrefDialogUI(

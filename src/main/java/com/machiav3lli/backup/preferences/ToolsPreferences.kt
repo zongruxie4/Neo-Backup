@@ -147,14 +147,14 @@ fun ToolsPrefsPage(viewModel: MainVM = koinViewModel()) {
         }
     }
 
-    if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+    if (openDialog.value) BaseDialog(onDismiss = { openDialog.value = false }) {
         dialogProps.value.let { (dialogMode, primary, second) ->
             when (dialogMode) {
                 DialogMode.TOOL_DELETE_BACKUP_UNINSTALLED
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.prefs_batchdelete),
                     messageText = primary.toString(),
-                    openDialogCustom = openDialog,
+                    onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialogYes),
                     primaryAction = second as () -> Unit,
                 )
@@ -163,7 +163,7 @@ fun ToolsPrefsPage(viewModel: MainVM = koinViewModel()) {
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.prefs_saveappslist),
                     messageText = stringResource(R.string.prefs_saveappslist_summary),
-                    openDialogCustom = openDialog,
+                    onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.radio_all),
                     primaryAction = primary as () -> Unit,
                     secondaryText = stringResource(R.string.filtered_list),

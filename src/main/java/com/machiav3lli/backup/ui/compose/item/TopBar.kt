@@ -213,7 +213,7 @@ fun TopBar(
                         )
                 )
                 if (showDevTools.value) {
-                    BaseDialog(openDialogCustom = showDevTools) {
+                    BaseDialog(onDismiss = { showDevTools.value = false }) {
                         DevTools(expanded = showDevTools)
                     }
                 }
@@ -299,7 +299,7 @@ fun MainTopBar(
                     )
                 }
                 if (showDevTools.value) {
-                    BaseDialog(openDialogCustom = showDevTools) {
+                    BaseDialog(onDismiss = { showDevTools.value = false }) {
                         DevTools(expanded = showDevTools)
                     }
                 }
