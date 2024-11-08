@@ -148,7 +148,7 @@ fun MainPage(
                 )
             }
 
-            if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
+            if (openBlocklist.value) BaseDialog(onDismiss = { openBlocklist.value = false }) {
                 GlobalBlockListDialogUI(
                     currentBlocklist = viewModel.getBlocklist().toSet(),
                     openDialogCustom = openBlocklist,

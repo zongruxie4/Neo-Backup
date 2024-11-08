@@ -422,7 +422,7 @@ fun SchedulePage(
             }
         }
 
-        if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+        if (openDialog.value) BaseDialog(onDismiss = { openDialog.value = false }) {
             dialogProps.value.let { (dialogMode, schedule) ->
                 when (dialogMode) {
                     DialogMode.BLOCKLIST
@@ -490,7 +490,7 @@ fun SchedulePage(
                         -> ActionsDialogUI(
                         titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
                         messageText = context.getStartScheduleMessage(schedule),
-                        openDialogCustom = openDialog,
+                        onDismiss = { openDialog.value = false },
                         primaryText = stringResource(R.string.dialogOK),
                         primaryAction = {
                             if (schedule.mode != MODE_UNSET)

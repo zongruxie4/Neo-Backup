@@ -290,7 +290,7 @@ fun BatchPage(
             }
         }
 
-        if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
+        if (openBlocklist.value) BaseDialog(onDismiss = { openBlocklist.value = false }) {
             GlobalBlockListDialogUI(
                 currentBlocklist = mainVM.getBlocklist()?.toSet()
                     ?: emptySet(),
@@ -299,7 +299,7 @@ fun BatchPage(
                 mainVM.setBlocklist(newSet)
             }
         }
-        if (openBatchDialog.value) BaseDialog(openDialogCustom = openBatchDialog) {
+        if (openBatchDialog.value) BaseDialog(onDismiss = { openBatchDialog.value = false }) {
             val selectedApk = viewModel.apkBackupCheckedList.filterValues { it != -1 }
             val selectedData = viewModel.dataBackupCheckedList.filterValues { it != -1 }
             val selectedPackageNames = selectedApk.keys.plus(selectedData.keys).distinct()
@@ -311,7 +311,7 @@ fun BatchPage(
                     .map(Package::packageInfo),
                 selectedApk = selectedApk,
                 selectedData = selectedData,
-                openDialogCustom = openBatchDialog,
+                onDismiss = { openBatchDialog.value = false },
             ) {
                 if (pref_singularBackupRestore.value && !backupBoolean) main.startBatchRestoreAction(
                     selectedPackageNames = selectedPackageNames,

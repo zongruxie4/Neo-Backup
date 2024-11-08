@@ -255,25 +255,26 @@ class MainActivityX : BaseActivity() {
                             navController = navController,
                         )
 
-                        if (openBlocklist.value) BaseDialog(openDialogCustom = openBlocklist) {
-                            GlobalBlockListDialogUI(
-                                currentBlocklist = viewModel.getBlocklist().toSet(),
-                                openDialogCustom = openBlocklist,
-                            ) { newSet ->
-                                viewModel.setBlocklist(newSet)
+                        if (openBlocklist.value)
+                            BaseDialog(onDismiss = { openBlocklist.value = false }) {
+                                GlobalBlockListDialogUI(
+                                    currentBlocklist = viewModel.getBlocklist().toSet(),
+                                    openDialogCustom = openBlocklist,
+                                ) { newSet ->
+                                    viewModel.setBlocklist(newSet)
+                                }
                             }
-                        }
                     }
                 }
 
                 if (openDialog.value) {
-                    BaseDialog(openDialogCustom = openDialog) {
+                    BaseDialog(onDismiss = { openDialog.value = false }) {
                         when (dialogKey.value) {
                             is DialogKey.Encryption -> {
                                 ActionsDialogUI(
                                     titleText = stringResource(id = R.string.enable_encryption_title),
                                     messageText = stringResource(id = R.string.enable_encryption_message),
-                                    openDialogCustom = openDialog,
+                                    onDismiss = { openDialog.value = false },
                                     primaryText = stringResource(id = R.string.dialog_approve),
                                     primaryAction = {
                                         openDialog.value = false
@@ -287,7 +288,7 @@ class MainActivityX : BaseActivity() {
                                 ActionsDialogUI(
                                     titleText = stringResource(id = R.string.errorDialogTitle),
                                     messageText = message,
-                                    openDialogCustom = openDialog,
+                                    onDismiss = { openDialog.value = false },
                                     primaryText = stringResource(id = R.string.dialogSave),
                                     primaryAction = { LogsHandler.logErrors(message) },
                                     secondaryText = stringResource(id = R.string.dialogOK)

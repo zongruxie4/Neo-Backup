@@ -532,7 +532,7 @@ fun AppPage(
                 }
             }
 
-            if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+            if (openDialog.value) BaseDialog(onDismiss = { openDialog.value = false }) {
                 dialogProps.value.let { (dialogMode, obj) ->
                     when (dialogMode) {
                         DialogMode.BACKUP         -> {
@@ -585,7 +585,7 @@ fun AppPage(
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.deleteBackupDialogMessage),
-                                openDialogCustom = openDialog,
+                                onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     snackbarHostState.show(
@@ -609,7 +609,7 @@ fun AppPage(
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.delete_all_backups),
-                                openDialogCustom = openDialog,
+                                onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     viewModel.deleteAllBackups()
@@ -629,7 +629,7 @@ fun AppPage(
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.clear_cache),
-                                openDialogCustom = openDialog,
+                                onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     try {
@@ -661,7 +661,7 @@ fun AppPage(
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.forceKillMessage),
-                                openDialogCustom = openDialog,
+                                onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     //TODO hg42 force-stop, force-close, ... ? I think these are different ones, and I don't know which.
@@ -681,7 +681,7 @@ fun AppPage(
                                     id = if (enable) R.string.enablePackage
                                     else R.string.disablePackage
                                 ),
-                                openDialogCustom = openDialog,
+                                onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     try {
@@ -698,7 +698,7 @@ fun AppPage(
                             ActionsDialogUI(
                                 titleText = thePackage.packageLabel,
                                 messageText = stringResource(id = R.string.uninstallDialogMessage),
-                                openDialogCustom = openDialog,
+                                onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     viewModel.uninstallApp()
@@ -743,7 +743,7 @@ fun AppPage(
                                     id = R.string.enforce_backups_limit_description,
                                     pref_numBackupRevisions.value
                                 ),
-                                openDialogCustom = openDialog,
+                                onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     BackupRestoreHelper.housekeepingPackageBackups(obj as Package)

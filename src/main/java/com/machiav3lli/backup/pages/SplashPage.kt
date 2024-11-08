@@ -140,7 +140,7 @@ fun RootMissing(activity: Activity? = null) {
                 OABX.context.restartApp()
             }
             if (showDevTools.value) {
-                BaseDialog(openDialogCustom = showDevTools) {
+                BaseDialog(onDismiss = { showDevTools.value = false }) {
                     DevTools(
                         expanded = showDevTools,
                         goto = "devsett",

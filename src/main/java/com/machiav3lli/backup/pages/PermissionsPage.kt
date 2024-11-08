@@ -220,14 +220,14 @@ fun PermissionsPage() {
         }
     }
 
-    if (openDialog.value) BaseDialog(openDialogCustom = openDialog) {
+    if (openDialog.value) BaseDialog(onDismiss = { openDialog.value = false }) {
         dialogProp.value.let { dialogMode ->
             when (dialogMode) {
                 DialogMode.NO_SAF
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.no_file_manager_title),
                     messageText = stringResource(R.string.no_file_manager_message),
-                    openDialogCustom = openDialog,
+                    onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialogOK),
                     primaryAction = {
                         mainActivity.finishAffinity()
@@ -238,7 +238,7 @@ fun PermissionsPage() {
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.grant_usage_access_title),
                     messageText = stringResource(R.string.grant_usage_access_message),
-                    openDialogCustom = openDialog,
+                    onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialog_approve),
                     primaryAction = {
                         mainActivity.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
@@ -249,7 +249,7 @@ fun PermissionsPage() {
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.smsmms_permission_title),
                     messageText = stringResource(R.string.grant_smsmms_message),
-                    openDialogCustom = openDialog,
+                    onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialog_approve),
                     primaryAction = {
                         mainActivity.requireSMSMMSPermission()
@@ -260,7 +260,7 @@ fun PermissionsPage() {
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.calllogs_permission_title),
                     messageText = stringResource(R.string.grant_calllogs_message),
-                    openDialogCustom = openDialog,
+                    onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialog_approve),
                     primaryAction = {
                         mainActivity.requireCallLogsPermission()
@@ -271,7 +271,7 @@ fun PermissionsPage() {
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.contacts_permission_title),
                     messageText = stringResource(R.string.grant_contacts_message),
-                    openDialogCustom = openDialog,
+                    onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialog_approve),
                     primaryAction = {
                         mainActivity.requireContactsPermission()
@@ -282,7 +282,7 @@ fun PermissionsPage() {
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.ignore_battery_optimization_title),
                     messageText = stringResource(R.string.ignore_battery_optimization_message),
-                    openDialogCustom = openDialog,
+                    onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialog_approve),
                     primaryAction = {
                         val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
