@@ -20,8 +20,8 @@ package com.machiav3lli.backup.pages
 import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
@@ -65,9 +65,6 @@ import com.machiav3lli.backup.ui.compose.item.TopBar
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.SystemUtils.packageName
 import com.machiav3lli.backup.utils.checkBatteryOptimization
-import com.machiav3lli.backup.utils.checkCallLogsPermission
-import com.machiav3lli.backup.utils.checkContactsPermission
-import com.machiav3lli.backup.utils.checkSMSMMSPermission
 import com.machiav3lli.backup.utils.checkUsageStatsPermission
 import com.machiav3lli.backup.utils.getStoragePermission
 import com.machiav3lli.backup.utils.hasStoragePermissions
@@ -77,13 +74,13 @@ import com.machiav3lli.backup.utils.requireContactsPermission
 import com.machiav3lli.backup.utils.requireSMSMMSPermission
 import com.machiav3lli.backup.utils.requireStorageLocation
 import com.machiav3lli.backup.utils.setBackupDir
+import com.machiav3lli.backup.utils.specialBackupsEnabled
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import timber.log.Timber
 
-// TODO use rememberPermissionState to manage more permissions
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PermissionsPage(powerManager: PowerManager = koinInject()) {
@@ -99,9 +96,56 @@ fun PermissionsPage(powerManager: PowerManager = koinInject()) {
         mutableStateMapOf<Permission, () -> Unit>()
     }
 
-    val permissionStatePostNotifications = if (OABX.minSDK(Build.VERSION_CODES.TIRAMISU)) {
-        rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-    } else null
+    val standardPermissions = remember {
+        listOfNotNull(
+            if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+                && specialBackupsEnabled
+            ) Triple(
+                Permission.SMSMMS,
+                listOf(
+                    Manifest.permission.READ_SMS,
+                    Manifest.permission.SEND_SMS,
+                    Manifest.permission.RECEIVE_SMS,
+                    Manifest.permission.RECEIVE_MMS,
+                    Manifest.permission.RECEIVE_WAP_PUSH
+                ),
+                DialogMode.PERMISSION_SMS_MMS
+            ) else null,
+            if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+                && specialBackupsEnabled
+            ) Triple(
+                Permission.CallLogs,
+                listOf(
+                    Manifest.permission.READ_CALL_LOG,
+                    Manifest.permission.WRITE_CALL_LOG
+                ),
+                DialogMode.PERMISSION_CALL_LOGS
+            ) else null,
+            if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+                && specialBackupsEnabled
+            ) Triple(
+                Permission.Contacts,
+                listOf(Manifest.permission.READ_CONTACTS),
+                DialogMode.PERMISSION_CONTACTS
+            ) else null,
+            Triple(
+                Permission.PostNotifications,
+                if (OABX.minSDK(Build.VERSION_CODES.TIRAMISU)) {
+                    listOf(Manifest.permission.POST_NOTIFICATIONS)
+                } else emptyList(),
+                DialogMode.NONE
+            )
+        )
+    }
+
+    // standard permissions' states
+    val permissionStates = standardPermissions.associate { (permissionType, permissions, _) ->
+        permissionType to permissions.mapNotNull { permission ->
+            if (permission.isNotEmpty()) {
+                rememberPermissionState(permission)
+            } else null
+        }
+    }
 
     val askForDirectory =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -146,47 +190,38 @@ fun PermissionsPage(powerManager: PowerManager = koinInject()) {
                             openDialog.value = true
                         }
 
-                    if (!context.checkSMSMMSPermission && none { it.key == Permission.SMSMMS })
-                        set(Permission.SMSMMS) {
-                            dialogProp.value = DialogMode.PERMISSION_SMS_MMS
-                            openDialog.value = true
+                    // Handle standard permissions
+                    standardPermissions.forEach { (permissionType, permissions, dialogMode) ->
+                        val permissionState = permissionStates[permissionType]
+                        if (permissions.isNotEmpty() &&
+                            permissionState?.any { !it.status.isGranted } == true &&
+                            none { it.key == permissionType }
+                        ) {
+                            set(permissionType) {
+                                if (dialogMode != DialogMode.NONE) {
+                                    dialogProp.value = dialogMode
+                                    openDialog.value = true
+                                } else {
+                                    permissionState.forEach { it.launchPermissionRequest() }
+                                }
+                            }
                         }
+                    }
 
-                    if (!context.checkCallLogsPermission && none { it.key == Permission.CallLogs })
-                        set(Permission.CallLogs) {
-                            dialogProp.value = DialogMode.PERMISSION_CALL_LOGS
-                            openDialog.value = true
-                        }
+                    // Remove granted permissions
+                    if (context.hasStoragePermissions) remove(Permission.StorageAccess)
+                    if (context.isStorageDirSetAndOk) remove(Permission.StorageLocation)
+                    if (context.checkBatteryOptimization(powerManager)) remove(Permission.BatteryOptimization)
+                    if (context.checkUsageStatsPermission) remove(Permission.UsageStats)
 
-                    if (!context.checkContactsPermission && none { it.key == Permission.Contacts })
-                        set(Permission.Contacts) {
-                            dialogProp.value = DialogMode.PERMISSION_CONTACTS
-                            openDialog.value = true
-                        }
-
-                    if (permissionStatePostNotifications?.status?.isGranted == false
-                        && none { it.key == Permission.PostNotifications }
-                    )
-                        set(Permission.PostNotifications) {
-                            permissionStatePostNotifications.launchPermissionRequest()
-                        }
-                    if (context.hasStoragePermissions)
-                        remove(Permission.StorageAccess)
-                    if (context.isStorageDirSetAndOk)
-                        remove(Permission.StorageLocation)
-                    if (context.checkBatteryOptimization(powerManager))
-                        remove(Permission.BatteryOptimization)
-                    if (context.checkUsageStatsPermission)
-                        remove(Permission.UsageStats)
-                    if (context.checkSMSMMSPermission)
-                        remove(Permission.SMSMMS)
-                    if (context.checkCallLogsPermission)
-                        remove(Permission.CallLogs)
-                    if (context.checkContactsPermission)
-                        remove(Permission.Contacts)
-                    if (permissionStatePostNotifications?.status?.isGranted == true)
-                        remove(Permission.PostNotifications)
+                    standardPermissions.forEach { (permissionType, permissions, _) ->
+                        val permissionState = permissionStates[permissionType]
+                        if (permissions.isNotEmpty() &&
+                            permissionState?.all { it.status.isGranted } == true
+                        ) remove(permissionType)
+                    }
                 }
+
                 if (permissionsList.isEmpty()) mScope.launch {
                     mainActivity.moveTo(NavItem.Main.destination)
                 }
