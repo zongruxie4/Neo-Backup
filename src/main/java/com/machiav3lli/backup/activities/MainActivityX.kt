@@ -20,7 +20,6 @@ package com.machiav3lli.backup.activities
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.os.PowerManager
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -113,7 +112,6 @@ class MainActivityX : BaseActivity() {
 
     private val mScope: CoroutineScope = MainScope()
     lateinit var navController: NavHostController
-    private lateinit var powerManager: PowerManager
 
     private lateinit var openDialog: MutableState<Boolean>
     private lateinit var dialogKey: MutableState<DialogKey?>
@@ -198,8 +196,6 @@ class MainActivityX : BaseActivity() {
             }
             return
         }
-
-        powerManager = this.getSystemService(POWER_SERVICE) as PowerManager
 
         setContent {
 

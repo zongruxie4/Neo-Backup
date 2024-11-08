@@ -80,16 +80,16 @@ import com.machiav3lli.backup.utils.setBackupDir
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import timber.log.Timber
 
 // TODO use rememberPermissionState to manage more permissions
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PermissionsPage() {
+fun PermissionsPage(powerManager: PowerManager = koinInject()) {
     val context = LocalContext.current
     val mScope = CoroutineScope(Dispatchers.Main)
     val mainActivity = OABX.main!!
-    val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     val openDialog = remember { mutableStateOf(false) }
     val dialogProp: MutableState<DialogMode> = remember {
         mutableStateOf(DialogMode.NONE)
