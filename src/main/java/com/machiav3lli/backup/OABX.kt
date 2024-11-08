@@ -93,6 +93,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -544,7 +545,7 @@ class OABX : Application() {
             if (aquire) {
                 traceDebug { "%%%%% $wakeLockTag wakelock aquire (before: $wakeLockNested)" }
                 if (wakeLockNested.accumulateAndGet(+1, Int::plus) == 1) {
-                    val pm = context.getSystemService(POWER_SERVICE) as PowerManager
+                    val pm : PowerManager = get(PowerManager::class.java)
                     theWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockTag)
                     theWakeLock?.acquire(60 * 60 * 1000L)
                     traceDebug { "%%%%% $wakeLockTag wakelock ACQUIRED" }
@@ -741,4 +742,5 @@ class OABX : Application() {
 val handlersModule = module {
     single { WorkHandler(get()) }
     single { ExportsHandler(get()) }
+    single { get<Context>().getSystemService(Context.POWER_SERVICE) as PowerManager }
 }

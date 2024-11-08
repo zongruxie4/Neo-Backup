@@ -19,12 +19,13 @@ import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
+import org.koin.java.KoinJavaComponent.get
 
 // Getters
 
 val Context.allPermissionsGranted: Boolean
     get() {
-        val powerManager = getSystemService(AppCompatActivity.POWER_SERVICE) as PowerManager
+        val powerManager: PowerManager = get(PowerManager::class.java)
         return hasStoragePermissions &&
                 isStorageDirSetAndOk &&
                 checkSMSMMSPermission &&
