@@ -84,8 +84,7 @@ class MainVM(
     //   if f_in > f_proc, then there is no output at all
     //   this is much like processing on idle only
 
-    // TODO different models for different pages
-    val sortFilterModel: StateFlow<SortFilterModel> = combine(
+    val homeSortFilterModel: StateFlow<SortFilterModel> = combine(
         prefs.sortHome.get(),
         prefs.sortAscHome.get(),
         prefs.mainFilterHome.get(),
@@ -95,6 +94,64 @@ class MainVM(
         prefs.updatedFilterHome.get(),
         prefs.latestFilterHome.get(),
         prefs.enabledFilterHome.get(),
+    ) { args ->
+        SortFilterModel(
+            args[0] as Int,
+            args[1] as Boolean,
+            args[2] as Int,
+            args[3] as Int,
+            args[4] as Int,
+            args[5] as Int,
+            args[6] as Int,
+            args[7] as Int,
+            args[8] as Int,
+        )
+    }
+        .stateIn(
+            viewModelScope + Dispatchers.IO,
+            SharingStarted.Lazily,
+            SortFilterModel()
+        )
+
+    val backupSortFilterModel: StateFlow<SortFilterModel> = combine(
+        prefs.sortBackup.get(),
+        prefs.sortAscBackup.get(),
+        prefs.mainFilterBackup.get(),
+        prefs.backupFilterBackup.get(),
+        prefs.installedFilterBackup.get(),
+        prefs.launchableFilterBackup.get(),
+        prefs.updatedFilterBackup.get(),
+        prefs.latestFilterBackup.get(),
+        prefs.enabledFilterBackup.get(),
+    ) { args ->
+        SortFilterModel(
+            args[0] as Int,
+            args[1] as Boolean,
+            args[2] as Int,
+            args[3] as Int,
+            args[4] as Int,
+            args[5] as Int,
+            args[6] as Int,
+            args[7] as Int,
+            args[8] as Int,
+        )
+    }
+        .stateIn(
+            viewModelScope + Dispatchers.IO,
+            SharingStarted.Lazily,
+            SortFilterModel()
+        )
+
+    val restoreSortFilterModel: StateFlow<SortFilterModel> = combine(
+        prefs.sortRestore.get(),
+        prefs.sortAscRestore.get(),
+        prefs.mainFilterRestore.get(),
+        prefs.backupFilterRestore.get(),
+        prefs.installedFilterRestore.get(),
+        prefs.launchableFilterRestore.get(),
+        prefs.updatedFilterRestore.get(),
+        prefs.latestFilterRestore.get(),
+        prefs.enabledFilterRestore.get(),
     ) { args ->
         SortFilterModel(
             args[0] as Int,
@@ -256,7 +313,7 @@ class MainVM(
         //========================================================================================== filteredList
         combine(
             notBlockedList,
-            sortFilterModel,
+            backupSortFilterModel,
             searchQuery,
             appExtrasMap
         ) { pkgs, filter, search, extras ->
