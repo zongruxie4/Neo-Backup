@@ -42,7 +42,7 @@ import com.machiav3lli.backup.ui.compose.item.IconCache
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.formatSortedBackups
 import com.machiav3lli.backup.utils.TraceUtils.trace
-import com.machiav3lli.backup.utils.applyFilter
+import com.machiav3lli.backup.utils.applySearchAndFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -309,7 +309,27 @@ class MainVM(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    val filteredList =
+    val homeFilteredList =
+        //========================================================================================== filteredList
+        combine(
+            notBlockedList,
+            homeSortFilterModel,
+            searchQuery,
+            appExtrasMap
+        ) { pkgs, filter, search, extras ->
+            traceFlows { "******************** filtering - list: ${pkgs.size} filter: $filter" }
+            pkgs.applySearchAndFilter(appContext, search, extras, filter)
+        }
+            // if the filter changes we can drop the older filters
+            .mapLatest { it }
+            .trace { "*** filteredList <<- ${it.size}" }
+            .stateIn(
+                viewModelScope + Dispatchers.IO,
+                SharingStarted.Eagerly,
+                emptyList()
+            )
+
+    val backupFilteredList =
         //========================================================================================== filteredList
         combine(
             notBlockedList,
@@ -317,29 +337,28 @@ class MainVM(
             searchQuery,
             appExtrasMap
         ) { pkgs, filter, search, extras ->
-
-            var list = emptyList<Package>()
-
             traceFlows { "******************** filtering - list: ${pkgs.size} filter: $filter" }
+            pkgs.applySearchAndFilter(appContext, search, extras, filter)
+        }
+            // if the filter changes we can drop the older filters
+            .mapLatest { it }
+            .trace { "*** backupFilteredList <<- ${it.size}" }
+            .stateIn(
+                viewModelScope + Dispatchers.IO,
+                SharingStarted.Eagerly,
+                emptyList()
+            )
 
-            list = pkgs
-                .filter { item: Package ->
-                    search.isEmpty() || (
-                            (extras[item.packageName]?.customTags ?: emptySet()).plus(
-                                listOfNotNull(
-                                    item.packageName,
-                                    item.packageLabel,
-                                    extras[item.packageName]?.note
-                                )
-                            )
-                                .any { it.contains(search, ignoreCase = true) }
-                            )
-                }
-                .applyFilter(filter, OABX.context)
-
-            traceFlows { "***** filtered ->> ${list.size}" }
-
-            list
+    val restoreFilteredList =
+        //========================================================================================== filteredList
+        combine(
+            notBlockedList,
+            restoreSortFilterModel,
+            searchQuery,
+            appExtrasMap
+        ) { pkgs, filter, search, extras ->
+            traceFlows { "******************** filtering - list: ${pkgs.size} filter: $filter" }
+            pkgs.applySearchAndFilter(appContext, search, extras, filter)
         }
             // if the filter changes we can drop the older filters
             .mapLatest { it }

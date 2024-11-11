@@ -104,7 +104,7 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val packagesList by viewModel.notBlockedList.collectAsState(emptyList())
-    val filteredList by viewModel.filteredList.collectAsState(emptyList())
+    val filteredList by viewModel.homeFilteredList.collectAsState(emptyList())
     val updatedPackages by viewModel.updatedPackages.collectAsState(emptyList())
     val updaterVisible = updatedPackages.isNotEmpty()  // recompose is already triggered above
     var updaterExpanded by remember { mutableStateOf(false) }
