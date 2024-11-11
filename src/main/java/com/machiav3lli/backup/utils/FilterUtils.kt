@@ -97,6 +97,27 @@ fun filterPackages(
 
 //---------------------------------------- filters for activity
 
+fun List<Package>.applySearchAndFilter(
+    context: Context,
+    query: String,
+    extras: Map<String, AppExtras>,
+    filter: SortFilterModel,
+): List<Package> {
+    return filter { item ->
+        query.isEmpty() || (
+                (extras[item.packageName]?.customTags ?: emptySet()).plus(
+                    listOfNotNull(
+                        item.packageName,
+                        item.packageLabel,
+                        extras[item.packageName]?.note
+                    )
+                )
+                    .any { it.contains(query, ignoreCase = true) }
+                )
+    }
+        .applyFilter(filter, context)
+}
+
 fun List<Package>.applyFilter(filter: SortFilterModel, context: Context): List<Package> {
     val predicate: (Package) -> Boolean = {
         (if (filter.mainFilter and MAIN_FILTER_SYSTEM == MAIN_FILTER_SYSTEM) it.isSystem && !it.isSpecial else false)

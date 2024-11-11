@@ -85,7 +85,8 @@ fun BatchPage(
 ) {
     val main = OABX.main!!
     val scope = rememberCoroutineScope()
-    val filteredList by mainVM.filteredList.collectAsState(emptyList())
+    val filteredList by if (backupBoolean) mainVM.backupFilteredList.collectAsState(emptyList())
+    else mainVM.restoreFilteredList.collectAsState(emptyList())
     val scaffoldState = rememberBottomSheetScaffoldState()
     val openBatchDialog = remember { mutableStateOf(false) }
     val openBlocklist = rememberSaveable { mutableStateOf(false) }
