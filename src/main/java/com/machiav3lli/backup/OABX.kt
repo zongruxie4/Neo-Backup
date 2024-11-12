@@ -544,7 +544,7 @@ class OABX : Application() {
             if (aquire) {
                 traceDebug { "%%%%% $wakeLockTag wakelock aquire (before: $wakeLockNested)" }
                 if (wakeLockNested.accumulateAndGet(+1, Int::plus) == 1) {
-                    val pm : PowerManager = get(PowerManager::class.java)
+                    val pm: PowerManager = get(PowerManager::class.java)
                     theWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockTag)
                     theWakeLock?.acquire(60 * 60 * 1000L)
                     traceDebug { "%%%%% $wakeLockTag wakelock ACQUIRED" }

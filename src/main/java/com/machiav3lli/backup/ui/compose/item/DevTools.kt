@@ -221,7 +221,7 @@ fun TextInput(
                 }
             ),
             keyboardOptions = KeyboardOptions(
-                autoCorrect = false
+                autoCorrectEnabled = false
             ),
             onValueChange = {
                 if (it.text.contains("\n")) {

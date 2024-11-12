@@ -95,8 +95,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import timber.log.Timber
 
