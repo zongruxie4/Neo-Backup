@@ -542,7 +542,7 @@ fun TerminalText(
                         )
                 },
                 keyboardOptions = KeyboardOptions(
-                    autoCorrect = false,
+                    autoCorrectEnabled = false
                     //imeAction = ImeAction.Done
                 ),
                 //keyboardActions = KeyboardActions(
@@ -679,7 +679,7 @@ fun Terminal(
                 }
             },
             keyboardOptions = KeyboardOptions(
-                autoCorrect = false,
+                autoCorrectEnabled = false,
                 imeAction = ImeAction.Go
             ),
             keyboardActions = KeyboardActions(
