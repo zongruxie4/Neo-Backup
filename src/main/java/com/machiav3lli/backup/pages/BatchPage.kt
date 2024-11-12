@@ -296,8 +296,7 @@ fun BatchPage(
 
         if (openBlocklist.value) BaseDialog(onDismiss = { openBlocklist.value = false }) {
             GlobalBlockListDialogUI(
-                currentBlocklist = mainVM.getBlocklist()?.toSet()
-                    ?: emptySet(),
+                currentBlocklist = mainVM.getBlocklist().toSet(),
                 openDialogCustom = openBlocklist,
             ) { newSet ->
                 mainVM.setBlocklist(newSet)

@@ -22,7 +22,6 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.OABX.Companion.getBackups
 import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.dbs.ODatabase
@@ -191,7 +190,7 @@ class MainVM(
                 emptyList()
             )
 
-    val backupsMapDb =
+    private val backupsMapDb =
         //------------------------------------------------------------------------------------------ backupsMap
         db.getBackupDao().getAllFlow()
             .mapLatest { it.groupBy(Backup::packageName) }
@@ -231,7 +230,7 @@ class MainVM(
             null
         )
 
-    val appExtrasMap =
+    private val appExtrasMap =
         //------------------------------------------------------------------------------------------ appExtrasMap
         db.getAppExtrasDao().getAllFlow()
             .mapLatest { it.associateBy(AppExtras::packageName) }
@@ -427,7 +426,7 @@ class MainVM(
                 appPackage?.apply {
                     val new = Package(appContext, packageName)
                     if (!isSpecial) {
-                        new.refreshFromPackageManager(OABX.context)
+                        new.refreshFromPackageManager(appContext)
                         db.getAppInfoDao().update(new.packageInfo as AppInfo)
                     }
                     //new.refreshBackupList()     //TODO hg42 ??? who calls this? take it from backupsMap?

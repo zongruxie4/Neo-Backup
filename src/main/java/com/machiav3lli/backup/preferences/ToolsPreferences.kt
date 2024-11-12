@@ -332,8 +332,8 @@ private fun Context.onClickSaveAppsList(
                 )
             },
             {
-                writeAppsListFile(
-                    packageList.applyFilter(viewModel.sortFilterModel.value, this)
+                writeAppsListFile( // TODO communicate that the filter from home page is used
+                    packageList.applyFilter(viewModel.homeSortFilterModel.value, this)
                         .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     true
                 )

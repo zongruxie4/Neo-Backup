@@ -14,7 +14,6 @@ import android.os.PowerManager
 import android.os.Process
 import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.OABX
@@ -63,12 +62,9 @@ val Context.isStorageDirSetAndOk: Boolean
 
 val Context.checkSMSMMSPermission: Boolean
     get() {
-        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            return true
-        }
-        if (!specialBackupsEnabled) {
-            return true
-        }
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+            || !specialBackupsEnabled
+        ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
             OABX.minSDK(Build.VERSION_CODES.Q) ->
@@ -100,12 +96,9 @@ val Context.checkSMSMMSPermission: Boolean
 
 val Context.checkCallLogsPermission: Boolean
     get() {
-        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            return true
-        }
-        if (!specialBackupsEnabled) {
-            return true
-        }
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+            || !specialBackupsEnabled
+        ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
             OABX.minSDK(Build.VERSION_CODES.Q) ->
@@ -131,12 +124,9 @@ val Context.checkCallLogsPermission: Boolean
 
 val Context.checkContactsPermission: Boolean
     get() {
-        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            return true
-        }
-        if (!specialBackupsEnabled) {
-            return true
-        }
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+            || !specialBackupsEnabled
+        ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
             OABX.minSDK(Build.VERSION_CODES.Q) ->

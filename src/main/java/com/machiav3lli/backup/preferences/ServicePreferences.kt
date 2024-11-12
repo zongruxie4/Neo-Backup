@@ -21,6 +21,13 @@ import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
 import com.machiav3lli.backup.dialogs.ListPrefDialogUI
 import com.machiav3lli.backup.dialogs.StringPrefDialogUI
+import com.machiav3lli.backup.entity.BooleanPref
+import com.machiav3lli.backup.entity.EnumPref
+import com.machiav3lli.backup.entity.IntPref
+import com.machiav3lli.backup.entity.ListPref
+import com.machiav3lli.backup.entity.PasswordPref
+import com.machiav3lli.backup.entity.Pref
+import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FileZip
@@ -46,13 +53,6 @@ import com.machiav3lli.backup.ui.compose.theme.ColorMedia
 import com.machiav3lli.backup.ui.compose.theme.ColorOBB
 import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
 import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
-import com.machiav3lli.backup.entity.BooleanPref
-import com.machiav3lli.backup.entity.EnumPref
-import com.machiav3lli.backup.entity.IntPref
-import com.machiav3lli.backup.entity.ListPref
-import com.machiav3lli.backup.entity.PasswordPref
-import com.machiav3lli.backup.entity.Pref
-import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
