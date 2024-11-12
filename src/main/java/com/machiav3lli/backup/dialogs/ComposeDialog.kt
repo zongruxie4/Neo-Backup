@@ -51,7 +51,7 @@ fun ActionsDialogUI(
     onDismiss: () -> Unit,
     primaryText: String,
     primaryIcon: ImageVector? = null,
-    primaryAction: (() -> Unit) = {},
+    primaryAction: () -> Unit = {},
     secondaryText: String = "",
     secondaryAction: (() -> Unit)? = null,
 ) {
@@ -124,7 +124,7 @@ fun BatchActionDialogUI(
     selectedApk: Map<String, Int>,
     selectedData: Map<String, Int>,
     onDismiss: () -> Unit,
-    primaryAction: (() -> Unit) = {},
+    primaryAction: () -> Unit = {},
 ) {
     val message = StringBuilder()
     selectedPackageInfos.forEach { pi ->

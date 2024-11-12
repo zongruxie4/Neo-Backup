@@ -176,7 +176,6 @@ fun scheduleAlarmsOnce() { // TODO replace with ScheduleWorker.scheduleAll()
     ScheduleWork.scheduleAll(OABX.context)
 }
 
-// TODO replace dialog with composable
 fun Context.getStartScheduleMessage(schedule: Schedule) = StringBuilder()
     .append(
         "\n${getString(R.string.sched_mode)} ${
