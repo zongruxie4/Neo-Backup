@@ -88,6 +88,7 @@ import com.machiav3lli.backup.ui.compose.item.MainPackageContextMenu
 import com.machiav3lli.backup.ui.compose.item.cachedAsyncImagePainter
 import com.machiav3lli.backup.ui.compose.recycler.HomePackageRecycler
 import com.machiav3lli.backup.ui.compose.recycler.UpdatedPackageRecycler
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.launch
@@ -170,6 +171,7 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
                     // which is bad when they contain live content
                     if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
                         SortFilterSheet(
+                            sourcePage = NavItem.Home,
                             onDismiss = {
                                 scope.launch {
                                     scaffoldState.bottomSheetState.partialExpand()
