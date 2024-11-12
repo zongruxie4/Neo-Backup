@@ -91,7 +91,7 @@ import kotlinx.serialization.modules.SerializersModule
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
-import org.koin.core.context.startKoin
+import org.koin.androix.startup.KoinStartup.onKoinStartup
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
@@ -108,6 +108,20 @@ class OABX : Application() {
     val db: ODatabase by inject()
 
     // TODO Add BroadcastReceiver for (UN)INSTALL_PACKAGE intents
+
+    init {
+        onKoinStartup {
+            // TODO to be replaced in koin 4.0.1
+            androidLogger()
+            androidContext(this@OABX)
+            modules(
+                handlersModule,
+                databaseModule,
+                prefsModule,
+                viewModelsModule,
+            )
+        }
+    }
 
     override fun onCreate() {
 
@@ -177,21 +191,6 @@ class OABX : Application() {
         MainScope().launch {
             addInfoLogText("--> click title to keep infobox open")
             addInfoLogText("--> long press title for dev tools")
-        }
-    }
-
-    override fun attachBaseContext(base: Context?) {
-        super.attachBaseContext(base)
-
-        startKoin {
-            androidLogger()
-            androidContext(this@OABX)
-            modules(
-                handlersModule,
-                databaseModule,
-                prefsModule,
-                viewModelsModule,
-            )
         }
     }
 
