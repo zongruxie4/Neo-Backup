@@ -81,6 +81,7 @@ import com.machiav3lli.backup.ui.compose.item.SwitchChip
 import com.machiav3lli.backup.ui.compose.recycler.InfoChipsBlock
 import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getStats
@@ -90,12 +91,22 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SortFilterSheet(
+    sourcePage: NavItem,
     viewModel: MainVM = koinViewModel(),
     onDismiss: () -> Unit,
-) { // TODO add key for each page (HOME, BACKUP, RESTORE)
+) {
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
     val packageList by viewModel.notBlockedList.collectAsState()
-    var model by rememberSaveable { mutableStateOf(viewModel.sortFilterModel.value) }
+    var model by rememberSaveable {
+        mutableStateOf(
+            when (sourcePage) {
+                NavItem.Backup -> viewModel.backupSortFilterModel.value
+                NavItem.Restore -> viewModel.restoreSortFilterModel.value
+                else -> viewModel.homeSortFilterModel.value // NavItem.Home
+            }
+        )
+    }
+
     fun currentStats() = getStats(
         packageList.applyFilter(
             model,

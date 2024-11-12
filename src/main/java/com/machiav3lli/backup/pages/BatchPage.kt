@@ -70,6 +70,7 @@ import com.machiav3lli.backup.ui.compose.item.StateChip
 import com.machiav3lli.backup.ui.compose.recycler.BatchPackageRecycler
 import com.machiav3lli.backup.ui.compose.theme.ColorAPK
 import com.machiav3lli.backup.ui.compose.theme.ColorData
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.viewmodels.BatchVM
 import com.machiav3lli.backup.viewmodels.MainVM
@@ -135,6 +136,8 @@ fun BatchPage(
             if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
                 if (prefsNotFilter.value) BatchPrefsSheet(backupBoolean)
                 else SortFilterSheet(
+                    sourcePage = if (backupBoolean) NavItem.Backup
+                    else NavItem.Restore,
                     onDismiss = {
                         scope.launch {
                             scaffoldState.bottomSheetState.partialExpand()
