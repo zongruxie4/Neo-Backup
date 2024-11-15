@@ -17,60 +17,26 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.Schedule
-import com.machiav3lli.backup.preferences.traceSchedule
-import com.machiav3lli.backup.tasks.ScheduleWork
-import com.machiav3lli.backup.utils.scheduleNext
-import kotlinx.coroutines.Dispatchers
+import com.machiav3lli.backup.dbs.repository.ScheduleRepository
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class SchedulesVM(val database: ScheduleDao, private val appContext: Application) :
-    ViewModel() {
-    var schedules = database.getAllFlow()
+class SchedulesVM(
+    private val scheduleRepository: ScheduleRepository,
+) : ViewModel() {
+    var schedules = scheduleRepository.getAllFlow()
 
     fun addSchedule(withSpecial: Boolean) {
         viewModelScope.launch {
-            add(withSpecial)
+            scheduleRepository.addNew(withSpecial)
         }
     }
 
-    private suspend fun add(withSpecial: Boolean) {
-        withContext(Dispatchers.IO) {
-            database.insert(
-                Schedule.Builder() // Set id to 0 to make the database generate a new id
-                    .withId(0)
-                    .withSpecial(withSpecial)
-                    .build()
-            )
-        }
-    }
-
-    // TODO revamp
     fun updateSchedule(schedule: Schedule?, rescheduleBoolean: Boolean) {
         viewModelScope.launch {
-            schedule?.let { updateS(it, rescheduleBoolean) }
-        }
-    }
-
-    private suspend fun updateS(schedule: Schedule, rescheduleBoolean: Boolean) {
-        withContext(Dispatchers.IO) {
-            database.update(schedule)
-            if (schedule.enabled) {
-                traceSchedule { "[${schedule.id}] SchedulerViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
-                scheduleNext(
-                    appContext.baseContext,
-                    schedule.id,
-                    rescheduleBoolean
-                )
-            } else {
-                traceSchedule { "[${schedule.id}] SchedulerViewModel.updateS -> cancelAlarm" }
-                ScheduleWork.cancel(appContext.baseContext, schedule.id)
-            }
+            schedule?.let { scheduleRepository.updateSchedule(it, rescheduleBoolean) }
         }
     }
 }
