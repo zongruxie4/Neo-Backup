@@ -28,6 +28,8 @@ class PackageRepository(
             .map { it.groupBy(Backup::packageName) }
             .flowOn(Dispatchers.IO)
 
+    fun getBackups(packageName: String): List<Backup> = db.getBackupDao().get(packageName)
+
     suspend fun updatePackage(packageName: String) {
         withContext(Dispatchers.IO) {
             invalidateCacheForPackage(packageName)
@@ -37,6 +39,10 @@ class PackageRepository(
                 db.getAppInfoDao().update(new.packageInfo as AppInfo)
             }
         }
+    }
+
+    fun upsertAppInfo(vararg appInfos: AppInfo) {
+        db.getAppInfoDao().upsert(*appInfos)
     }
 
     fun replaceAppInfos(vararg appInfos: AppInfo) {
@@ -50,4 +56,6 @@ class PackageRepository(
     fun replaceBackups(vararg backups: Backup) {
         db.getBackupDao().updateList(*backups)
     }
+
+    fun deleteAppInfoOf(packageName: String) = db.getAppInfoDao().deleteAllOf(packageName)
 }
