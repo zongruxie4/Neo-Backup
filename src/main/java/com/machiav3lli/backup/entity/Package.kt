@@ -37,7 +37,6 @@ import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils
-import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.viewmodels.MainVM
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import timber.log.Timber
@@ -123,7 +122,7 @@ data class Package private constructor(val packageName: String) {
     private fun isPlausiblePath(path: String?): Boolean {
         return !path.isNullOrEmpty() &&
                 path.contains(packageName) &&
-                path != OABX.context.getBackupRoot().path
+                path != OABX.backupRoot?.path
     }
 
     fun refreshStorageStats(context: Context): Boolean {
@@ -185,21 +184,21 @@ data class Package private constructor(val packageName: String) {
         FileUtils.BackupLocationInAccessibleException::class,
         StorageLocationNotConfiguredException::class
     )
-    fun getAppBackupRoot(
+    fun getAppBackupBaseDir(
         packageName: String = this.packageName,
         create: Boolean = false,
     ): StorageFile? {
         return try {
             if (pref_flatStructure.value) {
-                OABX.context.getBackupRoot()
+                OABX.backupRoot
             } else {
                 when {
                     create -> {
-                        OABX.context.getBackupRoot().ensureDirectory(packageName)
+                        OABX.backupRoot?.ensureDirectory(packageName)
                     }
 
                     else   -> {
-                        OABX.context.getBackupRoot().findFile(packageName)
+                        OABX.backupRoot?.findFile(packageName)
                     }
                 }
             }

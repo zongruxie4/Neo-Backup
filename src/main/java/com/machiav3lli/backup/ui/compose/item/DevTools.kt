@@ -115,7 +115,6 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.trace
-import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.utils.recreateActivities
 import com.machiav3lli.backup.utils.restartApp
 import kotlinx.collections.immutable.persistentListOf
@@ -549,8 +548,7 @@ fun PluginEditor(plugin: Plugin? = null, onSubmit: (plugin: Plugin?) -> Unit) {
 
     fun share() {
         editPlugin?.file
-            ?.also { SystemUtils.share(StorageFile(it), asFile = true) }
-            ?: run { (editPlugin as? TextPlugin)?.let { SystemUtils.share(it.text) } }
+            ?.also { SystemUtils.share(StorageFile(it)) }
     }
 
     Column(
@@ -824,10 +822,11 @@ val pref_savePreferences = LaunchPref(
         val serialized = preferencesToSerialized()
         if (serialized.isNotEmpty()) {
             runCatching {
-                val backupRoot = OABX.context.getBackupRoot()
-                UndeterminedStorageFile(backupRoot, PREFS_BACKUP_FILE).let {
-                    it.writeText(serialized)?.let {
-                        OABX.addInfoLogText("saved ${it.name}")
+                OABX.backupRoot?.let { backupRoot ->
+                    UndeterminedStorageFile(backupRoot, PREFS_BACKUP_FILE).let {
+                        it.writeText(serialized)?.let {
+                            OABX.addInfoLogText("saved ${it.name}")
+                        }
                     }
                 }
             }
@@ -841,12 +840,13 @@ val pref_loadPreferences = LaunchPref(
 ) {
     MainScope().launch(Dispatchers.IO) {
         runCatching {
-            val backupRoot = OABX.context.getBackupRoot()
-            backupRoot.findFile(PREFS_BACKUP_FILE)?.let {
-                val serialized = it.readText()
-                preferencesFromSerialized(serialized)
-                OABX.addInfoLogText("loaded ${it.name}")
-                OABX.context.recreateActivities()
+            OABX.backupRoot?.let { backupRoot ->
+                backupRoot.findFile(PREFS_BACKUP_FILE)?.let {
+                    val serialized = it.readText()
+                    preferencesFromSerialized(serialized)
+                    OABX.addInfoLogText("loaded ${it.name}")
+                    OABX.context.recreateActivities()
+                }
             }
         }
     }
@@ -860,7 +860,7 @@ fun testOnStart() {
                 delay(3000)
                 trace { "############################################################ testOnStart: running..." }
 
-                //openFileManager(OABX.context.getBackupRoot())
+                //openFileManager(OABX.backupRoot)
 
                 //pref_savePreferences.onClick()
                 trace { "############################################################ testOnStart: end." }
@@ -974,7 +974,7 @@ val pref_openBackupDir = LaunchPref(
     key = "dev-tool.openBackupDir",
     summary = "open backup directory in associated app"
 ) {
-    OABX.context.getBackupRoot().let { openFileManager(it) }
+    OABX.backupRoot?.let { openFileManager(it) }
 }
 
 @Composable
