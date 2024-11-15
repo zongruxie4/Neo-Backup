@@ -43,6 +43,17 @@ class ScheduleRepository(
             .map { string -> Converters().toStringSet(string) }
     }.flowOn(Dispatchers.IO)
 
+    suspend fun addNew(withSpecial: Boolean) {
+        withContext(Dispatchers.IO) {
+            db.getScheduleDao().insert(
+                Schedule.Builder() // Set id to 0 to make the database generate a new id
+                    .withId(0)
+                    .withSpecial(withSpecial)
+                    .build()
+            )
+        }
+    }
+
     fun update(value: Schedule) {
         db.getScheduleDao().update(value)
     }
