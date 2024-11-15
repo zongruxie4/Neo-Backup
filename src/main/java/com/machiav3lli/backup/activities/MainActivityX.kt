@@ -670,6 +670,6 @@ val viewModelsModule = module {
     viewModel { SchedulesVM(get()) }
     viewModel { ScheduleVM(get(), get()) }
     viewModel { AppVM(get()) }
-    viewModel { ExportsVM(get(), get()) }
+    viewModel { ExportsVM(get()) }
     viewModel { LogsVM() }
 }
