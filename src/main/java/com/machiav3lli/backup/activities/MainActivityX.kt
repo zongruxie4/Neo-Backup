@@ -669,7 +669,7 @@ val viewModelsModule = module {
     viewModel { RestoreBatchVM() }
     viewModel { SchedulesVM(get()) }
     viewModel { ScheduleVM(get(), get()) }
-    viewModel { AppVM(get()) }
+    viewModel { AppVM(get(), get()) }
     viewModel { ExportsVM(get()) }
     viewModel { LogsVM() }
 }
