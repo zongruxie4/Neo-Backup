@@ -176,7 +176,7 @@ class AppVM(private val database: ODatabase) : ViewModel() {
     private suspend fun replaceExtras(appExtras: AppExtras?) {
         withContext(Dispatchers.IO) {
             if (appExtras != null)
-                database.getAppExtrasDao().replaceInsert(appExtras)
+                database.getAppExtrasDao().upsert(appExtras)
             else
                 thePackage.value?.let {
                     database.getAppExtrasDao().deleteByPackageName(it.packageName)
