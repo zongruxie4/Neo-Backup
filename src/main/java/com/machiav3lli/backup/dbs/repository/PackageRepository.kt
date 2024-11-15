@@ -20,7 +20,7 @@ import timber.log.Timber
 
 class PackageRepository(
     private val db: ODatabase,
-    private val appContext: Application
+    private val appContext: Application,
 ) {
     fun getPackagesFlow(): Flow<List<Package>> =
         db.getAppInfoDao().getAllFlow()
@@ -53,7 +53,7 @@ class PackageRepository(
         db.getAppInfoDao().updateList(*appInfos)
     }
 
-    fun updateBackups(packageName: String, backups: List<Backup>) {
+    suspend fun updateBackups(packageName: String, backups: List<Backup>) {
         db.getBackupDao().updateList(packageName, backups)
     }
 

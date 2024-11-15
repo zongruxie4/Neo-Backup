@@ -36,19 +36,6 @@ interface BlocklistDao : BaseDao<Blocklist> {
     @Query("SELECT packageName FROM blocklist WHERE blocklistId = :blocklistId")
     fun getBlocklistedPackages(blocklistId: Long): List<String>
 
-    fun updateList(blocklistId: Long, newList: Set<String>) {
-        deleteById(blocklistId)
-        newList.forEach { packageName ->
-            insert(
-                Blocklist.Builder()
-                    .withId(0)
-                    .withBlocklistId(blocklistId)
-                    .withPackageName(packageName)
-                    .build()
-            )
-        }
-    }
-
     @Query("DELETE FROM blocklist")
     fun deleteAll()
 
