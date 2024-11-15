@@ -19,57 +19,43 @@ package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.dbs.ODatabase
-import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Schedule
-import com.machiav3lli.backup.preferences.traceSchedule
-import com.machiav3lli.backup.tasks.ScheduleWork
+import com.machiav3lli.backup.dbs.repository.AppExtrasRepository
+import com.machiav3lli.backup.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.utils.TraceUtils.trace
-import com.machiav3lli.backup.utils.scheduleNext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
 
-class ScheduleVM(database: ODatabase) : ViewModel(), KoinComponent { // TODO add repos
-    private val cc = Dispatchers.IO
-    private val scheduleDB: ScheduleDao = database.getScheduleDao()
-
+@OptIn(ExperimentalCoroutinesApi::class)
+class ScheduleVM(
+    private val scheduleRepository: ScheduleRepository,
+    appExtrasRepository: AppExtrasRepository,
+) : ViewModel() {
     private val _scheduleID = MutableStateFlow(-1L)
 
-    val schedule: StateFlow<Schedule?> =
-        combine(_scheduleID, scheduleDB.getScheduleFlow(_scheduleID.value)) { id, schedule ->
-            withContext(cc) { scheduleDB.getSchedule(id) }
-        }
-            //TODO hg42 .trace { "*** schedule <<- ${it}" }     // what can here be null? (something is null that is not declared as nullable)
-            .stateIn(
-                viewModelScope,
-                SharingStarted.Eagerly,
-                Schedule(0)
-            )
+    val schedule: StateFlow<Schedule?> = scheduleRepository.getScheduleFlow(_scheduleID)
+        //TODO hg42 .trace { "*** schedule <<- ${it}" }     // what can here be null? (something is null that is not declared as nullable)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            Schedule(0)
+        )
 
-    val customList =
-        combine(_scheduleID, scheduleDB.getCustomListFlow(_scheduleID.value)) { id, bl ->
-            withContext(cc) { scheduleDB.getCustomList(id) }
-        }
-    val blockList = combine(_scheduleID, scheduleDB.getBlockListFlow(_scheduleID.value)) { id, bl ->
-        withContext(cc) { scheduleDB.getBlockList(id) }
-    }
+    val customList = scheduleRepository.getCustomListFlow(_scheduleID)
+    val blockList = scheduleRepository.getBlockListFlow(_scheduleID)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val allTags =
         //------------------------------------------------------------------------------------------ allTags
-        database.getAppExtrasDao().getAllFlow()
+        appExtrasRepository.getAllFlow()
             .mapLatest { it.flatMap(AppExtras::customTags) }
             .trace { "*** tags <<- ${it.size}" }
             .stateIn(
@@ -84,36 +70,13 @@ class ScheduleVM(database: ODatabase) : ViewModel(), KoinComponent { // TODO add
 
     fun updateSchedule(schedule: Schedule?, rescheduleBoolean: Boolean) {
         viewModelScope.launch {
-            schedule?.let { updateS(it, rescheduleBoolean) }
-        }
-    }
-
-    private suspend fun updateS(schedule: Schedule, rescheduleBoolean: Boolean) {
-        withContext(Dispatchers.IO) {
-            scheduleDB.update(schedule)
-            if (schedule.enabled) {
-                traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
-                scheduleNext(
-                    getKoin().get(),
-                    schedule.id,
-                    rescheduleBoolean
-                )
-            } else {
-                traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> cancelAlarm" }
-                ScheduleWork.cancel(getKoin().get(), schedule.id)
-            }
+            schedule?.let { scheduleRepository.updateSchedule(it, rescheduleBoolean) }
         }
     }
 
     fun deleteSchedule() {
         viewModelScope.launch {
-            deleteS()
-        }
-    }
-
-    private suspend fun deleteS() {
-        withContext(Dispatchers.IO) {
-            scheduleDB.deleteById(_scheduleID.value)
+            scheduleRepository.deleteById(_scheduleID.value)
         }
     }
 }

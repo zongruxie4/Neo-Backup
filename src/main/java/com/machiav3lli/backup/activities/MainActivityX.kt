@@ -660,13 +660,13 @@ class MainActivityX : BaseActivity() {
 val viewModelsModule = module {
     single { PackageRepository(get(), get()) }
     single { BlocklistRepository(get()) }
-    single { ScheduleRepository(get()) }
+    single { ScheduleRepository(get(), get()) }
     single { AppExtrasRepository(get()) }
     viewModel { MainVM(get(), get(), get(), get()) }
     viewModel { BackupBatchVM() }
     viewModel { RestoreBatchVM() }
     viewModel { SchedulesVM(get(), get()) }
-    viewModel { ScheduleVM(get()) }
+    viewModel { ScheduleVM(get(), get()) }
     viewModel { AppVM(get()) }
     viewModel { ExportsVM(get(), get()) }
     viewModel { LogsVM() }
