@@ -561,7 +561,7 @@ fun launchRestore(packages: List<Package>, mode: Int) {
 fun launchEnable(
     packages: List<Package>,
     selection: Set<String>,
-    toggleSelection: (String) -> Unit
+    toggleSelection: (String) -> Unit,
 ) {
     launchEachPackage(packages, "enable", selection, toggleSelection, parallel = false) {
         val users = listOf(currentProfile.toString())
@@ -574,7 +574,7 @@ fun launchEnable(
 fun launchDisable(
     packages: List<Package>,
     selection: Set<String>,
-    toggleSelection: (String) -> Unit
+    toggleSelection: (String) -> Unit,
 ) {
     launchEachPackage(packages, "disable", selection, toggleSelection, parallel = false) {
         val users = listOf(currentProfile.toString())
@@ -587,7 +587,7 @@ fun launchDisable(
 fun launchUninstall(
     packages: List<Package>,
     selection: Set<String>,
-    toggleSelection: (String) -> Unit
+    toggleSelection: (String) -> Unit,
 ) {
     launchEachPackage(packages, "uninstall", selection, toggleSelection, parallel = false) {
         val users = listOf(currentProfile.toString())
@@ -600,7 +600,7 @@ fun launchUninstall(
 fun launchDeleteBackups(
     packages: List<Package>,
     selection: Set<String>,
-    toggleSelection: (String) -> Unit
+    toggleSelection: (String) -> Unit,
 ) {
     launchEachPackage(packages.withBackups(), "delete backups", selection, toggleSelection) {
         it.deleteAllBackups()
@@ -611,7 +611,7 @@ fun launchDeleteBackups(
 fun launchLimitBackups(
     packages: List<Package>,
     selection: Set<String>,
-    toggleSelection: (String) -> Unit
+    toggleSelection: (String) -> Unit,
 ) {
     launchEachPackage(packages.withBackups(), "limit backups", selection, toggleSelection) {
         BackupRestoreHelper.housekeepingPackageBackups(it)
