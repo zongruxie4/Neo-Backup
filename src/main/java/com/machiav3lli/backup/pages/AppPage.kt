@@ -384,6 +384,7 @@ fun AppPage(
                             tags = appExtras.customTags,
                             onRemove = {
                                 viewModel.setExtras(
+                                    packageName,
                                     appExtras.copy(
                                         customTags = appExtras.customTags.minus(it)
                                     )
@@ -684,7 +685,7 @@ fun AppPage(
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     try {
-                                        viewModel.enableDisableApp(enable)
+                                        viewModel.enableDisableApp(packageName, enable)
                                         // TODO (re-)add user selection support
                                     } catch (e: ShellCommands.ShellActionFailedException) {
                                         mActivity.showError(e.message)
@@ -719,7 +720,10 @@ fun AppPage(
                                 initValue = dialogProps.value.second as String,
                                 openDialogCustom = openDialog,
                             ) {
-                                viewModel.setExtras(appExtras.copy(note = it))
+                                viewModel.setExtras(
+                                    packageName,
+                                    appExtras.copy(note = it)
+                                )
                             }
                         }
 
@@ -758,6 +762,7 @@ fun AppPage(
                                 openDialogCustom = openDialog,
                             ) {
                                 viewModel.setExtras(
+                                    packageName,
                                     appExtras.copy(
                                         customTags = appExtras.customTags.plus(it)
                                     )
