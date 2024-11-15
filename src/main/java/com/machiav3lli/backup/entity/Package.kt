@@ -305,7 +305,7 @@ class Package {
     fun deleteAllBackups() {
         val backups = backupsNewestFirst.toMutableList()
         while (backups.isNotEmpty())
-            _deleteBackup(backups.removeLast())
+            _deleteBackup(backups.removeLast()) // TODO
         if (pref_paranoidBackupLists.value)
             runOrLog { refreshBackupList() }                // get real state of file system only once
     }
@@ -324,7 +324,7 @@ class Package {
                 } --> delete ${TraceUtils.formatBackups(deletableBackups)}"
             }
             while (deletableBackups.size > 0) {
-                val backup = deletableBackups.removeLast()
+                val backup = deletableBackups.removeLast() // TODO
                 backups.remove(backup)
                 _deleteBackup(backup)
             }
@@ -339,7 +339,7 @@ class Package {
             }
             while (keep < backups.size && deletableBackups.size > 0) {
 
-                val backup = deletableBackups.removeLast()
+                val backup = deletableBackups.removeLast() // TODO
                 backups.remove(backup)
                 _deleteBackup(backup)
             }

@@ -38,7 +38,6 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.activities.viewModelsModule
-import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.databaseModule
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
@@ -105,7 +104,6 @@ val RESCUE_NAV get() = "rescue"
 class OABX : Application() {
 
     val work: WorkHandler by inject()
-    val db: ODatabase by inject()
 
     // TODO Add BroadcastReceiver for (UN)INSTALL_PACKAGE intents
 
@@ -470,8 +468,6 @@ class OABX : Application() {
         var viewModelSaved: ViewModel? = null
 
         var appsSuspendedChecked = false
-
-        val db: ODatabase get() = NB.db
 
         var shellHandler: ShellHandler? = null
             private set
