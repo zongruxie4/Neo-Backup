@@ -60,7 +60,7 @@ class ScheduleRepository(
 
     suspend fun updateSchedule(schedule: Schedule, rescheduleBoolean: Boolean) {
         withContext(Dispatchers.IO) {
-            update(schedule)
+            db.getScheduleDao().update(schedule)
             if (schedule.enabled) {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
                 scheduleNext(

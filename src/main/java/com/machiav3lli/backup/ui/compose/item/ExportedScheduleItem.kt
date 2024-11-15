@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
-import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
@@ -30,11 +29,9 @@ import java.time.LocalTime
 @Composable
 fun ExportedScheduleItem(
     item: Schedule,
-    file: StorageFile,
     onRestore: (Schedule) -> Unit = { },
-    onDelete: (StorageFile) -> Unit = { },
+    onDelete: () -> Unit = { },
 ) {
-
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
@@ -95,7 +92,7 @@ fun ExportedScheduleItem(
                         text = stringResource(id = R.string.delete),
                         withText = false,
                         positive = false,
-                        onClick = { onDelete(file) }
+                        onClick = onDelete
                     )
 
                     Spacer(modifier = Modifier.weight(1f))

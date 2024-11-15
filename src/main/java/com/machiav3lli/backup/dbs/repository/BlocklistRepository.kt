@@ -34,7 +34,16 @@ class BlocklistRepository(
 
     suspend fun updateBlocklist(packages: Set<String>) {
         withContext(Dispatchers.IO) {
-            db.getBlocklistDao().updateList(PACKAGES_LIST_GLOBAL_ID, packages)
+            db.getBlocklistDao().deleteById(PACKAGES_LIST_GLOBAL_ID)
+            packages.forEach { packageName ->
+                db.getBlocklistDao().insert(
+                    Blocklist.Builder()
+                        .withId(0)
+                        .withBlocklistId(PACKAGES_LIST_GLOBAL_ID)
+                        .withPackageName(packageName)
+                        .build()
+                )
+            }
         }
     }
 }

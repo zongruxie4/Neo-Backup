@@ -150,7 +150,7 @@ fun ExportedScheduleRecycler(
         VerticalItemList(
             list = productsList
         ) {
-            ExportedScheduleItem(it.first, it.second, onImport, onDelete)
+            ExportedScheduleItem(it.first, onImport) { onDelete(it.second) }
         }
     }
 }

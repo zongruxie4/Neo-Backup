@@ -45,7 +45,7 @@ interface BackupDao : BaseDao<Backup> {
     fun deleteAllOf(packageName: String)
 
     @Transaction
-    fun updateList(packageName: String, backups: List<Backup>) {
+    suspend fun updateList(packageName: String, backups: Collection<Backup>) {
         deleteAllOf(packageName)
         try {
             if (backups.isNotEmpty())
