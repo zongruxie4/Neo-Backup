@@ -219,6 +219,7 @@ class MainActivityX : BaseActivity() {
                 openDialog = remember { mutableStateOf(false) }
                 dialogKey = remember { mutableStateOf(null) }
                 val openBlocklist = remember { mutableStateOf(false) }
+                val mainState by viewModel.homeState.collectAsState()
 
                 LaunchedEffect(viewModel) {
                     navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -254,10 +255,10 @@ class MainActivityX : BaseActivity() {
                         if (openBlocklist.value)
                             BaseDialog(onDismiss = { openBlocklist.value = false }) {
                                 GlobalBlockListDialogUI(
-                                    currentBlocklist = viewModel.getBlocklist().toSet(),
+                                    currentBlocklist = mainState.blocklist,
                                     openDialogCustom = openBlocklist,
                                 ) { newSet ->
-                                    viewModel.setBlocklist(newSet)
+                                    viewModel.updateBlocklist(newSet)
                                 }
                             }
                     }

@@ -192,7 +192,7 @@ private fun Context.onClickUninstalledBackupsDelete(
 ): Boolean {
     val deleteList = ArrayList<Package>()
     val message = StringBuilder()
-    val packageList = viewModel.packageList.value
+    val packageList = viewModel.packageMap.value.values
     if (packageList.isNotEmpty()) {
         packageList.forEach { appInfo ->
             if (!appInfo.isInstalled) {
@@ -321,7 +321,7 @@ private fun Context.onClickSaveAppsList(
     coroutineScope: CoroutineScope,
     showDialog: (() -> Unit, () -> Unit) -> Unit
 ): Boolean {
-    val packageList = viewModel.packageList.value
+    val packageList = viewModel.packageMap.value.values
     if (packageList.isNotEmpty()) {
         showDialog(
             {
@@ -333,7 +333,7 @@ private fun Context.onClickSaveAppsList(
             },
             {
                 writeAppsListFile( // TODO communicate that the filter from home page is used
-                    packageList.applyFilter(viewModel.homeSortFilterModel.value, this)
+                    packageList.applyFilter(viewModel.homeState.value.sortFilter, this)
                         .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     true
                 )

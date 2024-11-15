@@ -100,10 +100,10 @@ fun SortFilterSheet(
     var model by rememberSaveable {
         mutableStateOf(
             when (sourcePage) {
-                NavItem.Backup -> viewModel.backupSortFilterModel.value
-                NavItem.Restore -> viewModel.restoreSortFilterModel.value
-                else -> viewModel.homeSortFilterModel.value // NavItem.Home
-            }
+                NavItem.Backup -> viewModel.backupState
+                NavItem.Restore -> viewModel.restoreState
+                else -> viewModel.homeState // NavItem.Home
+            }.value.sortFilter
         )
     }
 
@@ -210,7 +210,7 @@ fun SortFilterSheet(
                         fullWidth = true,
                         positive = false,
                         onClick = {
-                            viewModel.setSortFilter(SortFilterModel())
+                            viewModel.setSortFilter(SortFilterModel(), sourcePage)
                             onDismiss()
                         }
                     )
@@ -221,7 +221,7 @@ fun SortFilterSheet(
                         fullWidth = true,
                         positive = true,
                         onClick = {
-                            viewModel.setSortFilter(model)
+                            viewModel.setSortFilter(model, sourcePage)
                             onDismiss()
                         }
                     )
