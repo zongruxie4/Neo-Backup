@@ -54,6 +54,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.RESCUE_NAV
 import com.machiav3lli.backup.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.dbs.repository.BlocklistRepository
+import com.machiav3lli.backup.dbs.repository.ExportsRepository
 import com.machiav3lli.backup.dbs.repository.PackageRepository
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.dialogs.ActionsDialogUI
@@ -662,6 +663,7 @@ val viewModelsModule = module {
     single { BlocklistRepository(get()) }
     single { ScheduleRepository(get(), get()) }
     single { AppExtrasRepository(get()) }
+    single { ExportsRepository(get(), get(), get()) }
     viewModel { MainVM(get(), get(), get(), get()) }
     viewModel { BackupBatchVM() }
     viewModel { RestoreBatchVM() }
