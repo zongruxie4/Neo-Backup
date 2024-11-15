@@ -54,7 +54,6 @@ import com.machiav3lli.backup.InstalledFilter
 import com.machiav3lli.backup.LatestFilter
 import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.enabledFilterChipItems
@@ -95,6 +94,7 @@ fun SortFilterSheet(
     viewModel: MainVM = koinViewModel(),
     onDismiss: () -> Unit,
 ) {
+    val context = LocalContext.current
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
     val packageList by viewModel.notBlockedList.collectAsState()
     var model by rememberSaveable {
@@ -110,7 +110,7 @@ fun SortFilterSheet(
     fun currentStats() = getStats(
         packageList.applyFilter(
             model,
-            OABX.context,
+            context,
         )
     )  //TODO hg42 use central function for all the filtering
 

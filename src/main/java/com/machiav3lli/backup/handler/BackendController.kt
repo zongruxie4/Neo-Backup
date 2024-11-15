@@ -273,9 +273,9 @@ suspend fun scanBackups(
         }
     }
 
-   suspend fun handleDirectory(
-       file: StorageFile,
-       collector: FlowCollector<StorageFile>? = null
+    suspend fun handleDirectory(
+        file: StorageFile,
+        collector: FlowCollector<StorageFile>? = null
     ): Boolean {
 
         hitBusy()
@@ -332,7 +332,14 @@ suspend fun scanBackups(
             !name.contains(regexSpecialFile)
         ) {
             val props = file
-            traceBackupsScanPackage { traceLine(">", level, props, "++++++++++++++++++++ props ok") }
+            traceBackupsScanPackage {
+                traceLine(
+                    ">",
+                    level,
+                    props,
+                    "++++++++++++++++++++ props ok"
+                )
+            }
 
             handleProps(props, path, name, onValidBackup)
 
@@ -352,7 +359,14 @@ suspend fun scanBackups(
                         dir.findFile(BACKUP_INSTANCE_PROPERTIES_INDIR)  // indir props
                             ?.let { props ->
 
-                                traceBackupsScanPackage { traceLine(">", level, props, "++++++++++++++++++++ props indir ok") }
+                                traceBackupsScanPackage {
+                                    traceLine(
+                                        ">",
+                                        level,
+                                        props,
+                                        "++++++++++++++++++++ props indir ok"
+                                    )
+                                }
 
                                 handleProps(props, props.path, props.name, onValidBackup) {
                                     runCatching {
@@ -410,7 +424,14 @@ suspend fun scanBackups(
             name.contains(regexBackupInstance)                      // or backup instance
         ) {
             if (forceTrace)
-                traceBackupsScanPackage { traceLine("B", level, file, "++++++++++++++++++++ backup") }
+                traceBackupsScanPackage {
+                    traceLine(
+                        "B",
+                        level,
+                        file,
+                        "++++++++++++++++++++ backup"
+                    )
+                }
 
             if (path.contains(packageName)) {                           // package matches, empty matches all
 
@@ -423,14 +444,28 @@ suspend fun scanBackups(
                     if (file.isPropertyFile &&
                         !name.contains(regexSpecialFile)                        // non-instance props (wtf is that? probably a saved file)
                     ) {
-                        traceBackupsScanPackage { traceLine(">", level, file, "++++++++++++++++++++ non-instance props ok (a renamed backup?)") }
+                        traceBackupsScanPackage {
+                            traceLine(
+                                ">",
+                                level,
+                                file,
+                                "++++++++++++++++++++ non-instance props ok (a renamed backup?)"
+                            )
+                        }
 
                         handleProps(file, path, name, onValidBackup)
 
                     } else {
                         if (file.isDirectory) {                                 // non-instance-directory
                             val dir = file
-                            traceBackupsScanPackage { traceLine("/", level, file, "++++++++++++++++++++ //////////////////// dir ok") }
+                            traceBackupsScanPackage {
+                                traceLine(
+                                    "/",
+                                    level,
+                                    file,
+                                    "++++++++++++++++++++ //////////////////// dir ok"
+                                )
+                            }
 
                             if (handleDirectory(dir).not()) {
                                 // renameDamagedToERROR(dir, "empty-folder")
@@ -450,7 +485,14 @@ suspend fun scanBackups(
             ) {
                 val dir = file
                 if (forceTrace)
-                    traceBackupsScanPackage { traceLine("F", level, file, "/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ folder ok") }
+                    traceBackupsScanPackage {
+                        traceLine(
+                            "F",
+                            level,
+                            file,
+                            "/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ folder ok"
+                        )
+                    }
 
                 if (handleDirectory(dir).not()) {
                     // renameDamagedToERROR(dir, "empty-folder")
@@ -629,7 +671,8 @@ fun Context.getPackageInfoList(filter: Int): List<PackageInfo> =
     packageManager.getInstalledPackageInfosWithPermissions()
         .filter { packageInfo: PackageInfo ->
             val isSystem =
-                (packageInfo.applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM == ApplicationInfo.FLAG_SYSTEM
+                (packageInfo.applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM ==
+                        ApplicationInfo.FLAG_SYSTEM
             val isIgnored = packageInfo.packageName.matches(ignoredPackages)
             if (isIgnored)
                 Timber.i("ignored package: ${packageInfo.packageName}")
@@ -889,6 +932,8 @@ fun Context.getSpecial(packageName: String) =
 
 val PackageInfo.grantedPermissions: List<String>
     get() = requestedPermissions?.filterIndexed { index, perm ->
-        (requestedPermissionsFlags?.getOrNull(index) ?: 0) and PackageInfo.REQUESTED_PERMISSION_GRANTED == PackageInfo.REQUESTED_PERMISSION_GRANTED &&
+        (requestedPermissionsFlags?.getOrNull(index)
+            ?: 0) and PackageInfo.REQUESTED_PERMISSION_GRANTED ==
+                PackageInfo.REQUESTED_PERMISSION_GRANTED &&
                 perm !in IGNORED_PERMISSIONS
     }.orEmpty()
