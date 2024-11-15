@@ -43,12 +43,13 @@ import com.machiav3lli.backup.actions.BaseAppAction.Companion.ignoredPackages
 import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
-import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
-import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
+import com.machiav3lli.backup.dbs.repository.PackageRepository
 import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.entity.Package.Companion.invalidateBackupCacheForPackage
 import com.machiav3lli.backup.entity.StorageFile
+import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
+import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
+import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.preferences.pref_backupSuspendApps
 import com.machiav3lli.backup.preferences.pref_earlyEmptyBackups
 import com.machiav3lli.backup.preferences.pref_lookForEmptyBackups
@@ -71,6 +72,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.io.IOException
 import java.util.*
@@ -839,8 +841,11 @@ fun Context.updateAppTables() {
         try {
             beginNanoTimer("dbUpdate")
 
-            OABX.db.getBackupDao().updateList(*backups.toTypedArray())
-            OABX.db.getAppInfoDao().updateList(*appInfoList.toTypedArray())
+            get<PackageRepository>(PackageRepository::class.java)
+                .apply {
+                    replaceBackups(*backups.toTypedArray())
+                    replaceAppInfos(*appInfoList.toTypedArray())
+                }
         } catch (e: Throwable) {
             logException(e, backTrace = true)
         } finally {
