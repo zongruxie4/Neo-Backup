@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -264,6 +266,32 @@ fun RoundButton(
             modifier = Modifier.size(size),
             imageVector = icon,
             tint = tint,
+            contentDescription = description
+        )
+    }
+}
+
+@Composable
+fun FilledRoundButton(
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    size: Dp = ICON_SIZE_SMALL,
+    tint: Color = MaterialTheme.colorScheme.primary,
+    onTint: Color = MaterialTheme.colorScheme.onPrimary,
+    description: String = "",
+    onClick: () -> Unit,
+) {
+    FilledTonalIconButton(
+        modifier = modifier,
+        colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = tint,
+            contentColor = onTint,
+        ),
+        onClick = onClick,
+    ) {
+        Icon(
+            modifier = Modifier.size(size),
+            imageVector = icon,
             contentDescription = description
         )
     }

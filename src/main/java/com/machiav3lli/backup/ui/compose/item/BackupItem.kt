@@ -49,34 +49,34 @@ import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_SHOW_FORMATTER
 import com.machiav3lli.backup.utils.getFormattedDate
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BackupItem_headlineContent(
     item: Backup,
 ) {
-    FlowRow(
+    Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
+            modifier = Modifier.weight(1f, false),
             text = "${item.versionName ?: ""} (${item.versionCode})",
             overflow = TextOverflow.Ellipsis,
-            maxLines = 5,
+            maxLines = 1,
         )
-        AnimatedVisibility(visible = (item.cpuArch != android.os.Build.SUPPORTED_ABIS[0])) {
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = " ${item.cpuArch} ",
-                color = Color.Red,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                style = MaterialTheme.typography.labelMedium,
-            )
-        }
         Row(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.End
         ) {
+            AnimatedVisibility(visible = (item.cpuArch != android.os.Build.SUPPORTED_ABIS[0])) {
+                Text(
+                    text = " ${item.cpuArch} ",
+                    color = Color.Red,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
             BackupLabels(item = item)
         }
     }
@@ -84,90 +84,103 @@ fun BackupItem_headlineContent(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun BackupItem_supportingContent(item: Backup) {
+fun BackupItem_supportingContent(
+    item: Backup,
+    showTag: Boolean = false,
+) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(
-            text = if (pref_altBackupDate.value)
-                item.backupDate.format(BACKUP_DATE_TIME_SHOW_FORMATTER)
-            else item.backupDate.getFormattedDate(true),
-            modifier = Modifier.align(Alignment.Top),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-        )
-        val directoryTag = item.directoryTag
-        if (directoryTag.isNotEmpty())
+        Row {
             Text(
-                text = " - $directoryTag",
+                text = if (pref_altBackupDate.value)
+                    item.backupDate.format(BACKUP_DATE_TIME_SHOW_FORMATTER)
+                else item.backupDate.getFormattedDate(true),
+                modifier = Modifier.align(Alignment.Top),
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
+                maxLines = 2,
             )
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = if (item.backupVersionCode == 0)
-                "old"
-            else
-                "${item.backupVersionCode / 1000}.${item.backupVersionCode % 1000}",
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-        )
-        if (item.isEncrypted) {
-            val description = "${item.cipherType}"
-            val showTooltip = remember { mutableStateOf(false) }
-            if (showTooltip.value) {
-                Tooltip(description, showTooltip)
-            }
-            Text(
-                text = " enc",
-                color = Color.Red,
-                modifier = Modifier
-                    .combinedClickable(
-                        onClick = {},
-                        onLongClick = { showTooltip.value = true }
-                    ),
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
-        }
-        val compressionText = if (item.isCompressed) {
-            if (item.compressionType.isNullOrEmpty())
-                " gz"
-            else
-                " ${item.compressionType}"
-        } else ""
-        if (compressionText.isNotEmpty()) Text(
-            text = compressionText,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-        )
-        val fileSizeText = if (item.backupVersionCode != 0)
-            Formatter.formatFileSize(LocalContext.current, item.size)
-        else ""
-        Text(
-            text = " - $fileSizeText",
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-        )
-        AnimatedVisibility(visible = (item.profileId != currentProfile)) {
-            Row {
+            val directoryTag = item.directoryTag
+            if (directoryTag.isNotEmpty())
                 Text(
-                    text = " 👤",
-                    style = MaterialTheme.typography.labelMedium,
+                    text = " - $directoryTag",
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
                 )
+        }
+        Row {
+            Text(
+                text = if (item.backupVersionCode == 0)
+                    "old"
+                else
+                    "${item.backupVersionCode / 1000}.${item.backupVersionCode % 1000}",
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+            )
+            if (item.isEncrypted) {
+                val description = "${item.cipherType}"
+                val showTooltip = remember { mutableStateOf(false) }
+                if (showTooltip.value) {
+                    Tooltip(description, showTooltip)
+                }
                 Text(
-                    text = "${item.profileId}",
+                    text = " enc",
                     color = Color.Red,
+                    modifier = Modifier
+                        .combinedClickable(
+                            onClick = {},
+                            onLongClick = { showTooltip.value = true }
+                        ),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )
             }
+            val compressionText = if (item.isCompressed) {
+                if (item.compressionType.isNullOrEmpty())
+                    " gz"
+                else
+                    " ${item.compressionType}"
+            } else ""
+            if (compressionText.isNotEmpty()) Text(
+                text = compressionText,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+            )
+            val fileSizeText = if (item.backupVersionCode != 0)
+                Formatter.formatFileSize(LocalContext.current, item.size)
+            else ""
+            Text(
+                text = " - $fileSizeText",
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+            )
+            AnimatedVisibility(visible = (item.profileId != currentProfile)) {
+                Row {
+                    Text(
+                        text = " 👤",
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                    Text(
+                        text = "${item.profileId}",
+                        color = Color.Red,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+        if (showTag) {
+            NoteTagItem(
+                item = item,
+                modifier = Modifier.weight(1f, false),
+                maxLines = 1,
+                onNote = null,
+            )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BackupItem(
     item: Backup,
@@ -189,10 +202,10 @@ fun BackupItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 BackupItem_supportingContent(item)
-                FlowRow(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    //verticalAlignment = Alignment.Bottom,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     var persistent by remember(item.persistent) {
                         mutableStateOf(item.persistent)
@@ -204,7 +217,9 @@ fun BackupItem(
 
                     NoteTagItem(
                         item = item,
-                        modifier = Modifier.weight(1f, false),
+                        modifier = Modifier
+                            .weight(1f, false)
+                            .align(Alignment.CenterVertically),
                         maxLines = 3,
                         onNote = onNote,
                     )
@@ -223,10 +238,11 @@ fun BackupItem(
                                 icon = Phosphor.LockOpen,
                                 onClick = togglePersistent
                             )
-                        RoundButton(
+                        FilledRoundButton(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.deleteBackup),
                             tint = MaterialTheme.colorScheme.tertiary,
+                            onTint = MaterialTheme.colorScheme.onTertiary,
                             onClick = { onDelete(item) }
                         )
                         if (!item.packageLabel.contains("INVALID"))
@@ -284,20 +300,7 @@ fun RestoreBackupItem(
                     containerColor = Color.Transparent,
                 ),
                 headlineContent = { BackupItem_headlineContent(item) },
-                supportingContent = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.wrapContentHeight(),
-                    ) {
-                        BackupItem_supportingContent(item)
-                        NoteTagItem(
-                            item = item,
-                            modifier = Modifier.weight(1f, false),
-                            maxLines = 3,
-                            onNote = null,
-                        )
-                    }
-                },
+                supportingContent = { BackupItem_supportingContent(item, true) },
             )
         }
     }
@@ -338,7 +341,11 @@ fun BackupRestorePreview() {
     val backup_without_note = backup.copy(note = "", versionName = "1.2.3.4")
     val backup_invalid = backup.copy(packageLabel = "? INVALID", note = "invalid")
 
-    Column(modifier = Modifier.width(500.dp).wrapContentHeight()) {
+    Column(
+        modifier = Modifier
+            .width(500.dp)
+            .wrapContentHeight()
+    ) {
         FlowRow {
             ActionButton("none") {
                 note = ""
