@@ -17,90 +17,49 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
-import com.machiav3lli.backup.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.dbs.entity.Schedule
+import com.machiav3lli.backup.dbs.repository.ExportsRepository
 import com.machiav3lli.backup.entity.StorageFile
-import com.machiav3lli.backup.handler.ExportsHandler
-import com.machiav3lli.backup.handler.showNotification
-import com.machiav3lli.backup.utils.SystemUtils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-class ExportsVM(val database: ScheduleDao, private val appContext: Application) :
-    ViewModel(), KoinComponent {
+class ExportsVM(
+    private val exportsRepository: ExportsRepository,
+) : ViewModel() {
 
     private val _exportsList =
         MutableStateFlow<MutableList<Pair<Schedule, StorageFile>>>(mutableListOf())
     val exportsList = _exportsList.asStateFlow()
-    val handler: ExportsHandler by inject()
 
     fun refreshList() {
         viewModelScope.launch {
-            _exportsList.update { recreateExportsList() }
+            _exportsList.update {
+                exportsRepository.recreateExports()
+            }
         }
     }
-
-    private suspend fun recreateExportsList(): MutableList<Pair<Schedule, StorageFile>> =
-        withContext(Dispatchers.IO) {
-            handler.readExports()
-        }
 
     fun exportSchedules() {
         viewModelScope.launch {
-            export()
+            exportsRepository.exportSchedules()
             refreshList()
         }
     }
-
-    private suspend fun export() =
-        withContext(Dispatchers.IO) {
-            handler.exportSchedules()
-        }
-
 
     fun deleteExport(exportFile: StorageFile) {
         viewModelScope.launch {
-            delete(exportFile)
+            exportsRepository.delete(exportFile)
             refreshList()
-        }
-    }
-
-    private suspend fun delete(exportFile: StorageFile) {
-        withContext(Dispatchers.IO) {
-            exportFile.delete()
         }
     }
 
     fun importSchedule(export: Schedule) {
         viewModelScope.launch {
-            import(export)
-            // TODO move out
-            showNotification(
-                appContext, MainActivityX::class.java, SystemUtils.now.toInt(),
-                appContext.getString(R.string.sched_imported), export.name, false
-            )
-        }
-    }
-
-    private suspend fun import(export: Schedule) {
-        withContext(Dispatchers.IO) {
-            database.insert(
-                Schedule.Builder() // Set id to 0 to make the database generate a new id
-                    .withId(0)
-                    .import(export)
-                    .build()
-            )
+            exportsRepository.import(export)
         }
     }
 }
