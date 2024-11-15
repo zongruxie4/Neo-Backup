@@ -21,22 +21,26 @@ import android.content.Context
 import com.machiav3lli.backup.EXPORTS_FOLDER_NAME
 import com.machiav3lli.backup.EXPORTS_FOLDER_NAME_ALT
 import com.machiav3lli.backup.EXPORTS_INSTANCE
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.activities.MainActivityX
 import com.machiav3lli.backup.dbs.entity.Schedule
-import com.machiav3lli.backup.handler.LogsHandler.Companion.logErrors
-import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
+import com.machiav3lli.backup.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.entity.StorageFile.Companion.invalidateCache
+import com.machiav3lli.backup.handler.LogsHandler.Companion.logErrors
+import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.getBackupRoot
+import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.io.BufferedOutputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
-class ExportsHandler(var context: Context) {
+class ExportsHandler(
+    private val context: Context,
+    private val scheduleRepository: ScheduleRepository = get(ScheduleRepository::class.java),
+) {
     private var exportsDirectory: StorageFile?
 
     init {
@@ -54,9 +58,7 @@ class ExportsHandler(var context: Context) {
     @Throws(IOException::class)
     fun exportSchedules() {
         // TODO improve on folder structure
-        val dataSource = OABX.db.getScheduleDao()
-        val scheds = dataSource.getAll()
-        scheds.forEach {
+        scheduleRepository.getAll().forEach {
             val fileName = String.format(EXPORTS_INSTANCE, it.name)
             exportsDirectory?.createFile(fileName)?.let { exportFile ->
                 BufferedOutputStream(exportFile.outputStream())
