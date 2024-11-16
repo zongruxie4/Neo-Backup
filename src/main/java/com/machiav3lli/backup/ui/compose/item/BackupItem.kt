@@ -34,9 +34,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.OABX.Companion.backupRoot
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.PackageInfo
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.preferences.pref_altBackupDate
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -46,6 +49,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.LockOpen
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_SHOW_FORMATTER
 import com.machiav3lli.backup.utils.getFormattedDate
+import java.io.File
 import java.time.LocalDateTime
 
 @Composable
@@ -306,15 +310,21 @@ fun RestoreBackupItem(
 }
 
 @OptIn(ExperimentalLayoutApi::class)
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun BackupRestorePreview() {
-    var note by remember { mutableStateOf("a very very very long note text") }
+fun BackupPreview(item: (@Composable (item: Backup) -> Unit) = { BackupItem(it) }) {
+
+    //OABX.fakeContext = LocalContext.current.applicationContext
+
+    var note by remember { mutableStateOf("a very very very very very very very very long note text and even longer") }
+
+    val backupRootLocal = File("/tmp", "backup")
+    backupRoot = StorageFile(backupRootLocal)
 
     val backup = Backup(
         base = PackageInfo(
             packageName = "some.package.name",
-            versionName = "1.2.3.4-some-version",
+            versionName = "1.2.3.4-some-long-version",
             versionCode = 1234,
         ),
         backupDate = LocalDateTime.now(),
@@ -333,6 +343,7 @@ fun BackupRestorePreview() {
         note = note,
         size = 123456789,
     )
+    backup.dir = StorageFile(File(backupRootLocal, "some/subfolder"))
 
     val backup_without_note = backup.copy(note = "", versionName = "1.2.3.4")
     val backup_invalid = backup.copy(packageLabel = "? INVALID", note = "invalid")
@@ -340,45 +351,41 @@ fun BackupRestorePreview() {
     Column(
         modifier = Modifier
             .width(500.dp)
-            .wrapContentHeight()
     ) {
         FlowRow {
             ActionButton("none") {
                 note = ""
+                backup.dir = backupRoot
             }
             ActionButton("short") {
                 note = "note text"
-            }
-            ActionButton("middle") {
-                note = "a longer note text"
+                backup.dir = StorageFile(File(backupRootLocal, "subfolder"))
             }
             ActionButton("long") {
                 note = "a very very very long note text"
+                backup.dir = StorageFile(File(backupRootLocal, "some/subfolder/in/dir"))
             }
             ActionButton("extreme") {
                 note = "a very very very very very very very very long note text and even longer"
+                backup.dir = StorageFile(File(backupRootLocal, "some/subfolder/in/backup/dir"))
             }
             ActionButton("multiline") {
                 note = "a very very very long note text\nmultiple\nlines"
+                backup.dir = StorageFile(File(backupRootLocal, "some/subfolder/in/backup/dir"))
             }
         }
 
-        Text("BackupItem:")
         Spacer(modifier = Modifier.height(8.dp))
-        BackupItem(item = backup)
+        item(backup)
         Spacer(modifier = Modifier.height(8.dp))
-        BackupItem(item = backup_without_note)
+        item(backup_without_note)
         Spacer(modifier = Modifier.height(8.dp))
-        BackupItem(item = backup_invalid)
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text("RestoreItem:")
-        Spacer(modifier = Modifier.height(8.dp))
-        RestoreBackupItem(item = backup, index = 3)
-        Spacer(modifier = Modifier.height(8.dp))
-        RestoreBackupItem(item = backup_without_note, index = 4)
-        Spacer(modifier = Modifier.height(8.dp))
-        RestoreBackupItem(item = backup_invalid, index = 5)
+        item(backup_invalid)
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RestoreBackupPreview() {
+    BackupPreview(item = { RestoreBackupItem(it, index = 0) })
 }
