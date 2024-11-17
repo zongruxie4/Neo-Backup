@@ -21,16 +21,17 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
 
+// TODO re-evaluate its usage as not used
 @Dao
 interface SpecialInfoDao : BaseDao<SpecialInfo> {
     @Query("SELECT COUNT(*) FROM specialinfo")
     fun count(): Long
 
     @Query("SELECT * FROM specialinfo ORDER BY packageName ASC")
-    fun getAll(): MutableList<SpecialInfo>
+    fun getAll(): List<SpecialInfo>
 
     @Query("SELECT * FROM specialinfo WHERE packageName = :packageName")
-    fun get(packageName: String): MutableList<SpecialInfo>
+    fun get(packageName: String): List<SpecialInfo>
 
     @Query("DELETE FROM specialinfo")
     fun emptyTable()

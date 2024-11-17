@@ -28,25 +28,19 @@ interface ScheduleDao : BaseDao<Schedule> {
     fun count(): Long
 
     @Query("SELECT * FROM schedule WHERE id = :id")
-    fun getSchedule(id: Long): Schedule?
+    fun getById(id: Long): Schedule?
 
     @Query("SELECT * FROM schedule WHERE name = :name")
-    fun getSchedule(name: String): Schedule?
+    fun getByName(name: String): Schedule?
 
     @Query("SELECT * FROM schedule WHERE id = :id")
-    fun getScheduleFlow(id: Long): Flow<Schedule?>
+    fun getByIdFlow(id: Long): Flow<Schedule?>
 
     @Query("SELECT customList FROM schedule WHERE id = :id")
-    fun _getCustomListFlow(id: Long): Flow<String?>
-
-    @Query("SELECT customList FROM schedule WHERE id = :id")
-    fun _getCustomList(id: Long): String?
+    fun getCustomListFlow(id: Long): Flow<String?>
 
     @Query("SELECT blockList FROM schedule WHERE id = :id")
-    fun _getBlockListFlow(id: Long): Flow<String?>
-
-    @Query("SELECT blockList FROM schedule WHERE id = :id")
-    fun _getBlockList(id: Long): String?
+    fun getBlockListFlow(id: Long): Flow<String?>
 
     @Query("SELECT * FROM schedule ORDER BY id ASC")
     fun getAll(): List<Schedule>
@@ -55,7 +49,7 @@ interface ScheduleDao : BaseDao<Schedule> {
     fun getAllFlow(): Flow<List<Schedule>>
 
     @Query("DELETE FROM schedule")
-    fun deleteAll()
+    fun emptyTable()
 
     @Query("DELETE FROM schedule WHERE id = :id")
     fun deleteById(id: Long)
