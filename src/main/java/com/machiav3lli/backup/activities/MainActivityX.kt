@@ -123,7 +123,7 @@ class MainActivityX : BaseActivity() {
     private lateinit var openDialog: MutableState<Boolean>
     private lateinit var dialogKey: MutableState<DialogKey?>
 
-    val viewModel: MainVM by viewModel() // TODO remove usage in other classes
+    private val viewModel: MainVM by viewModel()
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -20,7 +20,6 @@ package com.machiav3lli.backup.entity
 import android.app.usage.StorageStats
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.dbs.entity.Backup
@@ -39,7 +38,8 @@ import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.getBackupRoot
-import kotlinx.coroutines.launch
+import com.machiav3lli.backup.viewmodels.MainVM
+import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.io.File
 
@@ -171,11 +171,7 @@ class Package {
             } ${TraceUtils.methodName(2)}"
         }
         backupList = backups
-        OABX.main?.viewModel?.viewModelScope?.launch {
-            OABX.main?.viewModel?.backupsUpdateFlow?.emit(
-                Pair(packageName, backups.sortedByDescending { it.backupDate })
-            )
-        }
+        get<MainVM>(MainVM::class.java).updateBackups(packageName, backups)
     }
 
     fun getBackupsFromBackupDir(): List<Backup> {
@@ -349,11 +345,7 @@ class Package {
             }
         }
         backupList = backups
-        OABX.main?.viewModel?.viewModelScope?.launch {
-            OABX.main?.viewModel?.backupsUpdateFlow?.emit(
-                Pair(packageName, backups.sortedByDescending { it.backupDate })
-            )
-        }
+        get<MainVM>(MainVM::class.java).updateBackups(packageName, backups)
     }
 
     val backupsNewestFirst: List<Backup>
