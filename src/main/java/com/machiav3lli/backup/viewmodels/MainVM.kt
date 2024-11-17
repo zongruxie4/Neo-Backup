@@ -80,7 +80,8 @@ class MainVM(
     private val backupSortFilterModelFlow = prefs.backupSortFilterFlow()
     private val restoreSortFilterModelFlow = prefs.restoreSortFilterFlow()
 
-    val backupsUpdateFlow = MutableSharedFlow<Pair<String, List<Backup>>?>()
+    // TODO move logic to observeData()
+    private val backupsUpdateFlow = MutableSharedFlow<Pair<String, List<Backup>>?>()
 
     // Used as channel to update the database
     val backupsUpdate = backupsUpdateFlow
@@ -311,6 +312,14 @@ class MainVM(
                     prefs.enabledFilterHome.value = value.enabledFilter
                 }
             }
+        }
+    }
+
+    fun updateBackups(packageName: String, backups: List<Backup>) {
+        viewModelScope.launch {
+            backupsUpdateFlow.emit(
+                Pair(packageName, backups.sortedByDescending { it.backupDate })
+            )
         }
     }
 
