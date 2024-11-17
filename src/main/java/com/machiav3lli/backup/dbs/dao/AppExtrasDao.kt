@@ -28,10 +28,10 @@ interface AppExtrasDao : BaseDao<AppExtras> {
     fun count(): Long
 
     @Query("SELECT * FROM appextras ORDER BY packageName ASC")
-    fun getAll(): MutableList<AppExtras>
+    fun getAll(): List<AppExtras>
 
     @Query("SELECT * FROM appextras ORDER BY packageName ASC")
-    fun getAllFlow(): Flow<MutableList<AppExtras>>
+    fun getAllFlow(): Flow<List<AppExtras>>
 
     @Query("SELECT * FROM appextras WHERE packageName = :packageName")
     fun get(packageName: String): AppExtras

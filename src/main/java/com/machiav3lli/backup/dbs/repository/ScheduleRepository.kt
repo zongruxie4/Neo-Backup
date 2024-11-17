@@ -26,20 +26,20 @@ class ScheduleRepository(
     fun getAll() = db.getScheduleDao().getAll()
 
     fun getScheduleFlow(id: Flow<Long>) = id.flatMapLatest {
-        db.getScheduleDao().getScheduleFlow(it)
+        db.getScheduleDao().getByIdFlow(it)
     }.flowOn(Dispatchers.IO)
 
-    fun getSchedule(id: Long) = db.getScheduleDao().getSchedule(id)
+    fun getSchedule(id: Long) = db.getScheduleDao().getById(id)
 
-    fun getSchedule(name: String) = db.getScheduleDao().getSchedule(name)
+    fun getSchedule(name: String) = db.getScheduleDao().getByName(name)
 
     fun getCustomListFlow(id: Flow<Long>): Flow<Set<String>> = id.flatMapLatest {
-        db.getScheduleDao()._getCustomListFlow(it)
+        db.getScheduleDao().getCustomListFlow(it)
             .map { string -> Converters().toStringSet(string) }
     }.flowOn(Dispatchers.IO)
 
     fun getBlockListFlow(id: Flow<Long>): Flow<Set<String>> = id.flatMapLatest {
-        db.getScheduleDao()._getBlockListFlow(it)
+        db.getScheduleDao().getBlockListFlow(it)
             .map { string -> Converters().toStringSet(string) }
     }.flowOn(Dispatchers.IO)
 

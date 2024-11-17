@@ -37,7 +37,7 @@ interface BlocklistDao : BaseDao<Blocklist> {
     fun getBlocklistedPackages(blocklistId: Long): List<String>
 
     @Query("DELETE FROM blocklist")
-    fun deleteAll()
+    fun emptyTable()
 
     @Query("DELETE FROM blocklist WHERE blocklistId = :blocklistId")
     fun deleteById(blocklistId: Long)
