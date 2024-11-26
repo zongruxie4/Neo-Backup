@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -59,6 +60,7 @@ import com.machiav3lli.backup.OABX.Companion.endBusy
 import com.machiav3lli.backup.OABX.Companion.isDebug
 import com.machiav3lli.backup.SELECTIONS_FOLDER_NAME
 import com.machiav3lli.backup.batchModes
+import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.entity.IntPref
 import com.machiav3lli.backup.entity.Package
@@ -904,6 +906,7 @@ fun MainPackageItem(
         ),
         leadingContent = {
             PackageIcon(
+                modifier = Modifier.alpha(if (pkg.isSpecial && pkg.packageInfo !is SpecialInfo) 0.5f else 1f),  //TODO hg42 pkg.cannotHandle or similar
                 item = pkg,
                 imageData = pkg.iconData,
                 imageLoader = imageLoader,
