@@ -38,12 +38,12 @@ import com.machiav3lli.backup.entity.IntPref
 import com.machiav3lli.backup.entity.LaunchPref
 import com.machiav3lli.backup.entity.Pref
 import com.machiav3lli.backup.entity.PrefUI
+import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.handler.ShellHandler.Companion.findSuCommand
 import com.machiav3lli.backup.handler.ShellHandler.Companion.isLikeRoot
 import com.machiav3lli.backup.handler.ShellHandler.Companion.suCommand
 import com.machiav3lli.backup.handler.ShellHandler.Companion.validateSuCommand
-import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.preferences.ui.PrefsExpandableGroupHeader
 import com.machiav3lli.backup.preferences.ui.PrefsGroup
 import com.machiav3lli.backup.preferences.ui.PrefsGroupCollapsed
@@ -247,15 +247,18 @@ val pref_suCommand = SuCommandPref(
             Color.Red
         }
     },
-    defaultValue = suCommand_default,
+    defaultValue = "",
 ) {
     val pref = it as SuCommandPref
-    if (pref.value == "")
-        pref.value = suCommand_default
-    if (pref.value != suCommand) {
-        if (!validateSuCommand(pref.value)) {
+    var test = pref.value
+    if (test == "")
+        test = suCommand_default
+    if (test != suCommand) {
+        if (!validateSuCommand(test)) {
             findSuCommand()
             traceDebug { "findSuCommand: suCommand = $suCommand" }
+            if (pref.value == "")
+                pref.value = suCommand
         }
     }
     pref.summary = suCommand_summary
