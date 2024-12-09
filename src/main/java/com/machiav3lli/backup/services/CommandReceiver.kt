@@ -6,8 +6,9 @@ import android.content.Intent
 import com.machiav3lli.backup.ACTION_CANCEL
 import com.machiav3lli.backup.ACTION_CANCEL_SCHEDULE
 import com.machiav3lli.backup.ACTION_CRASH
-import com.machiav3lli.backup.ACTION_RESCHEDULE
-import com.machiav3lli.backup.ACTION_SCHEDULE
+import com.machiav3lli.backup.ACTION_RE_SCHEDULE
+import com.machiav3lli.backup.ACTION_RUN_SCHEDULE
+import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
@@ -43,7 +44,7 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                 OABX.work.cancel(batchName)
             }
 
-            ACTION_SCHEDULE        -> {
+            ACTION_RUN_SCHEDULE -> {
                 intent.getStringExtra("name")?.let { name ->
                     OABX.addInfoLogText("$command $name")
                     Timber.d("################################################### command intent schedule -------------> name=$name")
@@ -58,11 +59,11 @@ class CommandReceiver : //TODO hg42 how to maintain security?
             ACTION_CANCEL_SCHEDULE -> {
                 intent.getLongExtra(EXTRA_SCHEDULE_ID, -1L).takeIf { it != -1L }?.let { id ->
                     Timber.d("################################################### command cancel schedule -------------> id=$id")
-                    ScheduleWork.cancel(context, id)
+                    ScheduleWork.cancel(context, id, intent.getBooleanExtra(EXTRA_PERIODIC, false))
                 }
             }
 
-            ACTION_RESCHEDULE      -> { // TODO reconsider when ScheduleWork is fully implemented
+            ACTION_RE_SCHEDULE -> { // TODO reconsider when ScheduleWork is fully implemented
                 intent.getStringExtra("name")?.let { name ->
                     val now = SystemUtils.now
                     val time = intent.getStringExtra("time")
