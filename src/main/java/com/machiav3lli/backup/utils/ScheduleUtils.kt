@@ -39,12 +39,10 @@ import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
-fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
+fun calcRuntimeDiff(schedule: Schedule): Pair<Long, Long> {
+    val now = Calendar.getInstance()
     val c = Calendar.getInstance()
-    c.timeInMillis = schedule.timePlaced
-
-    val limitIncrements = 366 / schedule.interval
-    val minTimeFromNow = TimeUnit.MINUTES.toMillis(1)
+    var nIncrements = 0
 
     val fakeMin = pref_fakeScheduleMin.value
     if (fakeMin > 1) {
@@ -52,10 +50,7 @@ fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
         c[Calendar.MINUTE] = (c[Calendar.MINUTE] / fakeMin + 1) * fakeMin % 60
         c[Calendar.SECOND] = 0
         c[Calendar.MILLISECOND] = 0
-        var nIncrements = 0
-        repeat(limitIncrements) {
-            if (c.timeInMillis > now + minTimeFromNow)
-                return@repeat
+        while (c.before(now)) {
             c.add(Calendar.MINUTE, fakeMin)
             nIncrements++
         }
@@ -65,23 +60,17 @@ fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
         c[Calendar.MINUTE] = schedule.timeHour
         c[Calendar.SECOND] = schedule.timeMinute
         c[Calendar.MILLISECOND] = 0
-        var nIncrements = 0
-        repeat(limitIncrements) {
-            if (c.timeInMillis > now + minTimeFromNow)
-                return@repeat
+        while (c.before(now)) {
             c.add(Calendar.HOUR, schedule.interval)
             nIncrements++
         }
-        traceSchedule { "[${schedule.id}] added $nIncrements * ${schedule.interval} min" }
+        traceSchedule { "[${schedule.id}] added $nIncrements * ${schedule.interval} hours" }
     } else {
         c[Calendar.HOUR_OF_DAY] = schedule.timeHour
         c[Calendar.MINUTE] = schedule.timeMinute
         c[Calendar.SECOND] = 0
         c[Calendar.MILLISECOND] = 0
-        var nIncrements = 0
-        repeat(limitIncrements) {
-            if (c.timeInMillis > now + minTimeFromNow)
-                return@repeat
+        while (c.before(now)) {
             c.add(Calendar.DAY_OF_MONTH, schedule.interval)
             nIncrements++
         }
@@ -92,14 +81,14 @@ fun calculateTimeToRun(schedule: Schedule, now: Long): Long {
         "[${schedule.id}] calculateTimeToRun: next: ${
             ISO_DATE_TIME_FORMAT.format(c.timeInMillis)
         } now: ${
-            ISO_DATE_TIME_FORMAT.format(now)
+            ISO_DATE_TIME_FORMAT.format(now.timeInMillis)
         } placed: ${
             ISO_DATE_TIME_FORMAT.format(schedule.timePlaced)
         } interval: ${
             schedule.interval
         }"
     }
-    return c.timeInMillis
+    return Pair(c.timeInMillis, c.timeInMillis - now.timeInMillis)
 }
 
 val updateInterval = 1_000L
@@ -108,10 +97,9 @@ val useSeconds = updateInterval < 60_000
 fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
     var absTime = ""
     var relTime = ""
-    val now = SystemUtils.now
-    val at = calculateTimeToRun(schedule, now)
+    val (at, diff) = calcRuntimeDiff(schedule)
     absTime = ISO_DATE_TIME_FORMAT_MIN.format(at)
-    val timeDiff = max(at - now, 0)
+    val timeDiff = max(diff, 0)
     val remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(timeDiff).toInt()
     val days = TimeUnit.MILLISECONDS.toDays(timeDiff).toInt()
     if (days != 0) {
@@ -150,7 +138,7 @@ fun scheduleNext(context: Context, scheduleId: Long, rescheduleBoolean: Boolean)
 
             if (rescheduleBoolean) {
                 schedule = schedule.copy(timePlaced = now)
-                traceSchedule { "[${schedule?.id}] re-scheduling $schedule" }
+                traceSchedule { "[${schedule.id}] re-scheduling $schedule" }
                 scheduleRepo.update(schedule)
             }
             ScheduleWork.schedule(context, schedule)
