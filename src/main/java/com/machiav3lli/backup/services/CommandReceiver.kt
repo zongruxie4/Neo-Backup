@@ -49,7 +49,7 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                     Timber.d("################################################### command intent schedule -------------> name=$name")
                     CoroutineScope(Dispatchers.Default).launch {
                         scheduleRepo.getSchedule(name)?.let { schedule ->
-                            ScheduleWork.schedule(context, schedule, true)
+                            ScheduleWork.enqueueImmediate(context, schedule)
                         }
                     }
                 }

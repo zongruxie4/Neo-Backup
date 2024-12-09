@@ -141,7 +141,7 @@ fun scheduleNext(context: Context, scheduleId: Long, rescheduleBoolean: Boolean)
                 traceSchedule { "[${schedule.id}] re-scheduling $schedule" }
                 scheduleRepo.update(schedule)
             }
-            ScheduleWork.schedule(context, schedule)
+            ScheduleWork.enqueuePeriodic(context, schedule, rescheduleBoolean)
         }
     } else {
         Timber.e("[$scheduleId] got id from $context")
