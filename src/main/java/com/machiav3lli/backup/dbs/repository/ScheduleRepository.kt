@@ -78,6 +78,7 @@ class ScheduleRepository(
     suspend fun deleteById(id: Long) {
         withContext(Dispatchers.IO) {
             db.getScheduleDao().deleteById(id)
+            ScheduleWork.cancel(appContext, id)
         }
     }
 }

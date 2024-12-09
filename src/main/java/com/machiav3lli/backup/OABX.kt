@@ -193,10 +193,6 @@ class OABX : Application() {
     }
 
     override fun onTerminate() {
-
-        // in case the app is terminated too early
-        scheduleAlarmsOnce()
-
         work.release()
         refNB = WeakReference(null)
         super.onTerminate()
@@ -420,8 +416,6 @@ class OABX : Application() {
                 activityRefs.removeIf { it.get() == null }
                 traceDebug { "activities(add): ${activityRefs.map { classAndId(it.get()) }}" }
             }
-
-            scheduleAlarmsOnce()        // if any activity is started
         }
 
         fun resumeActivity(activity: Activity) {
