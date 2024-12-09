@@ -85,9 +85,9 @@ const val MAIN_DB_NAME = "main.db"
 const val PACKAGES_LIST_GLOBAL_ID = -1L
 
 const val ACTION_CANCEL = "cancel"
-const val ACTION_SCHEDULE = "schedule"
+const val ACTION_RUN_SCHEDULE = "schedule"
 const val ACTION_CANCEL_SCHEDULE = "cancel_schedule"
-const val ACTION_RESCHEDULE = "reschedule"
+const val ACTION_RE_SCHEDULE = "reschedule"
 const val ACTION_CRASH = "crash"
 
 enum class DialogMode {
@@ -124,6 +124,7 @@ const val PREFS_LANGUAGES_SYSTEM = "system"
 const val EXTRA_PACKAGE_NAME = "packageName"
 const val EXTRA_BACKUP_BOOLEAN = "backupBoolean"
 const val EXTRA_SCHEDULE_ID = "scheduleId"
+const val EXTRA_PERIODIC = "periodic"
 const val EXTRA_NAME = "name"
 const val EXTRA_STATS = "stats"
 
