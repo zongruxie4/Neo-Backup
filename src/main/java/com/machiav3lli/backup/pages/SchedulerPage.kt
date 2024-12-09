@@ -146,7 +146,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
                     primaryText = stringResource(R.string.dialogOK),
                     primaryAction = {
                         if (schedule.mode != MODE_UNSET)
-                            ScheduleWork.schedule(OABX.context, schedule, true)
+                            ScheduleWork.enqueueImmediate(OABX.context, schedule)
                     },
                 )
 
