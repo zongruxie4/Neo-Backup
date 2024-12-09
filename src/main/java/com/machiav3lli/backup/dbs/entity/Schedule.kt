@@ -125,7 +125,6 @@ data class Schedule(
                 ", timeMinute=" + timeMinute +
                 ", interval=" + interval +
                 ", timePlaced=" + timePlaced +
-                ", timeToRun=" + timeToRun +
                 ", filter=" + filter +
                 ", mode=" + mode +
                 ", launchableFilter=" + launchableFilter +

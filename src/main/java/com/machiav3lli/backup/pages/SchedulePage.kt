@@ -406,7 +406,6 @@ fun SchedulePage(
                         fullWidth = false
                     ) {
                         viewModel.deleteSchedule()
-                        ScheduleWork.cancel(context, scheduleId)
                         onDismiss()
                     }
                     ElevatedActionButton(
@@ -494,7 +493,7 @@ fun SchedulePage(
                         primaryText = stringResource(R.string.dialogOK),
                         primaryAction = {
                             if (schedule.mode != MODE_UNSET)
-                                ScheduleWork.schedule(OABX.context, schedule, true)
+                                ScheduleWork.enqueueImmediate(OABX.context, schedule)
                         },
                     )
 
