@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -97,14 +98,18 @@ fun SortFilterSheet(
     val context = LocalContext.current
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
     val packageList by viewModel.notBlockedList.collectAsState()
-    var model by rememberSaveable {
+    val state by remember(sourcePage) {
         mutableStateOf(
             when (sourcePage) {
                 NavItem.Backup -> viewModel.backupState
                 NavItem.Restore -> viewModel.restoreState
                 else -> viewModel.homeState // NavItem.Home
-            }.value.sortFilter
+            }
         )
+    }
+    val stateModel by state.collectAsState()
+    var model by rememberSaveable(stateModel.sortFilter) {
+        mutableStateOf(state.value.sortFilter)
     }
 
     fun currentStats() = getStats(
