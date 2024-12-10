@@ -1,7 +1,55 @@
 CHANGELOG
 =========
 
-8.3.8 (04.08.2024) +30 Commits & +9 0 Translations
+8.3.9 (10.12.2024) +230 Commits & +80 Translations
+------------
+
+#### Function
+
+- Add: Logic repositories in view models
+- Add: Scheduling worker (revamp scheduling logic)
+- Fix: Neo Backup not being on default SMS list (credit @dl200010)
+- Fix: InvalidBackup directory & packageNameFixed
+- Fix: Root access not working and fallback to SAF
+- Fix: Specials restore
+- Fix: Synchronizing backups
+- Fix: Empty properties files
+- Fix: ShadowRoot sub-folder not working
+- Fix: Possible deletion of built-in plugin
+- Update: Revamp & single-inject all view models
+- Update: Revamp permissions handling
+- Update: Revamp SortFilterModel handling
+- Update: (DevTools) allow search operators (and='+' or=',')
+- Update: (DevTools) ignore single char search pattern
+- Update: Simplify DAOs
+- Update: Replace unsafe string context menu action with enum
+- Update: Set pauseApps default to false (true causing increasingly problems)
+- Remove: Proxy usages of viewmodels, powermanager over OABX
+- Fix: Sorting locales for reproducible build (@obfusk)
+- CompileSdk 35
+
+#### UI & UX
+
+- Add: Different sorting/filtering for different pages
+- Add: Adaptive layout in Main & PrefsPage
+- Add: ListDetail layout for Home & Scheduler pages
+- Add: App & data size to sort/filter sheet
+- Add: Version code to BackupItem
+- Add: Data partial selection to context menu
+- Add: Share action to plugin editor
+- Add: Use Preferences button to jump to DevTools on RootMissing
+- Add: Make invalid backups visible
+- Fix: Empty terminal text
+- Fix: (DevTools) closing when there is no real activity
+- Update: Revamp sheets layouts
+- Update: Revamp backups layouts
+- Update: Split BlockBorder to Top & Bottom
+- Update: Hide schedule Tags filters when empty
+- Update: Replace AlertDialog usage with composables
+- Update: Make schedule backup types initially open and on top
+- Update: Animate Permission cards
+
+8.3.8 (04.08.2024) +30 Commits & +90 Translations
 ------------
 
 #### Function
