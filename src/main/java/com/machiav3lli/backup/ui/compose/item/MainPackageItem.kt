@@ -88,6 +88,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import java.util.concurrent.Executors
 import kotlin.math.roundToInt
@@ -235,12 +236,12 @@ fun TextInputMenuItem(
 @Composable
 fun Selections(
     action: MenuAction,
+    viewModel: MainVM = koinViewModel(),
     selection: Set<String> = emptySet(),
     onAction: (Set<String>) -> Unit = {},
 ) {
     val backupRoot = koinInject<Context>().getBackupRoot()
     val scope = rememberCoroutineScope()
-    val viewModel = koinInject<MainVM>()
     val selectionsDir = backupRoot.findFile(SELECTIONS_FOLDER_NAME)
         ?: backupRoot.createDirectory(SELECTIONS_FOLDER_NAME)
     val files = selectionsDir.listFiles()

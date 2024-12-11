@@ -459,7 +459,6 @@ class OABX : Application() {
                 mainRef = WeakReference(mainActivity)
             }
         var mainSaved: MainActivityX? = null    // just to see if activity changed
-        var viewModelSaved: ViewModel? = null
 
         var appsSuspendedChecked = false
 

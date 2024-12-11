@@ -150,14 +150,6 @@ class MainActivityX : BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
-        Timber.d(
-            "viewModel: ${
-                classAndId(viewModel)
-            }, was ${
-                classAndId(OABX.viewModelSaved)
-            }"
-        )
-
         //TODO wech begin ??? or is this necessary with resume or similar?
 
         //TODO here or in MainPage? MainPage seems to be weird at least for each recomposition
@@ -318,7 +310,6 @@ class MainActivityX : BaseActivity() {
     }
 
     override fun onDestroy() {
-        OABX.viewModelSaved = viewModel
         OABX.mainSaved = OABX.main
         OABX.main = null
         super.onDestroy()
