@@ -108,6 +108,7 @@ class OABX : Application() {
     // TODO Add BroadcastReceiver for (UN)INSTALL_PACKAGE intents
 
     init {
+        Timber.w("======================================== app ${classAndId(this)} koin startup")
         onKoinStartup {
             // TODO to be replaced in koin 4.0.1
             androidLogger()

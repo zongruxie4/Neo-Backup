@@ -10,6 +10,47 @@ import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 import kotlin.reflect.KClass
 
+/* only api33++
+
+object InstanceCounter {
+    private val cleaner = Cleaner.create()
+    private val counts = mutableMapOf<String, Int>()
+
+    fun register(category: String = this::class.simpleName ?: "Unknown"): Cleaner.Cleanable {
+        counts[category] = (counts[category] ?: 0) + 1
+        return cleaner.register(Any()) {
+            synchronized(this) {
+                counts[category] = (counts[category] ?: 1) - 1
+            }
+        }
+    }
+
+    fun getInstanceCount(category: String): Int {
+        return counts[category] ?: 0
+    }
+}
+
+*/
+
+/* potential useful, to see which instances are still alive
+
+object InstanceTracker {
+    private val trackedInstances = mutableMapOf<String, MutableSet<WeakReference<Any>>>()
+
+    fun registerInstance(obj: Any, category: String = obj::class.simpleName ?: "Unknown") {
+        trackedInstances.getOrPut(category) { mutableSetOf() }
+            .add(WeakReference(obj))
+    }
+
+    fun getInstanceCount(category: String): Int {
+        return trackedInstances[category]?.count { it.get() != null } ?: 0
+    }
+}
+
+*/
+
+
+
 object TraceUtils {
 
     // only use these in implementations of other trace functions
