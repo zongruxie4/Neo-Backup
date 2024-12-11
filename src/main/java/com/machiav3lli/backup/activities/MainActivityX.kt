@@ -103,7 +103,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import timber.log.Timber
 
@@ -677,12 +676,12 @@ val viewModelsModule = module {
     single { ScheduleRepository(get(), get()) }
     single { AppExtrasRepository(get()) }
     single { ExportsRepository(get(), get(), get()) }
-    viewModel { MainVM(get(), get(), get(), get()) }
-    viewModel { BackupBatchVM() }
-    viewModel { RestoreBatchVM() }
-    viewModel { SchedulesVM(get()) }
-    viewModel { ScheduleVM(get(), get()) }
-    viewModel { AppVM(get(), get()) }
-    viewModel { ExportsVM(get()) }
-    viewModel { LogsVM() }
+    single { MainVM(get(), get(), get(), get()) }
+    single { BackupBatchVM() }
+    single { RestoreBatchVM() }
+    single { SchedulesVM(get()) }
+    single { ScheduleVM(get(), get()) }
+    single { AppVM(get(), get()) }
+    single { ExportsVM(get()) }
+    single { LogsVM() }
 }
