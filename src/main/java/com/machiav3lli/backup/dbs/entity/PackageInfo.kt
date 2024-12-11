@@ -48,7 +48,7 @@ open class PackageInfo(
         versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pi.longVersionCode.toInt()
         else pi.versionCode,
         profileId = try {
-            File(pi.applicationInfo?.dataDir).parentFile?.name?.toInt() ?: -1
+            pi.applicationInfo?.dataDir?.let { File(it).parentFile?.name?.toInt() } ?: -1
         } catch (e: NumberFormatException) {
             -1 // Android System "App" points to /data/system
         },
