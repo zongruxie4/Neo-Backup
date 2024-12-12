@@ -28,10 +28,11 @@ import com.machiav3lli.backup.preferences.traceSchedule
 import com.machiav3lli.backup.tasks.ScheduleWork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
@@ -117,14 +118,17 @@ fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
     return Pair(absTime, relTime)
 }
 
-fun timeLeft(
-    schedule: Schedule,
-): StateFlow<Pair<String, String>> = MutableStateFlow(calcTimeLeft(schedule))
-    .debounce(updateInterval)
+fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
+    while (true) {
+        emit(calcTimeLeft(this@timeLeft))
+        delay(updateInterval)
+    }
+}
+    .flowOn(Dispatchers.Default)
     .stateIn(
-        scope = CoroutineScope(Dispatchers.IO),
-        started = SharingStarted.Lazily,
-        initialValue = calcTimeLeft(schedule)
+        scope = CoroutineScope(Dispatchers.Default),
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = calcTimeLeft(this)
     )
 
 // TODO clean up fully

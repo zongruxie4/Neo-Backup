@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,8 +34,7 @@ fun ScheduleItem(
     onCheckChanged: (Schedule, Boolean) -> Unit = { _: Schedule, _: Boolean -> },
 ) {
     val (checked, check) = mutableStateOf(schedule.enabled)
-    val (absTime, relTime) = timeLeft(schedule)
-        .collectAsState().value
+    val times by schedule.timeLeft().collectAsState()
 
     ListItem(
         modifier = Modifier
@@ -70,9 +70,9 @@ fun ScheduleItem(
             Row {
                 Text(
                     text = if (schedule.enabled)
-                        "🕒 $absTime\n⏳ $relTime"    // TODO replace by resource icons
+                        "🕒 ${times.first}\n⏳ ${times.second}"    // TODO replace by resource icons
                     else
-                        "🕒 $absTime",
+                        "🕒 ${times.first}",
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .weight(1f),

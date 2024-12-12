@@ -123,9 +123,7 @@ fun SchedulePage(
     }
 
     schedule?.let { schedule ->
-        val (absTime, relTime) = timeLeft(schedule)
-            .collectAsState().value
-
+        val times by schedule.timeLeft().collectAsState()
 
         fun refresh(
             schedule: Schedule,
@@ -390,8 +388,8 @@ fun SchedulePage(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         maxLines = 2
                     ) {
-                        Text(text = "🕒 $absTime")
-                        if (schedule.enabled) Text(text = "⏳ $relTime") // TODO replace by resource icons
+                        Text(text = "🕒 ${times.first}")
+                        if (schedule.enabled) Text(text = "⏳ ${times.second}") // TODO replace by resource icons
                     }
                 }
                 Row(
