@@ -620,7 +620,6 @@ val pref_enableSpecialBackups = BooleanPref(
     titleId = R.string.prefs_enablespecial,
     summaryId = R.string.prefs_enablespecial_summary,
     icon = Phosphor.AsteriskSimple,
-    iconTint = { ColorSpecial },
     defaultValue = false,
     onChanged = {
         OABX.main?.get<NeoPrefs>()?.let {
@@ -634,7 +633,6 @@ val pref_disableVerification = BooleanPref(
     titleId = R.string.prefs_disableverification,
     summaryId = R.string.prefs_disableverification_summary,
     icon = Phosphor.AndroidLogo,
-    iconTint = { ColorUpdated },
     defaultValue = true
 )
 
@@ -643,7 +641,6 @@ val pref_giveAllPermissions = BooleanPref(
     titleId = R.string.prefs_restoreallpermissions,
     summaryId = R.string.prefs_restoreallpermissions_summary,
     icon = Phosphor.ShieldStar,
-    iconTint = { ColorDeData },
     defaultValue = false
 )
 

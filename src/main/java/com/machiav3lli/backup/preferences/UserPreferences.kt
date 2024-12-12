@@ -110,7 +110,6 @@ val pref_languages = ListPref(
     key = "user.languages",
     titleId = R.string.prefs_languages,
     icon = Phosphor.Translate,
-    iconTint = { ColorOBB },
     entries = OABX.context.getLanguageList(),
     defaultValue = PREFS_LANGUAGES_SYSTEM,
     onChanged = {
@@ -128,7 +127,6 @@ val pref_appTheme = EnumPref(
     key = "user.appTheme",
     titleId = R.string.prefs_theme,
     icon = Phosphor.Swatches,
-    iconTint = { ColorSpecial },
     entries = themeItems,
     defaultValue = if (OABX.minSDK(31)) THEME_DYNAMIC
     else THEME_SYSTEM,
@@ -226,7 +224,6 @@ val pref_deviceLock = BooleanPref(
     titleId = R.string.prefs_devicelock,
     summaryId = R.string.prefs_devicelock_summary,
     icon = Phosphor.Lock,
-    iconTint = { ColorUpdated },
     defaultValue = false,
     enableIf = { OABX.context.isDeviceLockAvailable() }
 )
@@ -236,7 +233,6 @@ val pref_biometricLock = BooleanPref(
     titleId = R.string.prefs_biometriclock,
     summaryId = R.string.prefs_biometriclock_summary,
     icon = Phosphor.FingerprintSimple,
-    iconTint = { ColorDeData },
     defaultValue = false,
     enableIf = { OABX.context.isBiometricLockAvailable() && isDeviceLockEnabled() }
 )
@@ -246,7 +242,6 @@ val pref_multilineInfoChips = BooleanPref(
     titleId = R.string.prefs_multilineinfochips,
     summaryId = R.string.prefs_multilineinfochips_summary,
     icon = Phosphor.ArrowsOutLineVertical,
-    iconTint = { ColorSystem },
     defaultValue = false
 )
 
@@ -255,7 +250,6 @@ val pref_singularBackupRestore = BooleanPref(
     titleId = R.string.prefs_singularbackuprestore,
     summaryId = R.string.prefs_singularbackuprestore_summary,
     icon = Phosphor.List,
-    iconTint = { ColorSpecial },
     defaultValue = true
 )
 
@@ -272,7 +266,6 @@ val pref_squeezeNavText = BooleanPref(
     titleId = R.string.prefs_squeezenavtext,
     summaryId = R.string.prefs_squeezenavtext_summary,
     icon = Phosphor.TextAa,
-    iconTint = { ColorOBB },
     defaultValue = false
 )
 
@@ -313,7 +306,6 @@ val pref_oldBackups = IntPref(
     titleId = R.string.prefs_oldbackups,
     summaryId = R.string.prefs_oldbackups_summary,
     icon = Phosphor.Clock,
-    iconTint = { ColorExodus },
     entries = (1..30).toList(),
     defaultValue = 2
 )

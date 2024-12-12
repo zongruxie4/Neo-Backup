@@ -58,7 +58,7 @@ import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FolderNotch
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.ifThen
-import com.machiav3lli.backup.ui.compose.theme.ColorExtDATA
+import com.machiav3lli.backup.utils.backupFolderExists
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -265,7 +265,7 @@ fun StringPreferencePreview() {
         key = "user.pathBackupFolder",
         titleId = R.string.prefs_pathbackupfolder,
         icon = Phosphor.FolderNotch,
-        iconTint = { ColorExtDATA },
+        iconTint = { if (backupFolderExists()) Color.Green else Color.Red },
         defaultValue = "path/to/backup/folder",
     )
 
@@ -344,7 +344,7 @@ fun StringEditPreferencePreview() {
             key = "user.pathBackupFolder",
             titleId = R.string.prefs_pathbackupfolder,
             icon = Phosphor.FolderNotch,
-            iconTint = { ColorExtDATA },
+            iconTint = { if (backupFolderExists()) Color.Green else Color.Red },
             defaultValue = "path/to/backup/folder",
         )
 

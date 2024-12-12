@@ -42,9 +42,6 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
 import com.machiav3lli.backup.ui.compose.item.LaunchPreference
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
 import com.machiav3lli.backup.ui.compose.show
-import com.machiav3lli.backup.ui.compose.theme.ColorDeData
-import com.machiav3lli.backup.ui.compose.theme.ColorExodus
-import com.machiav3lli.backup.ui.compose.theme.ColorExtDATA
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.SystemUtils
@@ -309,7 +306,6 @@ val pref_schedulesExportImport = LinkPref(
     titleId = R.string.prefs_schedulesexportimport,
     summaryId = R.string.prefs_schedulesexportimport_summary,
     icon = Phosphor.CalendarX,
-    iconTint = { ColorExtDATA },
 )
 
 val pref_saveAppsList = LinkPref(
@@ -317,7 +313,6 @@ val pref_saveAppsList = LinkPref(
     titleId = R.string.prefs_saveappslist,
     summaryId = R.string.prefs_saveappslist_summary,
     icon = Phosphor.ListNumbers,
-    iconTint = { ColorExodus },
 )
 
 
@@ -378,12 +373,10 @@ val pref_logViewer = LinkPref(
     key = "tool.logViewer",
     titleId = R.string.prefs_logviewer,
     icon = Phosphor.Bug,
-    iconTint = { ColorDeData },
 )
 
 val pref_terminal = LinkPref(
     key = "tool.terminal",
     titleId = R.string.prefs_tools_terminal,
     icon = Phosphor.Bug,
-    iconTint = { ColorDeData },
 )
