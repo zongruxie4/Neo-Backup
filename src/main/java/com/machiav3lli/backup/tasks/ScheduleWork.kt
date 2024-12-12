@@ -108,7 +108,7 @@ class ScheduleWork(
                 return@withContext Result.failure()
             }
 
-            if (runningSchedules[scheduleId] == true) {
+            if (runningSchedules[scheduleId] != null) {
                 val message =
                     "[$scheduleId] duplicate schedule detected: $name (as designed, ignored)"
                 Timber.w(message)
