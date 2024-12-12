@@ -168,9 +168,6 @@ class OABX : Application(), KoinStartup {
                 .build()
         )
 
-        //TODO hg42 beginBusy(startupMsg)
-        hitBusy(60000)
-
         Plugin.ensureScanned()  // before ShellHandler, because plugins are used there
         initShellHandler()
 
@@ -326,9 +323,6 @@ class OABX : Application(), KoinStartup {
         var logSections = mutableMapOf<String, Int>()
             .withDefault { 0 }     //TODO hg42 use AtomicInteger? but map is synchronized anyways
 
-        var startup = true
-        val startupMsg = "******************** startup" // ensure it's the same for begin/end
-
         init {
 
             Timber.plant(object : Timber.DebugTree() {
@@ -389,6 +383,9 @@ class OABX : Application(), KoinStartup {
                 }
             })
         }
+
+        var startup = true
+        val startupMsg = "******************** startup" // ensure it's the same for begin/end
 
         // app should always be created
         var refNB: WeakReference<OABX> = WeakReference(null)
@@ -637,6 +634,9 @@ class OABX : Application(), KoinStartup {
                     }
                 }
             }
+
+            //TODO hg42 beginBusy(startupMsg)
+            hitBusy(120000) // startup
         }
 
         fun hitBusy(time: Int = pref_busyHitTime.value) {
