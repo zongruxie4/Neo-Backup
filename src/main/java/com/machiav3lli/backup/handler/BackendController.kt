@@ -51,6 +51,7 @@ import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.preferences.pref_backupSuspendApps
+import com.machiav3lli.backup.preferences.pref_createInvalidBackups
 import com.machiav3lli.backup.preferences.pref_earlyEmptyBackups
 import com.machiav3lli.backup.preferences.pref_lookForEmptyBackups
 import com.machiav3lli.backup.preferences.traceBackupsScan
@@ -233,7 +234,7 @@ suspend fun scanBackups(
         if (damagedOp != null)
             renameDamagedToERROR(dir, "empty-backup")
         else
-            onInvalidBackup(dir, file, null, "empty")
+            onInvalidBackup(dir, file, null, "empty-backup")
     }
 
     suspend fun handleProps(
@@ -582,7 +583,7 @@ fun Context.findBackups(
 
         val backupRoot = getBackupRoot()
 
-        val count = AtomicInteger(0)
+        //val count = AtomicInteger(0)
 
         when (1) {
             1 -> {
@@ -595,7 +596,7 @@ fun Context.findBackups(
                         damagedOp = damagedOp,
                         forceTrace = forceTrace,
                         onValidBackup = { props ->
-                            count.getAndIncrement()
+                            //count.getAndIncrement()
                             Backup.createFrom(props)
                                 ?.let { backup ->
                                     //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
@@ -606,15 +607,17 @@ fun Context.findBackups(
                                 }
                         },
                         onInvalidBackup = { dir: StorageFile, props: StorageFile?, packageName: String?, why: String? ->
-                            count.getAndIncrement()
-                            Backup.createInvalidFrom(dir, props, packageName, why)
-                                ?.let { backup ->
-                                    //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
-                                    synchronized(backupsMap) {
-                                        backupsMap.getOrPut(backup.packageName) { mutableListOf() }
-                                            .add(backup)
+                            //count.getAndIncrement()
+                            if (pref_createInvalidBackups.value) {
+                                Backup.createInvalidFrom(dir, props, packageName, why)
+                                    ?.let { backup ->
+                                        //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
+                                        synchronized(backupsMap) {
+                                            backupsMap.getOrPut(backup.packageName) { mutableListOf() }
+                                                .add(backup)
+                                        }
                                     }
-                                }
+                            }
                         }
                     )
                 }

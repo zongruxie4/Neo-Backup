@@ -27,6 +27,7 @@ import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.regexPackageFolder
+import com.machiav3lli.backup.preferences.pref_createInvalidBackups
 import com.machiav3lli.backup.utils.LocalDateTimeSerializer
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.getBackupRoot
@@ -272,16 +273,22 @@ data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::cla
 
                 serialized = propertiesFile.readText()
 
-                if (serialized.isEmpty())
-                    return createInvalidFrom(propertiesFile, why = "empty-props")
+                val backup = if (serialized.isEmpty()) {
+                    if (pref_createInvalidBackups.value)
+                        createInvalidFrom(propertiesFile, why = "empty-props")
+                    else
+                        null
+                } else {
+                    fromSerialized(serialized)
+                }
 
-                val backup = fromSerialized(serialized)
+                backup?.run {
+                    backup.file = propertiesFile
 
-                //TODO bug: list serialization (jsonPretty, yaml) adds a space in front of each value
-                // found older multiline json and yaml without the bug, so it was introduced lately (by lib versions)
-                backup.permissions = backup.permissions.map { it.trim() } //TODO workaround
-
-                backup.file = propertiesFile
+                    //TODO bug: list serialization (jsonPretty, yaml) adds a space in front of each value
+                    // found older multiline json and yaml without the bug, so it was introduced lately (by lib versions)
+                    backup.permissions = backup.permissions.map { it.trim() } //TODO workaround
+                }
 
                 return backup
 

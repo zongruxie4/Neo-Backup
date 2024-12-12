@@ -484,6 +484,12 @@ val pref_busyHitTime = IntPref(
     defaultValue = 2000
 )
 
+val pref_createInvalidBackups = BooleanPref(
+    key = "dev-alt.createInvalidBackups",
+    summary = "create dummy 'INVALID' backups when detecting errors (for now, do not try to delete them!!!)",
+    defaultValue = false
+)
+
 val pref_lookForEmptyBackups = BooleanPref(
     key = "dev-alt.lookForEmptyBackups",
     summary = "scan for empty backups (slower refresh, especially remote)",
