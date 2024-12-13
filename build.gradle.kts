@@ -57,12 +57,12 @@ android {
         }
     }
 
-    applicationVariants.all { variant ->
-        variant.outputs.all {
+    applicationVariants.all {
+        val variant = this
+        outputs.all {
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
                 "Neo_Backup_${variant.name}_${variant.versionName}.apk"
         }
-        true
     }
 
     buildTypes {
