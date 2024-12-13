@@ -109,6 +109,7 @@ class AppVM(
             packageRepository.deleteBackup(pkg.value, backup) {
                 dismissNow.value = true
             }
+            refreshNow.value = true
         }
     }
 
@@ -117,6 +118,7 @@ class AppVM(
             packageRepository.deleteAllBackups(pkg.value) {
                 dismissNow.value = true
             }
+            refreshNow.value = true
         }
     }
 
