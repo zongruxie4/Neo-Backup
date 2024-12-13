@@ -53,7 +53,6 @@ import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.calcRuntimeDiff
 import com.machiav3lli.backup.utils.filterPackages
-import com.machiav3lli.backup.utils.scheduleNext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -127,7 +126,7 @@ class ScheduleWork(
 
             repeat(1 + pref_fakeScheduleDups.value) {
                 val now = SystemUtils.now
-                scheduleNext(context, scheduleId, true)
+                //scheduleNext(context, scheduleId, true)
 
                 val result = processSchedule(name, now)
                 if (!result) {
@@ -180,6 +179,9 @@ class ScheduleWork(
                     immediate = false
                 )
                 worksList.add(oneTimeWorkRequest)
+
+                if (inputData.getBoolean(EXTRA_PERIODIC, false) && schedule != null)
+                    scheduleRepo.update(schedule.copy(timePlaced = now))
 
                 async {
                     OABX.work.manager.getWorkInfoByIdFlow(oneTimeWorkRequest.id)
@@ -452,10 +454,14 @@ class ScheduleWork(
         fun scheduleAll(context: Context) {
             Thread {
                 val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
+                val workManager = get<WorkManager>(WorkManager::class.java)
                 scheduleRepo.getAll().forEach { schedule ->
                     val scheduleAlreadyRuns = runningSchedules[schedule.id] == true
+                    val scheduled = workManager
+                        .getWorkInfosForUniqueWork("$SCHEDULE_WORK${schedule.id}")
+                        .get().any { !it.state.isFinished }
                     when {
-                        scheduleAlreadyRuns -> {
+                        scheduleAlreadyRuns || scheduled -> {
                             traceSchedule { "[${schedule.id}]: ignore $schedule" }
                         }
 
@@ -470,6 +476,7 @@ class ScheduleWork(
                         }
                     }
                 }
+                workManager.pruneWork()
             }.start()
         }
 
