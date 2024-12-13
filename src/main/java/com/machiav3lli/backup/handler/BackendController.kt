@@ -784,7 +784,7 @@ fun List<AppInfo>.toPackageList(
                         Timber.e("Could not create Package for ${it}: $e")
                         null
                     }
-                    //pkg?.updateBackupList(backupMap[pkg.packageName].orEmpty())
+                    //pkg?.updateBackupList(backupsMap[pkg.packageName].orEmpty())
                     pkg
                 }
                 .toMutableList()

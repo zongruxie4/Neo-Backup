@@ -105,7 +105,6 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val mainState by viewModel.homeState.collectAsState()
-    val packagesList by viewModel.notBlockedList.collectAsState(emptyList())
     val updatedPackages by viewModel.updatedPackages.collectAsState(emptyList())
     val updaterVisible = updatedPackages.isNotEmpty()  // recompose is already triggered above
     var updaterExpanded by remember { mutableStateOf(false) }
@@ -116,11 +115,6 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
     val openBlocklist = rememberSaveable { mutableStateOf(false) }
     val openBatchDialog = remember { mutableStateOf(false) }
     val appSheetPN: MutableState<String?> = remember { mutableStateOf(null) }
-    val appSheetPackage by remember(appSheetPN.value) {
-        mutableStateOf(
-            packagesList.find { it.packageName == appSheetPN.value }
-        )
-    }
 
     traceCompose {
         "HomePage filtered=${

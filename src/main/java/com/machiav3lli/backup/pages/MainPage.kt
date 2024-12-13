@@ -97,42 +97,40 @@ fun MainPage(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 topBar = {
-                    Column {
-                        MainTopBar(
-                            title = stringResource(id = currentPage.title),
-                            expanded = searchExpanded,
-                            query = mainState.searchQuery,
-                            onQueryChanged = { newQuery ->
-                                viewModel.setSearchQuery(newQuery)
-                            },
-                            onClose = {
-                                viewModel.setSearchQuery("")
+                    MainTopBar(
+                        title = stringResource(id = currentPage.title),
+                        expanded = searchExpanded,
+                        query = mainState.searchQuery,
+                        onQueryChanged = { newQuery ->
+                            viewModel.setSearchQuery(newQuery)
+                        },
+                        onClose = {
+                            viewModel.setSearchQuery("")
+                        }
+                    ) {
+                        when (currentPage.destination) {
+                            NavItem.Scheduler.destination -> {
+                                RoundButton(
+                                    icon = Phosphor.Prohibit,
+                                    description = stringResource(id = R.string.sched_blocklist)
+                                ) { openBlocklist.value = true }
+                                RoundButton(
+                                    description = stringResource(id = R.string.prefs_title),
+                                    icon = Phosphor.GearSix
+                                ) { navController.navigate(NavItem.Prefs.destination) }
                             }
-                        ) {
-                            when (currentPage.destination) {
-                                NavItem.Scheduler.destination -> {
-                                    RoundButton(
-                                        icon = Phosphor.Prohibit,
-                                        description = stringResource(id = R.string.sched_blocklist)
-                                    ) { openBlocklist.value = true }
-                                    RoundButton(
-                                        description = stringResource(id = R.string.prefs_title),
-                                        icon = Phosphor.GearSix
-                                    ) { navController.navigate(NavItem.Prefs.destination) }
-                                }
 
-                                else                          -> {
-                                    RoundButton(
-                                        icon = Phosphor.MagnifyingGlass,
-                                        description = stringResource(id = R.string.search),
-                                        onClick = { searchExpanded.value = true }
-                                    )
-                                    RefreshButton { OABX.main?.refreshPackagesAndBackups() }
-                                    RoundButton(
-                                        description = stringResource(id = R.string.prefs_title),
-                                        icon = Phosphor.GearSix
-                                    ) { navController.navigate(NavItem.Prefs.destination) }
-                                }
+                            else                          -> {
+                                RoundButton(
+                                    icon = Phosphor.MagnifyingGlass,
+                                    description = stringResource(id = R.string.search),
+                                    onClick = { searchExpanded.value = true }
+                                )
+                                RefreshButton { OABX.main?.refreshPackagesAndBackups() }
+                                RoundButton(
+                                    description = stringResource(id = R.string.prefs_title),
+                                    icon = Phosphor.GearSix
+                                ) { navController.navigate(NavItem.Prefs.destination) }
                             }
                         }
                     }

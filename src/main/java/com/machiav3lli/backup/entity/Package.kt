@@ -44,9 +44,8 @@ import timber.log.Timber
 import java.io.File
 
 // TODO need to handle some emergent props with empty backupList constructors
-class Package {
-    var packageName: String
-    var packageInfo: com.machiav3lli.backup.dbs.entity.PackageInfo
+data class Package private constructor(val packageName: String) {
+    lateinit var packageInfo: com.machiav3lli.backup.dbs.entity.PackageInfo
     var storageStats: StorageStats? = null
 
     var backupList: List<Backup>
@@ -55,7 +54,7 @@ class Package {
             //Timber.w("-------------------> backups $packageName -> ${formatSortedBackups(backups)}")
             return backups
         }
-        set(backups) {
+        private set(backups) {
             //Timber.w("<=================== backups $packageName <- ${formatSortedBackups(backups)}")
             OABX.putBackups(packageName, backups)
         }
@@ -64,8 +63,7 @@ class Package {
     internal constructor(
         context: Context,
         appInfo: AppInfo,
-    ) {
-        packageName = appInfo.packageName
+    ) : this(appInfo.packageName) {
         this.packageInfo = appInfo
         if (appInfo.installed) refreshStorageStats(context)
     }
@@ -73,8 +71,7 @@ class Package {
     // special packages
     constructor(
         specialInfo: SpecialInfo,
-    ) {
-        packageName = specialInfo.packageName
+    ) : this(specialInfo.packageName) {
         this.packageInfo = specialInfo
     }
 
@@ -82,8 +79,7 @@ class Package {
     constructor(
         context: Context,
         packageInfo: android.content.pm.PackageInfo,
-    ) {
-        this.packageName = packageInfo.packageName
+    ) : this(packageInfo.packageName) {
         this.packageInfo = AppInfo(context, packageInfo)
         refreshStorageStats(context)
     }
@@ -92,8 +88,7 @@ class Package {
     constructor(
         context: Context,
         packageName: String,
-    ) {
-        this.packageName = packageName
+    ) : this(packageName) {
         try {
             val pi = context.packageManager.getPackageInfo(
                 this.packageName,
@@ -186,10 +181,6 @@ class Package {
         return backups
     }
 
-    private fun needBackupList(): List<Backup> {
-        return backupList
-    }
-
     @Throws(
         FileUtils.BackupLocationInAccessibleException::class,
         StorageLocationNotConfiguredException::class
@@ -218,7 +209,7 @@ class Package {
         }
     }
 
-    fun removeBackupFromList(backup: Backup): List<Backup> {
+    private fun removeBackupFromList(backup: Backup): List<Backup> {
         backupList = backupList.filterNot {
             it.packageName == backup.packageName
                     && it.backupDate == backup.backupDate
@@ -226,7 +217,7 @@ class Package {
         return backupList
     }
 
-    fun addBackupToList(backup: Backup): List<Backup> {
+    private fun addBackupToList(backup: Backup): List<Backup> {
         backupList = backupList + backup
         return backupList
     }
@@ -349,12 +340,12 @@ class Package {
     }
 
     val backupsNewestFirst: List<Backup>
-        get() = needBackupList().sortedByDescending { it.backupDate }
+        get() = backupList.sortedByDescending { it.backupDate }
 
     val latestBackup: Backup?
-        get() = needBackupList().maxByOrNull { it.backupDate }
+        get() = backupList.maxByOrNull { it.backupDate }
 
-    val numberOfBackups: Int get() = needBackupList().size
+    val numberOfBackups: Int get() = backupList.size
 
     val isApp: Boolean
         get() = packageInfo is AppInfo && !packageInfo.isSpecial

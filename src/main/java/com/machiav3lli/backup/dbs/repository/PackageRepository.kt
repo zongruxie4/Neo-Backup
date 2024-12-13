@@ -73,7 +73,7 @@ class PackageRepository(
         withContext(Dispatchers.IO) {
             pkg?.let { pkg ->
                 pkg.deleteBackup(backup)
-                if (!pkg.isInstalled && pkg.backupList.isEmpty()) {
+                if (!pkg.isInstalled && pkg.backupList.isEmpty() && backup.packageLabel != "? INVALID") {
                     db.getAppInfoDao().deleteAllOf(pkg.packageName)
                     onDismiss()
                 }

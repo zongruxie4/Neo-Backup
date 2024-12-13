@@ -17,6 +17,7 @@
  */
 package com.machiav3lli.backup.handler
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -30,20 +31,21 @@ import com.machiav3lli.backup.classAddress
 import com.machiav3lli.backup.utils.SystemUtils
 
 fun showNotification(
-        context: Context?,
-        parentActivity: Class<out BaseActivity?>?,
-        id: Int, title: String?, text: String?,
-        autoCancel: Boolean
+    context: Context?,
+    parentActivity: Class<out BaseActivity?>?,
+    id: Int, title: String?, text: String?,
+    autoCancel: Boolean
 ) {
     showNotification(context, parentActivity, id, title, text, "", autoCancel)
 }
 
+@SuppressLint("MissingPermission")
 fun showNotification(
-        context: Context?,
-        parentActivity: Class<out BaseActivity?>?,
-        id: Int, title: String?, text: String?,
-        bigText: String,
-        autoCancel: Boolean
+    context: Context?,
+    parentActivity: Class<out BaseActivity?>?,
+    id: Int, title: String?, text: String?,
+    bigText: String,
+    autoCancel: Boolean
 ) {
     val resultIntent = Intent(context, parentActivity)
     resultIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -59,16 +61,18 @@ fun showNotification(
     val notificationManager = NotificationManagerCompat.from(context!!)
     notificationManager.createNotificationChannel(notificationChannel)
     val notification = NotificationCompat.Builder(context, classAddress("NotificationHandler"))
-            .setGroup(SystemUtils.packageName)
-            .setSortKey("9")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(title)
-            .setStyle(if (bigText.isEmpty()) null
-                      else NotificationCompat.BigTextStyle().bigText(bigText))
-            .setContentText(if (text.isNullOrEmpty()) null else text)
-            .setAutoCancel(autoCancel)
-            .setContentIntent(resultPendingIntent)
-            .build()
+        .setGroup(SystemUtils.packageName)
+        .setSortKey("9")
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setSmallIcon(R.drawable.ic_launcher_foreground)
+        .setContentTitle(title)
+        .setStyle(
+            if (bigText.isEmpty()) null
+            else NotificationCompat.BigTextStyle().bigText(bigText)
+        )
+        .setContentText(if (text.isNullOrEmpty()) null else text)
+        .setAutoCancel(autoCancel)
+        .setContentIntent(resultPendingIntent)
+        .build()
     notificationManager.notify(id, notification)
 }
