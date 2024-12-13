@@ -1,6 +1,23 @@
 CHANGELOG
 =========
 
+8.3.10 (12.12.2024) +15 Commits
+------------
+
+#### Function
+
+- Add: Option to group invalid backups (pref_createInvalidBackups)
+- Fix: Repeated unscheduled run of scheduled schedules
+- Fix: Pulling timeleft for disabled schedules
+- Update: Replace WorkHandler & WorkManager calls with inject
+- Update: Make ViewModels singleton
+
+#### UI & UX
+
+- Fix: Blocking launching apps after force dismiss
+- Fix: Reactivity of schedule timer
+- Fix: Reactivity on deleting backups
+
 8.3.9 (10.12.2024) +230 Commits & +80 Translations
 ------------
 

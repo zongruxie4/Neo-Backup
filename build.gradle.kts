@@ -38,8 +38,8 @@ android {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8319
-        versionName = "8.3.9"
+        versionCode = 8320
+        versionName = "8.3.10"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
 
@@ -130,7 +130,7 @@ android {
                 "/kotlin/**.kotlin_metadata",
                 "/META-INF/**.kotlin_module",
                 "/META-INF/**.pro",
-                "/META-INF/**.version",     // comment out to enable layout inspector
+                //"/META-INF/**.version",     // comment out to enable layout inspector
                 "/META-INF/LICENSE-notice.md",
                 "/META-INF/LICENSE.md"
             )
