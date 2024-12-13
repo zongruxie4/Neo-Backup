@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.work.WorkManager
 import com.charleskorn.kaml.Yaml
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
@@ -729,7 +730,8 @@ class OABX : Application() {
 }
 
 val handlersModule = module {
-    single { WorkHandler(get()) }
+    single { WorkManager.getInstance(get()) }
+    single { WorkHandler(get(), get()) }
     single { ExportsHandler(get()) }
     single { get<Context>().getSystemService(Context.POWER_SERVICE) as PowerManager }
 }

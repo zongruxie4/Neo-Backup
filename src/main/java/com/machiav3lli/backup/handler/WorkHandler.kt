@@ -28,16 +28,16 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class WorkHandler(appContext: Context) {
-
-    var manager: WorkManager
     var actionReceiver: CommandReceiver
     var context: Context = appContext
     val notificationManager: NotificationManagerCompat
     val notificationChannel: NotificationChannel
+class WorkHandler(
+    private val context: Context,
+    private val manager: WorkManager,
+) {
 
     init {
-        manager = WorkManager.getInstance(context)
         actionReceiver = CommandReceiver()
 
         context.registerReceiver(actionReceiver, IntentFilter())
