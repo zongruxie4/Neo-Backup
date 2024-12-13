@@ -357,11 +357,10 @@ fun HomePage(viewModel: MainVM = koinViewModel()) {
             appSheetPN.value = paneNavigator.currentDestination
                 ?.takeIf { it.pane == this.role }?.content?.toString()
 
-            appSheetPackage?.let { app ->
+            appSheetPN.value?.let { packageName ->
                 AnimatedPane {
                     AppPage(
-                        packageName = appSheetPN.value ?: "",
-                        app = app,
+                        packageName = packageName,
                         onDismiss = onDismiss,
                     )
                 }

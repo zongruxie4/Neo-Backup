@@ -26,7 +26,6 @@ import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.dbs.repository.PackageRepository
-import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.showNotification
 import com.machiav3lli.backup.ui.compose.MutableComposableStateFlow
@@ -34,7 +33,7 @@ import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -45,8 +44,14 @@ class AppVM(
     private val appExtrasRepository: AppExtrasRepository,
     private val packageRepository: PackageRepository,
 ) : ViewModel() {
-    private val pkg: MutableStateFlow<Package?> = MutableStateFlow(null)
-    private val packageName = pkg.map { it?.packageName }
+    private val packageName: MutableStateFlow<String> = MutableStateFlow("")
+    val pkg = combine(
+        packageName,
+        packageRepository.getPackagesFlow(),
+        packageRepository.getBackupsFlow(),
+    ) { name, pkgs, bkups ->
+        pkgs.find { it.packageName == name }
+    }
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
@@ -58,7 +63,7 @@ class AppVM(
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        AppExtras(pkg.value?.packageName ?: "")
+        AppExtras(packageName.value)
     )
 
     val snackbarText = MutableComposableStateFlow( // TODO change to MutableStateFlow
@@ -71,8 +76,8 @@ class AppVM(
     val refreshNow = mutableStateOf(true)
     val dismissNow = mutableStateOf(false)
 
-    fun setApp(app: Package) {
-        viewModelScope.launch { pkg.update { app } }
+    fun setApp(pn: String) {
+        viewModelScope.launch { packageName.update { pn } }
     }
 
     fun uninstallApp() {

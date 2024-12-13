@@ -117,7 +117,6 @@ import timber.log.Timber
 @Composable
 fun AppPage(
     packageName: String,
-    app: Package,
     viewModel: AppVM = koinViewModel(),
     mainVM: MainVM = koinViewModel(),
     onDismiss: () -> Unit,
@@ -129,8 +128,7 @@ fun AppPage(
         mutableStateOf(Pair(DialogMode.NONE, Schedule()))
     }
 
-    val thePackages by mainVM.packageMap.collectAsState()
-    val thePackage: Package? = thePackages[packageName]
+    val thePackage by viewModel.pkg.collectAsState(null)
     val snackbarText by viewModel.snackbarText.flow.collectAsState("")
     val appExtras by viewModel.appExtras.collectAsState()
     val refreshNow by viewModel.refreshNow
@@ -141,18 +139,15 @@ fun AppPage(
     val columns = 2
 
     LaunchedEffect(packageName) {
-        viewModel.setApp(app)
+        viewModel.setApp(packageName)
     }
 
     thePackage?.let { pkg ->
 
-        val backups = pkg.backupsNewestFirst
-        val hasBackups = pkg.hasBackups
-
         traceCompose {
-            "AppPage ${thePackage.packageName} ${
+            "AppPage ${pkg.packageName} ${
                 TraceUtils.formatBackups(
-                    backups
+                    pkg.backupsNewestFirst
                 )
             }"
         }
@@ -460,7 +455,7 @@ fun AppPage(
                     }
                 }
                 item {
-                    AnimatedVisibility(visible = hasBackups) {
+                    AnimatedVisibility(visible = pkg.hasBackups) {
                         CardButton(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.delete_all_backups),
@@ -501,7 +496,7 @@ fun AppPage(
                     }
                 }
                 this.items(
-                    items = backups,
+                    items = pkg.backupsNewestFirst,
                     span = { GridItemSpan(columns) }) {
                     BackupItem(
                         it,
@@ -540,7 +535,7 @@ fun AppPage(
                     when (dialogMode) {
                         DialogMode.BACKUP         -> {
                             BackupDialogUI(
-                                appPackage = thePackage,
+                                appPackage = pkg,
                                 openDialogCustom = openDialog,
                             ) { mode ->
                                 if (pref_useWorkManagerForSingleManualJob.value) {
@@ -551,7 +546,7 @@ fun AppPage(
                                     )
                                 } else {
                                     BackupActionTask(
-                                        thePackage, mActivity, OABX.shellHandler!!, mode,
+                                        pkg, mActivity, OABX.shellHandler!!, mode,
                                     ) { message ->
                                         viewModel.snackbarText.value = message
                                     }.execute()
@@ -561,7 +556,7 @@ fun AppPage(
 
                         DialogMode.RESTORE        -> {
                             RestoreDialogUI(
-                                appPackage = thePackage,
+                                appPackage = pkg,
                                 backup = obj as Backup,
                                 openDialogCustom = openDialog,
                             ) { mode ->
@@ -574,7 +569,7 @@ fun AppPage(
                                 } else {
                                     obj.let {
                                         RestoreActionTask(
-                                            thePackage, mActivity, OABX.shellHandler!!, mode,
+                                            pkg, mActivity, OABX.shellHandler!!, mode,
                                             it
                                         ) { message ->
                                             viewModel.snackbarText.value = message
@@ -586,20 +581,20 @@ fun AppPage(
 
                         DialogMode.DELETE         -> {
                             ActionsDialogUI(
-                                titleText = thePackage.packageLabel,
+                                titleText = pkg.packageLabel,
                                 messageText = stringResource(id = R.string.deleteBackupDialogMessage),
                                 onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     snackbarHostState.show(
                                         coroutineScope = coroutineScope,
-                                        message = "${thePackage.packageLabel}: ${
+                                        message = "${pkg.packageLabel}: ${
                                             context.getString(
                                                 R.string.deleteBackup
                                             )
                                         }"
                                     )
-                                    if (!thePackage.hasBackups) {
+                                    if (!pkg.hasBackups) {
                                         Timber.w("UI Issue! Tried to delete backups for app without backups.")
                                         openDialog.value = false
                                     }
@@ -610,7 +605,7 @@ fun AppPage(
 
                         DialogMode.DELETE_ALL     -> {
                             ActionsDialogUI(
-                                titleText = thePackage.packageLabel,
+                                titleText = pkg.packageLabel,
                                 messageText = stringResource(id = R.string.delete_all_backups),
                                 onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
@@ -618,7 +613,7 @@ fun AppPage(
                                     viewModel.deleteAllBackups()
                                     snackbarHostState.show(
                                         coroutineScope = coroutineScope,
-                                        message = "${thePackage.packageLabel}: ${
+                                        message = "${pkg.packageLabel}: ${
                                             context.getString(
                                                 R.string.delete_all_backups
                                             )
@@ -630,14 +625,14 @@ fun AppPage(
 
                         DialogMode.CLEAN_CACHE    -> {
                             ActionsDialogUI(
-                                titleText = thePackage.packageLabel,
+                                titleText = pkg.packageLabel,
                                 messageText = stringResource(id = R.string.clear_cache),
                                 onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
                                     try {
-                                        Timber.i("${thePackage.packageLabel}: Wiping cache")
-                                        ShellCommands.wipeCache(context, thePackage)
+                                        Timber.i("${pkg.packageLabel}: Wiping cache")
+                                        ShellCommands.wipeCache(context, pkg)
                                         viewModel.refreshNow.value = true
                                     } catch (e: ShellCommands.ShellActionFailedException) {
                                         // Not a critical issue
@@ -662,7 +657,7 @@ fun AppPage(
                         DialogMode.FORCE_KILL     -> {
                             val profileId = currentProfile
                             ActionsDialogUI(
-                                titleText = thePackage.packageLabel,
+                                titleText = pkg.packageLabel,
                                 messageText = stringResource(id = R.string.forceKillMessage),
                                 onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
@@ -679,7 +674,7 @@ fun AppPage(
                             val enable = dialogProps.value.second as Boolean
 
                             ActionsDialogUI(
-                                titleText = thePackage.packageLabel,
+                                titleText = pkg.packageLabel,
                                 messageText = stringResource(
                                     id = if (enable) R.string.enablePackage
                                     else R.string.disablePackage
@@ -699,7 +694,7 @@ fun AppPage(
 
                         DialogMode.UNINSTALL      -> {
                             ActionsDialogUI(
-                                titleText = thePackage.packageLabel,
+                                titleText = pkg.packageLabel,
                                 messageText = stringResource(id = R.string.uninstallDialogMessage),
                                 onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
@@ -707,7 +702,7 @@ fun AppPage(
                                     viewModel.uninstallApp()
                                     snackbarHostState.show(
                                         coroutineScope = coroutineScope,
-                                        message = "${thePackage.packageLabel}: ${
+                                        message = "${pkg.packageLabel}: ${
                                             context.getString(
                                                 R.string.uninstallProgress
                                             )
@@ -744,7 +739,7 @@ fun AppPage(
 
                         DialogMode.ENFORCE_LIMIT  -> {
                             ActionsDialogUI(
-                                titleText = thePackage.packageLabel,
+                                titleText = pkg.packageLabel,
                                 messageText = stringResource(
                                     id = R.string.enforce_backups_limit_description,
                                     pref_numBackupRevisions.value
