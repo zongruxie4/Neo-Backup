@@ -104,6 +104,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.dsl.module
+import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 
 @Composable
@@ -442,6 +443,7 @@ class MainActivityX : BaseActivity() {
         val notificationId = now.toInt()
         val batchType = getString(if (backupBoolean) R.string.backup else R.string.restore)
         val batchName = WorkHandler.getBatchName(batchType, now)
+        val workManager = get<WorkManager>(WorkManager::class.java)
 
         val selectedItems = selectedPackageNames
             .mapIndexed { i, packageName ->
@@ -454,7 +456,7 @@ class MainActivityX : BaseActivity() {
         var resultsSuccess = true
         var counter = 0
         val worksList: MutableList<OneTimeWorkRequest> = mutableListOf()
-        OABX.work.beginBatch(batchName)
+        get<WorkHandler>(WorkHandler::class.java).beginBatch(batchName)
         selectedItems.forEach { (packageName, mode) ->
 
             val oneTimeWorkRequest =
@@ -468,8 +470,7 @@ class MainActivityX : BaseActivity() {
                 )
             worksList.add(oneTimeWorkRequest)
 
-            val oneTimeWorkLiveData = WorkManager.getInstance(OABX.context)
-                .getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
+            val oneTimeWorkLiveData = workManager.getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
             oneTimeWorkLiveData.observeForever(
                 object : Observer<WorkInfo?> {    //TODO WECH hg42
                     override fun onChanged(value: WorkInfo?) {
@@ -498,7 +499,7 @@ class MainActivityX : BaseActivity() {
         }
 
         if (worksList.isNotEmpty()) {
-            WorkManager.getInstance(OABX.context)
+            workManager
                 .beginWith(worksList)
                 .enqueue()
         }
@@ -513,6 +514,7 @@ class MainActivityX : BaseActivity() {
         val notificationId = now.toInt()
         val batchType = getString(R.string.restore)
         val batchName = WorkHandler.getBatchName(batchType, now)
+        val workManager = get<WorkManager>(WorkManager::class.java)
 
         val selectedItems = buildList {
             selectedPackageNames.forEach { pn ->
@@ -537,7 +539,7 @@ class MainActivityX : BaseActivity() {
         var resultsSuccess = true
         var counter = 0
         val worksList: MutableList<OneTimeWorkRequest> = mutableListOf()
-        OABX.work.beginBatch(batchName)
+        get<WorkHandler>(WorkHandler::class.java).beginBatch(batchName)
         selectedItems.forEach { (packageName, bi, mode) ->
             val oneTimeWorkRequest = AppActionWork.Request(
                 packageName = packageName,
@@ -550,8 +552,7 @@ class MainActivityX : BaseActivity() {
             )
             worksList.add(oneTimeWorkRequest)
 
-            val oneTimeWorkLiveData = WorkManager.getInstance(OABX.context)
-                .getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
+            val oneTimeWorkLiveData = workManager.getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
             oneTimeWorkLiveData.observeForever(
                 object : Observer<WorkInfo?> {
                     override fun onChanged(value: WorkInfo?) {
@@ -580,7 +581,7 @@ class MainActivityX : BaseActivity() {
         }
 
         if (worksList.isNotEmpty()) {
-            WorkManager.getInstance(OABX.context)
+            workManager
                 .beginWith(worksList)
                 .enqueue()
         }

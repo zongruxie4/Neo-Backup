@@ -70,7 +70,7 @@ class ScheduleRepository(
                 )
             } else {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> cancelAlarm" }
-                ScheduleWork.cancel(appContext, schedule.id)
+                ScheduleWork.cancel(schedule.id)
             }
         }
     }
@@ -78,7 +78,7 @@ class ScheduleRepository(
     suspend fun deleteById(id: Long) {
         withContext(Dispatchers.IO) {
             db.getScheduleDao().deleteById(id)
-            ScheduleWork.cancel(appContext, id)
+            ScheduleWork.cancel(id)
         }
     }
 }

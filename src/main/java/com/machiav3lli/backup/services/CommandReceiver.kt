@@ -12,6 +12,7 @@ import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
+import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.preferences.traceSchedule
 import com.machiav3lli.backup.tasks.ScheduleWork
 import com.machiav3lli.backup.utils.SystemUtils
@@ -21,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -41,16 +43,16 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                 val batchName = intent.getStringExtra("name")
                 Timber.d("################################################### command intent cancel -------------> name=$batchName")
                 OABX.addInfoLogText("$command $batchName")
-                OABX.work.cancel(batchName)
+                get<WorkHandler>(WorkHandler::class.java).cancel(batchName)
             }
 
-            ACTION_RUN_SCHEDULE -> {
+            ACTION_RUN_SCHEDULE    -> {
                 intent.getStringExtra("name")?.let { name ->
                     OABX.addInfoLogText("$command $name")
                     Timber.d("################################################### command intent schedule -------------> name=$name")
                     CoroutineScope(Dispatchers.Default).launch {
                         scheduleRepo.getSchedule(name)?.let { schedule ->
-                            ScheduleWork.enqueueImmediate(context, schedule)
+                            ScheduleWork.enqueueImmediate(schedule)
                         }
                     }
                 }
@@ -59,11 +61,11 @@ class CommandReceiver : //TODO hg42 how to maintain security?
             ACTION_CANCEL_SCHEDULE -> {
                 intent.getLongExtra(EXTRA_SCHEDULE_ID, -1L).takeIf { it != -1L }?.let { id ->
                     Timber.d("################################################### command cancel schedule -------------> id=$id")
-                    ScheduleWork.cancel(context, id, intent.getBooleanExtra(EXTRA_PERIODIC, false))
+                    ScheduleWork.cancel(id, intent.getBooleanExtra(EXTRA_PERIODIC, false))
                 }
             }
 
-            ACTION_RE_SCHEDULE -> { // TODO reconsider when ScheduleWork is fully implemented
+            ACTION_RE_SCHEDULE     -> { // TODO reconsider when ScheduleWork is fully implemented
                 intent.getStringExtra("name")?.let { name ->
                     val now = SystemUtils.now
                     val time = intent.getStringExtra("time")

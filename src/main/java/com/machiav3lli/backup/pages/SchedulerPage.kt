@@ -44,7 +44,6 @@ import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.MODE_UNSET
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dialogs.ActionsDialogUI
@@ -146,7 +145,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
                     primaryText = stringResource(R.string.dialogOK),
                     primaryAction = {
                         if (schedule.mode != MODE_UNSET)
-                            ScheduleWork.enqueueImmediate(OABX.context, schedule)
+                            ScheduleWork.enqueueImmediate(schedule)
                     },
                 )
 

@@ -162,7 +162,7 @@ class ScheduleWork(
             notificationManager.cancel(notificationId)
 
             val batchName = WorkHandler.getBatchName(name, now)
-            OABX.work.beginBatch(batchName)
+            get<WorkHandler>(WorkHandler::class.java).beginBatch(batchName)
 
             var errors = ""
             var resultsSuccess = true
@@ -184,7 +184,7 @@ class ScheduleWork(
                     scheduleRepo.update(schedule.copy(timePlaced = now))
 
                 async {
-                    OABX.work.manager.getWorkInfoByIdFlow(oneTimeWorkRequest.id)
+                    get<WorkManager>(WorkManager::class.java).getWorkInfoByIdFlow(oneTimeWorkRequest.id)
                         .collectLatest { workInfo ->
                             when (workInfo?.state) {
                                 androidx.work.WorkInfo.State.SUCCEEDED,
@@ -220,7 +220,7 @@ class ScheduleWork(
 
             if (worksList.isNotEmpty()) {
                 if (beginSchedule(name, "queueing work")) {
-                    OABX.work.manager
+                    get<WorkManager>(WorkManager::class.java)
                         .beginWith(worksList)
                         .enqueue()
                     workJobs.awaitAll()
@@ -382,9 +382,9 @@ class ScheduleWork(
         private const val SCHEDULE_WORK = "schedule_work_"
         private val runningSchedules = ConcurrentHashMap<Long, Boolean>()
 
-        fun enqueuePeriodic(context: Context, schedule: Schedule, reschedule: Boolean = false) {
+        fun enqueuePeriodic(schedule: Schedule, reschedule: Boolean = false) {
             if (!schedule.enabled) return
-            val workManager = WorkManager.getInstance(context)
+            val workManager = get<WorkManager>(WorkManager::class.java)
 
             val (timeToRun, initialDelay) = calcRuntimeDiff(schedule)
 
@@ -426,9 +426,7 @@ class ScheduleWork(
             }
         }
 
-        fun enqueueImmediate(context: Context, schedule: Schedule) {
-            val workManager = WorkManager.getInstance(context)
-
+        fun enqueueImmediate(schedule: Schedule) {
             val scheduleWorkRequest = OneTimeWorkRequestBuilder<ScheduleWork>()
                 .setInputData(
                     workDataOf(
@@ -441,7 +439,7 @@ class ScheduleWork(
                 .addTag("schedule_${schedule.id}")
                 .build()
 
-            workManager.enqueueUniqueWork(
+            get<WorkManager>(WorkManager::class.java).enqueueUniqueWork(
                 "$SCHEDULE_ONETIME${schedule.id}",
                 ExistingWorkPolicy.REPLACE,
                 scheduleWorkRequest,
@@ -451,7 +449,7 @@ class ScheduleWork(
             }
         }
 
-        fun scheduleAll(context: Context) {
+        fun scheduleAll() {
             Thread {
                 val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
                 val workManager = get<WorkManager>(WorkManager::class.java)
@@ -465,14 +463,14 @@ class ScheduleWork(
                             traceSchedule { "[${schedule.id}]: ignore $schedule" }
                         }
 
-                        schedule.enabled    -> {
+                        schedule.enabled                 -> {
                             traceSchedule { "[${schedule.id}]: enable $schedule" }
-                            enqueuePeriodic(context, schedule, false)
+                            enqueuePeriodic(schedule, false)
                         }
 
-                        else                -> {
+                        else                             -> {
                             traceSchedule { "[${schedule.id}]: cancel $schedule" }
-                            cancel(context, schedule.id, true)
+                            cancel(schedule.id, true)
                         }
                     }
                 }
@@ -480,9 +478,9 @@ class ScheduleWork(
             }.start()
         }
 
-        fun cancel(context: Context, scheduleId: Long, periodic: Boolean = true) {
+        fun cancel(scheduleId: Long, periodic: Boolean = true) {
             traceSchedule { "[$scheduleId]: Canceling" }
-            WorkManager.getInstance(context)
+            get<WorkManager>(WorkManager::class.java)
                 .cancelUniqueWork(
                     "${if (periodic) SCHEDULE_WORK else SCHEDULE_ONETIME}$scheduleId"
                 )

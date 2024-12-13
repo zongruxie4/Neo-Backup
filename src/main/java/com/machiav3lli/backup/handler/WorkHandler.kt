@@ -1,5 +1,7 @@
 package com.machiav3lli.backup.handler
 
+import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -24,22 +26,20 @@ import com.machiav3lli.backup.preferences.pref_maxRetriesPerPackage
 import com.machiav3lli.backup.services.CommandReceiver
 import com.machiav3lli.backup.tasks.AppActionWork
 import com.machiav3lli.backup.utils.SystemUtils
+import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-    var actionReceiver: CommandReceiver
-    var context: Context = appContext
-    val notificationManager: NotificationManagerCompat
-    val notificationChannel: NotificationChannel
 class WorkHandler(
     private val context: Context,
     private val manager: WorkManager,
 ) {
+    private val actionReceiver = CommandReceiver()
+    private val notificationChannel: NotificationChannel
+    private val notificationManager: NotificationManagerCompat
 
     init {
-        actionReceiver = CommandReceiver()
-
         context.registerReceiver(actionReceiver, IntentFilter())
 
         notificationManager = NotificationManagerCompat.from(context)
@@ -82,7 +82,7 @@ class WorkHandler(
 
     fun endBatches() {
         Timber.d("%%%%% ALL PRUNE")
-        OABX.work.prune()
+        get<WorkHandler>(WorkHandler::class.java).prune()
 
         // delete all batches started a long time ago (e.g. a day)
         val longAgo = 24 * 60 * 60 * 1000
@@ -145,6 +145,13 @@ class WorkHandler(
             manager.cancelAllWorkByTag("name:$tag")
         }
     }
+
+    @SuppressLint("MissingPermission")
+    fun notify(notificationId: Int, notification: Notification) =
+        notificationManager.notify(
+            notificationId,
+            notification,
+        )
 
     companion object {
 
@@ -520,15 +527,16 @@ class WorkHandler(
                         }
 
                         val notification = notificationBuilder.build()
+                        val workHandler = get<WorkHandler>(WorkHandler::class.java)
                         Timber.d("%%%%%%%%%%%%%%%%%%%%> $batchName ${batch.notificationId} '$shortText' $notification")
-                        OABX.work.notificationManager.notify(
+                        workHandler.notify(
                             batch.notificationId,
                             notification
                         )
 
                         if (remaining <= 0) {
                             if (batch.nFinished == 0)
-                                OABX.work.endBatch(batchName)
+                                workHandler.endBatch(batchName)
                             batch.nFinished += 1
                         }
                     }
@@ -541,9 +549,10 @@ class WorkHandler(
             } else {
                 packagesState.clear()
                 OABX.setProgress()
-                if (OABX.work.justFinishedAll()) {
+                val workHandler = get<WorkHandler>(WorkHandler::class.java)
+                if (workHandler.justFinishedAll()) {
                     Timber.d("%%%%% ALL $batchesStarted batches, thread ${Thread.currentThread().id}")
-                    OABX.work.endBatches()
+                    workHandler.endBatches()
                 }
             }
         }

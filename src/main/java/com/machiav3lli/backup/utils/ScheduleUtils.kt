@@ -145,7 +145,7 @@ fun scheduleNext(context: Context, scheduleId: Long, rescheduleBoolean: Boolean)
                 traceSchedule { "[${schedule.id}] re-scheduling $schedule" }
                 scheduleRepo.update(schedule)
             }
-            ScheduleWork.enqueuePeriodic(context, schedule, rescheduleBoolean)
+            ScheduleWork.enqueuePeriodic(schedule, rescheduleBoolean)
         }
     } else {
         Timber.e("[$scheduleId] got id from $context")
@@ -167,7 +167,7 @@ fun scheduleAlarmsOnce() { // TODO replace with ScheduleWorker.scheduleAll()
     if (alarmsHaveBeenScheduled)
         return
     alarmsHaveBeenScheduled = true
-    ScheduleWork.scheduleAll(OABX.context)
+    ScheduleWork.scheduleAll()
 }
 
 fun Context.getStartScheduleMessage(schedule: Schedule) = StringBuilder()

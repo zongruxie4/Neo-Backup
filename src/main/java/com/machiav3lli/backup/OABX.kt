@@ -476,8 +476,6 @@ class OABX : Application() {
             }
         }
 
-        val work: WorkHandler get() = NB.work
-
         fun getString(resId: Int) = context.getString(resId)
 
         fun minSDK(sdk: Int): Boolean {

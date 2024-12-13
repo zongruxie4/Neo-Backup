@@ -58,7 +58,6 @@ import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
 import com.machiav3lli.backup.MODE_UNSET
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.dbs.entity.Schedule
@@ -491,7 +490,7 @@ fun SchedulePage(
                         primaryText = stringResource(R.string.dialogOK),
                         primaryAction = {
                             if (schedule.mode != MODE_UNSET)
-                                ScheduleWork.enqueueImmediate(OABX.context, schedule)
+                                ScheduleWork.enqueueImmediate(schedule)
                         },
                     )
 
