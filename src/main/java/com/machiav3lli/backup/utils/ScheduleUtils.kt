@@ -120,7 +120,7 @@ fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
 
 fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
     while (true) {
-        emit(calcTimeLeft(this@timeLeft))
+        if (this@timeLeft.enabled) emit(calcTimeLeft(this@timeLeft))
         delay(updateInterval)
     }
 }
