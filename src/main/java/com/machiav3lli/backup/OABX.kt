@@ -91,7 +91,9 @@ import kotlinx.serialization.modules.SerializersModule
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
-import org.koin.androix.startup.KoinStartup.onKoinStartup
+import org.koin.androix.startup.KoinStartup
+import org.koin.core.annotation.KoinExperimentalAPI
+import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
@@ -102,25 +104,22 @@ import kotlin.system.exitProcess
 
 val RESCUE_NAV get() = "rescue"
 
-class OABX : Application() {
+@KoinExperimentalAPI
+class OABX : Application(), KoinStartup {
 
     val work: WorkHandler by inject()
 
     // TODO Add BroadcastReceiver for (UN)INSTALL_PACKAGE intents
 
-    init {
-        Timber.w("======================================== app ${classAndId(this)} koin startup")
-        onKoinStartup {
-            // TODO to be replaced in koin 4.0.1
-            androidLogger()
-            androidContext(this@OABX)
-            modules(
-                handlersModule,
-                databaseModule,
-                prefsModule,
-                viewModelsModule,
-            )
-        }
+    override fun onKoinStartup() = koinConfiguration {
+        androidLogger()
+        androidContext(this@OABX)
+        modules(
+            handlersModule,
+            databaseModule,
+            prefsModule,
+            viewModelsModule,
+        )
     }
 
     override fun onCreate() {
