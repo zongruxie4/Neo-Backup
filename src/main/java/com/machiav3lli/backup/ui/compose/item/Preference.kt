@@ -35,14 +35,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.machiav3lli.backup.ICON_SIZE_MEDIUM
 import com.machiav3lli.backup.ICON_SIZE_SMALL
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.entity.BooleanPref
 import com.machiav3lli.backup.entity.EnumPref
@@ -247,9 +245,6 @@ fun StringPreference(
 @Preview
 @Composable
 fun StringPreferencePreview() {
-
-    OABX.fakeContext = LocalContext.current.applicationContext
-
     val pref_pathBackupFolder = StringPref(
         key = "user.pathBackupFolder",
         titleId = R.string.prefs_pathbackupfolder,
@@ -295,8 +290,6 @@ fun StringEditPreference(
 @Preview
 @Composable
 fun StringEditPreferencePreview() {
-    OABX.fakeContext = LocalContext.current.applicationContext
-
     val pref_suCommand = StringEditPref(
         key = "user.suCommand",
         icon = Phosphor.Hash,

@@ -333,7 +333,7 @@ private fun Context.onClickSaveAppsList(
             },
             {
                 writeAppsListFile( // TODO communicate that the filter from home page is used
-                    packageList.applyFilter(viewModel.homeState.value.sortFilter, this)
+                    packageList.applyFilter(viewModel.homeState.value.sortFilter)
                         .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     true
                 )

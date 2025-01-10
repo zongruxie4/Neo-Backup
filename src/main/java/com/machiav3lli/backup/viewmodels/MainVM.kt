@@ -195,7 +195,7 @@ class MainVM(
             ) { packages, blocklist, sortFilter, search, selection ->
                 val filteredPackages = packages
                     .filterNot { blocklist.contains(it.packageName) }
-                    .applySearchAndFilter(appContext, search, emptyMap(), sortFilter)
+                    .applySearchAndFilter(search, emptyMap(), sortFilter)
 
                 MainState(
                     packages = packages,
@@ -220,7 +220,7 @@ class MainVM(
             ) { packages, blocklist, sortFilter, search, selection ->
                 val filteredPackages = packages
                     .filterNot { blocklist.contains(it.packageName) }
-                    .applySearchAndFilter(appContext, search, emptyMap(), sortFilter)
+                    .applySearchAndFilter(search, emptyMap(), sortFilter)
 
                 MainState(
                     packages = packages,
@@ -245,7 +245,7 @@ class MainVM(
             ) { packages, blocklist, sortFilter, search, selection ->
                 val filteredPackages = packages
                     .filterNot { blocklist.contains(it.packageName) }
-                    .applySearchAndFilter(appContext, search, emptyMap(), sortFilter)
+                    .applySearchAndFilter(search, emptyMap(), sortFilter)
 
                 MainState(
                     packages = packages,

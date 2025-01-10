@@ -50,7 +50,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -415,9 +414,6 @@ fun ExpandedSearchView(
 @Preview
 @Composable
 fun ProgressPreview() {
-
-    OABX.fakeContext = LocalContext.current.applicationContext
-
     var count by remember { mutableStateOf(0) }
 
     val maxCount = 4

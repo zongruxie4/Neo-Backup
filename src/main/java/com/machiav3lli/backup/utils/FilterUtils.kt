@@ -85,10 +85,7 @@ fun filterPackages(
             blackList.contains(it.packageName)
         }
         .filter(predicate)
-        .applySpecialFilter(
-            specialFilter,
-            OABX.context
-        ) // filter last, with fewer packages, e.g. old backups is expensive
+        .applySpecialFilter(specialFilter) // filter last, with fewer packages, e.g. old backups is expensive
         .sortedWith { m1: Package, m2: Package ->
             m1.packageLabel.compareTo(m2.packageLabel, ignoreCase = true)
         }
@@ -98,7 +95,6 @@ fun filterPackages(
 //---------------------------------------- filters for activity
 
 fun Collection<Package>.applySearchAndFilter(
-    context: Context,
     query: String,
     extras: Map<String, AppExtras>,
     filter: SortFilterModel,
@@ -115,10 +111,10 @@ fun Collection<Package>.applySearchAndFilter(
                     .any { it.contains(query, ignoreCase = true) }
                 )
     }
-        .applyFilter(filter, context)
+        .applyFilter(filter)
 }
 
-fun Collection<Package>.applyFilter(filter: SortFilterModel, context: Context): List<Package> {
+fun Collection<Package>.applyFilter(filter: SortFilterModel): List<Package> {
     val predicate: (Package) -> Boolean = {
         (if (filter.mainFilter and MAIN_FILTER_SYSTEM == MAIN_FILTER_SYSTEM) it.isSystem && !it.isSpecial else false)
                 || (if (filter.mainFilter and MAIN_FILTER_USER == MAIN_FILTER_USER) !it.isSystem else false)
@@ -126,7 +122,7 @@ fun Collection<Package>.applyFilter(filter: SortFilterModel, context: Context): 
     }
     return filter(predicate)
         .applyBackupFilter(filter.backupFilter)
-        .applySpecialFilter(filter.specialFilter, context)
+        .applySpecialFilter(filter.specialFilter)
         .applySort(filter.sort, filter.sortAsc)
 }
 
@@ -146,8 +142,8 @@ private fun Collection<Package>.applyBackupFilter(backupFilter: Int): List<Packa
 
 private fun List<Package>.applySpecialFilter(
     specialFilter: SpecialFilter,
-    context: Context,
 ): List<Package> {
+    val context = OABX.context
     val predicate: (Package) -> Boolean
     var launchableAppsList = listOf<String>()
     if (specialFilter.launchableFilter != LaunchableFilter.ALL.ordinal) {

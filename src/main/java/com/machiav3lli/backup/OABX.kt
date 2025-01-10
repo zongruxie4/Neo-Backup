@@ -383,11 +383,7 @@ class OABX : Application(), KoinStartup {
         var refNB: WeakReference<OABX> = WeakReference(null)
         val NB: OABX get() = refNB.get()!!
 
-        // lint: "Do not place Android context classes in static fields; this is a memory leak"
-        // but: only if a context is assigned, and this is only used by Preview (and maybe by Tests)
-        @SuppressLint("StaticFieldLeak")
-        var fakeContext: Context? = null
-        val context: Context get() = fakeContext ?: NB.applicationContext
+        val context: Context get() = NB.applicationContext
 
         var assetsRef: WeakReference<AssetHandler> = WeakReference(null)
         val assets: AssetHandler

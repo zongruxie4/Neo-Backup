@@ -95,7 +95,6 @@ fun SortFilterSheet(
     viewModel: MainVM = koinViewModel(),
     onDismiss: () -> Unit,
 ) {
-    val context = LocalContext.current
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
     val packageList by viewModel.notBlockedList.collectAsState()
     val state by remember(sourcePage) {
@@ -115,7 +114,6 @@ fun SortFilterSheet(
     fun currentStats() = getStats(
         packageList.applyFilter(
             model,
-            context,
         )
     )  //TODO hg42 use central function for all the filtering
 

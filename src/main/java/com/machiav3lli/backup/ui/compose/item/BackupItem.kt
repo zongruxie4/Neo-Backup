@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.PackageInfo
@@ -310,9 +309,6 @@ fun RestoreBackupItem(
 @Preview
 @Composable
 fun BackupRestorePreview() {
-
-    OABX.fakeContext = LocalContext.current.applicationContext
-
     var note by remember { mutableStateOf("a very very very long note text") }
 
     val backup = Backup(

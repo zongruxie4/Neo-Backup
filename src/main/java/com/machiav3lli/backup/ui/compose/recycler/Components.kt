@@ -41,7 +41,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -361,8 +360,6 @@ fun InnerBackground(
 @Preview
 @Composable
 fun BusyBackgroundPreview() {
-    OABX.fakeContext = LocalContext.current.applicationContext
-
     val busy by remember { OABX.busy }
     val count by remember { OABX.busyCountDown }
     val level by remember { OABX.busyLevel }

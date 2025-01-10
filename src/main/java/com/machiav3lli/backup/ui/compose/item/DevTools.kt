@@ -59,7 +59,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
@@ -759,9 +758,6 @@ fun PluginsPage() {
 @Preview
 @Composable
 fun PluginsPagePreview() {
-
-    OABX.fakeContext = LocalContext.current.applicationContext
-
     Plugin.setPlugins(
         listOf(
             "/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app1.special_files",
@@ -1193,9 +1189,6 @@ fun DevTools(
 @Preview
 @Composable
 fun DevToolsPreview() {
-
-    OABX.fakeContext = LocalContext.current.applicationContext
-
     Plugin.setPlugins(
         listOf(
             "/data/user/0/com.machiav3lli.backup.hg42/files/plugin/test_app1.special_files",

@@ -759,9 +759,6 @@ fun Terminal(
 @Preview
 @Composable
 fun PreviewTerminal() {
-
-    OABX.fakeContext = LocalContext.current.applicationContext
-
     Box(
         modifier = Modifier
         //.height(500.dp)
