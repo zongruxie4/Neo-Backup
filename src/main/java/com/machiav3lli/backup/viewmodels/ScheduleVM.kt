@@ -17,12 +17,12 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
+import com.machiav3lli.backup.utils.NeoViewModel
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,7 +39,7 @@ import kotlinx.coroutines.plus
 class ScheduleVM(
     private val scheduleRepository: ScheduleRepository,
     appExtrasRepository: AppExtrasRepository,
-) : ViewModel() {
+) : NeoViewModel() {
     private val _scheduleID = MutableStateFlow(-1L)
 
     val schedule: StateFlow<Schedule?> = scheduleRepository.getScheduleFlow(_scheduleID)

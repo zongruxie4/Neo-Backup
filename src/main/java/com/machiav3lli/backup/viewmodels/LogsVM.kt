@@ -18,16 +18,16 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.mutableStateListOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.machiav3lli.backup.entity.Log
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.LogsHandler.Companion.share
-import com.machiav3lli.backup.entity.Log
+import com.machiav3lli.backup.utils.NeoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LogsVM : ViewModel() {
+class LogsVM : NeoViewModel() {
 
     var logsList = mutableStateListOf<Log>()
 

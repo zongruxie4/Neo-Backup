@@ -18,7 +18,6 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.activities.MainActivityX
@@ -29,6 +28,7 @@ import com.machiav3lli.backup.dbs.repository.PackageRepository
 import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.handler.showNotification
 import com.machiav3lli.backup.ui.compose.MutableComposableStateFlow
+import com.machiav3lli.backup.utils.NeoViewModel
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 class AppVM(
     private val appExtrasRepository: AppExtrasRepository,
     private val packageRepository: PackageRepository,
-) : ViewModel() {
+) : NeoViewModel() {
     private val packageName: MutableStateFlow<String> = MutableStateFlow("")
     val pkg = combine(
         packageName,

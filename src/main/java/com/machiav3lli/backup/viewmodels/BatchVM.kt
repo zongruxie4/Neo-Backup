@@ -18,9 +18,9 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.lifecycle.ViewModel
+import com.machiav3lli.backup.utils.NeoViewModel
 
-open class BatchVM : ViewModel() {
+open class BatchVM : NeoViewModel() {
     val apkBackupCheckedList = SnapshotStateMap<String, Int>()
     val dataBackupCheckedList = SnapshotStateMap<String, Int>()
 }

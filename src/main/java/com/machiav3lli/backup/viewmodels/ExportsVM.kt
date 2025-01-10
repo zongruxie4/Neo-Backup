@@ -17,11 +17,11 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dbs.repository.ExportsRepository
 import com.machiav3lli.backup.entity.StorageFile
+import com.machiav3lli.backup.utils.NeoViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 
 class ExportsVM(
     private val exportsRepository: ExportsRepository,
-) : ViewModel() {
+) : NeoViewModel() {
 
     private val _exportsList =
         MutableStateFlow<MutableList<Pair<Schedule, StorageFile>>>(mutableListOf())

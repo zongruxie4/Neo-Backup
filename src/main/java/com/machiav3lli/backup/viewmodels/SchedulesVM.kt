@@ -17,15 +17,15 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
+import com.machiav3lli.backup.utils.NeoViewModel
 import kotlinx.coroutines.launch
 
 class SchedulesVM(
     private val scheduleRepository: ScheduleRepository,
-) : ViewModel() {
+) : NeoViewModel() {
     var schedules = scheduleRepository.getAllFlow()
 
     fun addSchedule(withSpecial: Boolean) {

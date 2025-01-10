@@ -17,8 +17,6 @@
  */
 package com.machiav3lli.backup.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.repository.BlocklistRepository
@@ -32,7 +30,7 @@ import com.machiav3lli.backup.preferences.traceBackups
 import com.machiav3lli.backup.preferences.traceFlows
 import com.machiav3lli.backup.ui.compose.item.IconCache
 import com.machiav3lli.backup.ui.navigation.NavItem
-import com.machiav3lli.backup.utils.TraceUtils.classAndId
+import com.machiav3lli.backup.utils.NeoViewModel
 import com.machiav3lli.backup.utils.TraceUtils.formatSortedBackups
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.applySearchAndFilter
@@ -51,18 +49,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import timber.log.Timber
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainVM(
     private val packageRepository: PackageRepository,
     private val blocklistRepository: BlocklistRepository,
     private val prefs: NeoPrefs,
-    private val appContext: Application,
-) : ViewModel() {
-    init {
-        Timber.w("==================== ${classAndId(this)}")
-    }
+) : NeoViewModel() {
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS
 
