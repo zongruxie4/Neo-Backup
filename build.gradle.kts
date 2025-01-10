@@ -61,7 +61,7 @@ android {
         val variant = this
         outputs.all {
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "Neo_Backup_${variant.name}_${variant.versionName}.apk"
+                "Neo_Backup_${variant.versionCode}_${variant.name}.apk"
         }
     }
 
