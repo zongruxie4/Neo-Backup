@@ -10,6 +10,7 @@ import com.machiav3lli.backup.handler.ExportsHandler
 import com.machiav3lli.backup.handler.showNotification
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 
 class ExportsRepository(
@@ -17,18 +18,20 @@ class ExportsRepository(
     private val db: ODatabase,
     private val appContext: Application,
 ) {
-    suspend fun recreateExports() = withContext(Dispatchers.IO) {
+    private val jcc = Dispatchers.IO + SupervisorJob()
+
+    suspend fun recreateExports() = withContext(jcc) {
         handler.readExports()
     }
 
     suspend fun exportSchedules() {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             handler.exportSchedules()
         }
     }
 
     suspend fun import(schedule: Schedule) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             db.getScheduleDao().insert(
                 Schedule.Builder() // Set id to 0 to make the database generate a new id
                     .withId(0)
@@ -43,7 +46,7 @@ class ExportsRepository(
     }
 
     suspend fun delete(exportFile: StorageFile) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             exportFile.delete()
         }
     }

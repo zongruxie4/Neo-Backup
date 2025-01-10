@@ -23,23 +23,25 @@ class PackageRepository(
     private val db: ODatabase,
     private val appContext: Application,
 ) {
+    private val cc = Dispatchers.IO
     private val jcc = Dispatchers.IO + SupervisorJob()
+
     fun getPackagesFlow(): Flow<List<Package>> =
         db.getAppInfoDao().getAllFlow()
             .map { it.toPackageList(appContext, emptyList(), getBackups()) }
-            .flowOn(Dispatchers.IO)
+            .flowOn(cc)
 
     fun getBackupsFlow(): Flow<Map<String, List<Backup>>> =
         db.getBackupDao().getAllFlow()
             .map { it.groupBy(Backup::packageName) }
-            .flowOn(Dispatchers.IO)
+            .flowOn(cc)
 
     suspend fun getBackups(packageName: String): List<Backup> = withContext(jcc) {
         db.getBackupDao().get(packageName)
     }
 
     suspend fun updatePackage(packageName: String) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             invalidateCacheForPackage(packageName)
             val new = Package(appContext, packageName)
             if (!new.isSpecial) {
@@ -66,7 +68,7 @@ class PackageRepository(
     }
 
     suspend fun rewriteBackup(pkg: Package?, backup: Backup, changedBackup: Backup) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             pkg?.rewriteBackup(backup, changedBackup)
         }
     }
@@ -74,7 +76,7 @@ class PackageRepository(
     fun deleteAppInfoOf(packageName: String) = db.getAppInfoDao().deleteAllOf(packageName)
 
     suspend fun deleteBackup(pkg: Package?, backup: Backup, onDismiss: () -> Unit) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             pkg?.let { pkg ->
                 pkg.deleteBackup(backup)
                 if (!pkg.isInstalled && pkg.backupList.isEmpty() && backup.packageLabel != "? INVALID") {
@@ -86,7 +88,7 @@ class PackageRepository(
     }
 
     suspend fun deleteAllBackups(pkg: Package?, onDismiss: () -> Unit) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             pkg?.let { pkg ->
                 pkg.deleteAllBackups()
                 if (!pkg.isInstalled && pkg.backupList.isEmpty()) {
@@ -99,7 +101,7 @@ class PackageRepository(
 
     @Throws(ShellCommands.ShellActionFailedException::class)
     suspend fun enableDisable(packageName: String, users: List<String>, enable: Boolean) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             ShellCommands.enableDisable(users, packageName, enable)
         }
     }
@@ -110,7 +112,7 @@ class PackageRepository(
         onDismiss: () -> Unit,
         showNotification: (String) -> Unit,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             mPackage?.let { mPackage ->
                 Timber.i("uninstalling: ${mPackage.packageLabel}")
                 try {

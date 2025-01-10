@@ -13,18 +13,20 @@ import kotlinx.coroutines.withContext
 class BlocklistRepository(
     private val db: ODatabase
 ) {
+    private val cc = Dispatchers.IO
     private val jcc = Dispatchers.IO + SupervisorJob()
+
     fun getBlocklistFlow(): Flow<Set<String>> =
         db.getBlocklistDao().getAllFlow()
             .map { it.mapNotNull { item -> item.packageName }.toSet() }
-            .flowOn(Dispatchers.IO)
+            .flowOn(cc)
 
     suspend fun getBlocklistedPackages(blocklistId: Long) = withContext(jcc) {
         db.getBlocklistDao().getBlocklistedPackages(blocklistId)
     }
 
     suspend fun addToBlocklist(packageName: String) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             db.getBlocklistDao().insert(
                 Blocklist.Builder()
                     .withId(0)
@@ -36,7 +38,7 @@ class BlocklistRepository(
     }
 
     suspend fun updateBlocklist(packages: Set<String>) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             db.getBlocklistDao().deleteById(PACKAGES_LIST_GLOBAL_ID)
             packages.forEach { packageName ->
                 db.getBlocklistDao().insert(

@@ -14,9 +14,11 @@ import kotlinx.coroutines.withContext
 class AppExtrasRepository(
     private val db: ODatabase
 ) {
+    private val cc = Dispatchers.IO
     private val jcc = Dispatchers.IO + SupervisorJob()
+
     fun getAllFlow() = db.getAppExtrasDao().getAllFlow()
-        .flowOn(Dispatchers.IO)
+        .flowOn(cc)
 
     suspend fun getAll() = withContext(jcc) {
         db.getAppExtrasDao().getAll()
@@ -24,10 +26,10 @@ class AppExtrasRepository(
 
     fun getFlow(packageName: Flow<String?>) = packageName.flatMapLatest {
         db.getAppExtrasDao().getFlow(it)
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(cc)
 
     suspend fun replaceExtras(packageName: String, appExtras: AppExtras?) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             if (appExtras != null) db.getAppExtrasDao().upsert(appExtras)
             else db.getAppExtrasDao().deleteByPackageName(packageName)
         }

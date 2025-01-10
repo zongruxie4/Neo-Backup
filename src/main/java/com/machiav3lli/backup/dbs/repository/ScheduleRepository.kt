@@ -21,9 +21,11 @@ class ScheduleRepository(
     private val db: ODatabase,
     private val appContext: Application,
 ) {
+    private val cc = Dispatchers.IO
     private val jcc = Dispatchers.IO + SupervisorJob()
+
     fun getAllFlow() = db.getScheduleDao().getAllFlow()
-        .flowOn(Dispatchers.IO)
+        .flowOn(cc)
 
     suspend fun getAll() = withContext(jcc) {
         db.getScheduleDao().getAll()
@@ -31,7 +33,7 @@ class ScheduleRepository(
 
     fun getScheduleFlow(id: Flow<Long>) = id.flatMapLatest {
         db.getScheduleDao().getByIdFlow(it)
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(cc)
 
     fun getSchedule(id: Long) = db.getScheduleDao().getById(id)
 
@@ -40,15 +42,15 @@ class ScheduleRepository(
     fun getCustomListFlow(id: Flow<Long>): Flow<Set<String>> = id.flatMapLatest {
         db.getScheduleDao().getCustomListFlow(it)
             .map { string -> Converters().toStringSet(string) }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(cc)
 
     fun getBlockListFlow(id: Flow<Long>): Flow<Set<String>> = id.flatMapLatest {
         db.getScheduleDao().getBlockListFlow(it)
             .map { string -> Converters().toStringSet(string) }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(cc)
 
     suspend fun addNew(withSpecial: Boolean) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             db.getScheduleDao().insert(
                 Schedule.Builder() // Set id to 0 to make the database generate a new id
                     .withId(0)
@@ -63,7 +65,7 @@ class ScheduleRepository(
     }
 
     suspend fun updateSchedule(schedule: Schedule, rescheduleBoolean: Boolean) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             db.getScheduleDao().update(schedule)
             if (schedule.enabled) {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
@@ -80,7 +82,7 @@ class ScheduleRepository(
     }
 
     suspend fun deleteById(id: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(jcc) {
             db.getScheduleDao().deleteById(id)
             ScheduleWork.cancel(id)
         }
