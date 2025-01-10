@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -287,7 +288,7 @@ fun Selections(
 
     if (action != MenuAction.DEL) {
         val scheduleRepo: ScheduleRepository = koinInject()
-        val schedules = scheduleRepo.getAll()
+        val schedules by scheduleRepo.getAllFlow().collectAsState(emptyList())
         if (schedules.isEmpty())
             DropdownMenuItem(
                 text = { Text("--- no schedules ---") },

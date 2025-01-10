@@ -4,6 +4,7 @@ import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -13,10 +14,13 @@ import kotlinx.coroutines.withContext
 class AppExtrasRepository(
     private val db: ODatabase
 ) {
+    private val jcc = Dispatchers.IO + SupervisorJob()
     fun getAllFlow() = db.getAppExtrasDao().getAllFlow()
         .flowOn(Dispatchers.IO)
 
-    fun getAll() = db.getAppExtrasDao().getAll()
+    suspend fun getAll() = withContext(jcc) {
+        db.getAppExtrasDao().getAll()
+    }
 
     fun getFlow(packageName: Flow<String?>) = packageName.flatMapLatest {
         db.getAppExtrasDao().getFlow(it)

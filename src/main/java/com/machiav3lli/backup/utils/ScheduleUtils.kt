@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.time.LocalTime
@@ -167,7 +168,9 @@ fun scheduleAlarmsOnce() { // TODO replace with ScheduleWorker.scheduleAll()
     if (alarmsHaveBeenScheduled)
         return
     alarmsHaveBeenScheduled = true
-    ScheduleWork.scheduleAll()
+    CoroutineScope(Dispatchers.IO).launch {
+        ScheduleWork.scheduleAll()
+    }
 }
 
 fun Context.getStartScheduleMessage(schedule: Schedule) = StringBuilder()

@@ -449,33 +449,31 @@ class ScheduleWork(
             }
         }
 
-        fun scheduleAll() {
-            Thread {
-                val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
-                val workManager = get<WorkManager>(WorkManager::class.java)
-                scheduleRepo.getAll().forEach { schedule ->
-                    val scheduleAlreadyRuns = runningSchedules[schedule.id] == true
-                    val scheduled = workManager
-                        .getWorkInfosForUniqueWork("$SCHEDULE_WORK${schedule.id}")
-                        .get().any { !it.state.isFinished }
-                    when {
-                        scheduleAlreadyRuns || scheduled -> {
-                            traceSchedule { "[${schedule.id}]: ignore $schedule" }
-                        }
+        suspend fun scheduleAll() = coroutineScope {
+            val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
+            val workManager = get<WorkManager>(WorkManager::class.java)
+            scheduleRepo.getAll().forEach { schedule ->
+                val scheduleAlreadyRuns = runningSchedules[schedule.id] == true
+                val scheduled = workManager
+                    .getWorkInfosForUniqueWork("$SCHEDULE_WORK${schedule.id}")
+                    .get().any { !it.state.isFinished }
+                when {
+                    scheduleAlreadyRuns || scheduled -> {
+                        traceSchedule { "[${schedule.id}]: ignore $schedule" }
+                    }
 
-                        schedule.enabled                 -> {
-                            traceSchedule { "[${schedule.id}]: enable $schedule" }
-                            enqueuePeriodic(schedule, false)
-                        }
+                    schedule.enabled                 -> {
+                        traceSchedule { "[${schedule.id}]: enable $schedule" }
+                        enqueuePeriodic(schedule, false)
+                    }
 
-                        else                             -> {
-                            traceSchedule { "[${schedule.id}]: cancel $schedule" }
-                            cancel(schedule.id, true)
-                        }
+                    else                             -> {
+                        traceSchedule { "[${schedule.id}]: cancel $schedule" }
+                        cancel(schedule.id, true)
                     }
                 }
-                workManager.pruneWork()
-            }.start()
+            }
+            workManager.pruneWork()
         }
 
         fun cancel(scheduleId: Long, periodic: Boolean = true) {

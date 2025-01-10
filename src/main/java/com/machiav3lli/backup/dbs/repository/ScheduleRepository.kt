@@ -9,6 +9,7 @@ import com.machiav3lli.backup.tasks.ScheduleWork
 import com.machiav3lli.backup.utils.scheduleNext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -20,10 +21,13 @@ class ScheduleRepository(
     private val db: ODatabase,
     private val appContext: Application,
 ) {
+    private val jcc = Dispatchers.IO + SupervisorJob()
     fun getAllFlow() = db.getScheduleDao().getAllFlow()
         .flowOn(Dispatchers.IO)
 
-    fun getAll() = db.getScheduleDao().getAll()
+    suspend fun getAll() = withContext(jcc) {
+        db.getScheduleDao().getAll()
+    }
 
     fun getScheduleFlow(id: Flow<Long>) = id.flatMapLatest {
         db.getScheduleDao().getByIdFlow(it)

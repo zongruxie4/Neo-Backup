@@ -56,7 +56,7 @@ class ExportsHandler(
     }
 
     @Throws(IOException::class)
-    fun exportSchedules() {
+    suspend fun exportSchedules() {
         // TODO improve on folder structure
         scheduleRepository.getAll().forEach {
             val fileName = String.format(EXPORTS_INSTANCE, it.name)

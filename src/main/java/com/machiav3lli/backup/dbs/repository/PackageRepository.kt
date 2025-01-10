@@ -12,6 +12,7 @@ import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.ShellCommands
 import com.machiav3lli.backup.handler.toPackageList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -22,6 +23,7 @@ class PackageRepository(
     private val db: ODatabase,
     private val appContext: Application,
 ) {
+    private val jcc = Dispatchers.IO + SupervisorJob()
     fun getPackagesFlow(): Flow<List<Package>> =
         db.getAppInfoDao().getAllFlow()
             .map { it.toPackageList(appContext, emptyList(), getBackups()) }
@@ -32,7 +34,9 @@ class PackageRepository(
             .map { it.groupBy(Backup::packageName) }
             .flowOn(Dispatchers.IO)
 
-    fun getBackups(packageName: String): List<Backup> = db.getBackupDao().get(packageName)
+    suspend fun getBackups(packageName: String): List<Backup> = withContext(jcc) {
+        db.getBackupDao().get(packageName)
+    }
 
     suspend fun updatePackage(packageName: String) {
         withContext(Dispatchers.IO) {
