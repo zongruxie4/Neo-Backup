@@ -86,8 +86,8 @@ fun Modifier.blockBorderBottom(altStyle: Boolean = pref_altBlockLayout.value) =
             .ifThenElse(altStyle,
                 modifier = {
                     border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline,
+                        width = 0.5.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant,
                         shape = BlockBottomShape,
                     )
                 },
@@ -105,8 +105,8 @@ fun Modifier.blockBorderTop(altStyle: Boolean = pref_altBlockLayout.value) =
             .ifThenElse(altStyle,
                 modifier = {
                     border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline,
+                        width = 0.5.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant,
                         shape = BlockTopShape,
                     )
                 },
@@ -122,9 +122,9 @@ fun Modifier.blockShadow(altStyle: Boolean = pref_altBlockLayout.value) =
             .ifThenElse(altStyle,
                 modifier = {
                     border(
-                        1.dp,
-                        MaterialTheme.colorScheme.outline,
-                        MaterialTheme.shapes.extraLarge,
+                        width = 0.5.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        shape = MaterialTheme.shapes.extraLarge,
                     )
                 },
                 elseModifier = {
