@@ -104,7 +104,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -139,7 +138,7 @@ class MainActivityX : BaseActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        val mainChanged = (this != OABX.mainSaved)
+        val mainChanged = (this != OABX.mainSaved.get())
         OABX.main = this
 
         var freshStart = (savedInstanceState == null)   //TODO use some lifecycle method?
@@ -147,8 +146,8 @@ class MainActivityX : BaseActivity() {
         Timber.w(
             listOfNotNull(
                 if (freshStart) "fresh start" else null,
-                if (mainChanged && (!freshStart || (OABX.mainSaved != null)))
-                    "main changed (was ${classAndId(OABX.mainSaved)})"
+                if (mainChanged && (!freshStart || (OABX.mainSaved.get() != null)))
+                    "main changed (was ${classAndId(OABX.mainSaved.get())})"
                 else
                     null,
             ).joinToString(", ")
@@ -319,7 +318,7 @@ class MainActivityX : BaseActivity() {
     }
 
     override fun onDestroy() {
-        OABX.mainSaved = OABX.main
+        OABX.mainSaved = OABX.mainRef
         OABX.main = null
         super.onDestroy()
     }

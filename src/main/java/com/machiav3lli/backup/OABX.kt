@@ -466,7 +466,7 @@ class OABX : Application(), KoinStartup {
             set(mainActivity) {
                 mainRef = WeakReference(mainActivity)
             }
-        var mainSaved: MainActivityX? = null    // just to see if activity changed
+        var mainSaved: WeakReference<MainActivityX> = WeakReference(null)    // just to see if activity changed
 
         var appsSuspendedChecked = false
 
