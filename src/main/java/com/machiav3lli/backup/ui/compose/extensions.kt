@@ -78,7 +78,7 @@ inline fun Modifier.ifThenElse(
     }
 }
 
-fun Modifier.blockBorderBottom(altStyle: Boolean = pref_altBlockLayout.value) =
+fun Modifier.blockBorderBottom(altStyle: Boolean = !pref_altBlockLayout.value) =
     composed {
         this
             .padding(2.dp)
@@ -97,7 +97,7 @@ fun Modifier.blockBorderBottom(altStyle: Boolean = pref_altBlockLayout.value) =
             )
     }
 
-fun Modifier.blockBorderTop(altStyle: Boolean = pref_altBlockLayout.value) =
+fun Modifier.blockBorderTop(altStyle: Boolean = !pref_altBlockLayout.value) =
     composed {
         this
             .padding(2.dp)
@@ -116,7 +116,7 @@ fun Modifier.blockBorderTop(altStyle: Boolean = pref_altBlockLayout.value) =
             )
     }
 
-fun Modifier.blockShadow(altStyle: Boolean = pref_altBlockLayout.value) =
+fun Modifier.blockShadow(altStyle: Boolean = !pref_altBlockLayout.value) =
     composed {
         this
             .ifThenElse(altStyle,
