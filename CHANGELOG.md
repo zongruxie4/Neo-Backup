@@ -1,6 +1,25 @@
 CHANGELOG
 =========
 
+8.3.11 (10.01.2025) +15 Commits, 6 Translations
+------------
+
+#### Function
+
+- Add: Scope logging to all ViewModels
+- Fix: Crash of using repository database calls on UI thread
+- Fix: Koin calls and scoping
+- Update: Improve coroutines handling in repositories
+- Update: Improve StateFlow usages
+- Update: Reduce context usage and calls
+
+#### UI & UX
+
+- Update: Make alternative block design default
+- Update: Revamp block borders' design
+- Update: Make preference's surface and switch interactively connected
+- Update: Improve preferences coloring
+
 8.3.10 (12.12.2024) +15 Commits
 ------------
 
