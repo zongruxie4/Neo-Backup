@@ -326,30 +326,32 @@ fun StringEditPreferencePreview() {
     val pref = pref_suCommand
 
     Column {
-        Row {
-            ActionButton(text = "test") {
-                pref.value = "test"
+        Column {
+            Row {
+                ActionButton(text = "test") {
+                    pref.value = "test"
+                }
+                ActionButton(text = "test2") {
+                    pref.value = "test2"
+                }
             }
-            ActionButton(text = "test2") {
-                pref.value = "test2"
-            }
+            StringEditPreference(
+                pref = pref
+            )
         }
+
+        val pref_pathBackupFolder = StringEditPref(
+            key = "user.pathBackupFolder",
+            titleId = R.string.prefs_pathbackupfolder,
+            icon = Phosphor.FolderNotch,
+            iconTint = { ColorExtDATA },
+            defaultValue = "path/to/backup/folder",
+        )
+
         StringEditPreference(
-            pref = pref
+            pref = pref_pathBackupFolder,
         )
     }
-
-    val pref_pathBackupFolder = StringEditPref(
-        key = "user.pathBackupFolder",
-        titleId = R.string.prefs_pathbackupfolder,
-        icon = Phosphor.FolderNotch,
-        iconTint = { ColorExtDATA },
-        defaultValue = "path/to/backup/folder",
-    )
-
-    StringEditPreference(
-        pref = pref_pathBackupFolder,
-    )
 }
 
 @Composable
