@@ -109,6 +109,7 @@ fun BasePreference(
     groupSize: Int = 1,
     endWidget: (@Composable (isEnabled: Boolean) -> Unit)? = null,
     bottomWidget: (@Composable (isEnabled: Boolean) -> Unit)? = null,
+    interactionSource: MutableInteractionSource? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val isEnabled by remember(pref.enableIf?.invoke() ?: true) {
@@ -147,7 +148,12 @@ fun BasePreference(
                     else MaterialTheme.shapes.extraSmall.bottomEnd
                 )
             )
-            .clickable(enabled = isEnabled, onClick = onClick ?: {}),
+            .clickable(
+                enabled = isEnabled,
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onClick = onClick ?: {}
+            ),
         colors = ListItemDefaults.colors(
             containerColor = surfaceColor,
         ),
@@ -407,6 +413,7 @@ fun SwitchPreference(
     onCheckedChange: (Boolean) -> Unit = {},
 ) {
     var checked by remember(pref.value) { mutableStateOf(pref.value) }  //TODO hg42 remove remember ???
+    val interactionSource = remember { MutableInteractionSource() }
     val check = { value: Boolean ->
         pref.value = value
         checked = value
@@ -425,11 +432,13 @@ fun SwitchPreference(
             onCheckedChange(!checked)
             check(!checked)
         },
+        interactionSource = interactionSource,
         endWidget = { isEnabled ->
             Switch(
                 modifier = Modifier
                     .height(ICON_SIZE_SMALL),
                 checked = checked,
+                interactionSource = interactionSource,
                 onCheckedChange = {
                     onCheckedChange(it)
                     check(it)
