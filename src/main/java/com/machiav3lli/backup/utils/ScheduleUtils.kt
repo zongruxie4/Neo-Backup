@@ -124,9 +124,9 @@ fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
         delay(updateInterval)
     }
 }
-    .flowOn(Dispatchers.Default)
+    .flowOn(Dispatchers.IO)
     .stateIn(
-        scope = CoroutineScope(Dispatchers.Default),
+        scope = CoroutineScope(Dispatchers.IO),
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = calcTimeLeft(this)
     )

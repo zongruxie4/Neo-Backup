@@ -56,6 +56,7 @@ class MainVM(
     private val blocklistRepository: BlocklistRepository,
     private val prefs: NeoPrefs,
 ) : NeoViewModel() {
+    private val ioScope = viewModelScope.plus(Dispatchers.IO)
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS
 
@@ -99,7 +100,7 @@ class MainVM(
             }
         }
         .stateIn(
-            viewModelScope + Dispatchers.IO,
+            ioScope,
             SharingStarted.Eagerly,
             null
         )
@@ -125,7 +126,7 @@ class MainVM(
             .mapLatest { it.associateBy(Package::packageName) }
             .trace { "*** packageMap <<- ${it.size}" }
             .stateIn(
-                viewModelScope + Dispatchers.IO,
+                ioScope,
                 SharingStarted.Eagerly,
                 emptyMap()
             )
@@ -151,7 +152,7 @@ class MainVM(
             .mapLatest { it }
             .trace { "*** notBlockedList <<- ${it.size}" }
             .stateIn(
-                viewModelScope + Dispatchers.IO,
+                ioScope,
                 SharingStarted.Eagerly,
                 emptyList()
             )
@@ -173,7 +174,7 @@ class MainVM(
                 }"
             }
             .stateIn(
-                viewModelScope + Dispatchers.IO,
+                ioScope,
                 SharingStarted.Eagerly,
                 emptyList()
             )

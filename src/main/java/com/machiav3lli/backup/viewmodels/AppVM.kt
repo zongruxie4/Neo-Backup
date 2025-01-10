@@ -30,6 +30,7 @@ import com.machiav3lli.backup.handler.showNotification
 import com.machiav3lli.backup.ui.compose.MutableComposableStateFlow
 import com.machiav3lli.backup.utils.NeoViewModel
 import com.machiav3lli.backup.utils.SystemUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,12 +39,15 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppVM(
     private val appExtrasRepository: AppExtrasRepository,
     private val packageRepository: PackageRepository,
 ) : NeoViewModel() {
+    private val ioScope = viewModelScope.plus(Dispatchers.IO)
+
     private val packageName: MutableStateFlow<String> = MutableStateFlow("")
     val pkg = combine(
         packageName,
@@ -53,7 +57,7 @@ class AppVM(
         pkgs.find { it.packageName == name }
     }
         .stateIn(
-            viewModelScope,
+            ioScope,
             SharingStarted.Eagerly,
             null
         )
@@ -61,7 +65,7 @@ class AppVM(
     var appExtras = appExtrasRepository.getFlow(packageName).mapLatest {
         it ?: AppExtras(packageName.value ?: "")
     }.stateIn(
-        viewModelScope,
+        ioScope,
         SharingStarted.Eagerly,
         AppExtras(packageName.value)
     )

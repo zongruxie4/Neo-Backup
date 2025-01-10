@@ -40,12 +40,13 @@ class ScheduleVM(
     private val scheduleRepository: ScheduleRepository,
     appExtrasRepository: AppExtrasRepository,
 ) : NeoViewModel() {
+    private val ioScope = viewModelScope.plus(Dispatchers.IO)
     private val _scheduleID = MutableStateFlow(-1L)
 
     val schedule: StateFlow<Schedule?> = scheduleRepository.getScheduleFlow(_scheduleID)
         //TODO hg42 .trace { "*** schedule <<- ${it}" }     // what can here be null? (something is null that is not declared as nullable)
         .stateIn(
-            viewModelScope,
+            ioScope,
             SharingStarted.Eagerly,
             Schedule(0)
         )
@@ -59,7 +60,7 @@ class ScheduleVM(
             .mapLatest { it.flatMap(AppExtras::customTags) }
             .trace { "*** tags <<- ${it.size}" }
             .stateIn(
-                viewModelScope + Dispatchers.IO,
+                ioScope,
                 SharingStarted.Eagerly,
                 emptyList()
             )
