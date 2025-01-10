@@ -1,7 +1,10 @@
 package com.machiav3lli.backup.ui.compose.item
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,7 +54,6 @@ import com.machiav3lli.backup.entity.Pref
 import com.machiav3lli.backup.entity.StringEditPref
 import com.machiav3lli.backup.entity.StringPref
 import com.machiav3lli.backup.preferences.traceDebug
-import com.machiav3lli.backup.ui.compose.flatten
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FolderNotch
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
@@ -116,8 +118,11 @@ fun BasePreference(
     val base = index.toFloat() / groupSize
     val rank = (index + 1f) / groupSize
 
-    val surfaceColor = MaterialTheme.colorScheme.surfaceContainerHigh
-    val surfaceDirty = MaterialTheme.colorScheme.surfaceContainerLow
+    val surfaceColor by animateColorAsState(
+        if (dirty) MaterialTheme.colorScheme.surfaceContainerLow
+        else MaterialTheme.colorScheme.surfaceContainer,
+        label = "surfaceColor"
+    )
 
     LaunchedEffect(dirty) {
         delay(500)
@@ -144,7 +149,7 @@ fun BasePreference(
             )
             .clickable(enabled = isEnabled, onClick = onClick ?: {}),
         colors = ListItemDefaults.colors(
-            containerColor = if (dirty) surfaceDirty else surfaceColor,
+            containerColor = surfaceColor,
         ),
         leadingContent = { PrefIcon(pref) },
         headlineContent = {
@@ -166,14 +171,14 @@ fun BasePreference(
                     val summaryText = stringResource(id = summaryId)
                     Text(
                         text = summaryText,
-                        color = MaterialTheme.colorScheme.onSurface.flatten(surface = surfaceColor),
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
                 summary?.let {
                     Text(
                         text = it,
-                        color = MaterialTheme.colorScheme.onSurface.flatten(surface = surfaceColor),
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
