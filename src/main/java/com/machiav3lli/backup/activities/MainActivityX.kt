@@ -102,7 +102,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
@@ -663,17 +666,17 @@ class MainActivityX : BaseActivity() {
 }
 
 val viewModelsModule = module {
-    single { PackageRepository(get(), get()) }
-    single { BlocklistRepository(get()) }
-    single { ScheduleRepository(get(), get()) }
-    single { AppExtrasRepository(get()) }
-    single { ExportsRepository(get(), get(), get()) }
-    single { MainVM(get(), get(), get(), get()) }
-    single { BackupBatchVM() }
-    single { RestoreBatchVM() }
-    single { SchedulesVM(get()) }
-    single { ScheduleVM(get(), get()) }
-    single { AppVM(get(), get()) }
-    single { ExportsVM(get()) }
-    single { LogsVM() }
+    singleOf(::PackageRepository)
+    singleOf(::BlocklistRepository)
+    singleOf(::ScheduleRepository)
+    singleOf(::AppExtrasRepository)
+    singleOf(::ExportsRepository)
+    viewModelOf(::MainVM)
+    viewModelOf(::BackupBatchVM)
+    viewModelOf(::RestoreBatchVM)
+    viewModelOf(::SchedulesVM)
+    viewModelOf(::ScheduleVM)
+    viewModelOf(::AppVM)
+    viewModelOf(::ExportsVM)
+    viewModelOf(::LogsVM)
 }

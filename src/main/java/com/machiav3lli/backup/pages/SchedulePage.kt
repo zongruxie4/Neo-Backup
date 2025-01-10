@@ -94,17 +94,17 @@ import com.machiav3lli.backup.ui.compose.recycler.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.recycler.SelectableChipGroup
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.getStartScheduleMessage
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.utils.timeLeft
 import com.machiav3lli.backup.viewmodels.ScheduleVM
-import org.koin.androidx.compose.koinViewModel
 import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SchedulePage(
     scheduleId: Long,
-    viewModel: ScheduleVM = koinViewModel(),
+    viewModel: ScheduleVM = koinNeoViewModel(),
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current

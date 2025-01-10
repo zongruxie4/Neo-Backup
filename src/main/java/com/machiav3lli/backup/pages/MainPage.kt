@@ -18,7 +18,6 @@
 package com.machiav3lli.backup.pages
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
@@ -52,15 +51,15 @@ import com.machiav3lli.backup.ui.compose.recycler.FullScreenBackground
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.NeoNavigationSuiteScaffold
 import com.machiav3lli.backup.ui.navigation.SlidePager
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainPage(
     navController: NavHostController,
-    viewModel: MainVM = koinViewModel(),
+    viewModel: MainVM = koinNeoViewModel(),
 ) {
     val scope = rememberCoroutineScope()
     val pages = persistentListOf(

@@ -53,16 +53,16 @@ import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarPlus
 import com.machiav3lli.backup.ui.compose.recycler.ScheduleRecycler
 import com.machiav3lli.backup.utils.getStartScheduleMessage
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.viewmodels.SchedulesVM
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
-import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun SchedulerPage(viewModel: SchedulesVM = koinViewModel()) {
+fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val openDialog = remember { mutableStateOf(false) }

@@ -63,7 +63,7 @@ import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
-
+import org.koin.android.ext.android.get
 
 @Composable
 fun DevPrefGroups() {
@@ -621,7 +621,7 @@ val pref_enableSpecialBackups = BooleanPref(
     iconTint = ColorSpecial,
     defaultValue = false,
     onChanged = {
-        NeoPrefs.getInstance().let {
+        OABX.main?.get<NeoPrefs>()?.let {
             it.mainFilterHome.value = it.mainFilterHome.value and MAIN_FILTER_DEFAULT
         }
     }

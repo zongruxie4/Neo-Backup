@@ -71,16 +71,16 @@ import com.machiav3lli.backup.ui.compose.theme.ColorAPK
 import com.machiav3lli.backup.ui.compose.theme.ColorData
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.altModeToMode
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.BatchVM
 import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BatchPage(
     viewModel: BatchVM,
-    mainVM: MainVM = koinViewModel(),
+    mainVM: MainVM = koinNeoViewModel(),
     backupBoolean: Boolean
 ) {
     val main = OABX.main!!

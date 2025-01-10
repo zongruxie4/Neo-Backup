@@ -50,12 +50,12 @@ import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getBackupRoot
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 import java.io.BufferedOutputStream
 import java.io.IOException
@@ -64,7 +64,9 @@ import java.time.LocalDateTime
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ToolsPrefsPage(viewModel: MainVM = koinViewModel()) {
+fun ToolsPrefsPage(
+    viewModel: MainVM = koinNeoViewModel(),
+) {
     val context = LocalContext.current
     val neoActivity = OABX.main!!
     val snackbarHostState = remember { SnackbarHostState() }

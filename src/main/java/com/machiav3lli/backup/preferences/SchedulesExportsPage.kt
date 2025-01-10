@@ -40,12 +40,12 @@ import com.machiav3lli.backup.ui.compose.recycler.ExportedScheduleRecycler
 import com.machiav3lli.backup.ui.compose.recycler.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
 import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.ExportsVM
-import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun SchedulesExportsPage(viewModel: ExportsVM = koinViewModel()) {
+fun SchedulesExportsPage(viewModel: ExportsVM = koinNeoViewModel()) {
 
     FullScreenBackground {
         Scaffold(

@@ -28,9 +28,9 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.SlidersHorizontal
 import com.machiav3lli.backup.ui.compose.icons.phosphor.UserGear
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Wrench
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.RestoreBatchVM
-import org.koin.androidx.compose.koinViewModel
 
 sealed class NavItem(
     val title: Int,
@@ -63,12 +63,12 @@ sealed class NavItem(
 
     data object Backup :
         NavItem(R.string.backup, Phosphor.ArchiveTray, "batch_backup", {
-            BatchPage(viewModel = koinViewModel<BackupBatchVM>(), backupBoolean = true)
+            BatchPage(viewModel = koinNeoViewModel<BackupBatchVM>(), backupBoolean = true)
         })
 
     data object Restore :
         NavItem(R.string.restore, Phosphor.ClockCounterClockwise, "batch_restore", {
-            BatchPage(viewModel = koinViewModel<RestoreBatchVM>(), backupBoolean = false)
+            BatchPage(viewModel = koinNeoViewModel<RestoreBatchVM>(), backupBoolean = false)
         })
 
     data object Scheduler :

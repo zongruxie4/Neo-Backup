@@ -109,16 +109,16 @@ import com.machiav3lli.backup.ui.compose.recycler.InfoChipsBlock
 import com.machiav3lli.backup.ui.compose.show
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.infoChips
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.AppVM
 import com.machiav3lli.backup.viewmodels.MainVM
-import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
 @Composable
 fun AppPage(
     packageName: String,
-    viewModel: AppVM = koinViewModel(),
-    mainVM: MainVM = koinViewModel(),
+    viewModel: AppVM = koinNeoViewModel(),
+    mainVM: MainVM = koinNeoViewModel(),
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current

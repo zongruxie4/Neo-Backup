@@ -90,14 +90,16 @@ import com.machiav3lli.backup.ui.compose.recycler.HomePackageRecycler
 import com.machiav3lli.backup.ui.compose.recycler.UpdatedPackageRecycler
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.altModeToMode
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // TODO remove Scaffold
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun HomePage(viewModel: MainVM = koinViewModel()) {
+fun HomePage(
+    viewModel: MainVM = koinNeoViewModel(),
+) {
     // TODO include tags in search
     val mActivity = OABX.main!!
     val scope = rememberCoroutineScope()

@@ -39,7 +39,7 @@ import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.viewmodels.MainVM
-import org.koin.java.KoinJavaComponent.get
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 import timber.log.Timber
 import java.io.File
 
@@ -166,7 +166,7 @@ data class Package private constructor(val packageName: String) {
             } ${TraceUtils.methodName(2)}"
         }
         backupList = backups
-        get<MainVM>(MainVM::class.java).updateBackups(packageName, backups)
+        OABX.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
     }
 
     fun getBackupsFromBackupDir(): List<Backup> {
@@ -336,7 +336,7 @@ data class Package private constructor(val packageName: String) {
             }
         }
         backupList = backups
-        get<MainVM>(MainVM::class.java).updateBackups(packageName, backups)
+        OABX.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
     }
 
     val backupsNewestFirst: List<Backup>

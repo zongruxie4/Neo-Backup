@@ -85,14 +85,14 @@ import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getStats
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.viewmodels.MainVM
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SortFilterSheet(
     sourcePage: NavItem,
-    viewModel: MainVM = koinViewModel(),
+    viewModel: MainVM = koinNeoViewModel(),
     onDismiss: () -> Unit,
 ) {
     val nestedScrollConnection = rememberNestedScrollInteropConnection()

@@ -84,13 +84,13 @@ import com.machiav3lli.backup.utils.TraceUtils.logNanoTiming
 import com.machiav3lli.backup.utils.TraceUtils.nanoTiming
 import com.machiav3lli.backup.utils.getBackupRoot
 import com.machiav3lli.backup.utils.getFormattedDate
+import com.machiav3lli.backup.utils.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import java.util.concurrent.Executors
 import kotlin.math.roundToInt
@@ -238,7 +238,7 @@ fun TextInputMenuItem(
 @Composable
 fun Selections(
     action: MenuAction,
-    viewModel: MainVM = koinViewModel(),
+    viewModel: MainVM = koinNeoViewModel(),
     selection: Set<String> = emptySet(),
     onAction: (Set<String>) -> Unit = {},
 ) {

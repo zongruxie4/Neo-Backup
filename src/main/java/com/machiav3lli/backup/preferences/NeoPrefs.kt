@@ -21,11 +21,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
-import org.koin.java.KoinJavaComponent.getKoin
 
 class NeoPrefs private constructor(val context: Context) : KoinComponent {
-    private val dataStore: DataStore<Preferences> by getKoin().inject()
+    private val dataStore: DataStore<Preferences> by inject()
 
     val sortHome = PrefInt(
         dataStore = dataStore,
@@ -287,8 +288,8 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
 
     companion object {
         val prefsModule = module {
-            single { NeoPrefs(get()) }
-            single { provideDataStore(get()) }
+            singleOf(::NeoPrefs)
+            singleOf(::provideDataStore)
         }
 
         private fun provideDataStore(context: Context): DataStore<Preferences> {
@@ -298,7 +299,5 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
                 },
             )
         }
-
-        fun getInstance(): NeoPrefs = getKoin().get()
     }
 }
