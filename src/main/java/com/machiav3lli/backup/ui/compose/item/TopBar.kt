@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -54,14 +53,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.machiav3lli.backup.OABX
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
@@ -70,6 +66,7 @@ import com.machiav3lli.backup.ui.compose.blockBorderTop
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
+import com.machiav3lli.backup.ui.compose.ifThenElse
 import com.machiav3lli.backup.ui.compose.vertical
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -125,6 +122,10 @@ fun TitleOrInfoLog(
     val infoLogText = OABX.getInfoLogText(n = 5, fill = "")
     val scroll = rememberScrollState(0)
     val scope = rememberCoroutineScope()
+    val rotation by animateFloatAsState(
+        targetValue = if (showInfo) -90f else 0f,
+        label = "rotation"
+    )
 
     LaunchedEffect(infoLogText) {
         tempShowInfo.value = true
@@ -135,62 +136,37 @@ fun TitleOrInfoLog(
         }
     }
 
-    Box(
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .wrapContentHeight()
             .fillMaxWidth()
     ) {
-        if (showInfo) {
-            Row(
-                verticalAlignment = if (showInfo) Alignment.Bottom else Alignment.CenterVertically,
-                modifier = Modifier
-                    .wrapContentHeight()
-            ) {
-                Text(
-                    text = buildAnnotatedString {
-                        append(title)
-                    },
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Start,
-                    fontSize = 11.0.sp,
-                    fontWeight = FontWeight(800),
-                    modifier = Modifier
-                        .absolutePadding(right = 4.dp, bottom = 4.dp)
-                        .vertical()
-                        .rotate(-90f)
+        Text(
+            text = title,
+            style = if (showInfo) MaterialTheme.typography.labelMedium
+            else MaterialTheme.typography.headlineSmall,
+            modifier = Modifier
+                .ifThenElse(
+                    boolean = showInfo,
+                    modifier = { vertical() },
+                    elseModifier = { fillMaxWidth() }
                 )
+                .rotate(rotation)
+                .wrapContentHeight()
+        )
 
-                Text(
-                    text = infoLogText,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontSize = 9.0.sp,
-                    lineHeight = 9.0.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = MaterialTheme.shapes.extraSmall
-                        )
-                        .padding(horizontal = 4.dp)
+        if (showInfo) Text(
+            text = infoLogText,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = MaterialTheme.shapes.extraSmall
                 )
-            }
-        } else {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .fillMaxWidth()
-                )
-            }
-        }
-
+                .padding(horizontal = 4.dp)
+        )
     }
 }
 
