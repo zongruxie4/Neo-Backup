@@ -26,6 +26,7 @@ import android.os.Build
 import android.os.Looper
 import android.os.PowerManager
 import android.os.Process
+import android.os.StrictMode
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -123,6 +124,13 @@ class NeoApp : Application(), KoinStartup {
     }
 
     override fun onCreate() {
+        if (minSDK(Build.VERSION_CODES.S)) {
+            StrictMode.setVmPolicy(
+                StrictMode.VmPolicy.Builder()
+                    .detectUnsafeIntentLaunch()
+                    .build()
+            )
+        }
 
         // do this early, context will be used immediately
         refNB = WeakReference(this)
