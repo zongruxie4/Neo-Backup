@@ -22,7 +22,7 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import com.machiav3lli.backup.BACKUP_INSTANCE_PROPERTIES_INDIR
 import com.machiav3lli.backup.BACKUP_INSTANCE_REGEX_PATTERN
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
@@ -220,7 +220,7 @@ data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::cla
         return result
     }
 
-    fun toSerialized() = OABX.toSerialized(OABX.propsSerializer, this)
+    fun toSerialized() = NeoApp.toSerialized(NeoApp.propsSerializer, this)
 
     class BrokenBackupException @JvmOverloads internal constructor(
         message: String?,
@@ -252,7 +252,7 @@ data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::cla
         get() {
             val pkg = "📦" // "📁"
             return (dir?.path
-                ?.replace(OABX.backupRoot?.path ?: "", "")
+                ?.replace(NeoApp.backupRoot?.path ?: "", "")
                 ?.replace(packageName, pkg)
                 ?.replace(Regex("""($pkg@)?$BACKUP_INSTANCE_REGEX_PATTERN"""), "")
                 ?.replace(Regex("""[-:\s]+"""), "-")
@@ -264,7 +264,7 @@ data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::cla
 
     companion object {
 
-        fun fromSerialized(serialized: String) = OABX.fromSerialized<Backup>(serialized)
+        fun fromSerialized(serialized: String) = NeoApp.fromSerialized<Backup>(serialized)
 
         fun createFrom(propertiesFile: StorageFile): Backup? {
             var serialized = ""

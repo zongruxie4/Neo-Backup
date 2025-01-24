@@ -2,7 +2,7 @@ package tests.research
 
 import android.content.res.Configuration
 import androidx.test.platform.app.InstrumentationRegistry
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.utils.getLocaleOfCode
 import org.junit.Test
@@ -13,7 +13,7 @@ class Try_locales {
     @Test
     fun test_language() {
 
-        val appConfig = OABX.context.resources.configuration
+        val appConfig = NeoApp.context.resources.configuration
 
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val config = context.resources.configuration

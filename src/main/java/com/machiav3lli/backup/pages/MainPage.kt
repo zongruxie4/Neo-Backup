@@ -35,7 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.GlobalBlockListDialogUI
@@ -72,7 +72,7 @@ fun MainPage(
     val currentPage by remember { derivedStateOf { pages[pagerState.currentPage] } }
 
     BackHandler {
-        OABX.main?.finishAffinity()
+        NeoApp.main?.finishAffinity()
     }
 
     val mainState by viewModel.homeState.collectAsState()
@@ -125,7 +125,7 @@ fun MainPage(
                                     description = stringResource(id = R.string.search),
                                     onClick = { searchExpanded.value = true }
                                 )
-                                RefreshButton { OABX.main?.refreshPackagesAndBackups() }
+                                RefreshButton { NeoApp.main?.refreshPackagesAndBackups() }
                                 RoundButton(
                                     description = stringResource(id = R.string.prefs_title),
                                     icon = Phosphor.GearSix

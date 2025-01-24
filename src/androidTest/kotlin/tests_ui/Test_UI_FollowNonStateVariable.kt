@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.preferences.TerminalText
 import com.machiav3lli.backup.ui.compose.isAtBottom
 import kotlinx.coroutines.GlobalScope
@@ -62,7 +62,7 @@ val init = run {
 class Test_UI_FollowNonStateVariable {
 
     @get:Rule
-    val test = createAndroidComposeRule<MainActivityX>()
+    val test = createAndroidComposeRule<NeoActivity>()
 
     @Before
     fun setUp() {

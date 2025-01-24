@@ -25,7 +25,7 @@ import com.machiav3lli.backup.MODE_DATA_DE
 import com.machiav3lli.backup.MODE_DATA_EXT
 import com.machiav3lli.backup.MODE_DATA_MEDIA
 import com.machiav3lli.backup.MODE_DATA_OBB
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.batchModes
 import com.machiav3lli.backup.batchOperations
 import com.machiav3lli.backup.dbs.entity.Backup
@@ -304,9 +304,9 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             val excludeCache = ! pref_backupCache.value
             val allFilesToBackup =
                 shell.suGetDetailedDirectoryContents(sourcePath, true, sourcePath)
-                    .filterNot { f: ShellHandler.FileInfo -> f.filename in OABX.assets.DATA_BACKUP_EXCLUDED_BASENAMES } //TODO basenames! not all levels
-                    .filterNot { f: ShellHandler.FileInfo -> f.filename in OABX.assets.DATA_EXCLUDED_NAMES }
-                    .filterNot { f: ShellHandler.FileInfo -> excludeCache && f.filename in OABX.assets.DATA_EXCLUDED_CACHE_DIRS }
+                    .filterNot { f: ShellHandler.FileInfo -> f.filename in NeoApp.assets.DATA_BACKUP_EXCLUDED_BASENAMES } //TODO basenames! not all levels
+                    .filterNot { f: ShellHandler.FileInfo -> f.filename in NeoApp.assets.DATA_EXCLUDED_NAMES }
+                    .filterNot { f: ShellHandler.FileInfo -> excludeCache && f.filename in NeoApp.assets.DATA_EXCLUDED_CACHE_DIRS }
             allFilesToBackup
         } catch (e: ShellCommandFailedException) {
             throw BackupFailedException("Could not list contents of $sourcePath", e)
@@ -380,9 +380,9 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
             val tarScript = InternalShellScriptPlugin.findScript("tar").toString()
 
             var options = ""
-            options += " --exclude ${quote(OABX.assets.BACKUP_EXCLUDE_FILE)}"
+            options += " --exclude ${quote(NeoApp.assets.BACKUP_EXCLUDE_FILE)}"
             if (! pref_backupCache.value) {
-                options += " --exclude ${quote(OABX.assets.EXCLUDE_CACHE_FILE)}"
+                options += " --exclude ${quote(NeoApp.assets.EXCLUDE_CACHE_FILE)}"
             }
 
             val cmd = "sh ${quote(tarScript)} create $utilBoxQ $options ${quote(sourcePath)}"
@@ -462,7 +462,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         compress: Boolean,
         iv: ByteArray?,
     ): Boolean {
-        Timber.i("${OABX.NB.packageName} <- $sourcePath")
+        Timber.i("${NeoApp.NB.packageName} <- $sourcePath")
         traceAccess { runAsRoot("echo '$sourcePath: '  '$sourcePath'/*").out.joinToString("\n") }
         if (pref_backupTarCmd.value) {
             return genericBackupDataTarCmd(

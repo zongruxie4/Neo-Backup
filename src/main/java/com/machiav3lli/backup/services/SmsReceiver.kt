@@ -27,7 +27,7 @@ import android.provider.ContactsContract.PhoneLookup
 import android.provider.Telephony
 import android.telephony.SmsMessage
 import androidx.core.content.PermissionChecker
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.handler.showNotification
 import com.machiav3lli.backup.utils.SystemUtils
 
@@ -89,7 +89,7 @@ class SmsReceiver : BroadcastReceiver() {
         values.put( Telephony.Sms.SUBJECT, sms.pseudoSubject)
         contentResolver.insert( Telephony.Sms.CONTENT_URI, values )
         showNotification(
-            context, MainActivityX::class.java, notificationId.toInt(),
+            context, NeoActivity::class.java, notificationId.toInt(),
                 sender, message, true
         )
     }

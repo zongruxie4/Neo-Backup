@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.preferences.publicPreferences
 import com.machiav3lli.backup.preferences.traceDebug
@@ -120,9 +120,9 @@ open class Pref(
 
         private fun getPrefs(private: Boolean = false) =
             if (private)
-                OABX.context.getPrivateSharedPrefs()
+                NeoApp.context.getPrivateSharedPrefs()
             else
-                OABX.context.getDefaultSharedPreferences()
+                NeoApp.context.getDefaultSharedPreferences()
 
         fun prefFlag(name: String, default: Boolean, private: Boolean = false) =
             try {

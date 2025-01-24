@@ -10,7 +10,7 @@ import com.machiav3lli.backup.ACTION_RE_SCHEDULE
 import com.machiav3lli.backup.ACTION_RUN_SCHEDULE
 import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.handler.WorkHandler
 import com.machiav3lli.backup.preferences.traceSchedule
@@ -42,13 +42,13 @@ class CommandReceiver : //TODO hg42 how to maintain security?
             ACTION_CANCEL          -> {
                 val batchName = intent.getStringExtra("name")
                 Timber.d("################################################### command intent cancel -------------> name=$batchName")
-                OABX.addInfoLogText("$command $batchName")
+                NeoApp.addInfoLogText("$command $batchName")
                 get<WorkHandler>(WorkHandler::class.java).cancel(batchName)
             }
 
             ACTION_RUN_SCHEDULE    -> {
                 intent.getStringExtra("name")?.let { name ->
-                    OABX.addInfoLogText("$command $name")
+                    NeoApp.addInfoLogText("$command $name")
                     Timber.d("################################################### command intent schedule -------------> name=$name")
                     CoroutineScope(Dispatchers.Default).launch {
                         scheduleRepo.getSchedule(name)?.let { schedule ->
@@ -71,7 +71,7 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                     val time = intent.getStringExtra("time")
                     val setTime = time ?: SimpleDateFormat("HH:mm", Locale.getDefault())
                         .format(now + 120)
-                    OABX.addInfoLogText("$command $name $time -> $setTime")
+                    NeoApp.addInfoLogText("$command $name $time -> $setTime")
                     Timber.d("################################################### command intent reschedule -------------> name=$name time=$time -> $setTime")
                     CoroutineScope(Dispatchers.Default).launch {
                         scheduleRepo.getSchedule(name)?.let { schedule ->
@@ -94,7 +94,7 @@ class CommandReceiver : //TODO hg42 how to maintain security?
 
             null                   -> {}
             else                   -> {
-                OABX.addInfoLogText("Command: command '$command'")
+                NeoApp.addInfoLogText("Command: command '$command'")
             }
         }
     }

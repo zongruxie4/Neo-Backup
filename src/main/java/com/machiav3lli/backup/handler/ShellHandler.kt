@@ -23,9 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.addErrorCommand
-import com.machiav3lli.backup.OABX.Companion.isDebug
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.addErrorCommand
+import com.machiav3lli.backup.NeoApp.Companion.isDebug
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.ShellHandler.Companion.splitCommand
 import com.machiav3lli.backup.handler.ShellHandler.FileInfo.Companion.utilBoxInfo
@@ -235,7 +235,7 @@ class ShellHandler {
         } catch (e: Throwable) {
             LogsHandler.unexpectedException(e, "utilBox detection failed miserable")
         }
-        OABX.lastErrorCommands.clear()  // ignore fails while searching for utilBox
+        NeoApp.lastErrorCommands.clear()  // ignore fails while searching for utilBox
 
         utilBoxes.sortByDescending { it.score }
 
@@ -1120,13 +1120,13 @@ class ShellHandler {
         fun findUserOverridableFile(subDirName: String, fileName: String): File? {
             var found: File? = null
             val userDir = File(
-                OABX.activity?.getExternalFilesDir(null),
+                NeoApp.activity?.getExternalFilesDir(null),
                 subDirName
             )
             userDir.mkdirs()
             found = File(userDir, fileName)
             if (found.isFile != true) {
-                val assetDir = File(OABX.assets.directory, subDirName)
+                val assetDir = File(NeoApp.assets.directory, subDirName)
                 found = File(assetDir, fileName)
             }
             return found

@@ -64,7 +64,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
@@ -74,7 +73,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.machiav3lli.backup.ICON_SIZE_SMALL
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.entity.Log
 import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.handler.LogsHandler
@@ -180,7 +179,7 @@ fun extendedInfo() =
 
 fun logInt() =
     listOf("------ last internal log messages") +
-            OABX.lastLogMessages
+            NeoApp.lastLogMessages
 
 const val maxLogcat = "-t 100000"
 
@@ -216,11 +215,11 @@ fun dumpTiming() =
 
 fun dumpDbSchedule() =
     listOf("------ schedule db") +
-            shell("sqlite3 ${OABX.context.getDatabasePath("main.db")} \"SELECT * FROM schedule ORDER BY id ASC\"")
+            shell("sqlite3 ${NeoApp.context.getDatabasePath("main.db")} \"SELECT * FROM schedule ORDER BY id ASC\"")
 
 fun dumpDbAppInfo() =
     listOf("------ app info db") +
-            shell("sqlite3 ${OABX.context.getDatabasePath("main.db")} \"SELECT * FROM appinfo ORDER BY packageName ASC\"")
+            shell("sqlite3 ${NeoApp.context.getDatabasePath("main.db")} \"SELECT * FROM appinfo ORDER BY packageName ASC\"")
 
 fun accessTest1(title: String, directory: String, comment: String) =
     listOf("--- $title") +
@@ -293,7 +292,7 @@ fun threadsInfo(): List<String> {
 }
 
 fun lastErrorPkg(): List<String> {
-    val pkg = OABX.lastErrorPackage
+    val pkg = NeoApp.lastErrorPackage
     return if (pkg.isNotEmpty()) {
         listOf("------ last error package: $pkg") +
                 shell("ls -l \$ANDROID_DATA/user/0/$pkg") +
@@ -305,7 +304,7 @@ fun lastErrorPkg(): List<String> {
 }
 
 fun lastErrorCommand(): List<String> {
-    val cmds = OABX.lastErrorCommands
+    val cmds = NeoApp.lastErrorCommands
     return if (cmds.isNotEmpty()) {
         listOf("------ last error command") + cmds
     } else {
@@ -630,7 +629,7 @@ fun Terminal(
             val hittingBusy = CoroutineScope(Dispatchers.Default)
             hittingBusy.launch {
                 while (true) {
-                    OABX.hitBusy(50)
+                    NeoApp.hitBusy(50)
                     delay(50)
                 }
             }
@@ -732,12 +731,12 @@ fun Terminal(
             SimpleButton("errInfo") { produce { lastErrorPkg() + lastErrorCommand() } }
             SimpleButton("err->cmd") {
                 command =
-                    if (OABX.lastErrorCommands.isNotEmpty())
-                        OABX.lastErrorCommands.first()
+                    if (NeoApp.lastErrorCommands.isNotEmpty())
+                        NeoApp.lastErrorCommands.first()
                     else
                         "no error command"
             }
-            SimpleButton("findBackups") { OABX.context.findBackups(forceTrace = true) }
+            SimpleButton("findBackups") { NeoApp.context.findBackups(forceTrace = true) }
         }
         Box(
             modifier = Modifier

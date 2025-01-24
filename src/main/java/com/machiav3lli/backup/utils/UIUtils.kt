@@ -28,7 +28,7 @@ import android.os.LocaleList
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.THEME_BLACK
@@ -281,12 +281,12 @@ fun Context.recreateActivities() {
         delay(500)
         Timber.w(
             "recreating activities ${
-                OABX.activities.map {
+                NeoApp.activities.map {
                     "${it.javaClass.simpleName}@${Integer.toHexString(it.hashCode())}"
                 }.joinToString(" ")
             }"
         )
-        OABX.activities
+        NeoApp.activities
             .forEach {
                 runCatching {
                     it.recreate()

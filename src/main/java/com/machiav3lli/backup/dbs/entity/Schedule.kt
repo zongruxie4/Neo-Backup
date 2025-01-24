@@ -29,7 +29,7 @@ import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
 import com.machiav3lli.backup.MODE_APK
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.entity.SpecialFilter
 import com.machiav3lli.backup.handler.LogsHandler
@@ -207,11 +207,11 @@ data class Schedule(
         }
     }
 
-    fun toSerialized() = OABX.toSerialized(OABX.schedSerializer, this)
+    fun toSerialized() = NeoApp.toSerialized(NeoApp.schedSerializer, this)
 
     companion object {
 
-        fun fromSerialized(serialized: String) = OABX.fromSerialized<Schedule>(serialized)
+        fun fromSerialized(serialized: String) = NeoApp.fromSerialized<Schedule>(serialized)
 
         @RenameColumn(
             tableName = "Schedule",

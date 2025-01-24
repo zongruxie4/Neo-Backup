@@ -28,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -136,7 +136,7 @@ fun RootMissing(activity: Activity? = null) {
                 fullWidth = true,
                 modifier = Modifier
             ) {
-                OABX.context.restartApp()
+                NeoApp.context.restartApp()
             }
             if (showDevTools.value) {
                 BaseDialog(onDismiss = { showDevTools.value = false }) {
@@ -177,7 +177,7 @@ fun LockPage(launchMain: () -> Unit) {
         }
     ) {
         BackHandler {
-            OABX.main?.finishAffinity()
+            NeoApp.main?.finishAffinity()
         }
         Box(modifier = Modifier.fillMaxSize()) {}
     }

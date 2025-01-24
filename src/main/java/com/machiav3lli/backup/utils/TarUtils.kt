@@ -17,7 +17,7 @@
  */
 package com.machiav3lli.backup.utils
 
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.handler.ShellHandler.Companion.quote
 import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
@@ -204,11 +204,11 @@ fun TarArchiveInputStream.suUnpackTo(targetDir: RootFile, forceOldVersion: Boole
         val relPath = targetFile.relativeTo(targetDir).toString()
         when {
             relPath.isEmpty() ||
-                    relPath in OABX.assets.DATA_RESTORE_EXCLUDED_BASENAMES ||
-                    relPath in OABX.assets.DATA_EXCLUDED_CACHE_DIRS -> {
+                    relPath in NeoApp.assets.DATA_RESTORE_EXCLUDED_BASENAMES ||
+                    relPath in NeoApp.assets.DATA_EXCLUDED_CACHE_DIRS -> {
                 return@forEach
             }
-            tarEntry.isDirectory                                    -> {
+            tarEntry.isDirectory                                      -> {
                 if (!targetFile.mkdirs()) {
                     throw IOException("Unable to create folder ${targetFile.absolutePath}")
                 }

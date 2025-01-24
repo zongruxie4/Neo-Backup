@@ -69,11 +69,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.machiav3lli.backup.ERROR_PREFIX
 import com.machiav3lli.backup.ICON_SIZE_SMALL
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.beginBusy
-import com.machiav3lli.backup.OABX.Companion.endBusy
-import com.machiav3lli.backup.OABX.Companion.hitBusy
-import com.machiav3lli.backup.OABX.Companion.isDebug
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.beginBusy
+import com.machiav3lli.backup.NeoApp.Companion.endBusy
+import com.machiav3lli.backup.NeoApp.Companion.hitBusy
+import com.machiav3lli.backup.NeoApp.Companion.isDebug
 import com.machiav3lli.backup.PREFS_BACKUP_FILE
 import com.machiav3lli.backup.entity.LaunchPref
 import com.machiav3lli.backup.entity.Pref
@@ -172,7 +172,6 @@ fun SmallButton(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TextInput(
     text: TextFieldValue,
@@ -370,7 +369,7 @@ val devToolsTabs = listOf<Pair<String, @Composable () -> Any>>(
 @Composable
 fun DevInfoLogTab() {
 
-    TerminalText(OABX.infoLogLines)
+    TerminalText(NeoApp.infoLogLines)
 }
 
 @Composable
@@ -386,7 +385,7 @@ fun DevLogTab() {
 
     LaunchedEffect(true) {
         launch {
-            lines.value = OABX.lastLogMessages.toList()
+            lines.value = NeoApp.lastLogMessages.toList()
             if (lines.value.isEmpty())
                 lines.value = logRel()
         }
@@ -444,16 +443,17 @@ fun DevSettingsTab() {
                 DevPrefGroups()
             else {
                 val alternates = search.text.split(',').map {
-                    it.split("+").filter { it.length >= 2 }
+                    it.split("+")
+                        .filter { key -> key.length >= 2 }
                 }.filter { it.isNotEmpty() }
                 PrefsGroup(
                     prefs =
                     Pref.prefGroups.values.flatten()
                         .filter { pref ->
                             pref.group !in listOf("persist", "kill") &&
-                                    alternates.any {
-                                        it.all {
-                                            pref.key.contains(it, ignoreCase = true)
+                                    alternates.any { alt ->
+                                        alt.all { key ->
+                                            pref.key.contains(key, ignoreCase = true)
                                         }
                                     }
                         }.toPersistentList()
@@ -578,7 +578,7 @@ fun PluginEditor(plugin: Plugin? = null, onSubmit: (plugin: Plugin?) -> Unit) {
                     editPlugin!!.save()
                 }
             } else {
-                SimpleButton(if (editPlugin?.isBuiltin ?: true) "Save Copy" else "Save") {
+                SimpleButton(if (editPlugin?.isBuiltin != false) "Save Copy" else "Save") {
                     if (editPlugin != null && Plugin.userDir != null) {
                         try {
                             val file = fileFor(
@@ -784,7 +784,7 @@ val pref_renameDamagedToERROR = LaunchPref(
 ) {
     MainScope().launch(Dispatchers.IO) {
         beginBusy("renameDamagedToERROR")
-        OABX.context.findBackups(damagedOp = "ren")
+        NeoApp.context.findBackups(damagedOp = "ren")
         devToolsTab.value = "infolog"
         endBusy("renameDamagedToERROR")
     }
@@ -796,7 +796,7 @@ val pref_undoDamagedToERROR = LaunchPref(
 ) {
     MainScope().launch(Dispatchers.IO) {
         beginBusy("undoDamagedToERROR")
-        OABX.context.findBackups(damagedOp = "undo")
+        NeoApp.context.findBackups(damagedOp = "undo")
         devToolsTab.value = "infolog"
         endBusy("undoDamagedToERROR")
     }
@@ -808,7 +808,7 @@ val pref_deleteERROR = LaunchPref(
 ) {
     MainScope().launch(Dispatchers.IO) {
         beginBusy("deleteERROR")
-        OABX.context.findBackups(damagedOp = "del")
+        NeoApp.context.findBackups(damagedOp = "del")
         devToolsTab.value = "infolog"
         endBusy("deleteERROR")
     }
@@ -822,10 +822,10 @@ val pref_savePreferences = LaunchPref(
         val serialized = preferencesToSerialized()
         if (serialized.isNotEmpty()) {
             runCatching {
-                OABX.backupRoot?.let { backupRoot ->
+                NeoApp.backupRoot?.let { backupRoot ->
                     UndeterminedStorageFile(backupRoot, PREFS_BACKUP_FILE).let {
                         it.writeText(serialized)?.let {
-                            OABX.addInfoLogText("saved ${it.name}")
+                            NeoApp.addInfoLogText("saved ${it.name}")
                         }
                     }
                 }
@@ -840,12 +840,12 @@ val pref_loadPreferences = LaunchPref(
 ) {
     MainScope().launch(Dispatchers.IO) {
         runCatching {
-            OABX.backupRoot?.let { backupRoot ->
+            NeoApp.backupRoot?.let { backupRoot ->
                 backupRoot.findFile(PREFS_BACKUP_FILE)?.let {
                     val serialized = it.readText()
                     preferencesFromSerialized(serialized)
-                    OABX.addInfoLogText("loaded ${it.name}")
-                    OABX.context.recreateActivities()
+                    NeoApp.addInfoLogText("loaded ${it.name}")
+                    NeoApp.context.recreateActivities()
                 }
             }
         }
@@ -886,7 +886,7 @@ fun openFileManager(folder: StorageFile) {
                                 //putExtra(Intent.EXTRA_LOCAL_ONLY, true)
                                 addCategory(Intent.CATEGORY_BROWSABLE)
                             }
-                        OABX.activity?.startActivity(intent)
+                        NeoApp.activity?.startActivity(intent)
                     }
 
                     0 -> {
@@ -902,7 +902,7 @@ fun openFileManager(folder: StorageFile) {
                                 addCategory(Intent.CATEGORY_BROWSABLE)
                             }
                         val chooser = Intent.createChooser(intent, "Browse")
-                        OABX.activity?.startActivity(chooser)
+                        NeoApp.activity?.startActivity(chooser)
                     }
 
                     0 -> {
@@ -917,7 +917,7 @@ fun openFileManager(folder: StorageFile) {
                                 addCategory(Intent.CATEGORY_OPENABLE)
                             }
                         val chooser = Intent.createChooser(intent, "Browse")
-                        OABX.activity?.startActivity(chooser)
+                        NeoApp.activity?.startActivity(chooser)
                     }
 
                     0 -> {
@@ -935,7 +935,7 @@ fun openFileManager(folder: StorageFile) {
                                 //setDataAndType(uri, EXTRA_MIME_TYPES)
                                 //addCategory(CATEGORY_APP_FILES)
                             }
-                        OABX.activity?.startActivity(intent)
+                        NeoApp.activity?.startActivity(intent)
                     }
 
                     1 -> {
@@ -957,7 +957,7 @@ fun openFileManager(folder: StorageFile) {
                                 //addCategory(CATEGORY_APP_FILES)
                                 //addCategory(Intent.CATEGORY_BROWSABLE)
                             }
-                        OABX.context.startActivity(intent)
+                        NeoApp.context.startActivity(intent)
                     }
 
                     else -> {}
@@ -974,7 +974,7 @@ val pref_openBackupDir = LaunchPref(
     key = "dev-tool.openBackupDir",
     summary = "open backup directory in associated app"
 ) {
-    OABX.backupRoot?.let { openFileManager(it) }
+    NeoApp.backupRoot?.let { openFileManager(it) }
 }
 
 @Composable
@@ -1056,7 +1056,10 @@ fun DevSupportTab() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalLayoutApi::class,
+)
 @Composable
 fun DevTools(
     expanded: MutableState<Boolean>,
@@ -1077,7 +1080,7 @@ fun DevTools(
     }
 
     val tempShowInfo = remember { mutableStateOf(false) }
-    val showInfo = OABX.showInfoLog || tempShowInfo.value
+    val showInfo = NeoApp.showInfoLog || tempShowInfo.value
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -1114,8 +1117,8 @@ fun DevTools(
                                 .wrapContentHeight()
                                 .combinedClickable(
                                     onClick = {
-                                        OABX.showInfoLog = OABX.showInfoLog.not()
-                                        if (OABX.showInfoLog.not())
+                                        NeoApp.showInfoLog = NeoApp.showInfoLog.not()
+                                        if (NeoApp.showInfoLog.not())
                                             tempShowInfo.value = false
                                     },
                                     onLongClick = {
@@ -1130,10 +1133,10 @@ fun DevTools(
                     ) {
                         expanded.value = false
                         try {
-                            if (OABX.main?.navController != null)
+                            if (NeoApp.main?.navController != null)
                             ;
                         } catch (e: Throwable) {
-                            OABX.main?.restartApp()
+                            NeoApp.main?.restartApp()
                         }
                     }
                 }
@@ -1213,7 +1216,7 @@ fun DevToolsPreview() {
             }
             SimpleButton("count") {
                 count++
-                OABX.addInfoLogText("line $count")
+                NeoApp.addInfoLogText("line $count")
             }
             SimpleButton("busy") {
                 hitBusy(5000)

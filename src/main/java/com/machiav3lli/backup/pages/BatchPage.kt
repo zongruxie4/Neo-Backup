@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.BatchActionDialogUI
@@ -83,7 +83,7 @@ fun BatchPage(
     mainVM: MainVM = koinNeoViewModel(),
     backupBoolean: Boolean
 ) {
-    val main = OABX.main!!
+    val main = NeoApp.main!!
     val scope = rememberCoroutineScope()
     val mainState by if (backupBoolean) mainVM.backupState.collectAsState()
     else mainVM.restoreState.collectAsState()

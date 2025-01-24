@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.COMPRESSION_TYPES
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
@@ -189,7 +189,7 @@ val pref_backupNoBackupData = BooleanPref(
     summaryId = R.string.prefs_nobackupdata_summary,
     icon = Phosphor.ProhibitInset,
     defaultValue = false,
-    onChanged = { OABX.assets.updateExcludeFiles() },
+    onChanged = { NeoApp.assets.updateExcludeFiles() },
 )
 
 val pref_backupCache = BooleanPref(
@@ -238,7 +238,7 @@ val pref_restoreNoBackupData = BooleanPref(
     summaryId = R.string.prefs_nobackupdata_rst_summary,
     icon = Phosphor.ProhibitInset,
     defaultValue = false,
-    onChanged = { OABX.assets.updateExcludeFiles() },
+    onChanged = { NeoApp.assets.updateExcludeFiles() },
 )
 
 val pref_restoreCache = BooleanPref(

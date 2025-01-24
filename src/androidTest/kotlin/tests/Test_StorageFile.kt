@@ -5,11 +5,10 @@ import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.test.platform.app.InstrumentationRegistry
 import com.machiav3lli.backup.ADMIN_PREFIX
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.entity.UndeterminedStorageFile
 import com.machiav3lli.backup.entity.uriFromFile
-import com.machiav3lli.backup.utils.FileUtils
 import com.machiav3lli.backup.utils.TraceUtils
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
@@ -31,11 +30,11 @@ class Test_StorageFile {
         0    -> DocumentFile.fromFile(baseDirAsFile).uri    // Unknown authority
         0    -> // same as uriFromFile below                   Failed to find configured root
             FileProvider.getUriForFile(
-                OABX.context,
-                "${OABX.context.packageName}.provider",
+                NeoApp.context,
+                "${NeoApp.context.packageName}.provider",
                 baseDirAsFile
             )
-        1    -> OABX.backupRoot?.uri!!
+        1    -> NeoApp.backupRoot?.uri!!
         else -> uriFromFile(baseDirAsFile)
     }
     val baseDir = when (1) {

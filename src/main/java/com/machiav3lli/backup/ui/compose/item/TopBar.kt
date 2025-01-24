@@ -58,7 +58,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.preferences.pref_showInfoLogBar
@@ -75,11 +75,11 @@ import java.lang.Float.max
 
 @Composable
 fun ProgressIndicator() {
-    val busy by remember(OABX.busy.value) { OABX.busy }
+    val busy by remember(NeoApp.busy.value) { NeoApp.busy }
     val progress by remember(
-        OABX.progress.value.first,
-        OABX.progress.value.second
-    ) { OABX.progress }
+        NeoApp.progress.value.first,
+        NeoApp.progress.value.second
+    ) { NeoApp.progress }
 
     if (progress.first) {
         LinearProgressIndicator(
@@ -119,7 +119,7 @@ fun TitleOrInfoLog(
     tempShowInfo: MutableState<Boolean>,
     modifier: Modifier = Modifier,
 ) {
-    val infoLogText = OABX.getInfoLogText(n = 5, fill = "")
+    val infoLogText = NeoApp.getInfoLogText(n = 5, fill = "")
     val scroll = rememberScrollState(0)
     val scope = rememberCoroutineScope()
     val rotation by animateFloatAsState(
@@ -180,7 +180,7 @@ fun TopBar(
     val showDevTools = remember { mutableStateOf(false) }
     val tempShowInfo = remember { mutableStateOf(false) }
     val showInfo =
-        !showDevTools.value && (OABX.showInfoLog || tempShowInfo.value) && pref_showInfoLogBar.value
+        !showDevTools.value && (NeoApp.showInfoLog || tempShowInfo.value) && pref_showInfoLogBar.value
 
     Box { // overlay TopBar and indicators
         ListItem(
@@ -201,9 +201,9 @@ fun TopBar(
                         .combinedClickable(
                             onClick = {
                                 if (pref_showInfoLogBar.value) {
-                                    OABX.showInfoLog = !OABX.showInfoLog
+                                    NeoApp.showInfoLog = !NeoApp.showInfoLog
                                 }
-                                if (!OABX.showInfoLog)
+                                if (!NeoApp.showInfoLog)
                                     tempShowInfo.value = false
                             },
                             onLongClick = {
@@ -242,7 +242,7 @@ fun MainTopBar(
     val showDevTools = remember { mutableStateOf(false) }
     val tempShowInfo = remember { mutableStateOf(false) }
     val showInfo =
-        !showDevTools.value && (OABX.showInfoLog || tempShowInfo.value) && pref_showInfoLogBar.value
+        !showDevTools.value && (NeoApp.showInfoLog || tempShowInfo.value) && pref_showInfoLogBar.value
     val (isExpanded, onExpanded) = remember { expanded }
     val enterPositive = expandHorizontally(expandFrom = Alignment.End)
     val exitPositive = shrinkHorizontally(shrinkTowards = Alignment.End)
@@ -273,9 +273,9 @@ fun MainTopBar(
                             .combinedClickable(
                                 onClick = {
                                     if (pref_showInfoLogBar.value) {
-                                        OABX.showInfoLog = !OABX.showInfoLog
+                                        NeoApp.showInfoLog = !NeoApp.showInfoLog
                                     }
-                                    if (!OABX.showInfoLog)
+                                    if (!NeoApp.showInfoLog)
                                         tempShowInfo.value = false
                                 },
                                 onLongClick = {
@@ -420,28 +420,28 @@ fun ProgressPreview() {
 
     SideEffect {
         if (count >= 0)
-            OABX.setProgress(count, maxCount)
+            NeoApp.setProgress(count, maxCount)
         else if (count == -2)
-            OABX.setProgress()
+            NeoApp.setProgress()
         else
-            OABX.hitBusy(2000)
+            NeoApp.hitBusy(2000)
     }
 
-    OABX.clearInfoLogText()
-    repeat(10) { OABX.addInfoLogText("line $it") }
-    OABX.setProgress(count, maxCount)
+    NeoApp.clearInfoLogText()
+    repeat(10) { NeoApp.addInfoLogText("line $it") }
+    NeoApp.setProgress(count, maxCount)
 
     LaunchedEffect(true) {
         MainScope().launch {
             while (count < maxCount) {
-                OABX.beginBusy()
-                OABX.addInfoLogText("count is $count")
+                NeoApp.beginBusy()
+                NeoApp.addInfoLogText("count is $count")
                 delay(1000)
                 count = (count + 1) % (maxCount + 2)
-                OABX.endBusy()
+                NeoApp.endBusy()
                 if (count > maxCount)
-                    OABX.setProgress()
-                OABX.addInfoLogText("count is $count")
+                    NeoApp.setProgress()
+                NeoApp.addInfoLogText("count is $count")
                 delay(1000)
             }
         }

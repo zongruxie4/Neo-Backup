@@ -6,7 +6,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.os.SystemClock
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.entity.RootFile
 import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.handler.LogsHandler
@@ -38,12 +38,12 @@ object SystemUtils {
     @Suppress("DEPRECATION")
     private fun Context.getApplicationIssuer() : String? {
         runCatching {
-            val signatures = if (OABX.minSDK(28)) {
-                val packageInfo = OABX.context.getApplicationInfos(PackageManager.GET_SIGNING_CERTIFICATES)
+            val signatures = if (NeoApp.minSDK(28)) {
+                val packageInfo = NeoApp.context.getApplicationInfos(PackageManager.GET_SIGNING_CERTIFICATES)
                 val signingInfo = packageInfo?.signingInfo
                 signingInfo?.getSigningCertificateHistory() ?: arrayOf()
             } else {
-                val packageInfo = OABX.context.getApplicationInfos(PackageManager.GET_SIGNATURES)
+                val packageInfo = NeoApp.context.getApplicationInfos(PackageManager.GET_SIGNATURES)
                 packageInfo?.signatures ?: arrayOf()
             }
             if (signatures.isEmpty())
@@ -68,10 +68,10 @@ object SystemUtils {
     val packageName get() = com.machiav3lli.backup.BuildConfig.APPLICATION_ID
     val versionCode get() = com.machiav3lli.backup.BuildConfig.VERSION_CODE
     val versionName get() = com.machiav3lli.backup.BuildConfig.VERSION_NAME
-    val updateId get() = "${OABX.context.getApplicationInfos()?.lastUpdateTime?.toString()}-${versionName}"
+    val updateId get() = "${NeoApp.context.getApplicationInfos()?.lastUpdateTime?.toString()}-${versionName}"
     val backupVersionCode get() = com.machiav3lli.backup.BuildConfig.MAJOR * 1000 + com.machiav3lli.backup.BuildConfig.MINOR
 
-    val applicationIssuer get() = OABX.context.getApplicationIssuer() ?: "UNKNOWN ISSUER"
+    val applicationIssuer get() = NeoApp.context.getApplicationIssuer() ?: "UNKNOWN ISSUER"
 
     val numCores get() = Runtime.getRuntime().availableProcessors()
 
@@ -109,7 +109,7 @@ object SystemUtils {
 
     fun share(text: String, subject: String? = null, asFile: Boolean = true) {
         if (asFile) {
-            OABX.context.getExternalFilesDir(DIRECTORY_DOWNLOADS)
+            NeoApp.context.getExternalFilesDir(DIRECTORY_DOWNLOADS)
                 ?.resolve("NeoBackup-share.txt")    // TODO hg42 use subject.replace(illegal, "_").truncate(n)
                 ?.also { it.writeText(text) }
                 ?.let { SystemUtils.share(StorageFile(it)) }
@@ -130,7 +130,7 @@ object SystemUtils {
                     putExtra(Intent.EXTRA_TEXT, text)
                 }
                 val shareIntent = Intent.createChooser(sendIntent, subject ?: "NeoBackup")
-                OABX.activity?.startActivity(shareIntent)
+                NeoApp.activity?.startActivity(shareIntent)
             } catch (e: Throwable) {
                 LogsHandler.unexpectedException(e)
             }
@@ -161,7 +161,7 @@ object SystemUtils {
                         putExtra(Intent.EXTRA_TEXT, text)       // send as text
                 }
                 val shareIntent = Intent.createChooser(sendIntent, file.name)
-                OABX.activity?.startActivity(shareIntent)
+                NeoApp.activity?.startActivity(shareIntent)
             } catch (e: Throwable) {
                 LogsHandler.unexpectedException(e)
             }

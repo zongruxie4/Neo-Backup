@@ -1,7 +1,7 @@
 package com.machiav3lli.backup.plugins
 
 import androidx.compose.runtime.Composable
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.preferences.tracePlugin
 import timber.log.Timber
@@ -131,8 +131,8 @@ abstract class Plugin(val name: String, var file: File) {
 
         // files need to be copied from ap[k to filesDir, so use assets.directory instead of filesDir
         //        val builtinDir get() = OABX.context.filesDir?.resolve("plugin")
-        val builtinDir get() = OABX.assets.directory.resolve("plugin")
-        val userDir get() = OABX.context.getExternalFilesDir(null)?.resolve("plugin")
+        val builtinDir get() = NeoApp.assets.directory.resolve("plugin")
+        val userDir get() = NeoApp.context.getExternalFilesDir(null)?.resolve("plugin")
 
         fun loadPluginFromDir(dir: File): Plugin? {
             Timber.w("not implemented: loadPluginFromDir ${dir.name}") //TODO hg42

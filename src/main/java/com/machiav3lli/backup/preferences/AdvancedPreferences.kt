@@ -27,11 +27,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.busyTick
-import com.machiav3lli.backup.OABX.Companion.isDebug
-import com.machiav3lli.backup.OABX.Companion.isHg42
-import com.machiav3lli.backup.OABX.Companion.isRelease
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.busyTick
+import com.machiav3lli.backup.NeoApp.Companion.isDebug
+import com.machiav3lli.backup.NeoApp.Companion.isHg42
+import com.machiav3lli.backup.NeoApp.Companion.isRelease
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.entity.BooleanPref
 import com.machiav3lli.backup.entity.IntPref
@@ -58,9 +58,6 @@ import com.machiav3lli.backup.ui.compose.item.BasePreference
 import com.machiav3lli.backup.ui.compose.item.TextInput
 import com.machiav3lli.backup.ui.compose.mix
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
-import com.machiav3lli.backup.ui.compose.theme.ColorDeData
-import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
-import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -553,7 +550,7 @@ val pref_fixNavBarOverlap = IntPref(
     key = "dev-hack.fixNavBarOverlap",
     summary = "fix UI overlapping system navbars [in 'dp', usually needs something like 42]",
     entries = (0..64).toList(),
-    defaultValue = if (OABX.minSDK(Build.VERSION_CODES.R)) 0 else 42
+    defaultValue = if (NeoApp.minSDK(Build.VERSION_CODES.R)) 0 else 42
 )
 
 val pref_delayBeforeRefreshAppInfo = IntPref(
@@ -580,7 +577,7 @@ val pref_killThisApp = LaunchPref(
         (in contrast to force-close, where alarms are removed from the system)
         """.trimIndent().replace("\n", " ").trim(),
 ) {
-    OABX.activity?.let { ActivityCompat.finishAffinity(it) }
+    NeoApp.activity?.let { ActivityCompat.finishAffinity(it) }
     System.exit(0)
 }
 
@@ -622,7 +619,7 @@ val pref_enableSpecialBackups = BooleanPref(
     icon = Phosphor.AsteriskSimple,
     defaultValue = false,
     onChanged = {
-        OABX.main?.get<NeoPrefs>()?.let {
+        NeoApp.main?.get<NeoPrefs>()?.let {
             it.mainFilterHome.value = it.mainFilterHome.value and MAIN_FILTER_DEFAULT
         }
     }

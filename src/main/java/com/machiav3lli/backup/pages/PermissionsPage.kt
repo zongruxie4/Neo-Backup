@@ -53,7 +53,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.machiav3lli.backup.DialogMode
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.dialogs.BaseDialog
@@ -86,7 +86,7 @@ import timber.log.Timber
 fun PermissionsPage(powerManager: PowerManager = koinInject()) {
     val context = LocalContext.current
     val mScope = CoroutineScope(Dispatchers.Main)
-    val mainActivity = OABX.main!!
+    val mainActivity = NeoApp.main!!
     val openDialog = remember { mutableStateOf(false) }
     val dialogProp: MutableState<DialogMode> = remember {
         mutableStateOf(DialogMode.NONE)
@@ -130,7 +130,7 @@ fun PermissionsPage(powerManager: PowerManager = koinInject()) {
             ) else null,
             Triple(
                 Permission.PostNotifications,
-                if (OABX.minSDK(Build.VERSION_CODES.TIRAMISU)) {
+                if (NeoApp.minSDK(Build.VERSION_CODES.TIRAMISU)) {
                     listOf(Manifest.permission.POST_NOTIFICATIONS)
                 } else emptyList(),
                 DialogMode.NONE

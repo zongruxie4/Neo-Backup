@@ -2,7 +2,7 @@ package com.machiav3lli.backup.dbs.repository
 
 import android.app.Application
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.entity.StorageFile
@@ -40,7 +40,7 @@ class ExportsRepository(
             )
         }
         showNotification(
-            appContext, MainActivityX::class.java, SystemUtils.now.toInt(),
+            appContext, NeoActivity::class.java, SystemUtils.now.toInt(),
             appContext.getString(R.string.sched_imported), schedule.name, false
         )
     }

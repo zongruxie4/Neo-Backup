@@ -19,8 +19,8 @@ package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.repository.AppExtrasRepository
@@ -93,8 +93,8 @@ class AppVM(
                 onDismiss = { dismissNow.value = true }
             ) { message ->
                 showNotification(
-                    OABX.NB,
-                    MainActivityX::class.java,
+                    NeoApp.NB,
+                    NeoActivity::class.java,
                     notificationId++,
                     pkg.value?.packageLabel,
                     message,

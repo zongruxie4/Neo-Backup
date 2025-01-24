@@ -26,11 +26,11 @@ import com.machiav3lli.backup.EXTRA_NAME
 import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.MODE_UNSET
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.beginLogSection
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.beginLogSection
 import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.dbs.entity.AppExtras
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dbs.repository.AppExtrasRepository
@@ -85,7 +85,7 @@ class ScheduleWork(
         return ForegroundInfo(
             notification.hashCode(),
             notification,
-            if (OABX.minSDK(Build.VERSION_CODES.Q)) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            if (NeoApp.minSDK(Build.VERSION_CODES.Q)) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             else 0
         )
     }
@@ -95,7 +95,7 @@ class ScheduleWork(
             scheduleId = inputData.getLong(EXTRA_SCHEDULE_ID, -1L)
             val name = inputData.getString(EXTRA_NAME) ?: ""
 
-            OABX.wakelock(true)
+            NeoApp.wakelock(true)
 
             traceSchedule {
                 buildString {
@@ -134,14 +134,14 @@ class ScheduleWork(
                 }
             }
 
-            OABX.wakelock(false)
+            NeoApp.wakelock(false)
 
             Result.success()
         } catch (e: Exception) {
             Timber.e(e)
             Result.failure()
         } finally {
-            OABX.wakelock(false)
+            NeoApp.wakelock(false)
         }
     }
 
@@ -275,7 +275,7 @@ class ScheduleWork(
         endSchedule(name, "no work")
         showNotification(
             context,
-            MainActivityX::class.java,
+            NeoActivity::class.java,
             notificationId,
             context.getString(R.string.schedule_failed),
             context.getString(R.string.empty_filtered_list),
@@ -285,8 +285,8 @@ class ScheduleWork(
     }
 
     private fun beginSchedule(name: String, details: String = ""): Boolean {
-        return if (OABX.runningSchedules[scheduleId] != true) {
-            OABX.runningSchedules[scheduleId] = true
+        return if (NeoApp.runningSchedules[scheduleId] != true) {
+            NeoApp.runningSchedules[scheduleId] = true
             beginLogSection("schedule $name")
             true
         } else {
@@ -305,8 +305,8 @@ class ScheduleWork(
     }
 
     private fun endSchedule(name: String, details: String = "") {
-        if (OABX.runningSchedules[scheduleId] != null) {
-            OABX.runningSchedules.remove(scheduleId)
+        if (NeoApp.runningSchedules[scheduleId] != null) {
+            NeoApp.runningSchedules.remove(scheduleId)
             if (pref_autoLogAfterSchedule.value) {
                 textLog(
                     listOf(
@@ -314,7 +314,7 @@ class ScheduleWork(
                     ) + supportInfo()
                 )
             }
-            OABX.endLogSection("schedule $name")
+            NeoApp.endLogSection("schedule $name")
         } else {
             traceSchedule { "[$scheduleId] duplicate schedule end: name='$name'${if (details.isEmpty()) "" else " ($details)"}" }
         }
@@ -330,7 +330,7 @@ class ScheduleWork(
         val contentPendingIntent = PendingIntent.getActivity(
             context,
             0,
-            Intent(context, MainActivityX::class.java),
+            Intent(context, NeoActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 

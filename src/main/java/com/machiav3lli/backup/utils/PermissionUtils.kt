@@ -16,7 +16,7 @@ import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
 import org.koin.java.KoinJavaComponent.get
 
@@ -37,7 +37,7 @@ val Context.allPermissionsGranted: Boolean
 
 val Context.hasStoragePermissions: Boolean
     get() = when {
-        OABX.minSDK(Build.VERSION_CODES.R) ->
+        NeoApp.minSDK(Build.VERSION_CODES.R) ->
             Environment.isExternalStorageManager()
 
         else                               ->
@@ -65,7 +65,7 @@ val Context.checkSMSMMSPermission: Boolean
         ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
-            OABX.minSDK(Build.VERSION_CODES.Q) ->
+            NeoApp.minSDK(Build.VERSION_CODES.Q) ->
                 appOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_READ_SMS,
                     Process.myUid(),
@@ -99,7 +99,7 @@ val Context.checkCallLogsPermission: Boolean
         ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
-            OABX.minSDK(Build.VERSION_CODES.Q) ->
+            NeoApp.minSDK(Build.VERSION_CODES.Q) ->
                 appOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_READ_CALL_LOG,
                     Process.myUid(),
@@ -127,7 +127,7 @@ val Context.checkContactsPermission: Boolean
         ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
-            OABX.minSDK(Build.VERSION_CODES.Q) ->
+            NeoApp.minSDK(Build.VERSION_CODES.Q) ->
                 appOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_READ_CONTACTS,
                     Process.myUid(),
@@ -150,7 +150,7 @@ val Context.checkUsageStatsPermission: Boolean
     get() {
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
-            OABX.minSDK(Build.VERSION_CODES.Q) ->
+            NeoApp.minSDK(Build.VERSION_CODES.Q) ->
                 appOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_GET_USAGE_STATS,
                     Process.myUid(),
@@ -173,7 +173,7 @@ val Context.checkUsageStatsPermission: Boolean
     }
 
 val Context.postNotificationsPermission: Boolean
-    get() = if (OABX.minSDK(Build.VERSION_CODES.TIRAMISU)) {
+    get() = if (NeoApp.minSDK(Build.VERSION_CODES.TIRAMISU)) {
         checkCallingOrSelfPermission(
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
@@ -200,7 +200,7 @@ fun requireStorageLocation(
 
 fun Activity.getStoragePermission() {
     when {
-        OABX.minSDK(Build.VERSION_CODES.R) -> {
+        NeoApp.minSDK(Build.VERSION_CODES.R) -> {
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
             intent.data = Uri.parse("package:$packageName")
             startActivity(intent)

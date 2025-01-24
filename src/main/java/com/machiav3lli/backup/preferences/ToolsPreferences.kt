@@ -22,9 +22,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.DialogMode
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.entity.LinkPref
@@ -64,7 +64,7 @@ fun ToolsPrefsPage(
     viewModel: MainVM = koinNeoViewModel(),
 ) {
     val context = LocalContext.current
-    val neoActivity = OABX.main!!
+    val neoActivity = NeoApp.main!!
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val openDialog = remember { mutableStateOf(false) }
@@ -224,7 +224,7 @@ private fun Context.deleteBackups(deleteList: List<Package>) {
     deleteList.forEachIndexed { i, ai ->
         showNotification(
             this,
-            MainActivityX::class.java,
+            NeoActivity::class.java,
             notificationId,
             "${getString(R.string.batchDeleteMessage)} ($i/${deleteList.size})",
             ai.packageLabel,
@@ -235,7 +235,7 @@ private fun Context.deleteBackups(deleteList: List<Package>) {
     }
     showNotification(
         this,
-        MainActivityX::class.java,
+        NeoActivity::class.java,
         notificationId,
         getString(R.string.batchDeleteNotificationTitle),
         "${getString(R.string.batchDeleteBackupsDeleted)} ${deleteList.size}",
@@ -264,12 +264,12 @@ private fun Context.onClickCopySelf(
         GlobalScope.launch(Dispatchers.IO) {  // TODO hg42 "they are like demon threads" -> use something like MainScope instead?
             if (BackupRestoreHelper.copySelfApk(
                     this@onClickCopySelf,
-                    OABX.shellHandler!!
+                    NeoApp.shellHandler!!
                 )
             ) {
                 showNotification(
                     this@onClickCopySelf,
-                    MainActivityX::class.java,
+                    NeoActivity::class.java,
                     SystemUtils.now.toInt(),
                     getString(R.string.copyOwnApkSuccess),
                     "",
@@ -282,7 +282,7 @@ private fun Context.onClickCopySelf(
             } else {
                 showNotification(
                     this@onClickCopySelf,
-                    MainActivityX::class.java,
+                    NeoActivity::class.java,
                     SystemUtils.now.toInt(),
                     getString(R.string.copyOwnApkFailed),
                     "",
@@ -354,11 +354,11 @@ fun Context.writeAppsListFile(appsList: List<String>, filteredBoolean: Boolean) 
     val date = LocalDateTime.now()
     val filesText = appsList.joinToString("\n")
     val fileName = "${BACKUP_DATE_TIME_FORMATTER.format(date)}.appslist"
-    OABX.backupRoot?.createFile(fileName)?.let { listFile ->
+    NeoApp.backupRoot?.createFile(fileName)?.let { listFile ->
         BufferedOutputStream(listFile.outputStream())
             .use { it.write(filesText.toByteArray(StandardCharsets.UTF_8)) }
         showNotification(
-            this, MainActivityX::class.java, SystemUtils.now.toInt(),
+            this, NeoActivity::class.java, SystemUtils.now.toInt(),
             getString(
                 if (filteredBoolean) R.string.write_apps_list_filtered
                 else R.string.write_apps_list_all

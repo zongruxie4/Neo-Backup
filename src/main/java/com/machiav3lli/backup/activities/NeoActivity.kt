@@ -1,6 +1,6 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
- * Copyright (C) 2020  Antonios Hazim
+ * Neo Backup: open-source apps backup and restore app.
+ * Copyright (C) 2025  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -48,9 +48,9 @@ import androidx.work.WorkManager
 import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.addInfoLogText
-import com.machiav3lli.backup.OABX.Companion.startup
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.addInfoLogText
+import com.machiav3lli.backup.NeoApp.Companion.startup
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.RESCUE_NAV
 import com.machiav3lli.backup.dbs.repository.AppExtrasRepository
@@ -119,7 +119,7 @@ fun Rescue() {
     }
 }
 
-class MainActivityX : BaseActivity() {
+class NeoActivity : BaseActivity() {
 
     private val mScope: CoroutineScope = MainScope()
     lateinit var navController: NavHostController
@@ -138,16 +138,16 @@ class MainActivityX : BaseActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        val mainChanged = (this != OABX.mainSaved.get())
-        OABX.main = this
+        val mainChanged = (this != NeoApp.mainSaved.get())
+        NeoApp.main = this
 
         var freshStart = (savedInstanceState == null)   //TODO use some lifecycle method?
 
         Timber.w(
             listOfNotNull(
                 if (freshStart) "fresh start" else null,
-                if (mainChanged && (!freshStart || (OABX.mainSaved.get() != null)))
-                    "main changed (was ${classAndId(OABX.mainSaved.get())})"
+                if (mainChanged && (!freshStart || (NeoApp.mainSaved.get() != null)))
+                    "main changed (was ${classAndId(NeoApp.mainSaved.get())})"
                 else
                     null,
             ).joinToString(", ")
@@ -158,7 +158,7 @@ class MainActivityX : BaseActivity() {
         //TODO wech begin ??? or is this necessary with resume or similar?
 
         //TODO here or in MainPage? MainPage seems to be weird at least for each recomposition
-        OABX.appsSuspendedChecked = false
+        NeoApp.appsSuspendedChecked = false
 
         //if (pref_catchUncaughtException.value) {               //TODO wech ???
         //    Thread.setDefaultUncaughtExceptionHandler { _, e ->
@@ -313,13 +313,13 @@ class MainActivityX : BaseActivity() {
     }
 
     override fun onResume() {
-        OABX.main = this
+        NeoApp.main = this
         super.onResume()
     }
 
     override fun onDestroy() {
-        OABX.mainSaved = OABX.mainRef
-        OABX.main = null
+        NeoApp.mainSaved = NeoApp.mainRef
+        NeoApp.main = null
         super.onDestroy()
     }
 
@@ -489,7 +489,7 @@ class MainActivityX : BaseActivity() {
                                 if (error.isNotEmpty()) errors =
                                     "$errors$packageLabel: ${      //TODO hg42 add to WorkHandler
                                         LogsHandler.handleErrorMessages(
-                                            OABX.context,
+                                            NeoApp.context,
                                             error
                                         )
                                     }\n"
@@ -571,7 +571,7 @@ class MainActivityX : BaseActivity() {
                                 if (error.isNotEmpty()) errors =
                                     "$errors$packageLabel: ${
                                         LogsHandler.handleErrorMessages(
-                                            OABX.context,
+                                            NeoApp.context,
                                             error
                                         )
                                     }\n"

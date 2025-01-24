@@ -141,11 +141,11 @@ val themeItems = mutableMapOf(
     THEME_DARK to R.string.prefs_theme_dark,
     THEME_BLACK to R.string.prefs_theme_black,
 ).apply {
-    if (OABX.minSDK(29)) {
+    if (NeoApp.minSDK(29)) {
         set(THEME_SYSTEM, R.string.prefs_theme_system)
         set(THEME_SYSTEM_BLACK, R.string.prefs_theme_system_black)
     }
-    if (OABX.minSDK(31)) {
+    if (NeoApp.minSDK(31)) {
         set(THEME_DYNAMIC, R.string.prefs_theme_dynamic)
         set(THEME_DYNAMIC_LIGHT, R.string.prefs_theme_dynamic_light)
         set(THEME_DYNAMIC_DARK, R.string.prefs_theme_dynamic_dark)
@@ -300,10 +300,10 @@ val IGNORED_PERMISSIONS = listOfNotNull(
     Manifest.permission.ACCESS_WIFI_STATE,
     Manifest.permission.ACCESS_NETWORK_STATE,
     Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
-    if (OABX.minSDK(28)) Manifest.permission.FOREGROUND_SERVICE else null,
+    if (NeoApp.minSDK(28)) Manifest.permission.FOREGROUND_SERVICE else null,
     Manifest.permission.INSTALL_SHORTCUT,
     Manifest.permission.INTERNET,
-    if (OABX.minSDK(30)) Manifest.permission.QUERY_ALL_PACKAGES else null,
+    if (NeoApp.minSDK(30)) Manifest.permission.QUERY_ALL_PACKAGES else null,
     Manifest.permission.REQUEST_DELETE_PACKAGES,
     Manifest.permission.RECEIVE_BOOT_COMPLETED,
     Manifest.permission.READ_SYNC_SETTINGS,

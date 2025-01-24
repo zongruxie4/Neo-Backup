@@ -1,7 +1,7 @@
 package tests.tests
 
 import androidx.test.platform.app.InstrumentationRegistry
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.actions.BackupAppAction
 import com.machiav3lli.backup.actions.RestoreAppAction
 import com.machiav3lli.backup.handler.ShellHandler
@@ -56,7 +56,7 @@ class Test_BackupRestore {
         @BeforeClass
         @JvmStatic
         fun setupClass() {
-            shellHandler = OABX.Companion.shellHandler!!
+            shellHandler = NeoApp.Companion.shellHandler!!
             //tempDir = RootFile(context.cacheDir, "test_backup_restore")
             tempDir = RootFile(context.dataDir, "test_backup_restore")
             //tempDir = RootFile("/data/local/tmp/test_backup_restore")

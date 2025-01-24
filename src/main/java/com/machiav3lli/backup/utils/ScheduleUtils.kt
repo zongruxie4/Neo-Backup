@@ -19,7 +19,7 @@ package com.machiav3lli.backup.utils
 
 import android.content.Context
 import android.icu.util.Calendar
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
@@ -106,7 +106,7 @@ fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
     val days = TimeUnit.MILLISECONDS.toDays(timeDiff).toInt()
     if (days != 0) {
         relTime +=
-            "${OABX.context.resources.getQuantityString(R.plurals.days_left, days, days)} + "
+            "${NeoApp.context.resources.getQuantityString(R.plurals.days_left, days, days)} + "
     }
     val hours = TimeUnit.MILLISECONDS.toHours(timeDiff).toInt() % 24
     val minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiff).toInt() % 60

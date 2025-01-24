@@ -19,9 +19,9 @@ package com.machiav3lli.backup.tasks
 
 import android.content.Context
 import android.content.DialogInterface
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.handler.BackupRestoreHelper.ActionType
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logErrors
@@ -34,16 +34,16 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.CountDownLatch
 
 abstract class BaseActionTask(
-    val app: Package, oAndBackupX: MainActivityX, val shellHandler: ShellHandler,
+    val app: Package, oAndBackupX: NeoActivity, val shellHandler: ShellHandler,
     val mode: Int, private val actionType: ActionType, val setInfoBar: (String) -> Unit,
 ) : CoroutinesAsyncTask<Void?, Void?, ActionResult>() {
-    val mainActivityXReference: WeakReference<MainActivityX> = WeakReference(oAndBackupX)
+    val neoActivityReference: WeakReference<NeoActivity> = WeakReference(oAndBackupX)
     private var signal: CountDownLatch? = null
     protected var result: ActionResult? = null
     protected var notificationId = -1
 
     override fun onProgressUpdate(vararg values: Void?) {
-        val mainActivityX = mainActivityXReference.get()
+        val mainActivityX = neoActivityReference.get()
         if (mainActivityX != null && !mainActivityX.isFinishing) {
             val message = getProgressMessage(mainActivityX, actionType)
             mainActivityX.runOnUiThread {
@@ -51,18 +51,18 @@ abstract class BaseActionTask(
                 setInfoBar("${app.packageLabel}: $message")
             }
             showNotification(
-                mainActivityX, MainActivityX::class.java,
+                mainActivityX, NeoActivity::class.java,
                 notificationId, app.packageLabel, message, true
             )
         }
     }
 
     override fun onPostExecute(result: ActionResult?) {
-        val mainActivityX = mainActivityXReference.get()
+        val mainActivityX = neoActivityReference.get()
         if (mainActivityX != null && !mainActivityX.isFinishing) {
             val message = getPostExecuteMessage(mainActivityX, actionType, result)
             showNotification(
-                mainActivityX, MainActivityX::class.java,
+                mainActivityX, NeoActivity::class.java,
                 notificationId, app.packageLabel, message, true
             )
             mainActivityX.showActionResult(this.result!!) { _: DialogInterface?, _: Int ->
@@ -72,7 +72,7 @@ abstract class BaseActionTask(
                 )
             }
             if (result?.succeeded != true)
-                OABX.lastErrorPackage = app.packageName
+                NeoApp.lastErrorPackage = app.packageName
             mainActivityX.updatePackage(app.packageName)
             mainActivityX.dismissSnackBar()
             setInfoBar("")

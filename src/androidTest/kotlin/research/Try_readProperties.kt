@@ -4,7 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
 import androidx.test.platform.app.InstrumentationRegistry
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.entity.RootFile
 import com.machiav3lli.backup.entity.StorageFile
@@ -73,7 +73,7 @@ class Try_readProperties {
     fun test_scanPropertiesSAF() {
         val backups = mutableMapOf<String, MutableList<Backup>>()
         val time = measureTimeMillis {
-            val backupRoot = OABX.backupRoot
+            val backupRoot = NeoApp.backupRoot
             backupRoot?.listFiles()?.forEach { packageDir ->
                 val packageName = packageDir.name
                 val backupList = mutableListOf<Backup>()
@@ -99,7 +99,7 @@ class Try_readProperties {
         val backups = mutableMapOf<String, MutableList<Backup>>()
         val backupList = mutableListOf<Backup>()
         val time = measureTimeMillis {
-            val backupRoot = OABX.backupRoot
+            val backupRoot = NeoApp.backupRoot
             val treeUri = DocumentsContract
                 .buildDocumentUriUsingTree(backupRoot!!.uri, DocumentsContract.getTreeDocumentId(backupRoot.uri))
 
@@ -114,7 +114,7 @@ class Try_readProperties {
                     ".properties"
                 )
 
-            val cursor = OABX.context.contentResolver
+            val cursor = NeoApp.context.contentResolver
                 .query(searchUri, null, Bundle.EMPTY, null)
 
             var documentUri: Uri
@@ -170,7 +170,7 @@ class Try_readProperties {
                     packageName?.let { backups.put(it, backupList) }
             }
         }
-        val serialized = OABX.propsSerializer.encodeToString(backups)
+        val serialized = NeoApp.propsSerializer.encodeToString(backups)
         //StorageFile(File("/sdcard/test.map")).outputStream()?.write(serialized.toByteArray())
         //Timber.i("backups: $serialized")
         Timber.i("packages: ${backups.size} backups: ${backups.map { it.value.size }.sum()}")
@@ -207,7 +207,7 @@ class Try_readProperties {
             Timber.i("file ${file.path} size: $size")
             val text = file.readText()
             Timber.i("text size: ${text.length}")
-            backups = OABX.propsSerializer.decodeFromString(text)
+            backups = NeoApp.propsSerializer.decodeFromString(text)
         }
         Timber.i("packages: ${backups.size} backups: ${backups.map { it.value.size }.sum()}")
         Timber.w("time backups from single map file: $time ms")

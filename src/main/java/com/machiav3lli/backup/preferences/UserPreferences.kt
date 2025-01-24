@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.THEME_DYNAMIC
@@ -142,24 +142,24 @@ fun UserPrefsPage() {
 }
 
 fun onThemeChanged(pref: Pref) {
-    OABX.context.setCustomTheme()
-    OABX.context.recreateActivities()
+    NeoApp.context.setCustomTheme()
+    NeoApp.context.recreateActivities()
 }
 
 val pref_languages = ListPref(
     key = "user.languages",
     titleId = R.string.prefs_languages,
     icon = Phosphor.Translate,
-    entries = OABX.context.getLanguageList(),
+    entries = NeoApp.context.getLanguageList(),
     defaultValue = PREFS_LANGUAGES_SYSTEM,
     onChanged = {
         val pref = it as ListPref
         // does not work as expected, because restartApp doesn't really restart the whole app
         //if (pref.value == PREFS_LANGUAGES_SYSTEM)
         if (pref_restartAppOnLanguageChange.value)
-            OABX.context.restartApp()   // does not really restart the app, only recreates
+            NeoApp.context.restartApp()   // does not really restart the app, only recreates
         else
-            OABX.context.recreateActivities()
+            NeoApp.context.recreateActivities()
     },
 )
 
@@ -168,7 +168,7 @@ val pref_appTheme = EnumPref(
     titleId = R.string.prefs_theme,
     icon = Phosphor.Swatches,
     entries = themeItems,
-    defaultValue = if (OABX.minSDK(31)) THEME_DYNAMIC
+    defaultValue = if (NeoApp.minSDK(31)) THEME_DYNAMIC
     else THEME_SYSTEM,
     onChanged = ::onThemeChanged,
 )
@@ -234,7 +234,7 @@ val pref_pathBackupFolder = StringEditPref(
                                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                     )
                             //TODO hg42 check and remember if flags are read only and implement appropriate actions elsewhere
-                            OABX.context.contentResolver.takePersistableUriPermission(uri, flags)
+                            NeoApp.context.contentResolver.takePersistableUriPermission(uri, flags)
                             Timber.i("setting uri $uri")
                             setBackupDir(uri)
                         }
@@ -265,7 +265,7 @@ val pref_deviceLock = BooleanPref(
     summaryId = R.string.prefs_devicelock_summary,
     icon = Phosphor.Lock,
     defaultValue = false,
-    enableIf = { OABX.context.isDeviceLockAvailable() }
+    enableIf = { NeoApp.context.isDeviceLockAvailable() }
 )
 
 val pref_biometricLock = BooleanPref(
@@ -274,7 +274,7 @@ val pref_biometricLock = BooleanPref(
     summaryId = R.string.prefs_biometriclock_summary,
     icon = Phosphor.FingerprintSimple,
     defaultValue = false,
-    enableIf = { OABX.context.isBiometricLockAvailable() && isDeviceLockEnabled() }
+    enableIf = { NeoApp.context.isBiometricLockAvailable() && isDeviceLockEnabled() }
 )
 
 val pref_multilineInfoChips = BooleanPref(

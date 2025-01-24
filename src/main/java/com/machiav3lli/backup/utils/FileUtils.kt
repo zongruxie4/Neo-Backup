@@ -18,12 +18,11 @@
 package com.machiav3lli.backup.utils
 
 import android.content.Context
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.backupRoot
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.backupRoot
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.entity.Package
-import com.machiav3lli.backup.entity.StorageFile
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.findBackups
 import com.machiav3lli.backup.handler.updateAppTables
@@ -68,9 +67,9 @@ object FileUtils {
     fun ensureBackups(): Map<String, List<Backup>> {
         runCatching {
             if (backupRoot == null)
-                OABX.context.findBackups()
+                NeoApp.context.findBackups()
         }
-        return OABX.getBackups()
+        return NeoApp.getBackups()
     }
 
     /**
@@ -83,8 +82,8 @@ object FileUtils {
         backupRoot = null // after clearing caches, because they probably need the location
         try {
             // updateAppTables does ensureBackups, but make intention clear here
-            OABX.context.findBackups()
-            OABX.context.updateAppTables()
+            NeoApp.context.findBackups()
+            NeoApp.context.updateAppTables()
         } catch (e: Throwable) {
             LogsHandler.logException(e, backTrace = true)
         }

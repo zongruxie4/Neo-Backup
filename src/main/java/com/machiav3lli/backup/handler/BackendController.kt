@@ -33,10 +33,10 @@ import com.machiav3lli.backup.ERROR_PREFIX
 import com.machiav3lli.backup.IGNORED_PERMISSIONS
 import com.machiav3lli.backup.MAIN_FILTER_SYSTEM
 import com.machiav3lli.backup.MAIN_FILTER_USER
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.addInfoLogText
-import com.machiav3lli.backup.OABX.Companion.hitBusy
-import com.machiav3lli.backup.OABX.Companion.setBackups
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.addInfoLogText
+import com.machiav3lli.backup.NeoApp.Companion.hitBusy
+import com.machiav3lli.backup.NeoApp.Companion.setBackups
 import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.actions.BaseAppAction.Companion.ignoredPackages
@@ -557,7 +557,7 @@ fun Context.findBackups(
     try {
         if (packageName.isEmpty()) {
 
-            OABX.beginBusy("findBackups")
+            NeoApp.beginBusy("findBackups")
 
             // preset installed packages with empty backups lists
             // this prevents scanning them again when a package needs it's backups later
@@ -573,14 +573,14 @@ fun Context.findBackups(
                 installedPackages.map { it.packageName } + specialInfos.map { it.packageName }
 
             if (pref_earlyEmptyBackups.value)
-                OABX.emptyBackupsForAllPackages(installedNames)
+                NeoApp.emptyBackupsForAllPackages(installedNames)
 
             clearThreadStats()
         }
 
         invalidateBackupCacheForPackage(packageName)
 
-        val backupRoot = OABX.backupRoot
+        val backupRoot = NeoApp.backupRoot
 
         //val count = AtomicInteger(0)
 
@@ -635,10 +635,10 @@ fun Context.findBackups(
             setBackups(backupsMap)
 
             // preset installed packages that don't have backups with empty backups lists
-            OABX.emptyBackupsForMissingPackages(installedNames)
+            NeoApp.emptyBackupsForMissingPackages(installedNames)
 
         } else {
-            if (OABX.startup)
+            if (NeoApp.startup)
                 traceBackupsScan {
                     "<$packageName> single scan (DURING STARTUP!!!) ${
                         formatBackups(
@@ -655,8 +655,8 @@ fun Context.findBackups(
     } finally {
         if (packageName.isEmpty()) {
 
-            val time = OABX.endBusy("findBackups")
-            OABX.addInfoLogText("findBackups: ${"%.3f".format(time / 1E9)} sec")
+            val time = NeoApp.endBusy("findBackups")
+            NeoApp.addInfoLogText("findBackups: ${"%.3f".format(time / 1E9)} sec")
 
             if (traceTiming.pref.value) {
                 logNanoTiming("scanBackups.", "scanBackups")
@@ -691,7 +691,7 @@ fun Context.getInstalledPackageList(): MutableList<Package> { // only used in Sc
     var packageList: MutableList<Package> = mutableListOf()
 
     try {
-        OABX.beginBusy("getInstalledPackageList")
+        NeoApp.beginBusy("getInstalledPackageList")
 
         val time = measureTimeMillis {
 
@@ -747,13 +747,13 @@ fun Context.getInstalledPackageList(): MutableList<Package> { // only used in Sc
             //}.toMutableList()
         }
 
-        OABX.addInfoLogText(
+        NeoApp.addInfoLogText(
             "getPackageList: ${(time / 1000 + 0.5).toInt()} sec"
         )
     } catch (e: Throwable) {
         logException(e, backTrace = true)
     } finally {
-        OABX.endBusy("getInstalledPackageList")
+        NeoApp.endBusy("getInstalledPackageList")
     }
 
     return packageList
@@ -771,7 +771,7 @@ fun List<AppInfo>.toPackageList(
     var packageList: MutableList<Package> = mutableListOf()
 
     try {
-        OABX.beginBusy("toPackageList")
+        NeoApp.beginBusy("toPackageList")
 
         val includeSpecial = specialBackupsEnabled
 
@@ -810,7 +810,7 @@ fun List<AppInfo>.toPackageList(
     } catch (e: Throwable) {
         LogsHandler.unexpectedException(e)
     } finally {
-        OABX.endBusy("toPackageList")
+        NeoApp.endBusy("toPackageList")
     }
 
     return packageList
@@ -819,7 +819,7 @@ fun List<AppInfo>.toPackageList(
 fun Context.updateAppTables() {
 
     try {
-        OABX.beginBusy("updateAppTables")
+        NeoApp.beginBusy("updateAppTables")
 
         val installedPackageInfos = packageManager.getInstalledPackageInfosWithPermissions()
         val installedNames = installedPackageInfos.map { it.packageName }.toSet()
@@ -827,21 +827,21 @@ fun Context.updateAppTables() {
         try {
             beginNanoTimer("unsuspend")
 
-            if (!OABX.appsSuspendedChecked && pref_backupSuspendApps.value) {
+            if (!NeoApp.appsSuspendedChecked && pref_backupSuspendApps.value) {
                 installedNames.filter { packageName ->
-                    0 != (OABX.activity?.packageManager
+                    0 != (NeoApp.activity?.packageManager
                         ?.getPackageInfo(packageName, 0)
                         ?.applicationInfo
                         ?.flags
                         ?: 0) and ApplicationInfo.FLAG_SUSPENDED
                 }.apply {
                     val profileId = currentProfile
-                    OABX.main?.whileShowingSnackBar(getString(R.string.supended_apps_cleanup)) {
+                    NeoApp.main?.whileShowingSnackBar(getString(R.string.supended_apps_cleanup)) {
                         // cleanup suspended package if lock file found
                         this.forEach { packageName ->
                             runAsRoot("pm unsuspend --user $profileId $packageName")
                         }
-                        OABX.appsSuspendedChecked = true
+                        NeoApp.appsSuspendedChecked = true
                     }
                 }
             }
@@ -903,8 +903,8 @@ fun Context.updateAppTables() {
     } catch (e: Throwable) {
         logException(e, backTrace = true)
     } finally {
-        val time = OABX.endBusy("updateAppTables")
-        OABX.addInfoLogText("updateAppTables: ${"%.3f".format(time / 1E9)} sec")
+        val time = NeoApp.endBusy("updateAppTables")
+        NeoApp.addInfoLogText("updateAppTables: ${"%.3f".format(time / 1E9)} sec")
     }
 }
 

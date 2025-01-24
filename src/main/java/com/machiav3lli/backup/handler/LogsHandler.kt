@@ -19,8 +19,8 @@ package com.machiav3lli.backup.handler
 
 import android.content.Context
 import com.machiav3lli.backup.LOG_INSTANCE
-import com.machiav3lli.backup.OABX.Companion.hitBusy
-import com.machiav3lli.backup.OABX.Companion.logsDirectory
+import com.machiav3lli.backup.NeoApp.Companion.hitBusy
+import com.machiav3lli.backup.NeoApp.Companion.logsDirectory
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.entity.Log
 import com.machiav3lli.backup.entity.StorageFile

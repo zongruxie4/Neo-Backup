@@ -8,7 +8,6 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -56,7 +55,7 @@
         android:required="false" />
 
     <application
-        android:name=".OABX"
+        android:name=".NeoApp"
         android:allowBackup="false"
         android:allowClearUserData="true"
         android:banner="@mipmap/ic_launcher"
@@ -108,7 +107,7 @@
         </service>
 
         <activity
-            android:name=".activities.MainActivityX"
+            android:name=".activities.NeoActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

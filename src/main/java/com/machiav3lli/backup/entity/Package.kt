@@ -20,7 +20,7 @@ package com.machiav3lli.backup.entity
 import android.app.usage.StorageStats
 import android.content.Context
 import android.content.pm.PackageManager
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
@@ -49,13 +49,13 @@ data class Package private constructor(val packageName: String) {
 
     var backupList: List<Backup>
         get() {
-            val backups = OABX.getBackups(packageName)
+            val backups = NeoApp.getBackups(packageName)
             //Timber.w("-------------------> backups $packageName -> ${formatSortedBackups(backups)}")
             return backups
         }
         private set(backups) {
             //Timber.w("<=================== backups $packageName <- ${formatSortedBackups(backups)}")
-            OABX.putBackups(packageName, backups)
+            NeoApp.putBackups(packageName, backups)
         }
 
     // toPackageList
@@ -122,7 +122,7 @@ data class Package private constructor(val packageName: String) {
     private fun isPlausiblePath(path: String?): Boolean {
         return !path.isNullOrEmpty() &&
                 path.contains(packageName) &&
-                path != OABX.backupRoot?.path
+                path != NeoApp.backupRoot?.path
     }
 
     fun refreshStorageStats(context: Context): Boolean {
@@ -165,12 +165,12 @@ data class Package private constructor(val packageName: String) {
             } ${TraceUtils.methodName(2)}"
         }
         backupList = backups
-        OABX.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
+        NeoApp.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
     }
 
     fun getBackupsFromBackupDir(): List<Backup> {
         // TODO hg42 may also find glob *packageName* for now so we need to take the correct package
-        return OABX.context.findBackups(packageName)[packageName] ?: emptyList()
+        return NeoApp.context.findBackups(packageName)[packageName] ?: emptyList()
     }
 
     fun refreshBackupList(): List<Backup> {
@@ -190,15 +190,15 @@ data class Package private constructor(val packageName: String) {
     ): StorageFile? {
         return try {
             if (pref_flatStructure.value) {
-                OABX.backupRoot
+                NeoApp.backupRoot
             } else {
                 when {
                     create -> {
-                        OABX.backupRoot?.ensureDirectory(packageName)
+                        NeoApp.backupRoot?.ensureDirectory(packageName)
                     }
 
                     else   -> {
-                        OABX.backupRoot?.findFile(packageName)
+                        NeoApp.backupRoot?.findFile(packageName)
                     }
                 }
             }
@@ -335,7 +335,7 @@ data class Package private constructor(val packageName: String) {
             }
         }
         backupList = backups
-        OABX.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
+        NeoApp.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
     }
 
     val backupsNewestFirst: List<Backup>

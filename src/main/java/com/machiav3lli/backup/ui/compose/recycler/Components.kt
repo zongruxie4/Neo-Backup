@@ -46,7 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.preferences.pref_busyFadeTime
 import com.machiav3lli.backup.preferences.pref_busyLaserBackground
@@ -310,7 +310,7 @@ fun BusyBackground(
     busy: State<Boolean>? = null,
     content: @Composable () -> Unit,
 ) {
-    val isBusy by remember { busy ?: OABX.busy }
+    val isBusy by remember { busy ?: NeoApp.busy }
 
     Box(
         modifier = modifier,
@@ -360,21 +360,21 @@ fun InnerBackground(
 @Preview
 @Composable
 fun BusyBackgroundPreview() {
-    val busy by remember { OABX.busy }
-    val count by remember { OABX.busyCountDown }
-    val level by remember { OABX.busyLevel }
+    val busy by remember { NeoApp.busy }
+    val count by remember { NeoApp.busyCountDown }
+    val level by remember { NeoApp.busyLevel }
     //var progress by remember { mutableStateOf(true) }
 
     Column {
         Row {
             RefreshButton {
-                OABX.hitBusy(5000)
+                NeoApp.hitBusy(5000)
             }
             ActionChip(text = "begin", positive = level > 0) {
-                OABX.beginBusy()
+                NeoApp.beginBusy()
             }
             ActionChip(text = "end", positive = level > 0) {
-                OABX.endBusy()
+                NeoApp.endBusy()
             }
         }
         BusyBackground(

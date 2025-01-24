@@ -1,7 +1,7 @@
 package com.machiav3lli.backup.preferences
 
-import com.machiav3lli.backup.OABX.Companion.isDebug
-import com.machiav3lli.backup.OABX.Companion.isHg42
+import com.machiav3lli.backup.NeoApp.Companion.isDebug
+import com.machiav3lli.backup.NeoApp.Companion.isHg42
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.entity.BooleanPref
 import com.machiav3lli.backup.entity.IntPref

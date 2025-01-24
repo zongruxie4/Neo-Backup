@@ -9,7 +9,7 @@ import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import com.machiav3lli.backup.MIME_TYPE_DIR
 import com.machiav3lli.backup.MIME_TYPE_FILE
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.handler.LogsHandler.Companion.unexpectedException
@@ -151,8 +151,8 @@ private fun closeQuietly(closeable: AutoCloseable?) {
 
 fun uriFromFile(file: File): Uri =
     FileProvider.getUriForFile(
-        OABX.context,
-        "${OABX.context.packageName}.provider",
+        NeoApp.context,
+        "${NeoApp.context.packageName}.provider",
         file
     )
 
@@ -178,7 +178,7 @@ open class StorageFile {
 
     var parent: StorageFile? = null
     val context: Context
-        get() = OABX.context            // ensure, the context is always the same for all objects and lives all the time
+        get() = NeoApp.context            // ensure, the context is always the same for all objects and lives all the time
 
     private var file: RootFile? = null
     private var _uri: Uri? = null

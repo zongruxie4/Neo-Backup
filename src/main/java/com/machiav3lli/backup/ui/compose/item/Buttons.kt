@@ -41,7 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.ICON_SIZE_SMALL
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.preferences.pref_busyIconScale
 import com.machiav3lli.backup.preferences.pref_busyIconTurnTime
@@ -304,7 +304,7 @@ fun RefreshButton(
     hideIfNotBusy: Boolean = false,
     onClick: () -> Unit = {},
 ) {
-    val isBusy by remember { OABX.busy }
+    val isBusy by remember { NeoApp.busy }
 
     if (hideIfNotBusy && isBusy.not())
         return
@@ -346,7 +346,7 @@ fun RefreshButton(
 @Preview
 @Composable
 fun RefreshButtonPreview() {
-    val level by remember { OABX.busyLevel }
+    val level by remember { NeoApp.busyLevel }
     val factor = 1.0 / max(1, level)
 
     Column {
@@ -356,13 +356,13 @@ fun RefreshButtonPreview() {
         Row {
             RefreshButton()
             ActionButton(text = "hit") {
-                OABX.hitBusy()
+                NeoApp.hitBusy()
             }
             ActionButton(text = "begin") {
-                OABX.beginBusy()
+                NeoApp.beginBusy()
             }
             ActionButton(text = "end") {
-                OABX.endBusy()
+                NeoApp.endBusy()
             }
         }
     }

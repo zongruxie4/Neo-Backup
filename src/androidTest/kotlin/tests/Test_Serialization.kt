@@ -1,7 +1,7 @@
 package tests.tests
 
 import androidx.test.platform.app.InstrumentationRegistry
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.entity.Pref.Companion.escape
 import com.machiav3lli.backup.entity.Pref.Companion.fromSimpleFormat
 import com.machiav3lli.backup.entity.Pref.Companion.toSimpleFormat
@@ -79,33 +79,33 @@ class Test_Serialization {
 
     @Test
     fun test_json_obj() {
-        val ser = OABX.toSerialized(OABX.JsonPretty, aObj)
+        val ser = NeoApp.toSerialized(NeoApp.JsonPretty, aObj)
         println("json: '\n$ser\n'")
-        val obj = OABX.fromSerialized<aClass>(ser)
+        val obj = NeoApp.fromSerialized<aClass>(ser)
         assertEquals(aObj, obj)
     }
 
     @Test
     fun test_json_map() {
-        val ser = OABX.toSerialized(OABX.JsonPretty, aMap)
+        val ser = NeoApp.toSerialized(NeoApp.JsonPretty, aMap)
         println("json: '\n$ser\n'")
-        val obj = OABX.fromSerialized<aClass>(ser)
+        val obj = NeoApp.fromSerialized<aClass>(ser)
         assertEquals(aMap, obj)
     }
 
     @Test
     fun test_yaml_obj() {
-        val ser = OABX.toSerialized(OABX.YamlDefault, aObj)
+        val ser = NeoApp.toSerialized(NeoApp.YamlDefault, aObj)
         println("yaml: '\n$ser\n'")
-        val obj = OABX.fromSerialized<aClass>(ser)
+        val obj = NeoApp.fromSerialized<aClass>(ser)
         assertEquals(aObj, obj)
     }
 
     @Test
     fun test_yaml_map() {
-        val ser = OABX.toSerialized(OABX.YamlDefault, aMap)
+        val ser = NeoApp.toSerialized(NeoApp.YamlDefault, aMap)
         println("yaml: '\n$ser\n'")
-        val obj = OABX.fromSerialized<aClass>(ser)
+        val obj = NeoApp.fromSerialized<aClass>(ser)
         assertEquals(aMap, obj)
     }
 

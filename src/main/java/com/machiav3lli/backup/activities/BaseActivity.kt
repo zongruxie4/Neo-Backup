@@ -19,10 +19,9 @@ package com.machiav3lli.backup.activities
 
 import android.content.Context
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.machiav3lli.backup.ContextWrapperX.Companion.wrap
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.setCustomTheme
 import timber.log.Timber
@@ -35,7 +34,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        OABX.addActivity(this)
+        NeoApp.addActivity(this)
 
         setCustomTheme()
 
@@ -54,7 +53,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 TraceUtils.classAndId(this)
             }"
         )
-        OABX.resumeActivity(this)
+        NeoApp.resumeActivity(this)
         super.onResume()
     }
 
@@ -64,7 +63,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 TraceUtils.classAndId(this)
             }"
         )
-        OABX.removeActivity(this)
+        NeoApp.removeActivity(this)
         super.onDestroy()
     }
 }

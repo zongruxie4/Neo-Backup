@@ -17,7 +17,7 @@
  */
 package com.machiav3lli.backup.entity
 
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.utils.LocalDateTimeSerializer
@@ -58,7 +58,7 @@ open class Log {
                 //initFromSerialized(text) ||
                 initFromText(text) ||
                         throw Backup.BrokenBackupException(
-                            "$logFile is neither ${OABX.propsSerializer::class.simpleName} nor text header format"
+                            "$logFile is neither ${NeoApp.propsSerializer::class.simpleName} nor text header format"
                         )
             }
         } catch (e: FileNotFoundException) {

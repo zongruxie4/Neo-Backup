@@ -18,7 +18,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.pages.LockPage
 import com.machiav3lli.backup.pages.MainPage
 import com.machiav3lli.backup.pages.PermissionsPage
@@ -41,7 +41,7 @@ fun MainNavHost(
         else NavItem.Welcome.destination
     ) {
         slideInComposable(route = NavItem.Lock.destination) {
-            LockPage { OABX.main?.resumeMain() }
+            LockPage { NeoApp.main?.resumeMain() }
         }
         slideInComposable(route = NavItem.Welcome.destination) {
             WelcomePage()

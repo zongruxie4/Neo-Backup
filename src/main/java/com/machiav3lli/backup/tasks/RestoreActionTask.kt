@@ -17,7 +17,7 @@
  */
 package com.machiav3lli.backup.tasks
 
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.ShellHandler
@@ -26,7 +26,7 @@ import com.machiav3lli.backup.entity.Package
 import com.machiav3lli.backup.utils.SystemUtils
 
 class RestoreActionTask(
-    appInfo: Package, oAndBackupX: MainActivityX, shellHandler: ShellHandler, restoreMode: Int,
+    appInfo: Package, oAndBackupX: NeoActivity, shellHandler: ShellHandler, restoreMode: Int,
     private val backup: Backup, setInfoBar: (String) -> Unit,
 ) : BaseActionTask(
     appInfo, oAndBackupX, shellHandler, restoreMode,
@@ -34,7 +34,7 @@ class RestoreActionTask(
 ) {
 
     override fun doInBackground(vararg params: Void?): ActionResult? {
-        val mainActivityX = mainActivityXReference.get()
+        val mainActivityX = neoActivityReference.get()
         if (mainActivityX == null || mainActivityX.isFinishing) {
             return ActionResult(app, backup, "", false)
         }

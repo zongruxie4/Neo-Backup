@@ -1,6 +1,6 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
- * Copyright (C) 2020  Antonios Hazim
+ * Neo Backup: open-source apps backup and restore app.
+ * Copyright (C) 2025  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -35,7 +35,7 @@ import androidx.work.WorkManager
 import com.charleskorn.kaml.Yaml
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.activities.viewModelsModule
 import com.machiav3lli.backup.dbs.databaseModule
 import com.machiav3lli.backup.dbs.entity.Backup
@@ -107,15 +107,13 @@ import kotlin.system.exitProcess
 val RESCUE_NAV get() = "rescue"
 
 @KoinExperimentalAPI
-class OABX : Application(), KoinStartup {
+class NeoApp : Application(), KoinStartup {
 
     val work: WorkHandler by inject()
 
-    // TODO Add BroadcastReceiver for (UN)INSTALL_PACKAGE intents
-
     override fun onKoinStartup() = koinConfiguration {
         androidLogger()
-        androidContext(this@OABX)
+        androidContext(this@NeoApp)
         modules(
             handlersModule,
             databaseModule,
@@ -248,25 +246,25 @@ class OABX : Application(), KoinStartup {
                     else                         -> "json" to JsonDefault
                 }
         val propsSerializer: StringFormat get() = propsSerializerDef.second
-        val propsSerializerSuffix: String get() = propsSerializerDef.first
+        private val propsSerializerSuffix: String get() = propsSerializerDef.first
 
-        val prefsSerializerDef: Pair<String, StringFormat>
+        private val prefsSerializerDef: Pair<String, StringFormat>
             get() =
                 when {
                     pref_useYamlPreferences.value -> "yaml" to YamlDefault
                     else                          -> "json" to JsonPretty
                 }
-        val prefsSerializer: StringFormat get() = prefsSerializerDef.second
-        val prefsSerializerSuffix: String get() = prefsSerializerDef.first
+        private val prefsSerializer: StringFormat get() = prefsSerializerDef.second
+        private val prefsSerializerSuffix: String get() = prefsSerializerDef.first
 
-        val schedSerializerDef: Pair<String, StringFormat>
+        private val schedSerializerDef: Pair<String, StringFormat>
             get() =
                 when {
                     pref_useYamlSchedules.value -> "yaml" to YamlDefault
                     else                        -> "json" to JsonPretty
                 }
         val schedSerializer: StringFormat get() = schedSerializerDef.second
-        val schedSerializerSuffix: String get() = schedSerializerDef.first
+        private val schedSerializerSuffix: String get() = schedSerializerDef.first
 
         inline fun <reified T> toSerialized(serializer: StringFormat, value: T) =
             serializer.encodeToString(value)
@@ -301,7 +299,8 @@ class OABX : Application(), KoinStartup {
         var logsDirectory: StorageFile? = null
             get() {
                 if (field == null) {
-                    field = context.getExternalFilesDir(null)?.let { StorageFile(it).ensureDirectory("logs") }
+                    field = context.getExternalFilesDir(null)
+                        ?.let { StorageFile(it).ensureDirectory("logs") }
                         ?: context.filesDir.let { StorageFile(it).ensureDirectory("logs") }
                 }
                 return field
@@ -320,7 +319,7 @@ class OABX : Application(), KoinStartup {
                 }
         }
 
-        var logSections = mutableMapOf<String, Int>()
+        private var logSections = mutableMapOf<String, Int>()
             .withDefault { 0 }     //TODO hg42 use AtomicInteger? but map is synchronized anyways
 
         init {
@@ -388,8 +387,8 @@ class OABX : Application(), KoinStartup {
         val startupMsg = "******************** startup" // ensure it's the same for begin/end
 
         // app should always be created
-        var refNB: WeakReference<OABX> = WeakReference(null)
-        val NB: OABX get() = refNB.get()!!
+        var refNB: WeakReference<NeoApp> = WeakReference(null)
+        val NB: NeoApp get() = refNB.get()!!
 
         val context: Context get() = NB.applicationContext
 
@@ -455,15 +454,16 @@ class OABX : Application(), KoinStartup {
             }
 
         // main might be null
-        var mainRef: WeakReference<MainActivityX> = WeakReference(null)
-        var main: MainActivityX?
+        var mainRef: WeakReference<NeoActivity> = WeakReference(null)
+        var main: NeoActivity?
             get() {
                 return mainRef.get()
             }
             set(mainActivity) {
                 mainRef = WeakReference(mainActivity)
             }
-        var mainSaved: WeakReference<MainActivityX> = WeakReference(null)    // just to see if activity changed
+        var mainSaved: WeakReference<NeoActivity> =
+            WeakReference(null)    // just to see if activity changed
 
         var appsSuspendedChecked = false
 

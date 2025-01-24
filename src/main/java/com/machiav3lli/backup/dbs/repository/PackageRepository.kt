@@ -1,7 +1,7 @@
 package com.machiav3lli.backup.dbs.repository
 
 import android.app.Application
-import com.machiav3lli.backup.OABX.Companion.getBackups
+import com.machiav3lli.backup.NeoApp.Companion.getBackups
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.ODatabase
 import com.machiav3lli.backup.dbs.entity.AppInfo

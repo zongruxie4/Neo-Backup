@@ -17,8 +17,8 @@
  */
 package com.machiav3lli.backup.tasks
 
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.ShellHandler
 import com.machiav3lli.backup.entity.ActionResult
@@ -27,7 +27,7 @@ import com.machiav3lli.backup.utils.SystemUtils
 import kotlin.system.measureTimeMillis
 
 class BackupActionTask(
-    appInfo: Package, oAndBackupX: MainActivityX, shellHandler: ShellHandler, backupMode: Int,
+    appInfo: Package, oAndBackupX: NeoActivity, shellHandler: ShellHandler, backupMode: Int,
     setInfoBar: (String) -> Unit,
 ) : BaseActionTask(
     appInfo, oAndBackupX, shellHandler, backupMode,
@@ -36,7 +36,7 @@ class BackupActionTask(
 
     override fun doInBackground(vararg params: Void?): ActionResult? {
 
-        val mainActivityX = mainActivityXReference.get()
+        val mainActivityX = neoActivityReference.get()
         if (mainActivityX == null || mainActivityX.isFinishing) {
             return ActionResult(app, null, "", false)
         }
@@ -49,7 +49,7 @@ class BackupActionTask(
             result = BackupRestoreHelper.backup(mainActivityX, null, shellHandler, app, mode)
 
         }
-        OABX.addInfoLogText(
+        NeoApp.addInfoLogText(
             "backup: ${app.packageName}: ${(time / 1000 + 0.5).toInt()} sec"
         )
 

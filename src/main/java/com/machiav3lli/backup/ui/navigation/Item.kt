@@ -2,9 +2,9 @@ package com.machiav3lli.backup.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.machiav3lli.backup.OABX.Companion.isDebug
-import com.machiav3lli.backup.OABX.Companion.isHg42
-import com.machiav3lli.backup.OABX.Companion.isNeo
+import com.machiav3lli.backup.NeoApp.Companion.isDebug
+import com.machiav3lli.backup.NeoApp.Companion.isHg42
+import com.machiav3lli.backup.NeoApp.Companion.isNeo
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.pages.BatchPage
 import com.machiav3lli.backup.pages.HomePage

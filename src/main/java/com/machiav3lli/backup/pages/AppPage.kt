@@ -64,7 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.DialogMode
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Backup
 import com.machiav3lli.backup.dbs.entity.Schedule
@@ -122,7 +122,7 @@ fun AppPage(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    val mActivity = OABX.main!!
+    val mActivity = NeoApp.main!!
     val openDialog = remember { mutableStateOf(false) }
     val dialogProps: MutableState<Pair<DialogMode, Any>> = remember {
         mutableStateOf(Pair(DialogMode.NONE, Schedule()))
@@ -539,14 +539,14 @@ fun AppPage(
                                 openDialogCustom = openDialog,
                             ) { mode ->
                                 if (pref_useWorkManagerForSingleManualJob.value) {
-                                    OABX.main?.startBatchAction(
+                                    NeoApp.main?.startBatchAction(
                                         true,
                                         listOf(packageName),
                                         listOf(mode)
                                     )
                                 } else {
                                     BackupActionTask(
-                                        pkg, mActivity, OABX.shellHandler!!, mode,
+                                        pkg, mActivity, NeoApp.shellHandler!!, mode,
                                     ) { message ->
                                         viewModel.snackbarText.value = message
                                     }.execute()
@@ -561,7 +561,7 @@ fun AppPage(
                                 openDialogCustom = openDialog,
                             ) { mode ->
                                 if (pref_useWorkManagerForSingleManualJob.value) {
-                                    OABX.main?.startBatchAction(
+                                    NeoApp.main?.startBatchAction(
                                         false,
                                         listOf(packageName),
                                         listOf(mode)
@@ -569,7 +569,7 @@ fun AppPage(
                                 } else {
                                     obj.let {
                                         RestoreActionTask(
-                                            pkg, mActivity, OABX.shellHandler!!, mode,
+                                            pkg, mActivity, NeoApp.shellHandler!!, mode,
                                             it
                                         ) { message ->
                                             viewModel.snackbarText.value = message

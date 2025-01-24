@@ -36,9 +36,9 @@ import androidx.work.WorkInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.machiav3lli.backup.MODE_UNSET
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.handler.BackupRestoreHelper
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.handler.WorkHandler.Companion.getVar
@@ -80,7 +80,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
 
         return withContext(jobPool) {
 
-            OABX.wakelock(true)
+            NeoApp.wakelock(true)
 
             if (pref_useForegroundInJob.value)               //TODO hg42 the service already does this?
             //if (inputData.getBoolean("immediate", false))
@@ -124,7 +124,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
 
                     packageItem?.let { pi ->
                         try {
-                            OABX.shellHandler?.let { shellHandler ->
+                            NeoApp.shellHandler?.let { shellHandler ->
                                 actionResult = when {
                                     backupBoolean -> {
                                         BackupRestoreHelper.backup(
@@ -171,7 +171,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
                 } else {
                     val message = "$packageName\n${actionResult?.message}"
                     showNotification(
-                        context, MainActivityX::class.java,
+                        context, NeoActivity::class.java,
                         actionResult.hashCode(), packageLabel, actionResult?.message, message, false
                     )
                     setOperation("======>FAIL")
@@ -180,7 +180,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
                 }
             }
 
-            OABX.wakelock(false)
+            NeoApp.wakelock(false)
 
             result
         }
@@ -218,17 +218,17 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val contentPendingIntent = PendingIntent.getActivity(
             context, 0,
-            Intent(context, MainActivityX::class.java),
+            Intent(context, NeoActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val cancelAllIntent =
-            Intent(OABX.context, CommandReceiver::class.java).apply {
+            Intent(NeoApp.context, CommandReceiver::class.java).apply {
                 action = "cancel"
                 //putExtra("name", "")
             }
         val cancelAllPendingIntent = PendingIntent.getBroadcast(
-            OABX.context,
+            NeoApp.context,
             "<ALL>".hashCode(),
             cancelAllIntent,
             PendingIntent.FLAG_IMMUTABLE
@@ -259,7 +259,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
         return ForegroundInfo(
             this.notificationId + 1,
             notification,
-            if (OABX.minSDK(Build.VERSION_CODES.Q)) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            if (NeoApp.minSDK(Build.VERSION_CODES.Q)) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             else 0
         )
     }

@@ -33,7 +33,7 @@ import com.machiav3lli.backup.MODE_DATA_EXT
 import com.machiav3lli.backup.MODE_DATA_MEDIA
 import com.machiav3lli.backup.MODE_DATA_OBB
 import com.machiav3lli.backup.MODE_NONE
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.Sort
 import com.machiav3lli.backup.UpdatedFilter
@@ -143,7 +143,7 @@ private fun Collection<Package>.applyBackupFilter(backupFilter: Int): List<Packa
 private fun List<Package>.applySpecialFilter(
     specialFilter: SpecialFilter,
 ): List<Package> {
-    val context = OABX.context
+    val context = NeoApp.context
     val predicate: (Package) -> Boolean
     var launchableAppsList = listOf<String>()
     if (specialFilter.launchableFilter != LaunchableFilter.ALL.ordinal) {

@@ -15,7 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.preferences.pref_appTheme
 import com.machiav3lli.backup.utils.isBlackTheme
 import com.machiav3lli.backup.utils.isDynamicTheme
@@ -30,13 +30,13 @@ fun AppTheme(
 
     MaterialTheme( // TODO add contrasts
         colorScheme = when {
-            isDynamicTheme && isSystemInDarkTheme() && blackTheme && OABX.minSDK(Build.VERSION_CODES.S)
+            isDynamicTheme && isSystemInDarkTheme() && blackTheme && NeoApp.minSDK(Build.VERSION_CODES.S)
             -> dynamicBlackColorScheme(context)
 
-            isDynamicTheme && isSystemInDarkTheme() && OABX.minSDK(Build.VERSION_CODES.S)
+            isDynamicTheme && isSystemInDarkTheme() && NeoApp.minSDK(Build.VERSION_CODES.S)
             -> dynamicDarkColorScheme(context)
 
-            isDynamicTheme && OABX.minSDK(Build.VERSION_CODES.S)
+            isDynamicTheme && NeoApp.minSDK(Build.VERSION_CODES.S)
             -> dynamicLightColorScheme(context)
 
             darkTheme && blackTheme

@@ -41,7 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.linksList
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
@@ -76,7 +76,7 @@ fun WelcomePage() {
                     text = stringResource(id = R.string.dialog_start),
                     icon = Phosphor.ArrowRight,
                 ) {
-                    OABX.main?.moveTo(NavItem.Permissions.destination)
+                    NeoApp.main?.moveTo(NavItem.Permissions.destination)
                 }
             }
         }

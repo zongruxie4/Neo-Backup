@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.MAIN_FILTER_SPECIAL
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
@@ -57,7 +57,7 @@ fun PackagesListDialogUI(
     val packagePairs = mutableListOf<Pair<String, String>>()
 
     if (specialBackupsEnabled && filter and MAIN_FILTER_SPECIAL == MAIN_FILTER_SPECIAL) {
-        var specialInfos = SpecialInfo.getSpecialInfos(OABX.NB)
+        var specialInfos = SpecialInfo.getSpecialInfos(NeoApp.NB)
         specialInfos = specialInfos.sortedWith { si1, si2 ->
             val b1 = selectedPackageNames.contains(si1.packageName)
             val b2 = selectedPackageNames.contains(si2.packageName)

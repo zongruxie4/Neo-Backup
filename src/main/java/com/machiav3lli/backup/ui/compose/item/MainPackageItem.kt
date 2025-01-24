@@ -52,11 +52,11 @@ import coil.ImageLoader
 import com.machiav3lli.backup.MODE_ALL
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.MenuAction
-import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.OABX.Companion.addInfoLogText
-import com.machiav3lli.backup.OABX.Companion.beginBusy
-import com.machiav3lli.backup.OABX.Companion.endBusy
-import com.machiav3lli.backup.OABX.Companion.isDebug
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.addInfoLogText
+import com.machiav3lli.backup.NeoApp.Companion.beginBusy
+import com.machiav3lli.backup.NeoApp.Companion.endBusy
+import com.machiav3lli.backup.NeoApp.Companion.isDebug
 import com.machiav3lli.backup.SELECTIONS_FOLDER_NAME
 import com.machiav3lli.backup.batchModes
 import com.machiav3lli.backup.dbs.entity.SpecialInfo
@@ -240,7 +240,7 @@ fun Selections(
     selection: Set<String> = emptySet(),
     onAction: (Set<String>) -> Unit = {},
 ) {
-    val backupRoot = OABX.backupRoot
+    val backupRoot = NeoApp.backupRoot
     //val backupRoot = koinInject<Context>().getBackupRoot()
     val scope = rememberCoroutineScope()
     val selectionsDir = backupRoot?.findFile(SELECTIONS_FOLDER_NAME)
@@ -400,7 +400,7 @@ fun SelectionPutMenu(
 ) {
     val name = remember { mutableStateOf("") }
 
-    OABX.backupRoot?.let { backupRoot ->
+    NeoApp.backupRoot?.let { backupRoot ->
         TextInputMenuItem(
             text = name.value,
             placeholder = "new selection name",
@@ -542,7 +542,7 @@ fun launchEachPackage(
 
 fun launchBackup(packages: List<Package>, mode: Int) {
     val selectedAndInstalled = packages.installed()
-    OABX.main?.startBatchAction(
+    NeoApp.main?.startBatchAction(
         true,
         selectedAndInstalled.map { it.packageName },
         selectedAndInstalled.map { mode }
@@ -551,7 +551,7 @@ fun launchBackup(packages: List<Package>, mode: Int) {
 
 fun launchRestore(packages: List<Package>, mode: Int) {
     val packagesWithBackups = packages.withBackups()
-    OABX.main?.startBatchAction(
+    NeoApp.main?.startBatchAction(
         false,
         packagesWithBackups.map { it.packageName },
         packagesWithBackups.map { mode }

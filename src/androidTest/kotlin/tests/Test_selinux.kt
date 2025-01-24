@@ -1,6 +1,6 @@
 package tests.tests
 import androidx.test.platform.app.InstrumentationRegistry
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
@@ -12,7 +12,7 @@ class Test_selinux {
     @Test
     fun test_suGetOwnerGroupContext_extracts_valid_context() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val userGroupContext = OABX.shellHandler!!.suGetOwnerGroupContext("/system")
+        val userGroupContext = NeoApp.shellHandler!!.suGetOwnerGroupContext("/system")
         val con = userGroupContext[2]
         Timber.i("suGetOwnerGroupContext -> ${userGroupContext.joinToString("', '", "'", "'")} => context = '$con'")
 

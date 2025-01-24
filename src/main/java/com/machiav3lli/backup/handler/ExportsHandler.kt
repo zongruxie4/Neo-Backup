@@ -21,9 +21,9 @@ import android.content.Context
 import com.machiav3lli.backup.EXPORTS_FOLDER_NAME
 import com.machiav3lli.backup.EXPORTS_FOLDER_NAME_ALT
 import com.machiav3lli.backup.EXPORTS_INSTANCE
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.dbs.entity.Schedule
 import com.machiav3lli.backup.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.entity.StorageFile
@@ -44,7 +44,7 @@ class ExportsHandler(
     private var exportsDirectory: StorageFile? = null
 
     init {
-        OABX.backupRoot?.let { backupRoot ->
+        NeoApp.backupRoot?.let { backupRoot ->
             exportsDirectory = backupRoot.ensureDirectory(EXPORTS_FOLDER_NAME)
             backupRoot.findFile(EXPORTS_FOLDER_NAME_ALT)?.let { oldFolder ->
                 oldFolder.listFiles().forEach {
@@ -72,7 +72,7 @@ class ExportsHandler(
             }
         }
         showNotification(
-            context, MainActivityX::class.java, SystemUtils.now.toInt(),
+            context, NeoActivity::class.java, SystemUtils.now.toInt(),
             context.getString(R.string.sched_exported), null, false
         )
     }

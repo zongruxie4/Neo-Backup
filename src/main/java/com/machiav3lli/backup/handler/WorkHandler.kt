@@ -17,9 +17,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.machiav3lli.backup.OABX
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.activities.MainActivityX
+import com.machiav3lli.backup.activities.NeoActivity
 import com.machiav3lli.backup.classAddress
 import com.machiav3lli.backup.preferences.pref_fakeScheduleDups
 import com.machiav3lli.backup.preferences.pref_maxRetriesPerPackage
@@ -71,7 +71,7 @@ class WorkHandler(
     }
 
     fun beginBatches() {
-        OABX.wakelock(true)
+        NeoApp.wakelock(true)
         prune()
     }
 
@@ -106,11 +106,11 @@ class WorkHandler(
 
         Timber.d("%%%%% ALL DONE")
 
-        OABX.wakelock(false)
+        NeoApp.wakelock(false)
     }
 
     fun beginBatch(batchName: String) {
-        OABX.wakelock(true)
+        NeoApp.wakelock(true)
         if (batchesStarted < 0)
             batchesStarted = 0
         batchesStarted++
@@ -124,7 +124,7 @@ class WorkHandler(
         batchesStarted--
         Timber.d("%%%%% $batchName end, ${batchesStarted} batches, thread ${Thread.currentThread().id}")
         Thread.sleep(endDelay)
-        OABX.wakelock(false)
+        NeoApp.wakelock(false)
     }
 
     fun justFinishedAll(): Boolean {
@@ -275,7 +275,7 @@ class WorkHandler(
             val now = SystemUtils.now
             val batchesRunning = mutableMapOf<String, WorkState>()
 
-            val appContext = OABX.context
+            val appContext = NeoApp.context
 
             work.forEach { info ->
                 var data = info.progress
@@ -435,7 +435,7 @@ class WorkHandler(
 
                         Timber.d("%%%%% $batchName -----------------> $title $shortText")
 
-                        val resultIntent = Intent(appContext, MainActivityX::class.java)
+                        val resultIntent = Intent(appContext, NeoActivity::class.java)
                         resultIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                         val resultPendingIntent = PendingIntent.getActivity(
                             appContext,
@@ -545,10 +545,10 @@ class WorkHandler(
 
             if (allRemaining > 0) {
                 Timber.d("%%%%% ALL finished=$allProcessed <-- remain=$allRemaining <-- total=$allCount")
-                OABX.setProgress(allProcessed, allCount)
+                NeoApp.setProgress(allProcessed, allCount)
             } else {
                 packagesState.clear()
-                OABX.setProgress()
+                NeoApp.setProgress()
                 val workHandler = get<WorkHandler>(WorkHandler::class.java)
                 if (workHandler.justFinishedAll()) {
                     Timber.d("%%%%% ALL $batchesStarted batches, thread ${Thread.currentThread().id}")
