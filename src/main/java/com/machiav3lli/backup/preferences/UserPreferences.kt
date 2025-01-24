@@ -25,6 +25,9 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.THEME_DYNAMIC
 import com.machiav3lli.backup.THEME_SYSTEM
 import com.machiav3lli.backup.accentColorItems
+import com.machiav3lli.backup.dialogs.BaseDialog
+import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
+import com.machiav3lli.backup.dialogs.ListPrefDialogUI
 import com.machiav3lli.backup.entity.BooleanPref
 import com.machiav3lli.backup.entity.EnumPref
 import com.machiav3lli.backup.entity.IntPref
@@ -52,12 +55,6 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.TextAa
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Translate
 import com.machiav3lli.backup.ui.compose.item.StringEditPreference
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
-import com.machiav3lli.backup.ui.compose.theme.ColorDeData
-import com.machiav3lli.backup.ui.compose.theme.ColorExodus
-import com.machiav3lli.backup.ui.compose.theme.ColorOBB
-import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
-import com.machiav3lli.backup.ui.compose.theme.ColorSystem
-import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.backupDirConfigured
@@ -83,6 +80,29 @@ fun UserPrefsPage() {
 
     val prefs = Pref.prefGroups["user"]?.toPersistentList() ?: persistentListOf()
 
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.data != null && result.resultCode == Activity.RESULT_OK) {
+                result.data?.let {
+                    val uri = it.data ?: return@let
+                    val oldDir = try {
+                        backupDirConfigured
+                    } catch (e: StorageLocationNotConfiguredException) {
+                        "" // Can be ignored, this is about to set the path
+                    }
+                    if (oldDir != uri.toString()) {
+                        val flags = it.flags and (
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                )
+                        context.contentResolver.takePersistableUriPermission(uri, flags)
+                        Timber.i("setting uri $uri")
+                        backupDir = setBackupDir(uri)
+                    }
+                }
+            }
+        }
+
     InnerBackground(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -96,6 +116,26 @@ fun UserPrefsPage() {
                     dialogsPref = pref
                     openDialog.value = true
                 }
+            }
+        }
+    }
+
+    if (openDialog.value) {
+        BaseDialog(onDismiss = { openDialog.value = false }) {
+            when (dialogsPref) {
+                //pref_languages,
+                is ListPref -> ListPrefDialogUI(
+                    pref = dialogsPref as ListPref,
+                    openDialogCustom = openDialog,
+                )
+
+                //pref_appTheme,
+                //pref_appAccentColor,
+                //pref_appSecondaryColor,
+                is EnumPref -> EnumPrefDialogUI(
+                    pref = dialogsPref as EnumPref,
+                    openDialogCustom = openDialog,
+                )
             }
         }
     }
@@ -176,7 +216,7 @@ val pref_pathBackupFolder = StringEditPref(
         else if (backupFolderExists(pref.value)) Color.Green.copy(alpha = alpha)
         else Color.Red.copy(alpha = alpha)
     },
-    UI = { it, onDialogUI, index, groupSize ->
+    UI = { it, _, index, groupSize ->
         val pref = it as StringEditPref
         val launcher =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -192,7 +232,7 @@ val pref_pathBackupFolder = StringEditPref(
                             val flags = it.flags and (
                                     Intent.FLAG_GRANT_READ_URI_PERMISSION or
                                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-)
+                                    )
                             //TODO hg42 check and remember if flags are read only and implement appropriate actions elsewhere
                             OABX.context.contentResolver.takePersistableUriPermission(uri, flags)
                             Timber.i("setting uri $uri")

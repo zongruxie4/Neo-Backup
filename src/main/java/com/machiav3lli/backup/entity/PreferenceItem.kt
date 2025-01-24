@@ -5,15 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.machiav3lli.backup.OABX
-import com.machiav3lli.backup.dialogs.BaseDialog
-import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
-import com.machiav3lli.backup.dialogs.ListPrefDialogUI
-import com.machiav3lli.backup.dialogs.StringPrefDialogUI
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.preferences.publicPreferences
 import com.machiav3lli.backup.preferences.traceDebug
@@ -399,18 +394,12 @@ open class StringPref(
     summaryId = summaryId,
     summary = summary,
     UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        val openDialog = remember { mutableStateOf(false) }
-        StringPreference(pref = pref as StringPref, index = index, groupSize = groupSize) {
-            openDialog.value = true
-        }
-        if (openDialog.value) {
-            BaseDialog(onDismiss = { openDialog.value = false }) {
-                StringPrefDialogUI(
-                    pref = pref,
-                    openDialogCustom = openDialog
-                )
-            }
-        }
+        StringPreference(
+            pref = pref as StringPref,
+            index = index,
+            groupSize = groupSize,
+            onClick = { onDialogUI(pref) },
+        )
     },
     icon = icon,
     iconTint = iconTint,
@@ -451,7 +440,7 @@ class StringEditPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
+    UI = UI ?: { pref, _, index, groupSize ->
         StringEditPreference(pref = pref as StringEditPref, index = index, groupSize = groupSize)
     },
     icon = icon,
@@ -481,20 +470,12 @@ class PasswordPref(
     summaryId = summaryId,
     summary = summary,
     UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        val openDialog = remember { mutableStateOf(false) }
-        PasswordPreference(pref = pref as PasswordPref, index = index, groupSize = groupSize) {
-            openDialog.value = true
-        }
-        if (openDialog.value) {
-            BaseDialog(onDismiss = { openDialog.value = false }) {
-                StringPrefDialogUI(
-                    pref = pref,
-                    isPrivate = true,
-                    confirm = true,
-                    openDialogCustom = openDialog
-                )
-            }
-        }
+        PasswordPreference(
+            pref = pref as PasswordPref,
+            index = index,
+            groupSize = groupSize,
+            onClick = { onDialogUI(pref) },
+        )
     },
     icon = icon,
     iconTint = iconTint,
@@ -524,25 +505,18 @@ class ListPref(
     summaryId = summaryId,
     summary = summary,
     UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        val openDialog = remember { mutableStateOf(false) }
-        ListPreference(pref = pref as ListPref, index = index, groupSize = groupSize) {
-            openDialog.value = true
-        }
-        if (openDialog.value) {
-            BaseDialog(onDismiss = { openDialog.value = false }) {
-                ListPrefDialogUI(
-                    pref = pref,
-                    openDialogCustom = openDialog,
-                )
-            }
-        }
+        ListPreference(
+            pref = pref as ListPref,
+            index = index,
+            groupSize = groupSize,
+            onClick = { onDialogUI(pref) },
+        )
     },
     icon = icon,
     iconTint = iconTint,
     enableIf = enableIf,
     onChanged = onChanged
 )
-
 
 class EnumPref(
     key: String,
@@ -565,18 +539,12 @@ class EnumPref(
     summaryId = summaryId,
     summary = summary,
     UI = UI ?: { pref, onDialogUI, index, groupSize ->
-        val openDialog = remember { mutableStateOf(false) }
-        EnumPreference(pref = pref as EnumPref, index = index, groupSize = groupSize) {
-            openDialog.value = true
-        }
-        if (openDialog.value) {
-            BaseDialog(onDismiss = { openDialog.value = false }) {
-                EnumPrefDialogUI(
-                    pref = pref as EnumPref,
-                    openDialogCustom = openDialog,
-                )
-            }
-        }
+        EnumPreference(
+            pref = pref as EnumPref,
+            index = index,
+            groupSize = groupSize,
+            onClick = { onDialogUI(pref) },
+        )
     },
     icon = icon,
     iconTint = iconTint,
@@ -644,7 +612,7 @@ class LaunchPref(
     titleId = titleId,
     summaryId = summaryId,
     summary = summary,
-    UI = UI ?: { pref, onDialogUI, index, groupSize ->
+    UI = UI ?: { pref, _, index, groupSize ->
         LaunchPreference(
             pref = pref as LaunchPref,
             index = index,

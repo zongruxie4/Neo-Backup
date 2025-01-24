@@ -44,15 +44,6 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ShieldStar
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TagSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Textbox
 import com.machiav3lli.backup.ui.compose.recycler.InnerBackground
-import com.machiav3lli.backup.ui.compose.theme.ColorAPK
-import com.machiav3lli.backup.ui.compose.theme.ColorData
-import com.machiav3lli.backup.ui.compose.theme.ColorDeData
-import com.machiav3lli.backup.ui.compose.theme.ColorExodus
-import com.machiav3lli.backup.ui.compose.theme.ColorExtDATA
-import com.machiav3lli.backup.ui.compose.theme.ColorMedia
-import com.machiav3lli.backup.ui.compose.theme.ColorOBB
-import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
-import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -71,6 +62,34 @@ fun ServicePrefsPage() {
             ServicePrefGroups { pref ->
                 dialogsPref = pref
                 openDialog.value = true
+            }
+        }
+    }
+
+    if (openDialog.value) {
+        BaseDialog(onDismiss = { openDialog.value = false }) {
+            when (dialogsPref) {
+                is ListPref     -> ListPrefDialogUI(
+                    pref = dialogsPref as ListPref,
+                    openDialogCustom = openDialog,
+                )
+
+                is EnumPref     -> EnumPrefDialogUI(
+                    pref = dialogsPref as EnumPref,
+                    openDialogCustom = openDialog
+                )
+
+                is PasswordPref -> StringPrefDialogUI(
+                    pref = dialogsPref as PasswordPref,
+                    isPrivate = true,
+                    confirm = true,
+                    openDialogCustom = openDialog
+                )
+
+                is StringPref   -> StringPrefDialogUI(
+                    pref = dialogsPref as StringPref,
+                    openDialogCustom = openDialog
+                )
             }
         }
     }
