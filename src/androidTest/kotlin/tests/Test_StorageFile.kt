@@ -35,7 +35,7 @@ class Test_StorageFile {
                 "${OABX.context.packageName}.provider",
                 baseDirAsFile
             )
-        1    -> FileUtils.getBackupDirUri(context)
+        1    -> OABX.backupRoot?.uri!!
         else -> uriFromFile(baseDirAsFile)
     }
     val baseDir = when (1) {
