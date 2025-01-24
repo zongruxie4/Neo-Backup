@@ -94,25 +94,23 @@ android {
         sourceCompatibility = jvmVersion
         targetCompatibility = jvmVersion
     }
-    kotlin {
-        jvmToolchain(jvmVersion.toString().toInt())
-        compilerOptions {
-            freeCompilerArgs.addAll(
-                "-Xjvm-default=all",
-                //"-Xuse-fir-lt=false",   // Scripts are not yet supported with K2 in LightTree mode
-                //"-Xallow-any-scripts-in-source-roots",
+    kotlinOptions {
+        jvmTarget = jvmVersion.toString()
+        freeCompilerArgs += listOf(
+            "-Xjvm-default=all-compatibility",
+            //"-Xuse-fir-lt=false",   // Scripts are not yet supported with K2 in LightTree mode
+            //"-Xallow-any-scripts-in-source-roots",
+        )
+        if (project.findProperty("enableComposeCompilerReports") == "true") {
+            val metricsDir =
+                "${project.layout.buildDirectory.asFile.get().absolutePath}/compose_metrics"
+            println("--- enableComposeCompilerReports -> $metricsDir")
+            freeCompilerArgs += listOf(
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=$metricsDir",
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$metricsDir",
             )
-            if (project.findProperty("enableComposeCompilerReports") == "true") {
-                val metricsDir =
-                    "${project.layout.buildDirectory.asFile.get().absolutePath}/compose_metrics"
-                println("--- enableComposeCompilerReports -> $metricsDir")
-                freeCompilerArgs.addAll(
-                    "-P",
-                    "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=$metricsDir",
-                    "-P",
-                    "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$metricsDir",
-                )
-            }
         }
     }
     lint {
