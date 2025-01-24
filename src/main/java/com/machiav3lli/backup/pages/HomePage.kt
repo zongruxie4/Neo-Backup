@@ -132,7 +132,7 @@ fun HomePage(
 
     val onDismiss: () -> Unit = {
         scope.launch {
-            paneNavigator.navigateTo(ListDetailPaneScaffoldRole.List)
+            paneNavigator.navigateBack()
         }
     }
 

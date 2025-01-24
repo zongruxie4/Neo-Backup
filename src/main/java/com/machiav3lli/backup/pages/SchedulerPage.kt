@@ -124,8 +124,8 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
                     SchedulePage(
                         scheduleId = id,
                         onDismiss = {
-                            scope.launch {
-                                paneNavigator.navigateTo(ListDetailPaneScaffoldRole.List)
+                            scope.launch { 
+                                paneNavigator.navigateBack()
                             }
                         }
                     )
