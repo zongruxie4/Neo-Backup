@@ -447,4 +447,10 @@
     <string name="search_package">Search for the app in store</string>
     <string name="prefs_altbackupdate">Show ISO date format in backups</string>
     <string name="prefs_altbackupdate_summary">Use the ISO date format in backup items instead of the locale one.</string>
+    <string name="light_medium_contrast">Light (medium contrast)</string>
+    <string name="light_high_contrast">Light (high contrast)</string>
+    <string name="dark_medium_contrast">Dark (medium contrast)</string>
+    <string name="dark_high_contrast">Dark (high contrast)</string>
+    <string name="black_medium_contrast">Black (medium contrast)</string>
+    <string name="black_high_contrast">Black (high contrast)</string>
 </resources>

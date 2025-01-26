@@ -16,37 +16,39 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.THEME
 import com.machiav3lli.backup.preferences.pref_appTheme
+import com.machiav3lli.backup.utils.getThemeContrast
 import com.machiav3lli.backup.utils.isBlackTheme
 import com.machiav3lli.backup.utils.isDynamicTheme
 
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    themeContrast: Contrast = getThemeContrast(),
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     val blackTheme by remember(pref_appTheme) { mutableStateOf(isBlackTheme) }
 
-    MaterialTheme( // TODO add contrasts
+    MaterialTheme(
         colorScheme = when {
             isDynamicTheme && isSystemInDarkTheme() && blackTheme && NeoApp.minSDK(Build.VERSION_CODES.S)
-            -> dynamicBlackColorScheme(context)
+                 -> dynamicBlackColorScheme(context)
 
             isDynamicTheme && isSystemInDarkTheme() && NeoApp.minSDK(Build.VERSION_CODES.S)
-            -> dynamicDarkColorScheme(context)
+                 -> dynamicDarkColorScheme(context)
 
             isDynamicTheme && NeoApp.minSDK(Build.VERSION_CODES.S)
-            -> dynamicLightColorScheme(context)
+                 -> dynamicLightColorScheme(context)
 
             darkTheme && blackTheme
-            -> BlackColors
+                 -> getBlackColors(themeContrast)
 
             darkTheme
-            -> DarkColors
+                 -> getDarkColors(themeContrast)
 
-            else
-            -> LightColors
+            else -> getLightColors(themeContrast)
         },
         content = content
     )
@@ -59,6 +61,12 @@ fun dynamicBlackColorScheme(context: Context) = dynamicDarkColorScheme(context).
 )
 
 // LIGHT THEMES
+
+fun getLightColors(contrast: Contrast) = when (contrast) {
+    Contrast.NORMAL -> LightColors
+    Contrast.MEDIUM -> MediumContrastLightColors
+    Contrast.HIGH   -> HighContrastLightColors
+}
 
 private val LightColors = lightColorScheme(
     primary = primaryLight,
@@ -176,6 +184,12 @@ private val HighContrastLightColors = lightColorScheme(
 
 // DARK THEMES
 
+fun getDarkColors(contrast: Contrast) = when (contrast) {
+    Contrast.NORMAL -> DarkColors
+    Contrast.MEDIUM -> MediumContrastDarkColors
+    Contrast.HIGH   -> HighContrastDarkColors
+}
+
 private val DarkColors = darkColorScheme(
     primary = primaryDark,
     onPrimary = onPrimaryDark,
@@ -292,6 +306,12 @@ private val HighContrastDarkColors = darkColorScheme(
 
 // Black Themes
 
+fun getBlackColors(contrast: Contrast) = when (contrast) {
+    Contrast.NORMAL -> BlackColors
+    Contrast.MEDIUM -> MediumContrastBlackColors
+    Contrast.HIGH   -> HighContrastBlackColors
+}
+
 private val BlackColors = DarkColors.copy(
     background = Color.Black,
     surfaceContainerLowest = Color.Black,
@@ -304,3 +324,27 @@ private val HighContrastBlackColors = HighContrastDarkColors.copy(
     background = Color.Black,
     surfaceContainerLowest = Color.Black,
 )
+
+enum class Contrast(val themes: List<THEME>) {
+    NORMAL(
+        listOf(
+            THEME.LIGHT,
+            THEME.DARK,
+            THEME.BLACK,
+        )
+    ),
+    MEDIUM(
+        listOf(
+            THEME.LIGHT_MEDIUM,
+            THEME.DARK_MEDIUM,
+            THEME.BLACK_MEDIUM,
+        )
+    ),
+    HIGH(
+        listOf(
+            THEME.LIGHT_HIGH,
+            THEME.DARK_HIGH,
+            THEME.BLACK_HIGH,
+        )
+    )
+}

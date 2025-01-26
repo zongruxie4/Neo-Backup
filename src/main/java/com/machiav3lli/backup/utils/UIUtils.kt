@@ -31,14 +31,7 @@ import com.google.android.material.color.DynamicColors
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.THEME_BLACK
-import com.machiav3lli.backup.THEME_DARK
-import com.machiav3lli.backup.THEME_DYNAMIC
-import com.machiav3lli.backup.THEME_DYNAMIC_BLACK
-import com.machiav3lli.backup.THEME_DYNAMIC_DARK
-import com.machiav3lli.backup.THEME_DYNAMIC_LIGHT
-import com.machiav3lli.backup.THEME_LIGHT
-import com.machiav3lli.backup.THEME_SYSTEM_BLACK
+import com.machiav3lli.backup.THEME
 import com.machiav3lli.backup.entity.ActionResult
 import com.machiav3lli.backup.handler.LogsHandler
 import com.machiav3lli.backup.preferences.traceDebug
@@ -48,6 +41,7 @@ import com.machiav3lli.backup.ui.compose.theme.AzureBlue
 import com.machiav3lli.backup.ui.compose.theme.BoldGreen
 import com.machiav3lli.backup.ui.compose.theme.CalmIndigo
 import com.machiav3lli.backup.ui.compose.theme.ChartreuseLime
+import com.machiav3lli.backup.ui.compose.theme.Contrast
 import com.machiav3lli.backup.ui.compose.theme.FinePurple
 import com.machiav3lli.backup.ui.compose.theme.FlamingoPink
 import com.machiav3lli.backup.ui.compose.theme.LavaOrange
@@ -82,9 +76,11 @@ fun Context.setCustomTheme() {
 
 val isBlackTheme: Boolean
     get() = when (styleTheme) {
-        THEME_BLACK,
-        THEME_SYSTEM_BLACK,
-        THEME_DYNAMIC_BLACK,
+        THEME.BLACK.ordinal,
+        THEME.BLACK_MEDIUM.ordinal,
+        THEME.BLACK_HIGH.ordinal,
+        THEME.SYSTEM_BLACK.ordinal,
+        THEME.DYNAMIC_BLACK.ordinal,
              -> true
 
         else -> false
@@ -92,14 +88,28 @@ val isBlackTheme: Boolean
 
 val isDynamicTheme: Boolean
     get() = when (styleTheme) {
-        THEME_DYNAMIC,
-        THEME_DYNAMIC_LIGHT,
-        THEME_DYNAMIC_DARK,
-        THEME_DYNAMIC_BLACK,
+        THEME.DYNAMIC.ordinal,
+        THEME.DYNAMIC_LIGHT.ordinal,
+        THEME.DYNAMIC_DARK.ordinal,
+        THEME.DYNAMIC_BLACK.ordinal,
              -> true
 
         else -> false
     }
+
+fun getThemeContrast(): Contrast = when (styleTheme) {
+    THEME.LIGHT_MEDIUM.ordinal,
+    THEME.DARK_MEDIUM.ordinal,
+    THEME.BLACK_MEDIUM.ordinal,
+         -> Contrast.MEDIUM
+
+    THEME.LIGHT_HIGH.ordinal,
+    THEME.DARK_HIGH.ordinal,
+    THEME.BLACK_HIGH.ordinal,
+         -> Contrast.HIGH
+
+    else -> Contrast.NORMAL
+}
 
 
 private var sysLocale: LocaleList? = null
@@ -158,14 +168,20 @@ fun Activity.showActionResult(result: ActionResult, saveMethod: DialogInterface.
     }
 
 fun getThemeStyleX(theme: Int) = when (theme) {
-    THEME_LIGHT,
-    THEME_DYNAMIC_LIGHT,
+    THEME.LIGHT.ordinal,
+    THEME.LIGHT_MEDIUM.ordinal,
+    THEME.LIGHT_HIGH.ordinal,
+    THEME.DYNAMIC_LIGHT.ordinal,
          -> AppCompatDelegate.MODE_NIGHT_NO
 
-    THEME_DARK,
-    THEME_BLACK,
-    THEME_DYNAMIC_DARK,
-    THEME_DYNAMIC_BLACK,
+    THEME.DARK.ordinal,
+    THEME.BLACK.ordinal,
+    THEME.DARK_MEDIUM.ordinal,
+    THEME.BLACK_MEDIUM.ordinal,
+    THEME.DARK_HIGH.ordinal,
+    THEME.BLACK_HIGH.ordinal,
+    THEME.DYNAMIC_DARK.ordinal,
+    THEME.DYNAMIC_BLACK.ordinal,
          -> AppCompatDelegate.MODE_NIGHT_YES
 
     else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
@@ -173,14 +189,20 @@ fun getThemeStyleX(theme: Int) = when (theme) {
 
 val Context.isDarkTheme: Boolean
     get() = when (styleTheme) {
-        THEME_LIGHT,
-        THEME_DYNAMIC_LIGHT,
+        THEME.LIGHT.ordinal,
+        THEME.LIGHT_MEDIUM.ordinal,
+        THEME.LIGHT_HIGH.ordinal,
+        THEME.DYNAMIC_LIGHT.ordinal,
              -> false
 
-        THEME_DARK,
-        THEME_BLACK,
-        THEME_DYNAMIC_DARK,
-        THEME_DYNAMIC_BLACK,
+        THEME.DARK.ordinal,
+        THEME.BLACK.ordinal,
+        THEME.DARK_MEDIUM.ordinal,
+        THEME.BLACK_MEDIUM.ordinal,
+        THEME.DARK_HIGH.ordinal,
+        THEME.BLACK_HIGH.ordinal,
+        THEME.DYNAMIC_DARK.ordinal,
+        THEME.DYNAMIC_BLACK.ordinal,
              -> true
 
         else -> isNightMode()

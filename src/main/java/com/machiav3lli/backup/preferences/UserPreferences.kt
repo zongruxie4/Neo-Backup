@@ -22,8 +22,7 @@ import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.THEME_DYNAMIC
-import com.machiav3lli.backup.THEME_SYSTEM
+import com.machiav3lli.backup.THEME
 import com.machiav3lli.backup.accentColorItems
 import com.machiav3lli.backup.dialogs.BaseDialog
 import com.machiav3lli.backup.dialogs.EnumPrefDialogUI
@@ -164,12 +163,12 @@ val pref_languages = ListPref(
 )
 
 val pref_appTheme = EnumPref(
-    key = "user.appTheme",
+    key = "user.appThemeNeo",
     titleId = R.string.prefs_theme,
     icon = Phosphor.Swatches,
     entries = themeItems,
-    defaultValue = if (NeoApp.minSDK(31)) THEME_DYNAMIC
-    else THEME_SYSTEM,
+    defaultValue = if (NeoApp.minSDK(31)) THEME.DYNAMIC.ordinal
+    else THEME.SYSTEM.ordinal,
     onChanged = ::onThemeChanged,
 )
 

@@ -43,7 +43,8 @@ const val EXPORTS_FOLDER_NAME_BASE = "EXPORTS"
 const val EXPORTS_FOLDER_NAME = "$ADMIN_PREFIX$EXPORTS_FOLDER_NAME_BASE"
 const val EXPORTS_FOLDER_NAME_ALT = EXPORTS_FOLDER_NAME_BASE
 
-const val LOGS_FOLDER_NAME_BASE = "LOGS"  // TODO deprecated, only for excluding from backup scanning
+const val LOGS_FOLDER_NAME_BASE =
+    "LOGS"  // TODO deprecated, only for excluding from backup scanning
 
 const val ERROR_PREFIX = "${ADMIN_PREFIX}ERROR."
 
@@ -126,30 +127,44 @@ const val EXTRA_PERIODIC = "periodic"
 const val EXTRA_NAME = "name"
 const val EXTRA_STATS = "stats"
 
-const val THEME_LIGHT = 0
-const val THEME_DARK = 1
-const val THEME_BLACK = 4
-const val THEME_SYSTEM = 2
-const val THEME_SYSTEM_BLACK = 5
-const val THEME_DYNAMIC = 3
-const val THEME_DYNAMIC_LIGHT = 6
-const val THEME_DYNAMIC_DARK = 7
-const val THEME_DYNAMIC_BLACK = 8
+enum class THEME {
+    LIGHT,
+    DARK,
+    BLACK,
+    LIGHT_MEDIUM,
+    DARK_MEDIUM,
+    BLACK_MEDIUM,
+    LIGHT_HIGH,
+    DARK_HIGH,
+    BLACK_HIGH,
+    SYSTEM,
+    SYSTEM_BLACK,
+    DYNAMIC,
+    DYNAMIC_LIGHT,
+    DYNAMIC_DARK,
+    DYNAMIC_BLACK,
+}
 
 val themeItems = mutableMapOf(
-    THEME_LIGHT to R.string.prefs_theme_light,
-    THEME_DARK to R.string.prefs_theme_dark,
-    THEME_BLACK to R.string.prefs_theme_black,
+    THEME.LIGHT.ordinal to R.string.prefs_theme_light,
+    THEME.DARK.ordinal to R.string.prefs_theme_dark,
+    THEME.BLACK.ordinal to R.string.prefs_theme_black,
+    THEME.LIGHT_MEDIUM.ordinal to R.string.light_medium_contrast,
+    THEME.DARK_MEDIUM.ordinal to R.string.dark_medium_contrast,
+    THEME.BLACK_MEDIUM.ordinal to R.string.black_medium_contrast,
+    THEME.LIGHT_HIGH.ordinal to R.string.light_high_contrast,
+    THEME.DARK_HIGH.ordinal to R.string.dark_high_contrast,
+    THEME.BLACK_HIGH.ordinal to R.string.black_high_contrast,
 ).apply {
     if (NeoApp.minSDK(29)) {
-        set(THEME_SYSTEM, R.string.prefs_theme_system)
-        set(THEME_SYSTEM_BLACK, R.string.prefs_theme_system_black)
+        set(THEME.SYSTEM.ordinal, R.string.prefs_theme_system)
+        set(THEME.SYSTEM_BLACK.ordinal, R.string.prefs_theme_system_black)
     }
     if (NeoApp.minSDK(31)) {
-        set(THEME_DYNAMIC, R.string.prefs_theme_dynamic)
-        set(THEME_DYNAMIC_LIGHT, R.string.prefs_theme_dynamic_light)
-        set(THEME_DYNAMIC_DARK, R.string.prefs_theme_dynamic_dark)
-        set(THEME_DYNAMIC_BLACK, R.string.prefs_theme_dynamic_black)
+        set(THEME.DYNAMIC.ordinal, R.string.prefs_theme_dynamic)
+        set(THEME.DYNAMIC_LIGHT.ordinal, R.string.prefs_theme_dynamic_light)
+        set(THEME.DYNAMIC_DARK.ordinal, R.string.prefs_theme_dynamic_dark)
+        set(THEME.DYNAMIC_BLACK.ordinal, R.string.prefs_theme_dynamic_black)
     }
 }
 
