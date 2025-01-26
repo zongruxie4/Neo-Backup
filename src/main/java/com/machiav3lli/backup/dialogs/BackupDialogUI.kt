@@ -29,9 +29,9 @@ import com.machiav3lli.backup.MODE_DATA_MEDIA
 import com.machiav3lli.backup.MODE_DATA_OBB
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.batchModesSequence
 import com.machiav3lli.backup.dbs.entity.AppInfo
 import com.machiav3lli.backup.entity.Package
-import com.machiav3lli.backup.batchModesSequence
 import com.machiav3lli.backup.utils.backupModeIfActive
 
 @Composable
@@ -69,7 +69,11 @@ fun BackupDialogUI(
 
     possibleModes.forEach { mode -> // TODO reusing mode of last backup?
         val activeMode = backupModeIfActive(mode)
-        selectedMode.add(activeMode)
+        selectedMode.add(
+            if (appPackage.latestBackup?.hasMode(mode) != false)
+                activeMode
+            else MODE_UNSET
+        )
     }
 
     MultiSelectionDialogUI(

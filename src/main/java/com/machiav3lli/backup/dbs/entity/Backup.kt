@@ -22,6 +22,12 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import com.machiav3lli.backup.BACKUP_INSTANCE_PROPERTIES_INDIR
 import com.machiav3lli.backup.BACKUP_INSTANCE_REGEX_PATTERN
+import com.machiav3lli.backup.MODE_APK
+import com.machiav3lli.backup.MODE_DATA
+import com.machiav3lli.backup.MODE_DATA_DE
+import com.machiav3lli.backup.MODE_DATA_EXT
+import com.machiav3lli.backup.MODE_DATA_MEDIA
+import com.machiav3lli.backup.MODE_DATA_OBB
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.entity.StorageFile
@@ -119,6 +125,16 @@ data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::cla
 
     val hasData: Boolean
         get() = hasAppData || hasExternalData || hasDevicesProtectedData || hasMediaData || hasObbData
+
+    fun hasMode(mode: Int): Boolean = when (mode) {
+        MODE_APK        -> hasApk
+        MODE_DATA       -> hasData
+        MODE_DATA_DE    -> hasDevicesProtectedData
+        MODE_DATA_EXT   -> hasExternalData
+        MODE_DATA_OBB   -> hasObbData
+        MODE_DATA_MEDIA -> hasMediaData
+        else            -> false
+    }
 
     fun toAppInfo() = AppInfo(
         packageName,
