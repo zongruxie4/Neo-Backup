@@ -2,11 +2,9 @@
 <resources>
     <color name="app_primary_base">#E9ECEF</color>
     <color name="app_primary_inverse">#323639</color>
-    <color name="ic_launcher_background">#EFD</color>
-    <color name="ic_launcher_foreground_red">#d06375</color>
-    <color name="ic_launcher_foreground_green">#182</color>
-    <color name="ic_launcher_foreground_yellow">#FD6</color>
-    <color name="ic_launcher_foreground_blue">#61B0D0</color>
+    <color name="ic_launcher_background">#FFF9FB</color>
+    <color name="ic_launcher_foreground_red">#C04</color>
+    <color name="ic_launcher_foreground_blue">#36A</color>
     <color name="ic_background_alpha">#55FFFFFF</color>
 
     <color name="ic_exodus">#AB47BC</color>
