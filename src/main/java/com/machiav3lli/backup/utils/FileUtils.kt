@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,12 +20,12 @@ package com.machiav3lli.backup.utils
 import android.content.Context
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.NeoApp.Companion.backupRoot
-import com.machiav3lli.backup.dbs.entity.Backup
-import com.machiav3lli.backup.dbs.entity.SpecialInfo
-import com.machiav3lli.backup.entity.Package
-import com.machiav3lli.backup.handler.LogsHandler
-import com.machiav3lli.backup.handler.findBackups
-import com.machiav3lli.backup.handler.updateAppTables
+import com.machiav3lli.backup.data.dbs.entity.Backup
+import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
+import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.manager.handler.findBackups
+import com.machiav3lli.backup.manager.handler.updateAppTables
 import java.io.File
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions

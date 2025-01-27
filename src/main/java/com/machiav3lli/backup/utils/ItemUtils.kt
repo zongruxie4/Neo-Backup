@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,9 +29,9 @@ import com.machiav3lli.backup.CHIP_SPLIT
 import com.machiav3lli.backup.CHIP_TYPE
 import com.machiav3lli.backup.CHIP_VERSION
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.dbs.entity.AppExtras
-import com.machiav3lli.backup.handler.LogsHandler
-import com.machiav3lli.backup.entity.Package
+import com.machiav3lli.backup.data.dbs.entity.AppExtras
+import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CircleWavyWarning
@@ -43,7 +43,7 @@ import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
 import com.machiav3lli.backup.ui.compose.theme.ColorSystem
 import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.ui.compose.theme.ColorUser
-import com.machiav3lli.backup.entity.InfoChipItem
+import com.machiav3lli.backup.data.entity.InfoChipItem
 
 data class AppStats(
     val nApps: Int,

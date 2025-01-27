@@ -1,9 +1,9 @@
 package tests.tests
 
 import androidx.test.platform.app.InstrumentationRegistry
-import com.machiav3lli.backup.handler.ShellHandler.Companion.quote
-import com.machiav3lli.backup.handler.ShellHandler.Companion.utilBoxQ
-import com.machiav3lli.backup.entity.RootFile
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.quote
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.utilBoxQ
+import com.machiav3lli.backup.data.entity.RootFile
 import com.topjohnwu.superuser.ShellUtils.fastCmd
 import org.junit.Assert.assertEquals
 import org.junit.Test

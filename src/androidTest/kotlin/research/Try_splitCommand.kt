@@ -1,6 +1,6 @@
 package tests.research
 
-import com.machiav3lli.backup.handler.ShellHandler.Companion.splitCommand
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.splitCommand
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 

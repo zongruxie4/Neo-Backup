@@ -1,5 +1,5 @@
 package tests.research
-import com.machiav3lli.backup.handler.ShellHandler
+import com.machiav3lli.backup.manager.handler.ShellHandler
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test

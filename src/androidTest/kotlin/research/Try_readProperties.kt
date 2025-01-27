@@ -5,11 +5,11 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import androidx.test.platform.app.InstrumentationRegistry
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.dbs.entity.Backup
-import com.machiav3lli.backup.entity.RootFile
-import com.machiav3lli.backup.entity.StorageFile
-import com.machiav3lli.backup.entity.getCursorString
-import com.machiav3lli.backup.handler.LogsHandler
+import com.machiav3lli.backup.data.dbs.entity.Backup
+import com.machiav3lli.backup.data.entity.RootFile
+import com.machiav3lli.backup.data.entity.StorageFile
+import com.machiav3lli.backup.data.entity.getCursorString
+import com.machiav3lli.backup.manager.handler.LogsHandler
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Test

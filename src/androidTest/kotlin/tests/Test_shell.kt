@@ -1,8 +1,8 @@
 package tests.tests
 import androidx.test.platform.app.InstrumentationRegistry
-import com.machiav3lli.backup.handler.LogsHandler
-import com.machiav3lli.backup.handler.ShellHandler
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
+import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.manager.handler.ShellHandler
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
 import com.topjohnwu.superuser.Shell
 import org.jetbrains.annotations.TestOnly
 import org.junit.Assert.assertEquals

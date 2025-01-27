@@ -21,8 +21,8 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.ui.compose.BalancedWrapRow
-import com.machiav3lli.backup.ui.compose.balancedWrap
+import com.machiav3lli.backup.ui.compose.component.BalancedWrapRow
+import com.machiav3lli.backup.ui.compose.component.balancedWrap
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

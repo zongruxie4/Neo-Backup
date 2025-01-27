@@ -7,10 +7,10 @@ import android.content.pm.PackageManager
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.os.SystemClock
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.entity.RootFile
-import com.machiav3lli.backup.entity.StorageFile
-import com.machiav3lli.backup.handler.LogsHandler
-import com.machiav3lli.backup.handler.ShellCommands
+import com.machiav3lli.backup.data.entity.RootFile
+import com.machiav3lli.backup.data.entity.StorageFile
+import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.manager.handler.ShellCommands
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

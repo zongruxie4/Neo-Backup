@@ -1,9 +1,9 @@
 package tests.tests
 
-import com.machiav3lli.backup.handler.ShellHandler
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRootPipeInCollectErr
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRootPipeOutCollectErr
+import com.machiav3lli.backup.manager.handler.ShellHandler
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRootPipeInCollectErr
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRootPipeOutCollectErr
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

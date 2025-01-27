@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
  */
 package com.machiav3lli.backup
 
-import com.machiav3lli.backup.dbs.entity.Backup
-import com.machiav3lli.backup.handler.BackupRestoreHelper.ActionType
+import com.machiav3lli.backup.data.dbs.entity.Backup
+import com.machiav3lli.backup.manager.handler.BackupRestoreHelper.ActionType
 
 interface ActionListener {
     fun onActionCalled(actionType: ActionType?, mode: Int, backup: Backup?)

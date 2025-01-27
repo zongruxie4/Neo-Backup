@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import com.machiav3lli.backup.utils.NeoViewModel
+import com.machiav3lli.backup.utils.extensions.NeoViewModel
 
 open class BatchVM : NeoViewModel() {
     val apkBackupCheckedList = SnapshotStateMap<String, Int>()

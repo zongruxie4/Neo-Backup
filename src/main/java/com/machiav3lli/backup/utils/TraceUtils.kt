@@ -1,10 +1,10 @@
 package com.machiav3lli.backup.utils
 
-import com.machiav3lli.backup.dbs.entity.Backup
-import com.machiav3lli.backup.entity.BooleanPref
-import com.machiav3lli.backup.preferences.pref_trace
-import com.machiav3lli.backup.preferences.traceFlows
-import com.machiav3lli.backup.preferences.traceTiming
+import com.machiav3lli.backup.data.dbs.entity.Backup
+import com.machiav3lli.backup.data.entity.BooleanPref
+import com.machiav3lli.backup.data.preferences.pref_trace
+import com.machiav3lli.backup.data.preferences.traceFlows
+import com.machiav3lli.backup.data.preferences.traceTiming
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
@@ -258,7 +258,7 @@ object TraceUtils {
     // helpers
 
     fun <T> formatElements(elements: Collection<T>): String {
-        return "(${elements.size})${elements.map {"${it}"}}"
+        return "(${elements.size})${elements.map { "${it}" }}"
     }
 
     fun formatBackups(backups: List<Backup>?): String {

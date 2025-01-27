@@ -19,15 +19,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.pages.LockPage
-import com.machiav3lli.backup.pages.MainPage
-import com.machiav3lli.backup.pages.PermissionsPage
-import com.machiav3lli.backup.pages.PrefsPage
-import com.machiav3lli.backup.pages.WelcomePage
-import com.machiav3lli.backup.preferences.LogsPage
-import com.machiav3lli.backup.preferences.SchedulesExportsPage
-import com.machiav3lli.backup.preferences.TerminalPage
-import com.machiav3lli.backup.preferences.persist_beenWelcomed
+import com.machiav3lli.backup.ui.pages.LockPage
+import com.machiav3lli.backup.ui.pages.MainPage
+import com.machiav3lli.backup.ui.pages.PermissionsPage
+import com.machiav3lli.backup.ui.pages.PrefsPage
+import com.machiav3lli.backup.ui.pages.WelcomePage
+import com.machiav3lli.backup.ui.pages.LogsPage
+import com.machiav3lli.backup.ui.pages.SchedulesExportsPage
+import com.machiav3lli.backup.ui.pages.TerminalPage
+import com.machiav3lli.backup.ui.pages.persist_beenWelcomed
 
 @Composable
 fun MainNavHost(

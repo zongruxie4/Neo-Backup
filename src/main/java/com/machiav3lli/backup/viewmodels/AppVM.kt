@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,16 +20,16 @@ package com.machiav3lli.backup.viewmodels
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.activities.NeoActivity
-import com.machiav3lli.backup.dbs.entity.AppExtras
-import com.machiav3lli.backup.dbs.entity.Backup
-import com.machiav3lli.backup.dbs.repository.AppExtrasRepository
-import com.machiav3lli.backup.dbs.repository.PackageRepository
-import com.machiav3lli.backup.handler.ShellCommands.Companion.currentProfile
-import com.machiav3lli.backup.handler.showNotification
+import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.data.dbs.entity.AppExtras
+import com.machiav3lli.backup.data.dbs.entity.Backup
+import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
+import com.machiav3lli.backup.data.dbs.repository.PackageRepository
+import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
+import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.ui.compose.MutableComposableStateFlow
-import com.machiav3lli.backup.utils.NeoViewModel
 import com.machiav3lli.backup.utils.SystemUtils
+import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow

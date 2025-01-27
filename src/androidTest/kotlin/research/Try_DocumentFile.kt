@@ -3,7 +3,7 @@ package tests.research
 import androidx.documentfile.provider.DocumentFile
 import androidx.test.platform.app.InstrumentationRegistry
 import com.machiav3lli.backup.MIME_TYPE_FILE
-import com.machiav3lli.backup.preferences.pref_shadowRootFile
+import com.machiav3lli.backup.ui.pages.pref_shadowRootFile
 import com.machiav3lli.backup.utils.TraceUtils
 import junit.framework.TestCase.assertEquals
 import org.junit.Before

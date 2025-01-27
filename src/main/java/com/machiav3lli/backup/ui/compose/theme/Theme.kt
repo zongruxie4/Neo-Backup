@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.THEME
-import com.machiav3lli.backup.preferences.pref_appTheme
+import com.machiav3lli.backup.ui.pages.pref_appTheme
 import com.machiav3lli.backup.utils.getThemeContrast
 import com.machiav3lli.backup.utils.isBlackTheme
 import com.machiav3lli.backup.utils.isDynamicTheme

@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,12 +37,12 @@ import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.Sort
 import com.machiav3lli.backup.UpdatedFilter
-import com.machiav3lli.backup.dbs.entity.AppExtras
-import com.machiav3lli.backup.entity.Package
-import com.machiav3lli.backup.entity.SortFilterModel
-import com.machiav3lli.backup.entity.SpecialFilter
+import com.machiav3lli.backup.data.dbs.entity.AppExtras
+import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.data.entity.SortFilterModel
+import com.machiav3lli.backup.data.entity.SpecialFilter
 import com.machiav3lli.backup.possibleMainFilters
-import com.machiav3lli.backup.preferences.pref_oldBackups
+import com.machiav3lli.backup.ui.pages.pref_oldBackups
 import java.text.Collator
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit

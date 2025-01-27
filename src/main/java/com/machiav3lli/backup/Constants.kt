@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,10 +21,10 @@ import android.Manifest
 import android.content.Intent
 import android.provider.DocumentsContract
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.dbs.entity.PackageInfo
-import com.machiav3lli.backup.entity.ChipItem
-import com.machiav3lli.backup.entity.Legend
-import com.machiav3lli.backup.entity.Link
+import com.machiav3lli.backup.data.dbs.entity.PackageInfo
+import com.machiav3lli.backup.data.entity.ChipItem
+import com.machiav3lli.backup.data.entity.Legend
+import com.machiav3lli.backup.data.entity.Link
 
 const val PREFS_SHARED_PRIVATE = "com.machiav3lli.backup"
 

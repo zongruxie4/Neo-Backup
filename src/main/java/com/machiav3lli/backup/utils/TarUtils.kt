@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@
 package com.machiav3lli.backup.utils
 
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.handler.ShellHandler
-import com.machiav3lli.backup.handler.ShellHandler.Companion.quote
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
-import com.machiav3lli.backup.handler.ShellHandler.FileType
-import com.machiav3lli.backup.entity.RootFile
-import com.machiav3lli.backup.preferences.pref_strictHardLinks
+import com.machiav3lli.backup.manager.handler.ShellHandler
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.quote
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
+import com.machiav3lli.backup.manager.handler.ShellHandler.FileType
+import com.machiav3lli.backup.data.entity.RootFile
+import com.machiav3lli.backup.ui.pages.pref_strictHardLinks
 import com.topjohnwu.superuser.io.SuFileOutputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream

@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowWidthSizeClass
-import com.machiav3lli.backup.preferences.pref_altNavBarItem
+import com.machiav3lli.backup.ui.pages.pref_altNavBarItem
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable

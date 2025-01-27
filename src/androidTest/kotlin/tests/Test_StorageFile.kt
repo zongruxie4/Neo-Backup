@@ -6,9 +6,9 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.test.platform.app.InstrumentationRegistry
 import com.machiav3lli.backup.ADMIN_PREFIX
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.entity.StorageFile
-import com.machiav3lli.backup.entity.UndeterminedStorageFile
-import com.machiav3lli.backup.entity.uriFromFile
+import com.machiav3lli.backup.data.entity.StorageFile
+import com.machiav3lli.backup.data.entity.UndeterminedStorageFile
+import com.machiav3lli.backup.data.entity.uriFromFile
 import com.machiav3lli.backup.utils.TraceUtils
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull

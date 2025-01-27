@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,10 +19,10 @@ package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.entity.Log
-import com.machiav3lli.backup.handler.LogsHandler
-import com.machiav3lli.backup.handler.LogsHandler.Companion.share
-import com.machiav3lli.backup.utils.NeoViewModel
+import com.machiav3lli.backup.data.entity.Log
+import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.share
+import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

@@ -17,7 +17,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.preferences.persist_ignoreBatteryOptimization
+import com.machiav3lli.backup.ui.pages.persist_ignoreBatteryOptimization
 import org.koin.java.KoinJavaComponent.get
 
 // Getters

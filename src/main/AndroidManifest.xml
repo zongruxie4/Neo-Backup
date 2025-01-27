@@ -70,7 +70,7 @@
         tools:targetApi="34">
 
         <receiver
-            android:name=".services.MmsReceiver"
+            android:name=".manager.services.MmsReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BROADCAST_WAP_PUSH">
@@ -80,7 +80,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".services.SmsReceiver"
+            android:name=".manager.services.SmsReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
@@ -90,7 +90,7 @@
         </receiver>
 
         <service
-            android:name=".services.HeadlessSmsSendService"
+            android:name=".manager.services.HeadlessSmsSendService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
@@ -107,7 +107,7 @@
         </service>
 
         <activity
-            android:name=".activities.NeoActivity"
+            android:name=".ui.activities.NeoActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -119,7 +119,7 @@
         </activity>
 
         <activity
-            android:name=".activities.ComposeSms"
+            android:name=".ui.activities.ComposeSms"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -146,7 +146,7 @@
         </provider>
 
         <receiver
-            android:name=".services.CommandReceiver"
+            android:name=".manager.services.CommandReceiver"
             android:exported="true" />
 
         <service

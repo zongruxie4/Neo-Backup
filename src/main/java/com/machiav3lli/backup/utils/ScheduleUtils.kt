@@ -21,11 +21,11 @@ import android.content.Context
 import android.icu.util.Calendar
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.dbs.entity.Schedule
-import com.machiav3lli.backup.dbs.repository.ScheduleRepository
-import com.machiav3lli.backup.preferences.pref_fakeScheduleMin
-import com.machiav3lli.backup.preferences.traceSchedule
-import com.machiav3lli.backup.tasks.ScheduleWork
+import com.machiav3lli.backup.data.dbs.entity.Schedule
+import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
+import com.machiav3lli.backup.ui.pages.pref_fakeScheduleMin
+import com.machiav3lli.backup.data.preferences.traceSchedule
+import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

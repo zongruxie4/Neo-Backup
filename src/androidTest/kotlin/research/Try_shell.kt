@@ -1,5 +1,5 @@
 package tests.research
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRoot
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
 import org.jetbrains.annotations.TestOnly
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

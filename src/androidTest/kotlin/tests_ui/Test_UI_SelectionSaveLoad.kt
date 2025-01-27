@@ -14,7 +14,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.printToLog
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.machiav3lli.backup.activities.NeoActivity
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.utils.SystemUtils
 import junit.framework.TestCase.assertEquals
 import org.junit.Before

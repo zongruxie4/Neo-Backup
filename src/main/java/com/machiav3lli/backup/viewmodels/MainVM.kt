@@ -1,5 +1,5 @@
 /*
- * OAndBackupX: open-source apps backup and restore app.
+ * Neo Backup: open-source apps backup and restore app.
  * Copyright (C) 2020  Antonios Hazim
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,22 +18,22 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.dbs.entity.Backup
-import com.machiav3lli.backup.dbs.repository.BlocklistRepository
-import com.machiav3lli.backup.dbs.repository.PackageRepository
-import com.machiav3lli.backup.entity.MainState
-import com.machiav3lli.backup.entity.Package
-import com.machiav3lli.backup.entity.SortFilterModel
-import com.machiav3lli.backup.preferences.NeoPrefs
-import com.machiav3lli.backup.preferences.pref_newAndUpdatedNotification
-import com.machiav3lli.backup.preferences.traceBackups
-import com.machiav3lli.backup.preferences.traceFlows
-import com.machiav3lli.backup.ui.compose.item.IconCache
+import com.machiav3lli.backup.data.dbs.entity.Backup
+import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
+import com.machiav3lli.backup.data.dbs.repository.PackageRepository
+import com.machiav3lli.backup.data.entity.MainState
+import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.data.entity.SortFilterModel
+import com.machiav3lli.backup.data.preferences.NeoPrefs
+import com.machiav3lli.backup.data.preferences.traceBackups
+import com.machiav3lli.backup.data.preferences.traceFlows
 import com.machiav3lli.backup.ui.navigation.NavItem
-import com.machiav3lli.backup.utils.NeoViewModel
+import com.machiav3lli.backup.ui.pages.pref_newAndUpdatedNotification
 import com.machiav3lli.backup.utils.TraceUtils.formatSortedBackups
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.applySearchAndFilter
+import com.machiav3lli.backup.utils.extensions.IconCache
+import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -1,10 +1,9 @@
 package com.machiav3lli.backup.utils
 
-import android.content.Context
-import com.machiav3lli.backup.entity.StorageFile
-import com.machiav3lli.backup.handler.ShellHandler.Companion.quote
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRootPipeInCollectErr
-import com.machiav3lli.backup.handler.ShellHandler.Companion.runAsRootPipeOutCollectErr
+import com.machiav3lli.backup.data.entity.StorageFile
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.quote
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRootPipeInCollectErr
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRootPipeOutCollectErr
 import java.io.IOException
 
 //TODO wech
