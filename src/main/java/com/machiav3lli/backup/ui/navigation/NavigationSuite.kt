@@ -19,6 +19,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +33,7 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 fun NeoNavigationSuiteScaffold(
     pages: ImmutableList<NavItem>,
-    selectedPage: NavItem,
+    currentState: State<Int>,
     onItemClick: (Int) -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -74,7 +75,7 @@ fun NeoNavigationSuiteScaffold(
             pages.forEachIndexed { index, it ->
                 navItem(
                     item = it,
-                    selected = it == selectedPage,
+                    selected = index == currentState.value,
                     itemColors = itemColors,
                     onClick = { onItemClick(index) }
                 )

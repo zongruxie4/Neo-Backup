@@ -65,7 +65,8 @@ fun PrefsPage(
         NavItem.ToolsPrefs,
     )
     val pagerState = rememberPagerState(initialPage = pageIndex, pageCount = { pages.size })
-    val currentPage by remember { derivedStateOf { pages[pagerState.currentPage] } }
+    val currentPageIndex = remember { derivedStateOf { pagerState.currentPage } }
+    val currentPage by remember { derivedStateOf { pages[currentPageIndex.value] } }
     val scaffoldState = rememberBottomSheetScaffoldState()
 
     Shell.getShell()
@@ -94,7 +95,7 @@ fun PrefsPage(
         ) {
             NeoNavigationSuiteScaffold(
                 pages = pages,
-                selectedPage = currentPage,
+                currentState = currentPageIndex,
                 onItemClick = { index ->
                     scope.launch {
                         pagerState.animateScrollToPage(index)

@@ -69,7 +69,8 @@ fun MainPage(
         NavItem.Scheduler,
     )
     val pagerState = rememberPagerState(pageCount = { pages.size })
-    val currentPage by remember { derivedStateOf { pages[pagerState.currentPage] } }
+    val currentPageIndex = remember { derivedStateOf { pagerState.currentPage } }
+    val currentPage by remember { derivedStateOf { pages[currentPageIndex.value] } }
 
     BackHandler {
         NeoApp.main?.finishAffinity()
@@ -80,7 +81,7 @@ fun MainPage(
     FullScreenBackground {
         NeoNavigationSuiteScaffold(
             pages = pages,
-            selectedPage = currentPage,
+            currentState = currentPageIndex,
             onItemClick = { index ->
                 scope.launch {
                     pagerState.animateScrollToPage(index)
