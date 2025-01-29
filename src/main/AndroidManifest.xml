@@ -150,6 +150,10 @@
             android:exported="true" />
 
         <service
+            android:name=".manager.services.ScheduleService"
+            android:foregroundServiceType="dataSync" />
+
+        <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"
             tools:node="merge" />

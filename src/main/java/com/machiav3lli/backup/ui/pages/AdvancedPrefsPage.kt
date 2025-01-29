@@ -329,6 +329,18 @@ val pref_showInfoLogBar = BooleanPref(
     defaultValue = false
 )
 
+val pref_useAlarmClock = BooleanPref(
+    key = "dev-adv.useAlarmClock",
+    summaryId = R.string.prefs_usealarmclock_summary,
+    defaultValue = false
+)
+
+val pref_useExactAlarm = BooleanPref(
+    key = "dev-adv.useExactAlarm",
+    summaryId = R.string.prefs_useexactalarm_summary,
+    defaultValue = false
+)
+
 val pref_backupPauseApps = BooleanPref(
     key = "dev-adv.backupPauseApps",
     summary = """
