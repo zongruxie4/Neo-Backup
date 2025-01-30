@@ -14,6 +14,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,8 +50,8 @@ import kotlin.math.min
 val countTime = 100
 val resetTime = 200
 
-var externalState = mutableStateOf(0)
-var externalByState by mutableStateOf(0)
+var externalState = mutableIntStateOf(0)
+var externalByState by mutableIntStateOf(0)
 val externalStateValue get() = externalState.value
 val externalByStateValue get() = externalByState
 var externalValue = 0
@@ -76,12 +78,12 @@ private val recomposeModifier =
         val totalCompositions = remember { arrayOf(0L) }
         totalCompositions[0]++
         // The value of totalCompositions at the last timeout.
-        val totalCompositionsAtLastTimeout = remember { mutableStateOf(0L) }
+        val totalCompositionsAtLastTimeout = remember { mutableLongStateOf(0L) }
         // Start the timeout, and reset everytime there's a recomposition. (Using totalCompositions
         // as the key is really just to cause the timer to restart every composition).
         LaunchedEffect(totalCompositions[0]) {
             delay(resetTime.toLong())
-            totalCompositionsAtLastTimeout.value = totalCompositions[0]
+            totalCompositionsAtLastTimeout.longValue = totalCompositions[0]
         }
         Modifier.drawWithCache {
             onDrawWithContent {
@@ -90,7 +92,7 @@ private val recomposeModifier =
                 // Below is to draw the highlight, if necessary. A lot of the logic is copied from
                 // Modifier.border
                 val numCompositionsSinceTimeout =
-                    totalCompositions[0] - totalCompositionsAtLastTimeout.value
+                    totalCompositions[0] - totalCompositionsAtLastTimeout.longValue
                 val hasValidBorderParams = size.minDimension > 0f
                 if (!hasValidBorderParams || numCompositionsSinceTimeout <= 0) {
                     return@onDrawWithContent
@@ -99,9 +101,9 @@ private val recomposeModifier =
                     when (numCompositionsSinceTimeout) {
                         // We need at least one composition to draw, so draw the smallest border
                         // color in blue.
-                        1L -> Color.Cyan.copy(alpha = 0.5f) to 1.dp.toPx()
+                        1L   -> Color.Cyan.copy(alpha = 0.5f) to 1.dp.toPx()
                         // 2 compositions is _probably_ okay.
-                        2L -> Color.Blue.copy(alpha = 0.5f) to 1.dp.toPx()
+                        2L   -> Color.Blue.copy(alpha = 0.5f) to 1.dp.toPx()
                         // 3 or more compositions before timeout may indicate an issue. lerp the
                         // color from yellow to red, and continually increase the border size.
                         else -> {
@@ -131,685 +133,685 @@ private val recomposeModifier =
     }
 
 //functions-begin
-    @Composable
-    fun DerivedState_from_Value() {
-        val value by remember { derivedStateOf { externalValue } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_from_Value")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_from_Value() {
+    val value by remember { derivedStateOf { externalValue } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_from_Value")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun DerivedState_from_Param(param: Int) {
-        val value by remember { derivedStateOf { param } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_from_Param")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_Value_stateofValue() {
-        val value by remember(externalValue ) { mutableStateOf ( externalValue ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Value_stateofValue")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_from_Param(param: Int) {
+    val value by remember { derivedStateOf { param } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_from_Param")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_Value_stateofValue10() {
-        val value by remember(externalValue ) { mutableStateOf ( externalValue / 10 ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Value_stateofValue10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_Value10_stateofValue10() {
-        val value by remember(externalValue / 10) { mutableStateOf ( externalValue / 10 ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Value10_stateofValue10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun RememberKey_Value_stateofValue() {
+    val value by remember(externalValue) { mutableStateOf(externalValue) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Value_stateofValue")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_Value_Value() {
-        val value = remember(externalValue ) { externalValue }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Value_Value")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_Value_Value10() {
-        val value = remember(externalValue ) { externalValue / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Value_Value10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun RememberKey_Value_stateofValue10() {
+    val value by remember(externalValue) { mutableStateOf(externalValue / 10) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Value_stateofValue10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_Value10_Value10() {
-        val value = remember(externalValue / 10) { externalValue / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Value10_Value10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun Remember__stateofParam(param: Int) {
-        val value by remember { mutableStateOf ( param ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" Remember__stateofParam")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun RememberKey_Value10_stateofValue10() {
+    val value by remember(externalValue / 10) { mutableStateOf(externalValue / 10) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Value10_stateofValue10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun Remember__stateofParam10(param: Int) {
-        val value by remember { mutableStateOf ( param / 10 ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" Remember__stateofParam10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun Remember__Param(param: Int) {
-        val value = remember { param }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" Remember__Param")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun RememberKey_Value_Value() {
+    val value = remember(externalValue) { externalValue }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Value_Value")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun Remember__Param10(param: Int) {
-        val value = remember { param / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" Remember__Param10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun DerivedState_State() {
-        val value by remember { derivedStateOf { externalState.value } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_State")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun RememberKey_Value_Value10() {
+    val value = remember(externalValue) { externalValue / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Value_Value10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun DerivedState_State10() {
-        val value by remember { derivedStateOf { externalState.value / 10 } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_State10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun DerivedState_StateValue() {
-        val value by remember { derivedStateOf { externalStateValue } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_StateValue")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun RememberKey_Value10_Value10() {
+    val value = remember(externalValue / 10) { externalValue / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Value10_Value10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun DerivedState_StateValue10() {
-        val value by remember { derivedStateOf { externalStateValue / 10 } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_StateValue10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun DerivedState_byState() {
-        val value by remember { derivedStateOf { externalByState } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_byState")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun Remember__stateofParam(param: Int) {
+    val value by remember { mutableStateOf(param) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" Remember__stateofParam")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun DerivedState_byState10() {
-        val value by remember { derivedStateOf { externalByState / 10 } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_byState10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun DerivedState_byStateValue() {
-        val value by remember { derivedStateOf { externalByStateValue } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_byStateValue")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun Remember__stateofParam10(param: Int) {
+    val value by remember { mutableStateOf(param / 10) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" Remember__stateofParam10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun DerivedState_byStateValue10() {
-        val value by remember { derivedStateOf { externalByStateValue / 10 } }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" DerivedState_byStateValue10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_State_stateofState() {
-        val value by remember(externalState.value ) { mutableStateOf ( externalState.value ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_State_stateofState")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun Remember__Param(param: Int) {
+    val value = remember { param }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" Remember__Param")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_State_stateofState10() {
-        val value by remember(externalState.value ) { mutableStateOf ( externalState.value / 10 ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_State_stateofState10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_State10_stateofState10() {
-        val value by remember(externalState.value / 10) { mutableStateOf ( externalState.value / 10 ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_State10_stateofState10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun Remember__Param10(param: Int) {
+    val value = remember { param / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" Remember__Param10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_State_State() {
-        val value = remember(externalState.value ) { externalState.value }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_State_State")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_State_State10() {
-        val value = remember(externalState.value ) { externalState.value / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_State_State10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_State() {
+    val value by remember { derivedStateOf { externalState.value } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_State")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_State10_State10() {
-        val value = remember(externalState.value / 10) { externalState.value / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_State10_State10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_byState_byState() {
-        val value = remember(externalByState ) { externalByState }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_byState_byState")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_State10() {
+    val value by remember { derivedStateOf { externalState.value / 10 } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_State10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_byState_byState10() {
-        val value = remember(externalByState ) { externalByState / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_byState_byState10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_byState10_byState10() {
-        val value = remember(externalByState / 10) { externalByState / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_byState10_byState10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_StateValue() {
+    val value by remember { derivedStateOf { externalStateValue } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_StateValue")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_byStateValue_byStateValue() {
-        val value = remember(externalByStateValue ) { externalByStateValue }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_byStateValue_byStateValue")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_byStateValue_byStateValue10() {
-        val value = remember(externalByStateValue ) { externalByStateValue / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_byStateValue_byStateValue10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_StateValue10() {
+    val value by remember { derivedStateOf { externalStateValue / 10 } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_StateValue10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_byStateValue10_byStateValue10() {
-        val value = remember(externalByStateValue / 10) { externalByStateValue / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_byStateValue10_byStateValue10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_Param_stateofParam(param: Int) {
-        val value by remember(param ) { mutableStateOf ( param ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Param_stateofParam")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_byState() {
+    val value by remember { derivedStateOf { externalByState } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_byState")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_Param_stateofParam10(param: Int) {
-        val value by remember(param ) { mutableStateOf ( param / 10 ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Param_stateofParam10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_Param10_stateofParam10(param: Int) {
-        val value by remember(param / 10) { mutableStateOf ( param / 10 ) }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Param10_stateofParam10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_byState10() {
+    val value by remember { derivedStateOf { externalByState / 10 } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_byState10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_Param_Param(param: Int) {
-        val value = remember(param ) { param }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Param_Param")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun RememberKey_Param_Param10(param: Int) {
-        val value = remember(param ) { param / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Param_Param10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_byStateValue() {
+    val value by remember { derivedStateOf { externalByStateValue } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_byStateValue")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun RememberKey_Param10_Param10(param: Int) {
-        val value = remember(param / 10) { param / 10 }
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" RememberKey_Param10_Param10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-    
 
-    @Composable
-    fun Param(param: Int) {
-        val value = param 
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" Param")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+@Composable
+fun DerivedState_byStateValue10() {
+    val value by remember { derivedStateOf { externalByStateValue / 10 } }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" DerivedState_byStateValue10")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    
+}
 
-    @Composable
-    fun Param10(param: Int) {
-        val value = param / 10 
-        Row {
-            Text(
-                text = "   $value   ",
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(70.dp)
-                    .recomposeHighlighter()
-            )
-            Text(" Param10")
-            Spacer(modifier = Modifier.weight(1f))
-        }
+
+@Composable
+fun RememberKey_State_stateofState() {
+    val value by remember(externalState.value) { mutableStateOf(externalState.value) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_State_stateofState")
+        Spacer(modifier = Modifier.weight(1f))
     }
-    //functions-end
+}
+
+
+@Composable
+fun RememberKey_State_stateofState10() {
+    val value by remember(externalState.value) { mutableStateOf(externalState.value / 10) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_State_stateofState10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_State10_stateofState10() {
+    val value by remember(externalState.value / 10) { mutableStateOf(externalState.value / 10) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_State10_stateofState10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_State_State() {
+    val value = remember(externalState.value) { externalState.value }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_State_State")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_State_State10() {
+    val value = remember(externalState.value) { externalState.value / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_State_State10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_State10_State10() {
+    val value = remember(externalState.value / 10) { externalState.value / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_State10_State10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_byState_byState() {
+    val value = remember(externalByState) { externalByState }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_byState_byState")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_byState_byState10() {
+    val value = remember(externalByState) { externalByState / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_byState_byState10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_byState10_byState10() {
+    val value = remember(externalByState / 10) { externalByState / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_byState10_byState10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_byStateValue_byStateValue() {
+    val value = remember(externalByStateValue) { externalByStateValue }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_byStateValue_byStateValue")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_byStateValue_byStateValue10() {
+    val value = remember(externalByStateValue) { externalByStateValue / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_byStateValue_byStateValue10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_byStateValue10_byStateValue10() {
+    val value = remember(externalByStateValue / 10) { externalByStateValue / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_byStateValue10_byStateValue10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_Param_stateofParam(param: Int) {
+    val value by remember(param) { mutableStateOf(param) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Param_stateofParam")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_Param_stateofParam10(param: Int) {
+    val value by remember(param) { mutableStateOf(param / 10) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Param_stateofParam10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_Param10_stateofParam10(param: Int) {
+    val value by remember(param / 10) { mutableStateOf(param / 10) }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Param10_stateofParam10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_Param_Param(param: Int) {
+    val value = remember(param) { param }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Param_Param")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_Param_Param10(param: Int) {
+    val value = remember(param) { param / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Param_Param10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun RememberKey_Param10_Param10(param: Int) {
+    val value = remember(param / 10) { param / 10 }
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" RememberKey_Param10_Param10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun Param(param: Int) {
+    val value = param
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" Param")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+fun Param10(param: Int) {
+    val value = param / 10
+    Row {
+        Text(
+            text = "   $value   ",
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(70.dp)
+                .recomposeHighlighter()
+        )
+        Text(" Param10")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+//functions-end
 
 @Composable
 fun TheComposable() {

@@ -29,6 +29,7 @@ import android.os.Process
 import android.os.StrictMode
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -36,8 +37,6 @@ import androidx.work.WorkManager
 import com.charleskorn.kaml.Yaml
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
-import com.machiav3lli.backup.ui.activities.NeoActivity
-import com.machiav3lli.backup.ui.activities.viewModelsModule
 import com.machiav3lli.backup.data.dbs.databaseModule
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
@@ -59,6 +58,8 @@ import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.services.PackageUnInstalledReceiver
+import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.ui.activities.viewModelsModule
 import com.machiav3lli.backup.ui.pages.pref_busyHitTime
 import com.machiav3lli.backup.ui.pages.pref_cancelOnStart
 import com.machiav3lli.backup.ui.pages.pref_prettyJson
@@ -246,7 +247,7 @@ class NeoApp : Application(), KoinStartup {
         @OptIn(ExperimentalSerializationApi::class)
         val YamlDefault = Yaml(serMod)
 
-        val propsSerializerDef: Pair<String, StringFormat>
+        private val propsSerializerDef: Pair<String, StringFormat>
             get() =
                 when {
                     pref_useYamlProperties.value -> "yaml" to YamlDefault
@@ -392,7 +393,7 @@ class NeoApp : Application(), KoinStartup {
         }
 
         var startup = true
-        val startupMsg = "******************** startup" // ensure it's the same for begin/end
+        const val startupMsg = "******************** startup" // ensure it's the same for begin/end
 
         // app should always be created
         var refNB: WeakReference<NeoApp> = WeakReference(null)
@@ -400,7 +401,7 @@ class NeoApp : Application(), KoinStartup {
 
         val context: Context get() = NB.applicationContext
 
-        var assetsRef: WeakReference<AssetHandler> = WeakReference(null)
+        private var assetsRef: WeakReference<AssetHandler> = WeakReference(null)
         val assets: AssetHandler
             get() {
                 if (assetsRef.get() == null)
@@ -523,7 +524,7 @@ class NeoApp : Application(), KoinStartup {
 
         var infoLogLines = mutableStateListOf<String>()
 
-        val nInfoLogLines = 100
+        const val nInfoLogLines = 100
         var showInfoLog by mutableStateOf(false)
 
         fun clearInfoLogText() {
@@ -555,7 +556,7 @@ class NeoApp : Application(), KoinStartup {
         // if any background work is to be done
         private var theWakeLock: PowerManager.WakeLock? = null
         private var wakeLockNested = AtomicInteger(0)
-        private const val wakeLockTag = "NeoBackup:Application"
+        private const val WAKELOCK_TAG = "NeoBackup:Application"
 
         // count the nesting levels
         // might be difficult sometimes, because
@@ -563,17 +564,17 @@ class NeoApp : Application(), KoinStartup {
         // e.g. from the receiver to the service
         fun wakelock(aquire: Boolean) {
             if (aquire) {
-                traceDebug { "%%%%% $wakeLockTag wakelock aquire (before: $wakeLockNested)" }
+                traceDebug { "%%%%% $WAKELOCK_TAG wakelock aquire (before: $wakeLockNested)" }
                 if (wakeLockNested.accumulateAndGet(+1, Int::plus) == 1) {
                     val pm: PowerManager = get(PowerManager::class.java)
-                    theWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockTag)
+                    theWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)
                     theWakeLock?.acquire(60 * 60 * 1000L)
-                    traceDebug { "%%%%% $wakeLockTag wakelock ACQUIRED" }
+                    traceDebug { "%%%%% $WAKELOCK_TAG wakelock ACQUIRED" }
                 }
             } else {
-                traceDebug { "%%%%% $wakeLockTag wakelock release (before: $wakeLockNested)" }
+                traceDebug { "%%%%% $WAKELOCK_TAG wakelock release (before: $wakeLockNested)" }
                 if (wakeLockNested.accumulateAndGet(-1, Int::plus) == 0) {
-                    traceDebug { "%%%%% $wakeLockTag wakelock RELEASING" }
+                    traceDebug { "%%%%% $WAKELOCK_TAG wakelock RELEASING" }
                     theWakeLock?.release()
                 }
             }
@@ -620,8 +621,8 @@ class NeoApp : Application(), KoinStartup {
         var busyLevelAtomic = AtomicInteger(0)
         val busyTick = 250
         var busy = mutableStateOf(false)
-        var busyLevel = mutableStateOf(0)
-        var busyCountDown = mutableStateOf(0)
+        var busyLevel = mutableIntStateOf(0)
+        var busyCountDown = mutableIntStateOf(0)
 
         init {
             CoroutineScope(Dispatchers.IO).launch {
@@ -630,11 +631,11 @@ class NeoApp : Application(), KoinStartup {
                     busyCountDownAtomic.getAndUpdate {
                         if (it > 0) {
                             val next = it - 1
-                            busyCountDown.value = next
-                            busyLevel.value = busyLevelAtomic.get()
+                            busyCountDown.intValue = next
+                            busyLevel.intValue = busyLevelAtomic.get()
                             if (next == 0)
                                 busy.value = false
-                            else if (busy.value == false)
+                            else if (!busy.value)
                                 busy.value = true
                             next
                         } else
@@ -699,7 +700,7 @@ class NeoApp : Application(), KoinStartup {
         fun setBackups(backupsMap: Map<String, List<Backup>>) {
             synchronized(theBackupsMap) {
                 backupsMap.forEach { (packageName, backups) ->
-                    theBackupsMap.put(packageName, backups)
+                    theBackupsMap[packageName] = backups
                 }
                 // clear no more existing packages
                 (theBackupsMap.keys - backupsMap.keys).forEach {
@@ -738,7 +739,7 @@ class NeoApp : Application(), KoinStartup {
         fun emptyBackupsForMissingPackages(packageNames: List<String>) {
             synchronized(theBackupsMap) {
                 (packageNames - theBackupsMap.keys).forEach {
-                    theBackupsMap.put(it, emptyList())
+                    theBackupsMap[it] = emptyList()
                 }
             }
         }
@@ -746,7 +747,7 @@ class NeoApp : Application(), KoinStartup {
         fun emptyBackupsForAllPackages(packageNames: List<String>) {
             synchronized(theBackupsMap) {
                 packageNames.forEach {
-                    theBackupsMap.put(it, emptyList())
+                    theBackupsMap[it] = emptyList()
                 }
             }
         }

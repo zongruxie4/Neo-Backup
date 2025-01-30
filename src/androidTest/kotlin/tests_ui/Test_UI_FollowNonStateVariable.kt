@@ -15,7 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.machiav3lli.backup.ui.activities.NeoActivity
-import com.machiav3lli.backup.ui.pages.TerminalText
 import com.machiav3lli.backup.ui.compose.isAtBottom
+import com.machiav3lli.backup.ui.pages.TerminalText
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -79,7 +79,9 @@ class Test_UI_FollowNonStateVariable {
     fun test_findList() {
 
         test.waitForIdle()
-        test.waitUntil(10000) { test.onAllNodesWithText("some added text 20").fetchSemanticsNodes().count() >= 2 }
+        test.waitUntil(10000) {
+            test.onAllNodesWithText("some added text 20").fetchSemanticsNodes().count() >= 2
+        }
     }
 }
 
@@ -91,7 +93,7 @@ fun TerminalTextPreview() {
 
     val lines = queue2
 
-    var recompose by remember { mutableStateOf(0) }
+    var recompose by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         launch {
@@ -124,7 +126,7 @@ fun TestPreview() {
 
     val listState = rememberLazyListState()
 
-    var recompose by remember { mutableStateOf(0) }
+    var recompose by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         launch {

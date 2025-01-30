@@ -258,9 +258,6 @@ fun StringPreference(
 @Preview
 @Composable
 fun StringPreferencePreview() {
-
-    //OABX.fakeContext = LocalContext.current.applicationContext
-
     val pref_pathBackupFolder = StringPref(
         key = "user.pathBackupFolder",
         titleId = R.string.prefs_pathbackupfolder,
@@ -308,9 +305,6 @@ fun StringEditPreference(
 @Preview
 @Composable
 fun StringEditPreferencePreview() {
-
-    //OABX.fakeContext = LocalContext.current.applicationContext
-
     val pref_suCommand = StringEditPref(
         key = "user.suCommand",
         icon = Phosphor.Hash,

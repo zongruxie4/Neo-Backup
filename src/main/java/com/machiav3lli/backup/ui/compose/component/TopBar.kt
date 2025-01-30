@@ -40,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,14 +61,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
-import com.machiav3lli.backup.ui.pages.pref_showInfoLogBar
 import com.machiav3lli.backup.ui.compose.blockBorderTop
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.ifThenElse
 import com.machiav3lli.backup.ui.compose.vertical
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
+import com.machiav3lli.backup.ui.pages.pref_showInfoLogBar
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -414,7 +415,7 @@ fun ExpandedSearchView(
 @Preview
 @Composable
 fun ProgressPreview() {
-    var count by remember { mutableStateOf(0) }
+    var count by remember { mutableIntStateOf(0) }
 
     val maxCount = 4
 

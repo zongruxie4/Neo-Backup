@@ -49,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,21 +82,9 @@ import com.machiav3lli.backup.data.entity.Pref.Companion.preferencesFromSerializ
 import com.machiav3lli.backup.data.entity.Pref.Companion.preferencesToSerialized
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.data.entity.UndeterminedStorageFile
-import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
-import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.data.plugins.Plugin
-import com.machiav3lli.backup.data.plugins.Plugin.Companion.displayPath
-import com.machiav3lli.backup.data.plugins.Plugin.Companion.fileFor
-import com.machiav3lli.backup.data.plugins.Plugin.Companion.getAll
-import com.machiav3lli.backup.data.plugins.Plugin.Companion.pluginTypes
-import com.machiav3lli.backup.data.plugins.Plugin.Companion.typeFor
 import com.machiav3lli.backup.data.plugins.SpecialFilesPlugin
 import com.machiav3lli.backup.data.plugins.TextPlugin
-import com.machiav3lli.backup.ui.pages.DevPrefGroups
-import com.machiav3lli.backup.ui.pages.Logs
-import com.machiav3lli.backup.ui.pages.Terminal
-import com.machiav3lli.backup.ui.pages.TerminalText
-import com.machiav3lli.backup.ui.pages.logRel
 import com.machiav3lli.backup.data.preferences.pref_autoLogAfterSchedule
 import com.machiav3lli.backup.data.preferences.pref_autoLogExceptions
 import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
@@ -103,13 +92,20 @@ import com.machiav3lli.backup.data.preferences.pref_catchUncaughtException
 import com.machiav3lli.backup.data.preferences.pref_logToSystemLogcat
 import com.machiav3lli.backup.data.preferences.pref_maxLogLines
 import com.machiav3lli.backup.data.preferences.pref_trace
-import com.machiav3lli.backup.ui.pages.supportInfoLogShare
 import com.machiav3lli.backup.data.preferences.traceDebug
+import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
+import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUUpLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Pencil
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
+import com.machiav3lli.backup.ui.pages.DevPrefGroups
+import com.machiav3lli.backup.ui.pages.Logs
+import com.machiav3lli.backup.ui.pages.Terminal
+import com.machiav3lli.backup.ui.pages.TerminalText
+import com.machiav3lli.backup.ui.pages.logRel
+import com.machiav3lli.backup.ui.pages.supportInfoLogShare
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.recreateActivities
@@ -518,7 +514,7 @@ fun PluginEditor(plugin: Plugin? = null, onSubmit: (plugin: Plugin?) -> Unit) {
             editPlugin?.let { Plugin.typeFor(it) } ?: Plugin.DEFAULT_TYPE
         )
     }
-    val where = displayPath(editPlugin?.file?.path ?: "")
+    val where = Plugin.displayPath(editPlugin?.file?.path ?: "")
 
     fun submit() {
         if ((plugin != null)
@@ -558,14 +554,14 @@ fun PluginEditor(plugin: Plugin? = null, onSubmit: (plugin: Plugin?) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            MenuSelector(selectedType, pluginTypes.keys) {
+            MenuSelector(selectedType, Plugin.pluginTypes.keys) {
                 selectedType = it
             }
             Spacer(modifier = Modifier.weight(1f))
             if (editPlugin == null) {
                 SimpleButton("Create") {
                     if (Plugin.userDir != null) {
-                        val file = fileFor(
+                        val file = Plugin.fileFor(
                             dir = Plugin.userDir!!,
                             name = name.text,
                             type = selectedType
@@ -578,12 +574,12 @@ fun PluginEditor(plugin: Plugin? = null, onSubmit: (plugin: Plugin?) -> Unit) {
                 SimpleButton(if (editPlugin?.isBuiltin != false) "Save Copy" else "Save") {
                     if (editPlugin != null && Plugin.userDir != null) {
                         try {
-                            val file = fileFor(
+                            val file = Plugin.fileFor(
                                 dir = Plugin.userDir!!,
                                 name = name.text,
                                 type = selectedType
                             )!!
-                            if (typeFor(editPlugin) != selectedType) {
+                            if (Plugin.typeFor(editPlugin) != selectedType) {
                                 val text = if (editPlugin is TextPlugin)
                                     (editPlugin as TextPlugin).text
                                 else
@@ -630,7 +626,7 @@ fun PluginItem(
     onChange: (plugin: Plugin) -> Unit,
     onEdit: (plugin: Plugin) -> Unit,
 ) {
-    val path = displayPath(plugin.file.path)
+    val path = Plugin.displayPath(plugin.file.path)
     Card(
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.outlinedCardColors(
@@ -678,7 +674,7 @@ fun PluginsPage() {
     fun reload() {
         pluginList.clear()
         Plugin.scan()
-        pluginList.addAll(getAll())
+        pluginList.addAll(Plugin.getAll())
     }
 
     LaunchedEffect(true) {
@@ -714,8 +710,9 @@ fun PluginsPage() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             val scope = this
-            pluginTypes.keys.forEach { type ->
-                val typePlugins = pluginList.filter { typeFor(it) == type }.sortedBy { it.name }
+            Plugin.pluginTypes.keys.forEach { type ->
+                val typePlugins =
+                    pluginList.filter { Plugin.typeFor(it) == type }.sortedBy { it.name }
                 if (typePlugins.isNotEmpty()) {
                     scope.apply {
                         stickyHeader {
@@ -1200,7 +1197,7 @@ fun DevToolsPreview() {
     )
 
     val expanded = remember { mutableStateOf(true) }
-    var count by remember { mutableStateOf(0) }
+    var count by remember { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier

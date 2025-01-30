@@ -30,7 +30,6 @@ import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.NeoApp.Companion.beginLogSection
 import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.data.dbs.entity.AppExtras
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
@@ -44,6 +43,7 @@ import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.manager.handler.getInstalledPackageList
 import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.manager.services.CommandReceiver
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.pages.pref_fakeScheduleDups
 import com.machiav3lli.backup.ui.pages.pref_useForegroundInService
 import com.machiav3lli.backup.ui.pages.supportInfo
@@ -147,9 +147,9 @@ class ScheduleWork(
 
     private suspend fun processSchedule(name: String, now: Long): Boolean =
         coroutineScope {
-            val schedule = scheduleRepo.getSchedule(scheduleId)
+            val schedule = scheduleRepo.getSchedule(scheduleId) ?: return@coroutineScope false
 
-            val selectedItems = schedule?.let { getFilteredPackages(it) } ?: emptyList()
+            val selectedItems = getFilteredPackages(schedule)
 
             if (selectedItems.isEmpty()) {
                 handleEmptySelectedItems(name)
