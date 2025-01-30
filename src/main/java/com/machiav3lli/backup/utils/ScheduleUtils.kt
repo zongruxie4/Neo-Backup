@@ -17,17 +17,33 @@
  */
 package com.machiav3lli.backup.utils
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.icu.util.Calendar
+import android.os.Build
+import com.machiav3lli.backup.EXTRA_NAME
+import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.NeoApp.Companion.isDebug
+import com.machiav3lli.backup.NeoApp.Companion.isHg42
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
-import com.machiav3lli.backup.ui.pages.pref_fakeScheduleMin
+import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
 import com.machiav3lli.backup.data.preferences.traceSchedule
+import com.machiav3lli.backup.manager.services.ScheduleReceiver
+import com.machiav3lli.backup.manager.services.ScheduleService
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
+import com.machiav3lli.backup.ui.pages.onErrorInfo
+import com.machiav3lli.backup.ui.pages.pref_fakeScheduleMin
+import com.machiav3lli.backup.ui.pages.pref_useAlarmClock
+import com.machiav3lli.backup.ui.pages.pref_useExactAlarm
+import com.machiav3lli.backup.ui.pages.textLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -132,8 +148,8 @@ fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
         initialValue = calcTimeLeft(this)
     )
 
-// TODO clean up fully
-fun scheduleNext(context: Context, scheduleId: Long, rescheduleBoolean: Boolean) {
+// TODO fix for future replacement of Alarm
+fun scheduleNextWork(context: Context, scheduleId: Long, rescheduleBoolean: Boolean) {
     if (scheduleId >= 0) {
         val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
         var schedule = scheduleRepo.getSchedule(scheduleId)
@@ -153,10 +169,120 @@ fun scheduleNext(context: Context, scheduleId: Long, rescheduleBoolean: Boolean)
     }
 }
 
+suspend fun scheduleNextAlarm(context: Context, scheduleId: Long, rescheduleBoolean: Boolean) {
+    if (scheduleId >= 0) {
+        coroutineScope {
+            val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
+            var schedule = scheduleRepo.getSchedule(scheduleId) ?: return@coroutineScope
+            if (schedule.enabled) {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+                val now = SystemUtils.now
+                val (timeToRun, timeLeft) = calcRuntimeDiff(schedule)
+
+                if (rescheduleBoolean) {
+                    schedule = schedule.copy(
+                        timePlaced = now,
+                        timeToRun = timeToRun,
+                    )
+                    traceSchedule { "[${schedule.id}] re-scheduling $schedule" }
+                    scheduleRepo.update(schedule)
+                } else {
+                    if (timeLeft <= TimeUnit.MINUTES.toMillis(1)) {
+                        schedule = schedule.copy(
+                            timeToRun = now + TimeUnit.MINUTES.toMillis(1)
+                        )
+                        scheduleRepo.update(schedule)
+                        val message = "timeLeft < 1 min -> set schedule $schedule"
+                        traceSchedule { "[${schedule.id}] **************************************** $message" }
+                        if (isDebug || isHg42 || pref_autoLogSuspicious.value)
+                            textLog(
+                                listOf(
+                                    message,
+                                    ""
+                                ) + onErrorInfo()
+                            )
+                    }
+                }
+
+                val hasPermission: Boolean =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        alarmManager.canScheduleExactAlarms()
+                    } else {
+                        true
+                    }
+
+                val pendingIntent = context.createPendingIntent(scheduleId, schedule.name)
+
+                when {
+                    hasPermission && pref_useAlarmClock.value -> {
+                        traceSchedule { "[${schedule.id}] alarmManager.setAlarmClock $schedule" }
+                        alarmManager.setAlarmClock(
+                            AlarmManager.AlarmClockInfo(schedule.timeToRun, null),
+                            pendingIntent
+                        )
+                    }
+
+                    hasPermission && pref_useExactAlarm.value -> {
+                        traceSchedule { "[${schedule.id}] alarmManager.setExactAndAllowWhileIdle $schedule" }
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            schedule.timeToRun,
+                            pendingIntent
+                        )
+                    }
+
+                    else                                      -> {
+                        traceSchedule { "[${schedule.id}] alarmManager.setAndAllowWhileIdle $schedule" }
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            schedule.timeToRun,
+                            pendingIntent
+                        )
+                    }
+                }
+                traceSchedule {
+                    "[$scheduleId] schedule starting in: ${
+                        TimeUnit.MILLISECONDS.toMinutes(schedule.timeToRun - SystemUtils.now)
+                    } minutes name=${schedule.name}"
+                }
+            } else
+                traceSchedule { "[$scheduleId] schedule is disabled. Nothing to schedule!" }
+        }
+    } else {
+        Timber.e("[$scheduleId] got id from $context")
+    }
+}
+
+fun cancelScheduleAlarm(context: Context, scheduleId: Long, scheduleName: String) {
+    traceSchedule { "[$scheduleId] cancelled schedule" }
+    context.createPendingIntent(scheduleId, scheduleName).let {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(it)
+        it.cancel()
+    }
+}
+
+private const val ALARM_REQUEST_CODE_PREFIX = 8000
+fun Context.createPendingIntent(scheduleId: Long, scheduleName: String): PendingIntent {
+    val alarmIntent = Intent(this, ScheduleReceiver::class.java).apply {
+        action = "schedule"
+        putExtra(EXTRA_SCHEDULE_ID, scheduleId)
+        putExtra(EXTRA_NAME, scheduleName)
+        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+    }
+    return PendingIntent.getBroadcast(
+        this,
+        ALARM_REQUEST_CODE_PREFIX + scheduleId.toInt(),
+        alarmIntent,
+        PendingIntent.FLAG_IMMUTABLE
+    )
+}
+
 var alarmsHaveBeenScheduled = false
 
 // TODO clean up fully
-fun scheduleAlarmsOnce() { // TODO replace with ScheduleWorker.scheduleAll()
+fun scheduleAlarmsOnce(context: Context) { // TODO replace with ScheduleWorker.scheduleAll()
 
     // schedule alarms only once
     // whichever event comes first:
@@ -169,7 +295,7 @@ fun scheduleAlarmsOnce() { // TODO replace with ScheduleWorker.scheduleAll()
         return
     alarmsHaveBeenScheduled = true
     CoroutineScope(Dispatchers.IO).launch {
-        ScheduleWork.scheduleAll()
+        ScheduleService.scheduleAll(context)
     }
 }
 

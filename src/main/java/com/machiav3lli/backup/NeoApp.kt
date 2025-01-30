@@ -441,7 +441,7 @@ class NeoApp : Application(), KoinStartup {
                 traceDebug { "activities(res): ${activityRefs.map { classAndId(it.get()) }}" }
             }
 
-            scheduleAlarmsOnce()        // if any activity is started
+            scheduleAlarmsOnce(context)        // if any activity is started
         }
 
         fun removeActivity(activity: Activity) {

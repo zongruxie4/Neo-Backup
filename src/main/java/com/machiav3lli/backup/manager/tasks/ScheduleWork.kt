@@ -426,29 +426,36 @@ class ScheduleWork(
             }
         }
 
-        fun enqueueImmediate(schedule: Schedule) {
+        fun enqueueImmediate(schedule: Schedule) =
+            enqueueOnce(schedule.id, schedule.name, false)
+
+        fun enqueueScheduled(scheduleId: Long, scheduleName: String) =
+            enqueueOnce(scheduleId, scheduleName, true)
+
+        private fun enqueueOnce(scheduleId: Long, scheduleName: String, periodic: Boolean) {
             val scheduleWorkRequest = OneTimeWorkRequestBuilder<ScheduleWork>()
                 .setInputData(
                     workDataOf(
-                        EXTRA_SCHEDULE_ID to schedule.id,
-                        EXTRA_NAME to schedule.name,
-                        EXTRA_PERIODIC to false,
+                        EXTRA_SCHEDULE_ID to scheduleId,
+                        EXTRA_NAME to scheduleName,
+                        EXTRA_PERIODIC to periodic,
                     )
                 )
                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .addTag("schedule_${schedule.id}")
+                .addTag("schedule_${scheduleId}")
                 .build()
 
             get<WorkManager>(WorkManager::class.java).enqueueUniqueWork(
-                "$SCHEDULE_ONETIME${schedule.id}",
+                "${if (periodic) SCHEDULE_WORK else SCHEDULE_ONETIME}$scheduleId",
                 ExistingWorkPolicy.REPLACE,
                 scheduleWorkRequest,
             )
             traceSchedule {
-                "[${schedule.id}] schedule starting immediately, name=${schedule.name}"
+                "[${scheduleId}] schedule starting immediately, name=${scheduleName}"
             }
         }
 
+        // TODO use when periodic runs are fixed
         suspend fun scheduleAll() = coroutineScope {
             val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
             val workManager = get<WorkManager>(WorkManager::class.java)

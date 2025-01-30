@@ -6,7 +6,7 @@ import com.machiav3lli.backup.data.dbs.DB
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.preferences.traceSchedule
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
-import com.machiav3lli.backup.utils.scheduleNext
+import com.machiav3lli.backup.utils.scheduleNextAlarm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -69,7 +69,7 @@ class ScheduleRepository(
             db.getScheduleDao().update(schedule)
             if (schedule.enabled) {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
-                scheduleNext(
+                scheduleNextAlarm(
                     appContext,
                     schedule.id,
                     rescheduleBoolean

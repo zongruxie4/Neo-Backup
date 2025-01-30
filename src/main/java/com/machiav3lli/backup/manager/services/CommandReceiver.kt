@@ -12,11 +12,11 @@ import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
-import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.data.preferences.traceSchedule
+import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import com.machiav3lli.backup.utils.SystemUtils
-import com.machiav3lli.backup.utils.scheduleNext
+import com.machiav3lli.backup.utils.scheduleNextAlarm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -82,7 +82,7 @@ class CommandReceiver : //TODO hg42 how to maintain security?
                                 timeMinute = minute,
                             )
                             scheduleRepo.update(newSched)
-                            scheduleNext(context, newSched.id, true)
+                            scheduleNextAlarm(context, newSched.id, true)
                         }
                     }
                 }
