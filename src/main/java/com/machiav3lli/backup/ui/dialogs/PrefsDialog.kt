@@ -22,11 +22,11 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,17 +46,17 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.data.entity.EnumPref
+import com.machiav3lli.backup.data.entity.ListPref
+import com.machiav3lli.backup.data.entity.StringPref
 import com.machiav3lli.backup.ui.compose.blockShadow
+import com.machiav3lli.backup.ui.compose.component.DialogNegativeButton
+import com.machiav3lli.backup.ui.compose.component.DialogPositiveButton
+import com.machiav3lli.backup.ui.compose.component.SelectableRow
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Eye
 import com.machiav3lli.backup.ui.compose.icons.phosphor.EyeSlash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
-import com.machiav3lli.backup.ui.compose.component.DialogNegativeButton
-import com.machiav3lli.backup.ui.compose.component.DialogPositiveButton
-import com.machiav3lli.backup.ui.compose.component.SelectableRow
-import com.machiav3lli.backup.data.entity.EnumPref
-import com.machiav3lli.backup.data.entity.ListPref
-import com.machiav3lli.backup.data.entity.StringPref
 import kotlinx.coroutines.delay
 
 @Composable
@@ -66,7 +66,7 @@ fun EnumPrefDialogUI(
     onChanged: (() -> Unit) = {},
 ) {
     val context = LocalContext.current
-    var selected by remember { mutableIntStateOf(pref.value) }
+    var selected = remember { mutableIntStateOf(pref.value) }
     val entryPairs = pref.entries.toList()
 
     Card(
@@ -90,15 +90,15 @@ fun EnumPrefDialogUI(
                     .blockShadow()
             ) {
                 items(items = entryPairs) {
-                    val isSelected = rememberSaveable(selected) {
-                        mutableStateOf(selected == it.first)
+                    val isSelected by remember {
+                        derivedStateOf { selected.value == it.first }
                     }
                     SelectableRow(
                         modifier = Modifier.clip(MaterialTheme.shapes.medium),
                         title = stringResource(id = it.second),
                         selectedState = isSelected
                     ) {
-                        selected = it.first
+                        selected.value = it.first
                     }
                 }
             }
@@ -113,8 +113,8 @@ fun EnumPrefDialogUI(
                     openDialogCustom.value = false
                 }
                 DialogPositiveButton(text = stringResource(id = R.string.dialogSave)) {
-                    if (pref.value != selected) {
-                        pref.value = selected
+                    if (pref.value != selected.intValue) {
+                        pref.value = selected.intValue
                         onChanged()
                     }
                     openDialogCustom.value = false
@@ -131,7 +131,7 @@ fun ListPrefDialogUI(
     onChanged: (() -> Unit) = {},
 ) {
     val context = LocalContext.current
-    var selected by remember { mutableStateOf(pref.value) }
+    val selected = remember { mutableStateOf(pref.value) }
     val entryPairs = pref.entries.toList()
 
     Card(
@@ -155,15 +155,15 @@ fun ListPrefDialogUI(
                     .blockShadow()
             ) {
                 items(items = entryPairs) {
-                    val isSelected = rememberSaveable(selected) {
-                        mutableStateOf(selected == it.first)
+                    val isSelected by remember {
+                        derivedStateOf { selected.value == it.first }
                     }
                     SelectableRow(
                         modifier = Modifier.clip(MaterialTheme.shapes.medium),
                         title = it.second,
                         selectedState = isSelected
                     ) {
-                        selected = it.first
+                        selected.value = it.first
                     }
                 }
             }
@@ -178,8 +178,8 @@ fun ListPrefDialogUI(
                     openDialogCustom.value = false
                 }
                 DialogPositiveButton(text = stringResource(id = R.string.dialogSave)) {
-                    if (pref.value != selected) {
-                        pref.value = selected
+                    if (pref.value != selected.value) {
+                        pref.value = selected.value
                         onChanged()
                     }
                     openDialogCustom.value = false

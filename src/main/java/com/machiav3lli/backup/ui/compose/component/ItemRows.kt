@@ -20,22 +20,20 @@ import androidx.compose.ui.unit.dp
 fun SelectableRow(
     modifier: Modifier = Modifier,
     title: String,
-    selectedState: MutableState<Boolean>,
+    selectedState: Boolean,
     onClick: () -> Unit,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clickable {
-                selectedState.value = true
                 onClick()
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
-            selected = selectedState.value,
+            selected = selectedState,
             onClick = {
-                selectedState.value = true
                 onClick()
             },
             modifier = Modifier.padding(horizontal = 8.dp),
