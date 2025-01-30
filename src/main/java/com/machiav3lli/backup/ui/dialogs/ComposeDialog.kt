@@ -36,7 +36,7 @@ fun BaseDialog(
     onDismiss: () -> Unit,
     dialogUI: @Composable () -> Unit,
 ) {
-    Dialog(
+    Dialog( // TODO broken till fixes from https://developer.android.com/jetpack/androidx/releases/compose-ui#1.8.0-alpha05 get upstreamed
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {

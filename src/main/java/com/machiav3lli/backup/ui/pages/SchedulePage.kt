@@ -67,8 +67,8 @@ import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.latestFilterChipItems
 import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainFilterChipItems
-import com.machiav3lli.backup.scheduleBackupModeChipItems
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
+import com.machiav3lli.backup.scheduleBackupModeChipItems
 import com.machiav3lli.backup.ui.compose.component.CardButton
 import com.machiav3lli.backup.ui.compose.component.CheckChip
 import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
@@ -173,7 +173,7 @@ fun SchedulePage(
                     }
                 )
                 HorizontalDivider(
-                    thickness = 2.dp,
+                    thickness = 1.dp,
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
@@ -223,6 +223,8 @@ fun SchedulePage(
                             description = stringResource(id = R.string.customListTitle),
                             containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.CUSTOMLIST, schedule)
                             openDialog.value = true
@@ -233,6 +235,8 @@ fun SchedulePage(
                             description = stringResource(id = R.string.sched_blocklist),
                             containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.BLOCKLIST, schedule)
                             openDialog.value = true
@@ -358,7 +362,7 @@ fun SchedulePage(
                 }
             }
             HorizontalDivider(
-                thickness = 2.dp,
+                thickness = 1.dp,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
             Column(

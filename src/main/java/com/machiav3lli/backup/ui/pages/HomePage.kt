@@ -67,7 +67,6 @@ import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.traceCompose
-import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.ActionChip
 import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.component.ExpandingFadingVisibility
@@ -204,7 +203,7 @@ fun HomePage(
                             }
                         }
                         HorizontalDivider(
-                            thickness = 2.dp,
+                            thickness = 1.dp,
                             modifier = Modifier.padding(horizontal = 8.dp),
                         )
                     }
@@ -227,16 +226,18 @@ fun HomePage(
                                                     modifier = Modifier.padding(horizontal = 8.dp),
                                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                                 ) {
-                                                    ActionButton(
+                                                    ElevatedActionButton(
                                                         modifier = Modifier.weight(1f),
                                                         text = stringResource(id = R.string.backup_all_updated),
+                                                        positive = true,
                                                     ) {
                                                         openBatchDialog.value = true
                                                     }
                                                     ElevatedActionButton(
                                                         text = "",
                                                         icon = Phosphor.CaretDown,
-                                                        withText = false
+                                                        withText = false,
+                                                        positive = false,
                                                     ) {
                                                         updaterExpanded = !updaterExpanded
                                                     }
@@ -268,7 +269,6 @@ fun HomePage(
                                                         contentDescription = text
                                                     )
                                                 },
-                                                containerColor = Color.Transparent,
                                                 elevation = FloatingActionButtonDefaults.elevation(0.dp),
                                                 onClick = { updaterExpanded = !updaterExpanded }
                                             )

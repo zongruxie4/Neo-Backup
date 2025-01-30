@@ -144,10 +144,10 @@ fun InfoChip(
             Text(text = item.text)
         },
         colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = item.color ?: MaterialTheme.colorScheme.surfaceContainer,
-            labelColor = if (item.color != null) MaterialTheme.colorScheme.surfaceContainerLowest
+            containerColor = item.color ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+            labelColor = if (item.color != null) MaterialTheme.colorScheme.surfaceContainerHigh
             else MaterialTheme.colorScheme.onSurface,
-            iconContentColor = if (item.color != null) MaterialTheme.colorScheme.surfaceContainerLowest
+            iconContentColor = if (item.color != null) MaterialTheme.colorScheme.surfaceContainerHigh
             else MaterialTheme.colorScheme.onSurface,
         ),
         onClick = {}

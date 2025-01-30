@@ -25,6 +25,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -88,9 +89,12 @@ fun TagItem(
         modifier = modifier,
         selected = false,
         colors = InputChipDefaults.inputChipColors(
-            containerColor = if (action) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
-            labelColor = if (action) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-            trailingIconColor = if (action) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.tertiary,
+            containerColor = if (action) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceContainerHigh,
+            labelColor = if (action) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onSurface,
+            trailingIconColor = if (action) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.tertiary,
         ),
         shape = MaterialTheme.shapes.small,
         border = null,
@@ -223,7 +227,7 @@ fun AddTagView(
 @Composable
 fun NoteTagItemPreview() {
     var note by remember { mutableStateOf("note text") }
-    var maxLines by remember { mutableStateOf(1) }
+    var maxLines by remember { mutableIntStateOf(1) }
 
     val packageInfo = PackageInfo(
         packageName = "com.machiav3lli.backup",

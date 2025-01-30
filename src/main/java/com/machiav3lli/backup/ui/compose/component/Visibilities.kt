@@ -1,10 +1,10 @@
 package com.machiav3lli.backup.ui.compose.component
 
-import androidx.compose.animation.Animatable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.expandVertically
@@ -18,8 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -85,14 +84,11 @@ fun ExpandingFadingVisibility(
     expandedView: @Composable (AnimatedVisibilityScope.() -> Unit),
     collapsedView: @Composable (AnimatedVisibilityScope.() -> Unit),
 ) {
-    val initColor = FloatingActionButtonDefaults.containerColor
-    val expandedColor = MaterialTheme.colorScheme.surface
-    val bgColor = remember {
-        Animatable(initColor)
-    }
-    LaunchedEffect(key1 = expanded) {
-        bgColor.animateTo(if (expanded) expandedColor else initColor)
-    }
+    val bgColor by animateColorAsState(
+        if (expanded) MaterialTheme.colorScheme.surfaceContainerHigh
+        else FloatingActionButtonDefaults.containerColor,
+        label = "bgColor"
+    )
     Column(
         modifier = Modifier
             .shadow(
@@ -100,7 +96,7 @@ fun ExpandingFadingVisibility(
                 MaterialTheme.shapes.large
             )
             .background(
-                bgColor.value,
+                bgColor,
                 MaterialTheme.shapes.large
             )
     ) {

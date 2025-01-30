@@ -258,7 +258,7 @@ fun AppPage(
                             gapSize = 2.dp,
                         )
                     HorizontalDivider(
-                        thickness = 2.dp,
+                        thickness = 1.dp,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }

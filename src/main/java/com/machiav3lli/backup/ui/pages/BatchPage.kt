@@ -172,7 +172,7 @@ fun BatchPage(
                     }
                 }
                 HorizontalDivider(
-                    thickness = 2.dp,
+                    thickness = 1.dp,
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
@@ -211,7 +211,7 @@ fun BatchPage(
                 }
             }
             HorizontalDivider(
-                thickness = 2.dp,
+                thickness = 1.dp,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
             Row(

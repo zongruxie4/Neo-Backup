@@ -39,12 +39,12 @@ import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.entity.PackageInfo
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
-import com.machiav3lli.backup.ui.pages.pref_altBackupDate
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Lock
 import com.machiav3lli.backup.ui.compose.icons.phosphor.LockOpen
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
+import com.machiav3lli.backup.ui.pages.pref_altBackupDate
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_SHOW_FORMATTER
 import com.machiav3lli.backup.utils.getFormattedDate
 import java.io.File
@@ -198,7 +198,7 @@ fun BackupItem(
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large),
         colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ),
         headlineContent = { BackupItem_headlineContent(item) },
         supportingContent = {
@@ -245,8 +245,8 @@ fun BackupItem(
                         FilledRoundButton(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.deleteBackup),
-                            tint = MaterialTheme.colorScheme.tertiary,
-                            onTint = MaterialTheme.colorScheme.onTertiary,
+                            tint = MaterialTheme.colorScheme.tertiaryContainer,
+                            onTint = MaterialTheme.colorScheme.onTertiaryContainer,
                             onClick = { onDelete(item) }
                         )
                         if (!item.packageLabel.contains("INVALID"))
@@ -278,7 +278,7 @@ fun RestoreBackupItem(
     val showData by remember(item) { mutableStateOf(item.hasData) }
 
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shape = MaterialTheme.shapes.large,
     ) {
         Row(
@@ -314,9 +314,6 @@ fun RestoreBackupItem(
 @Preview(showBackground = true)
 @Composable
 fun BackupPreview(item: (@Composable (item: Backup) -> Unit) = { BackupItem(it) }) {
-
-    //OABX.fakeContext = LocalContext.current.applicationContext
-
     var note by remember { mutableStateOf("a very very very very very very very very long note text and even longer") }
 
     val backupRootLocal = File("/tmp", "backup")

@@ -35,7 +35,7 @@ fun NeoNavigationSuiteScaffold(
     pages: ImmutableList<NavItem>,
     currentState: State<Int>,
     onItemClick: (Int) -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val customNavSuiteType = with(adaptiveInfo) {
@@ -45,25 +45,25 @@ fun NeoNavigationSuiteScaffold(
     }
     val itemColors = NavigationSuiteDefaults.itemColors(
         navigationBarItemColors = NavigationBarItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
             unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-            selectedTextColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
             unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-            indicatorColor = MaterialTheme.colorScheme.surfaceContainer,
+            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
         ),
         navigationRailItemColors = NavigationRailItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
             unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-            selectedTextColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
             unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-            indicatorColor = MaterialTheme.colorScheme.surfaceContainer,
+            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
         ),
         navigationDrawerItemColors = NavigationDrawerItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
             unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-            selectedTextColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
             unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-            selectedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
     )
 

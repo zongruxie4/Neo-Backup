@@ -124,7 +124,7 @@ fun PrefsExpandableGroupHeader(
     icon: ImageVector,
     onClick: (() -> Unit),
 ) {
-    HorizontalDivider(thickness = 2.dp, modifier = Modifier.clip(MaterialTheme.shapes.extraLarge))
+    HorizontalDivider(thickness = 1.dp, modifier = Modifier.clip(MaterialTheme.shapes.extraLarge))
     Spacer(modifier = Modifier.height(8.dp))
 
     ListItem(

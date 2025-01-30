@@ -57,35 +57,35 @@ import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
-import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.data.entity.ChipItem
 import com.machiav3lli.backup.data.entity.InfoChipItem
 import com.machiav3lli.backup.data.entity.SortFilterModel
+import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.installedFilterChipItems
 import com.machiav3lli.backup.latestFilterChipItems
 import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainBackupModeChipItems
 import com.machiav3lli.backup.mainFilterChipItems
 import com.machiav3lli.backup.sortChipItems
+import com.machiav3lli.backup.ui.compose.component.DoubleVerticalText
+import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
+import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
+import com.machiav3lli.backup.ui.compose.component.InfoChipsBlock
+import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
+import com.machiav3lli.backup.ui.compose.component.RoundButton
+import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
+import com.machiav3lli.backup.ui.compose.component.SwitchChip
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUUpLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Check
 import com.machiav3lli.backup.ui.compose.icons.phosphor.SortAscending
 import com.machiav3lli.backup.ui.compose.icons.phosphor.SortDescending
-import com.machiav3lli.backup.ui.compose.component.DoubleVerticalText
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
-import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
-import com.machiav3lli.backup.ui.compose.component.RoundButton
-import com.machiav3lli.backup.ui.compose.component.SwitchChip
-import com.machiav3lli.backup.ui.compose.component.InfoChipsBlock
-import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
-import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.applyFilter
-import com.machiav3lli.backup.utils.getStats
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
+import com.machiav3lli.backup.utils.getStats
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.viewmodels.MainVM
 
@@ -190,7 +190,7 @@ fun SortFilterSheet(
                         }
                     }
                 )
-                HorizontalDivider(thickness = 2.dp)
+                HorizontalDivider(thickness = 1.dp)
 
             }
         },
@@ -199,7 +199,7 @@ fun SortFilterSheet(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
             ) {
-                HorizontalDivider(thickness = 2.dp)
+                HorizontalDivider(thickness = 1.dp)
                 Row(
                     modifier = Modifier
                         .padding(8.dp)
