@@ -344,7 +344,7 @@ const val HELP_ISSUES = "https://github.com/NeoApplications/Neo-Backup/blob/mast
 const val HELP_FAQ = "https://github.com/NeoApplications/Neo-Backup/blob/master/FAQ.md"
 
 val linksList =
-    listOf(Link.Changelog, Link.Telegram, Link.Matrix, Link.License, Link.Issues, Link.FAQ)
+    listOf(Link.Changelog, Link.Telegram, Link.Matrix, Link.FAQ, Link.Issues, Link.License)
 
 val legendList = listOf(
     Legend.Exodus,

@@ -3,6 +3,7 @@ package com.machiav3lli.backup.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import com.machiav3lli.backup.NeoApp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -62,4 +63,13 @@ fun Context.recreateActivities() {
                 }
             }
     }
+}
+
+fun Context.launchView(url: String) {
+    startActivity(
+        Intent(
+            Intent.ACTION_VIEW,
+            url.toUri()
+        )
+    )
 }

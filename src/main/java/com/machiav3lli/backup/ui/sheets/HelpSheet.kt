@@ -18,19 +18,24 @@
 package com.machiav3lli.backup.ui.sheets
 
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -44,28 +49,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.HtmlCompat
+import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.legendList
 import com.machiav3lli.backup.linksList
+import com.machiav3lli.backup.ui.compose.BlockTopShape
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
-import com.machiav3lli.backup.ui.compose.blockBorderTop
+import com.machiav3lli.backup.ui.compose.component.LegendItem
+import com.machiav3lli.backup.ui.compose.component.LinkChip
+import com.machiav3lli.backup.ui.compose.component.RoundButton
+import com.machiav3lli.backup.ui.compose.component.TitleText
 import com.machiav3lli.backup.ui.compose.gridItems
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretUp
-import com.machiav3lli.backup.ui.compose.component.LegendItem
-import com.machiav3lli.backup.ui.compose.component.LinkItem
-import com.machiav3lli.backup.ui.compose.component.RoundButton
-import com.machiav3lli.backup.ui.compose.component.TitleText
-import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import java.io.IOException
 import java.io.InputStream
@@ -80,47 +87,97 @@ fun HelpSheet(onDismiss: () -> Unit) {
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
-            ListItem(
-                modifier = Modifier.blockBorderTop(),
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent,
-                ),
-                headlineContent = {
-                    Row(
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainerHighest,
+                        BlockTopShape,
+                    )
+                    .clip(BlockTopShape),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    ),
+                    leadingContent = {
+                        ResourcesCompat.getDrawable(
+                            LocalContext.current.resources,
+                            R.mipmap.ic_launcher,
+                            LocalContext.current.theme
+                        )?.let { drawable ->
+                            val bitmap = Bitmap.createBitmap(
+                                drawable.intrinsicWidth,
+                                drawable.intrinsicHeight,
+                                Bitmap.Config.ARGB_8888
+                            )
+                            val canvas = Canvas(bitmap)
+                            drawable.setBounds(0, 0, canvas.width, canvas.height)
+                            drawable.draw(canvas)
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .requiredSize(72.dp)
+                                    .clip(MaterialTheme.shapes.large)
+                            )
+                        }
+                    },
+                    overlineContent = {
+                        Text(
+                            text = stringResource(
+                                id = R.string.about_build_FORMAT,
+                                BuildConfig.VERSION_NAME,
+                                BuildConfig.VERSION_CODE,
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    },
+                    headlineContent = {
                         Text(
                             text = stringResource(id = R.string.app_name),
-                            style = MaterialTheme.typography.headlineMedium,
-                            maxLines = 1,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.primary,
                         )
-                        Text(
-                            text = SystemUtils.versionName,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                    },
+                    supportingContent = {
+                        Column {
+                            Text(
+                                text = BuildConfig.APPLICATION_ID,
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                            applicationIssuer?.let {
+                                Text(
+                                    text = "signed by $it",
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        }
+                    },
+                    trailingContent = {
+                        RoundButton(icon = Phosphor.CaretDown) {
+                            onDismiss()
+                        }
                     }
-                },
-                supportingContent = {
-                    applicationIssuer?.let {
-                        Text(
-                            text = "signed by $it",
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                )
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(8.dp),
+                ) {
+                    items(linksList) { link ->
+                        LinkChip(
+                            icon = link.icon,
+                            label = stringResource(id = link.nameId),
+                            url = link.uri,
                         )
-                    }
-                },
-                trailingContent = {
-                    RoundButton(icon = Phosphor.CaretDown) {
-                        onDismiss()
                     }
                 }
-            )
+            }
         }
     ) { paddingValues ->
         LazyColumn(
@@ -132,30 +189,6 @@ fun HelpSheet(onDismiss: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(8.dp)
         ) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    shape = MaterialTheme.shapes.large,
-                ) {
-                    linksList.forEach {
-                        LinkItem(
-                            item = it,
-                            onClick = { uriString ->
-                                context.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(uriString)
-                                    )
-                                )
-                            }
-                        )
-                    }
-                }
-            }
             item { TitleText(R.string.help_legend) }
             gridItems(
                 items = legendList,

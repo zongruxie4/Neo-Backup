@@ -453,4 +453,5 @@
     <string name="dark_high_contrast">Dark (high contrast)</string>
     <string name="black_medium_contrast">Black (medium contrast)</string>
     <string name="black_high_contrast">Black (high contrast)</string>
+    <string name="about_build_FORMAT">%s (Build %s)</string>
 </resources>

@@ -285,6 +285,44 @@ fun ActionChip(
 }
 
 @Composable
+fun LinkChip(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    label: String,
+    url: String,
+) {
+    val context = LocalContext.current
+
+    AssistChip(
+        modifier = modifier,
+        border = null,
+        shape = MaterialTheme.shapes.medium,
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+        leadingIcon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        },
+        label = {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        onClick = {
+            context.launchView(url)
+        }
+    )
+}
+
+@Composable
 fun SwitchChip(
     firstTextId: Int,
     firstIcon: ImageVector,
