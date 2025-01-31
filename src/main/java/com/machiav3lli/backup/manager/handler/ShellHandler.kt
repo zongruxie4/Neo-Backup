@@ -26,15 +26,15 @@ import androidx.core.text.isDigitsOnly
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.NeoApp.Companion.addErrorCommand
 import com.machiav3lli.backup.NeoApp.Companion.isDebug
+import com.machiav3lli.backup.data.plugins.InternalShellScriptPlugin
+import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.splitCommand
 import com.machiav3lli.backup.manager.handler.ShellHandler.FileInfo.Companion.utilBoxInfo
-import com.machiav3lli.backup.data.plugins.InternalShellScriptPlugin
 import com.machiav3lli.backup.ui.pages.baseInfo
 import com.machiav3lli.backup.ui.pages.pref_libsuTimeout
 import com.machiav3lli.backup.ui.pages.pref_libsuUseRootShell
 import com.machiav3lli.backup.ui.pages.pref_suCommand
-import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.utils.BUFFER_SIZE
 import com.machiav3lli.backup.utils.FileUtils.translatePosixPermissionToMode
 import com.topjohnwu.superuser.Shell
@@ -260,8 +260,8 @@ class ShellHandler {
             .filter { it.isNotEmpty() }
             .filter { !it.startsWith("total") }
             .mapNotNull { FileInfo.fromLsOutput(it, relativeParent, File(path).parent!!) }
-            .toMutableList()
-        if (result.size < 1)
+            .toList()
+        if (result.isEmpty())
             throw UnexpectedCommandResult("cannot get file info for '$path'", shellResult)
         if (result.size > 1)
             Timber.w("more than one file found for '$path', taking the first", shellResult)
@@ -520,7 +520,7 @@ class ShellHandler {
                         |""".trimMargin()
                 )
                 val match = regex.matchEntire(lsLine)
-                if (match == null) throw Exception("ls output does not match expectations (regex)")
+                    ?: throw Exception("ls output does not match expectations (regex)")
                 val modeFlags = match.groupValues[1]
                 val owner = match.groupValues[3]
                 val group = match.groupValues[4]
@@ -764,18 +764,19 @@ class ShellHandler {
             return result
         }
 
-        val checkRootScript get() = InternalShellScriptPlugin.findScript("checkroot").toString()
+        private val checkRootScript
+            get() = InternalShellScriptPlugin.findScript("checkroot").toString()
 
         fun checkRootEquivalent() = runAsRoot("sh '$checkRootScript'", throwFail = false).isSuccess
 
-        var checkedCommand: String = ""
+        private var checkedCommand: String = ""
 
         var isLikeRoot: Boolean? = null
             get() {
                 // invalidate cached field if suCommand changes
                 if (field == null || suCommand != checkedCommand) {
                     field = checkRootEquivalent()
-                    Timber.i("suCommand = $suCommand => ${if(field ?: false) "IS like root" else "is NOT like root"}")
+                    Timber.i("suCommand = $suCommand => ${if (field == true) "IS like root" else "is NOT like root"}")
                     checkedCommand = suCommand
                 }
                 return field ?: false
@@ -794,12 +795,12 @@ class ShellHandler {
                 }
                 Timber.w(
                     "ShellInit failed: ${
-                        if (result.out.size > 0)
+                        if (result.out.isNotEmpty())
                             "\n${result.out.joinToString("\n") { "> $it" }}"
                         else
                             ""
                     }${
-                        if (result.err.size > 0)
+                        if (result.err.isNotEmpty())
                             "\n${result.err.joinToString("\n") { "? $it" }}"
                         else
                             ""
@@ -819,7 +820,7 @@ class ShellHandler {
             }
         }
 
-        fun initLibSU() {
+        private fun initLibSU() {
             val builder = Shell.Builder.create()
                 .setTimeout(pref_libsuTimeout.value.toLong())
                 .setInitializers(ShellInit::class.java)
@@ -831,7 +832,7 @@ class ShellHandler {
             Shell.setDefaultBuilder(builder)
         }
 
-        fun tryGainAccessCommand(): Boolean {
+        private fun tryGainAccessCommand(): Boolean {
             try {
                 needFreshShell()
                 if (checkRootEquivalent())
@@ -880,7 +881,7 @@ class ShellHandler {
             findSuCommand(pref_suCommand.value)
         }
 
-        fun releaseShell(trace: Boolean = true): Shell? {
+        private fun releaseShell(trace: Boolean = true): Shell? {
             return try {
                 val shell = Shell.getCachedShell()
                 if (shell != null
@@ -1040,7 +1041,7 @@ class ShellHandler {
         //      double quote quotes all characters,
         //          except '$' , '`' and '\' ,
         //          up to the next unquoted double quote
-        val charactersToBeEscaped =
+        private val charactersToBeEscaped =
             Regex("""[\\${'$'}"`]""")   // blacklist, only escape those that are necessary
 
         fun quote(parameter: String): String {
@@ -1082,6 +1083,7 @@ class ShellHandler {
                     if (0 >= retriesLeft) {
                         Timber.e(
                             String.format(
+                                Locale.ENGLISH,
                                 "Could not recover after %d tries. Seems like there is a bigger issue. Maybe the file has changed?",
                                 maxRetries
                             )
@@ -1095,6 +1097,7 @@ class ShellHandler {
                     }
                     Timber.w(
                         String.format(
+                            Locale.ENGLISH,
                             "SuFileInputStream EOF before expected after %d bytes (%d are missing). Trying to recover. %d retries lef",
                             readOverall, filesize - readOverall, retriesLeft
                         )
@@ -1118,14 +1121,14 @@ class ShellHandler {
         }
 
         fun findUserOverridableFile(subDirName: String, fileName: String): File? {
-            var found: File? = null
+            var found: File?
             val userDir = File(
                 NeoApp.activity?.getExternalFilesDir(null),
                 subDirName
             )
             userDir.mkdirs()
             found = File(userDir, fileName)
-            if (found.isFile != true) {
+            if (found?.isFile != true) {
                 val assetDir = File(NeoApp.assets.directory, subDirName)
                 found = File(assetDir, fileName)
             }
