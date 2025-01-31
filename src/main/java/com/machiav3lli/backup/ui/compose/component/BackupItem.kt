@@ -2,11 +2,9 @@ package com.machiav3lli.backup.ui.compose.component
 
 import android.text.format.Formatter
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -83,10 +81,6 @@ fun BackupItem_headlineContent(
     }
 }
 
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalLayoutApi::class,
-)
 @Composable
 fun BackupItem_supportingContent(
     item: Backup,
@@ -310,7 +304,6 @@ fun RestoreBackupItem(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Preview(showBackground = true)
 @Composable
 fun BackupPreview(item: (@Composable (item: Backup) -> Unit) = { BackupItem(it) }) {

@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,10 +42,10 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.pages.pref_busyIconScale
-import com.machiav3lli.backup.ui.pages.pref_busyIconTurnTime
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsClockwise
+import com.machiav3lli.backup.ui.pages.pref_busyIconScale
+import com.machiav3lli.backup.ui.pages.pref_busyIconTurnTime
 import kotlin.math.max
 
 @Composable
@@ -203,7 +202,6 @@ fun ElevatedActionButton(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardButton(
     modifier: Modifier = Modifier,

@@ -1,7 +1,6 @@
 package com.machiav3lli.backup.ui.compose.component
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -63,26 +62,26 @@ import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.data.entity.IntPref
 import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.data.preferences.traceContextMenu
+import com.machiav3lli.backup.data.preferences.traceTiming
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.manager.handler.ShellCommands
 import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
-import com.machiav3lli.backup.ui.pages.pref_fixNavBarOverlap
-import com.machiav3lli.backup.data.preferences.traceContextMenu
-import com.machiav3lli.backup.data.preferences.traceTiming
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Check
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Play
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
+import com.machiav3lli.backup.ui.pages.pref_fixNavBarOverlap
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.SystemUtils.runParallel
 import com.machiav3lli.backup.utils.TraceUtils.beginNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.logNanoTiming
 import com.machiav3lli.backup.utils.TraceUtils.nanoTiming
-import com.machiav3lli.backup.utils.getFormattedDate
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
+import com.machiav3lli.backup.utils.getFormattedDate
 import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -880,7 +879,6 @@ fun MainPackageContextMenu(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainPackageItem(
     pkg: Package,

@@ -5,14 +5,12 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT
 import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -662,7 +660,6 @@ fun PluginItem(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PluginsPage() {
 
@@ -1050,10 +1047,6 @@ fun DevSupportTab() {
     }
 }
 
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalLayoutApi::class,
-)
 @Composable
 fun DevTools(
     expanded: MutableState<Boolean>,

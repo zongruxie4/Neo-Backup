@@ -3,7 +3,6 @@ package com.machiav3lli.backup.ui.compose.component
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
@@ -35,8 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
@@ -45,6 +46,7 @@ import com.machiav3lli.backup.data.entity.InfoChipItem
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Checks
 import com.machiav3lli.backup.ui.compose.ifThen
+import com.machiav3lli.backup.utils.launchView
 
 private enum class SelectionState { Unselected, Selected }
 
@@ -154,7 +156,6 @@ fun InfoChip(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun StateChip(
     modifier: Modifier = Modifier,
