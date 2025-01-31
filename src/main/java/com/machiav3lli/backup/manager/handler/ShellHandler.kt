@@ -862,7 +862,7 @@ class ShellHandler {
                 "su -c 'nsenter --mount=/proc/1/ns/mnt sh'",
                 "su --mount-master",
                 "sh -c \"exec \$(which su kp) -c 'nsenter --mount=/proc/1/ns/mnt sh'\"",  // APatch workaround
-                "sh -c \"(echo 'nsenter --mount=/proc/1/ns/mnt sh'; cat) | \$(which su kp)\"",  // APatch workaround
+                //"sh -c \"(echo 'nsenter --mount=/proc/1/ns/mnt sh'; cat) | \$(which su kp)\"",  // TODO to be fixed: APatch workaround
                 "su",
                 "/system/bin/su",
                 "sh"
