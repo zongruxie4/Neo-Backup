@@ -20,6 +20,7 @@ package com.machiav3lli.backup.ui.pages
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -78,6 +79,7 @@ import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.manager.tasks.BackupActionTask
 import com.machiav3lli.backup.manager.tasks.RestoreActionTask
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.BackupItem
 import com.machiav3lli.backup.ui.compose.component.CardButton
 import com.machiav3lli.backup.ui.compose.component.InfoChipsBlock
@@ -120,7 +122,7 @@ fun AppPage(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    val mActivity = NeoApp.main!!
+    val mActivity = LocalActivity.current as NeoActivity
     val openDialog = remember { mutableStateOf(false) }
     val dialogProps: MutableState<Pair<DialogMode, Any>> = remember {
         mutableStateOf(Pair(DialogMode.NONE, Schedule()))
@@ -537,7 +539,7 @@ fun AppPage(
                                 openDialogCustom = openDialog,
                             ) { mode ->
                                 if (pref_useWorkManagerForSingleManualJob.value) {
-                                    NeoApp.main?.startBatchAction(
+                                    mActivity.startBatchAction(
                                         true,
                                         listOf(packageName),
                                         listOf(mode)
@@ -559,7 +561,7 @@ fun AppPage(
                                 openDialogCustom = openDialog,
                             ) { mode ->
                                 if (pref_useWorkManagerForSingleManualJob.value) {
-                                    NeoApp.main?.startBatchAction(
+                                    mActivity.startBatchAction(
                                         false,
                                         listOf(packageName),
                                         listOf(mode)

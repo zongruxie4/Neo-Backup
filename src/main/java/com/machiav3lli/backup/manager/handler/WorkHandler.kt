@@ -19,12 +19,12 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.classAddress
-import com.machiav3lli.backup.ui.pages.pref_fakeScheduleDups
-import com.machiav3lli.backup.ui.pages.pref_maxRetriesPerPackage
 import com.machiav3lli.backup.manager.services.CommandReceiver
 import com.machiav3lli.backup.manager.tasks.AppActionWork
+import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.ui.pages.pref_fakeScheduleDups
+import com.machiav3lli.backup.ui.pages.pref_maxRetriesPerPackage
 import com.machiav3lli.backup.utils.SystemUtils
 import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
@@ -275,7 +275,7 @@ class WorkHandler(
             val now = SystemUtils.now
             val batchesRunning = mutableMapOf<String, WorkState>()
 
-            val appContext = NeoApp.context
+            val appContext = handler.context
 
             work.forEach { info ->
                 var data = info.progress

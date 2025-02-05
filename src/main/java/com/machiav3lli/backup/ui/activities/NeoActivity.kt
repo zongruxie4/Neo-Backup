@@ -490,7 +490,7 @@ class NeoActivity : BaseActivity() {
                                 if (error.isNotEmpty()) errors =
                                     "$errors$packageLabel: ${      //TODO hg42 add to WorkHandler
                                         LogsHandler.handleErrorMessages(
-                                            NeoApp.context,
+                                            this@NeoActivity,
                                             error
                                         )
                                     }\n"
@@ -572,7 +572,7 @@ class NeoActivity : BaseActivity() {
                                 if (error.isNotEmpty()) errors =
                                     "$errors$packageLabel: ${
                                         LogsHandler.handleErrorMessages(
-                                            NeoApp.context,
+                                            this@NeoActivity,
                                             error
                                         )
                                     }\n"

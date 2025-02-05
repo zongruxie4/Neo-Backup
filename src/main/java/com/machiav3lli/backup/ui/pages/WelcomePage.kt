@@ -20,6 +20,7 @@ package com.machiav3lli.backup.ui.pages
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -53,9 +54,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.machiav3lli.backup.BuildConfig
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.linksList
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.BlockTopShape
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
@@ -69,6 +70,8 @@ import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun WelcomePage() {
+    val main = LocalActivity.current as NeoActivity
+
     Scaffold(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -137,7 +140,7 @@ fun WelcomePage() {
                                 text = BuildConfig.APPLICATION_ID,
                                 style = MaterialTheme.typography.labelSmall,
                             )
-                            applicationIssuer?.let {
+                            main.applicationIssuer?.let {
                                 Text(
                                     text = "signed by $it",
                                     style = MaterialTheme.typography.labelSmall,
@@ -174,7 +177,7 @@ fun WelcomePage() {
                     text = stringResource(id = R.string.dialog_start),
                     icon = Phosphor.ArrowRight,
                 ) {
-                    NeoApp.main?.moveTo(NavItem.Permissions.destination)
+                    main.moveTo(NavItem.Permissions.destination)
                 }
             }
         }

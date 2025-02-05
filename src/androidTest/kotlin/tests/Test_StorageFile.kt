@@ -35,7 +35,7 @@ class Test_StorageFile {
                 baseDirAsFile
             )
         1    -> NeoApp.backupRoot?.uri!!
-        else -> uriFromFile(baseDirAsFile)
+        else -> NeoApp.context.uriFromFile(baseDirAsFile)
     }
     val baseDir = when (1) {
         1    -> StorageFile.fromUri(baseDirUri)     // SAF

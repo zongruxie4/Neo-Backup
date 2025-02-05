@@ -1,5 +1,6 @@
 package com.machiav3lli.backup.ui.compose.component
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -68,6 +69,7 @@ import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.manager.handler.ShellCommands
 import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Check
@@ -539,18 +541,18 @@ fun launchEachPackage(
     }
 }
 
-fun launchBackup(packages: List<Package>, mode: Int) {
+fun NeoActivity.launchBackup(packages: List<Package>, mode: Int) {
     val selectedAndInstalled = packages.installed()
-    NeoApp.main?.startBatchAction(
+    startBatchAction(
         true,
         selectedAndInstalled.map { it.packageName },
         selectedAndInstalled.map { mode }
     )
 }
 
-fun launchRestore(packages: List<Package>, mode: Int) {
+fun NeoActivity.launchRestore(packages: List<Package>, mode: Int) {
     val packagesWithBackups = packages.withBackups()
-    NeoApp.main?.startBatchAction(
+    startBatchAction(
         false,
         packagesWithBackups.map { it.packageName },
         packagesWithBackups.map { mode }
@@ -629,6 +631,7 @@ fun MainPackageContextMenu(
     openSheet: (Package) -> Unit = {},
 ) {
     val visible = productsList
+    val activity = LocalActivity.current as NeoActivity
 
     fun List<Package>.selected() = filter { selection.contains(it.packageName) }
 
@@ -802,7 +805,7 @@ fun MainPackageContextMenu(
                     openSubMenu(subMenu) {
                         SelectDataParts(expanded) { mode ->
                             expanded.value = false
-                            launchBackup(selectedVisible, mode)
+                            activity.launchBackup(selectedVisible, mode)
                         }
                     }
                 }
@@ -814,7 +817,7 @@ fun MainPackageContextMenu(
                     openSubMenu(subMenu) {
                         SelectDataParts(expanded) { mode ->
                             expanded.value = false
-                            launchRestore(selectedVisible, mode)
+                            activity.launchRestore(selectedVisible, mode)
                         }
                     }
                 }

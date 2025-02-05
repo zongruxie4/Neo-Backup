@@ -3,6 +3,7 @@ package com.machiav3lli.backup.ui.pages
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,29 +23,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
+import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.ui.compose.component.DevTools
+import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.compose.icons.phosphor.LockOpen
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
-import com.machiav3lli.backup.ui.compose.component.DevTools
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.utils.SystemUtils
+import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import com.machiav3lli.backup.utils.restartApp
 import kotlin.system.exitProcess
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SplashPage() {
+    val context = LocalContext.current
     Scaffold(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -66,7 +70,7 @@ fun SplashPage() {
                 text = listOf(
                     SystemUtils.packageName,
                     SystemUtils.versionName,
-                    SystemUtils.applicationIssuer?.let { "signed by $it" } ?: "",
+                    context.applicationIssuer?.let { "signed by $it" } ?: "",
                 ).joinToString("\n"),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface
@@ -79,6 +83,8 @@ fun SplashPage() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun RootMissing(activity: Activity? = null) {
+    val context = LocalContext.current
+
     Scaffold(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -136,7 +142,7 @@ fun RootMissing(activity: Activity? = null) {
                 fullWidth = true,
                 modifier = Modifier
             ) {
-                NeoApp.context.restartApp()
+                context.restartApp()
             }
             if (showDevTools.value) {
                 BaseDialog(onDismiss = { showDevTools.value = false }) {
@@ -154,7 +160,9 @@ fun RootMissing(activity: Activity? = null) {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LockPage(launchMain: () -> Unit) {
+fun LockPage() {
+    val main = LocalActivity.current as NeoActivity
+
     Scaffold(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -171,13 +179,13 @@ fun LockPage(launchMain: () -> Unit) {
                     text = stringResource(id = R.string.dialog_unlock),
                     icon = Phosphor.LockOpen,
                 ) {
-                    launchMain()
+                    main.resumeMain()
                 }
             }
         }
     ) {
         BackHandler {
-            NeoApp.main?.finishAffinity()
+            main.finishAffinity()
         }
         Box(modifier = Modifier.fillMaxSize()) {}
     }

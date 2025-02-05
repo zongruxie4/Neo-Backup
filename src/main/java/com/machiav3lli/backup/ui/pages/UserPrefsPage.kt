@@ -24,9 +24,6 @@ import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.THEME
 import com.machiav3lli.backup.accentColorItems
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
-import com.machiav3lli.backup.ui.dialogs.EnumPrefDialogUI
-import com.machiav3lli.backup.ui.dialogs.ListPrefDialogUI
 import com.machiav3lli.backup.data.entity.BooleanPref
 import com.machiav3lli.backup.data.entity.EnumPref
 import com.machiav3lli.backup.data.entity.IntPref
@@ -34,9 +31,11 @@ import com.machiav3lli.backup.data.entity.ListPref
 import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.data.entity.StringEditPref
 import com.machiav3lli.backup.data.entity.StringPref
-import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.secondaryColorItems
 import com.machiav3lli.backup.themeItems
+import com.machiav3lli.backup.ui.compose.component.InnerBackground
+import com.machiav3lli.backup.ui.compose.component.PrefsGroup
+import com.machiav3lli.backup.ui.compose.component.StringEditPreference
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsOutLineVertical
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarX
@@ -52,8 +51,9 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Swatches
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TagSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TextAa
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Translate
-import com.machiav3lli.backup.ui.compose.component.StringEditPreference
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
+import com.machiav3lli.backup.ui.dialogs.EnumPrefDialogUI
+import com.machiav3lli.backup.ui.dialogs.ListPrefDialogUI
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.backupDirConfigured
@@ -142,7 +142,7 @@ fun UserPrefsPage() {
 
 fun onThemeChanged(pref: Pref) {
     NeoApp.context.setCustomTheme()
-    NeoApp.context.recreateActivities()
+    recreateActivities()
 }
 
 val pref_languages = ListPref(
@@ -158,7 +158,7 @@ val pref_languages = ListPref(
         if (pref_restartAppOnLanguageChange.value)
             NeoApp.context.restartApp()   // does not really restart the app, only recreates
         else
-            NeoApp.context.recreateActivities()
+            recreateActivities()
     },
 )
 
@@ -216,6 +216,7 @@ val pref_pathBackupFolder = StringEditPref(
         else Color.Red.copy(alpha = alpha)
     },
     UI = { it, _, index, groupSize ->
+        val context = LocalContext.current
         val pref = it as StringEditPref
         val launcher =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -233,7 +234,7 @@ val pref_pathBackupFolder = StringEditPref(
                                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                     )
                             //TODO hg42 check and remember if flags are read only and implement appropriate actions elsewhere
-                            NeoApp.context.contentResolver.takePersistableUriPermission(uri, flags)
+                            context.contentResolver.takePersistableUriPermission(uri, flags)
                             Timber.i("setting uri $uri")
                             setBackupDir(uri)
                         }

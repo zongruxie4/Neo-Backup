@@ -18,6 +18,7 @@
 package com.machiav3lli.backup.ui.pages
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Environment
 import android.os.Process
 import androidx.compose.foundation.background
@@ -64,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
@@ -92,6 +94,11 @@ import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.handler.maxThreads
 import com.machiav3lli.backup.manager.handler.usedThreadsByName
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
+import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
+import com.machiav3lli.backup.ui.compose.component.RoundButton
+import com.machiav3lli.backup.ui.compose.component.SimpleButton
+import com.machiav3lli.backup.ui.compose.component.SmallButton
+import com.machiav3lli.backup.ui.compose.component.TopBar
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUDownLeft
@@ -104,13 +111,9 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.ifThen
 import com.machiav3lli.backup.ui.compose.isAtBottom
 import com.machiav3lli.backup.ui.compose.isAtTop
-import com.machiav3lli.backup.ui.compose.component.RoundButton
-import com.machiav3lli.backup.ui.compose.component.SimpleButton
-import com.machiav3lli.backup.ui.compose.component.SmallButton
-import com.machiav3lli.backup.ui.compose.component.TopBar
-import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.SystemUtils
+import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils.listNanoTiming
 import com.topjohnwu.superuser.Shell
@@ -157,7 +160,7 @@ fun appInfo(): List<String> {
         "------ application",
         "package   = ${SystemUtils.packageName}",
         "version   = ${SystemUtils.versionName} : ${SystemUtils.versionCode}",
-        SystemUtils.applicationIssuer.let { "signed by = $it" },
+        NeoApp.context.applicationIssuer.let { "signed by = $it" },
     )
 }
 
@@ -213,13 +216,13 @@ fun dumpTiming() =
     listOf("------ timing") +
             listNanoTiming()
 
-fun dumpDbSchedule() =
+fun Context.dumpDbSchedule() =
     listOf("------ schedule db") +
-            shell("sqlite3 ${NeoApp.context.getDatabasePath("main.db")} \"SELECT * FROM schedule ORDER BY id ASC\"")
+            shell("sqlite3 ${getDatabasePath("main.db")} \"SELECT * FROM schedule ORDER BY id ASC\"")
 
-fun dumpDbAppInfo() =
+fun Context.dumpDbAppInfo() =
     listOf("------ app info db") +
-            shell("sqlite3 ${NeoApp.context.getDatabasePath("main.db")} \"SELECT * FROM appinfo ORDER BY packageName ASC\"")
+            shell("sqlite3 ${getDatabasePath("main.db")} \"SELECT * FROM appinfo ORDER BY packageName ASC\"")
 
 fun accessTest1(title: String, directory: String, comment: String) =
     listOf("--- $title") +
@@ -610,6 +613,7 @@ fun TerminalPage(
 fun Terminal(
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val output = remember { mutableStateListOf<String>() }
     var command by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -726,8 +730,8 @@ fun Terminal(
             SimpleButton("timing") { produce { dumpTiming() } }
             SimpleButton("threads") { produce { threadsInfo() } }
             SimpleButton("access") { produce { accessTest() } }
-            SimpleButton("dbpkg") { produce { dumpDbAppInfo() } }
-            SimpleButton("dbsch") { produce { dumpDbSchedule() } }
+            SimpleButton("dbpkg") { produce { context.dumpDbAppInfo() } }
+            SimpleButton("dbsch") { produce { context.dumpDbSchedule() } }
             SimpleButton("errInfo") { produce { lastErrorPkg() + lastErrorCommand() } }
             SimpleButton("err->cmd") {
                 command =
@@ -736,7 +740,7 @@ fun Terminal(
                     else
                         "no error command"
             }
-            SimpleButton("findBackups") { NeoApp.context.findBackups(forceTrace = true) }
+            SimpleButton("findBackups") { context.findBackups(forceTrace = true) }
         }
         Box(
             modifier = Modifier

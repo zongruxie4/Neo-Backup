@@ -134,7 +134,7 @@ open class ScheduleService : Service() {
         if (scheduleId >= 0) {
             repeat(1 + pref_fakeScheduleDups.value) { count ->
                 CoroutineScope(Dispatchers.IO).launch {
-                    scheduleNextAlarm(NeoApp.context, scheduleId, true)
+                    scheduleNextAlarm(this@ScheduleService, scheduleId, true)
                 }
                 ScheduleWork.enqueueScheduled(scheduleId, scheduleName)
                 traceSchedule { "[$scheduleId] starting task for schedule${if (count > 0) " (dup $count)" else ""}" }

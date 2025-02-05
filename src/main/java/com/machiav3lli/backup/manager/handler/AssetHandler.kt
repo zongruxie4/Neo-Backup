@@ -6,7 +6,7 @@ import com.machiav3lli.backup.ui.pages.pref_backupCache
 import com.machiav3lli.backup.ui.pages.pref_backupNoBackupData
 import com.machiav3lli.backup.ui.pages.pref_restoreCache
 import com.machiav3lli.backup.ui.pages.pref_restoreNoBackupData
-import com.machiav3lli.backup.utils.SystemUtils
+import com.machiav3lli.backup.utils.SystemUtils.updateId
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
@@ -26,7 +26,7 @@ class AssetHandler(context: Context) {
 
         directory = context.filesDir
         directory.mkdirs()
-        val updateId = SystemUtils.updateId   //versionName
+        val updateId = context.updateId   //versionName
         val lastId = try {
             File(directory, UPDATE_ID_FILE).readText()
         } catch (e: Throwable) {
@@ -50,40 +50,45 @@ class AssetHandler(context: Context) {
     val BACKUP_EXCLUDE_FILE get() = File(directory, "tar_BACKUP_EXCLUDE").toString()
     val RESTORE_EXCLUDE_FILE get() = File(directory, "tar_RESTORE_EXCLUDE").toString()
 
-    val DATA_EXCLUDED_CACHE_DIRS get() = listOf(
-        "cache",
-        "code_cache"
-    )
+    val DATA_EXCLUDED_CACHE_DIRS
+        get() = listOf(
+            "cache",
+            "code_cache"
+        )
 
     // libs are generally created while installing the app. Backing them up
     // would result in a compatibility problem between devices with different cpu_arch
 
-    val LIB_DIRS get() = listOf(
-        "lib",      //TODO hg42 what about architecture dependent names? or may be application specific? lib* ???
-    )
+    val LIB_DIRS
+        get() = listOf(
+            "lib",      //TODO hg42 what about architecture dependent names? or may be application specific? lib* ???
+        )
 
     // these need to be dynamic, becasue the preferences can change at runtime
 
-    val DATA_BACKUP_EXCLUDED_BASENAMES get() = (
-            LIB_DIRS
-            + if (pref_backupNoBackupData.value) listOf() else listOf("no_backup") //TODO hg42 use Context.getNoBackupFilesDir() ??? tricky, because it's an absolute path (remove common part...)
-            + if (pref_backupCache.value) listOf() else DATA_EXCLUDED_CACHE_DIRS
-            )
+    val DATA_BACKUP_EXCLUDED_BASENAMES
+        get() = (
+                LIB_DIRS
+                        + if (pref_backupNoBackupData.value) listOf() else listOf("no_backup") //TODO hg42 use Context.getNoBackupFilesDir() ??? tricky, because it's an absolute path (remove common part...)
+                        + if (pref_backupCache.value) listOf() else DATA_EXCLUDED_CACHE_DIRS
+                )
 
-    val DATA_RESTORE_EXCLUDED_BASENAMES get() = (
-            LIB_DIRS
-            + if (pref_restoreNoBackupData.value) listOf() else listOf("no_backup") //TODO hg42 use Context.getNoBackupFilesDir() ??? tricky, because it's an absolute path (remove common part...)
-            + if (pref_restoreCache.value) listOf() else DATA_EXCLUDED_CACHE_DIRS
-            )
+    val DATA_RESTORE_EXCLUDED_BASENAMES
+        get() = (
+                LIB_DIRS
+                        + if (pref_restoreNoBackupData.value) listOf() else listOf("no_backup") //TODO hg42 use Context.getNoBackupFilesDir() ??? tricky, because it's an absolute path (remove common part...)
+                        + if (pref_restoreCache.value) listOf() else DATA_EXCLUDED_CACHE_DIRS
+                )
 
-    val DATA_EXCLUDED_NAMES get() = listOfNotNull(
-        "com.google.android.gms.appid.xml", // appid needs to be recreated
-        "com.machiav3lli.backup.xml", // encrypted prefs file
-        //"cache",  // don't, this also excludes the cache
-        "trash",
-        ".thumbnails",
-        if (ShellHandler.utilBox.hasBug("DotDotDirHang")) "..*" else null
-    )
+    val DATA_EXCLUDED_NAMES
+        get() = listOfNotNull(
+            "com.google.android.gms.appid.xml", // appid needs to be recreated
+            "com.machiav3lli.backup.xml", // encrypted prefs file
+            //"cache",  // don't, this also excludes the cache
+            "trash",
+            ".thumbnails",
+            if (ShellHandler.utilBox.hasBug("DotDotDirHang")) "..*" else null
+        )
 
     fun updateExcludeFiles() {
 

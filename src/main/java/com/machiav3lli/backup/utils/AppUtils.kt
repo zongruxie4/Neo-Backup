@@ -42,7 +42,7 @@ fun Context.restartApp(data: String? = null) {
 
 var recreateActivitiesJob: Job? = null
 
-fun Context.recreateActivities() {
+fun recreateActivities() {
     runBlocking {
         recreateActivitiesJob?.cancel()
     }

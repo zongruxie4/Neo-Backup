@@ -38,20 +38,20 @@ import androidx.work.workDataOf
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.data.entity.ActionResult
+import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler.Companion.getVar
 import com.machiav3lli.backup.manager.handler.WorkHandler.Companion.setVar
 import com.machiav3lli.backup.manager.handler.getSpecial
 import com.machiav3lli.backup.manager.handler.showNotification
-import com.machiav3lli.backup.data.entity.ActionResult
-import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.manager.services.CommandReceiver
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.pages.pref_maxJobs
 import com.machiav3lli.backup.ui.pages.pref_maxRetriesPerPackage
 import com.machiav3lli.backup.ui.pages.pref_useExpedited
 import com.machiav3lli.backup.ui.pages.pref_useForegroundInJob
-import com.machiav3lli.backup.manager.services.CommandReceiver
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -223,12 +223,12 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
         )
 
         val cancelAllIntent =
-            Intent(NeoApp.context, CommandReceiver::class.java).apply {
+            Intent(context, CommandReceiver::class.java).apply {
                 action = "cancel"
                 //putExtra("name", "")
             }
         val cancelAllPendingIntent = PendingIntent.getBroadcast(
-            NeoApp.context,
+            context,
             "<ALL>".hashCode(),
             cancelAllIntent,
             PendingIntent.FLAG_IMMUTABLE

@@ -18,6 +18,7 @@
 package com.machiav3lli.backup.ui.pages
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,28 +48,28 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
-import com.machiav3lli.backup.ui.dialogs.BatchActionDialogUI
-import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.data.entity.Package
-import com.machiav3lli.backup.ui.sheets.BatchPrefsSheet
-import com.machiav3lli.backup.ui.sheets.SortFilterSheet
+import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.ui.compose.component.ActionChip
+import com.machiav3lli.backup.ui.compose.component.BatchPackageRecycler
+import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
+import com.machiav3lli.backup.ui.compose.component.RoundButton
+import com.machiav3lli.backup.ui.compose.component.StateChip
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.DiamondsFour
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FunnelSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.HardDrives
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Nut
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
-import com.machiav3lli.backup.ui.compose.component.ActionChip
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
-import com.machiav3lli.backup.ui.compose.component.RoundButton
-import com.machiav3lli.backup.ui.compose.component.StateChip
-import com.machiav3lli.backup.ui.compose.component.BatchPackageRecycler
 import com.machiav3lli.backup.ui.compose.theme.ColorAPK
 import com.machiav3lli.backup.ui.compose.theme.ColorData
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
+import com.machiav3lli.backup.ui.dialogs.BatchActionDialogUI
+import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.sheets.BatchPrefsSheet
+import com.machiav3lli.backup.ui.sheets.SortFilterSheet
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.BatchVM
@@ -82,7 +83,7 @@ fun BatchPage(
     mainVM: MainVM = koinNeoViewModel(),
     backupBoolean: Boolean
 ) {
-    val main = NeoApp.main!!
+    val main = LocalActivity.current as NeoActivity
     val scope = rememberCoroutineScope()
     val mainState by if (backupBoolean) mainVM.backupState.collectAsState()
     else mainVM.restoreState.collectAsState()

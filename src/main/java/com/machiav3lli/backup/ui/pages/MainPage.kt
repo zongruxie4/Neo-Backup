@@ -18,6 +18,7 @@
 package com.machiav3lli.backup.ui.pages
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
@@ -35,19 +36,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
-import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
+import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
+import com.machiav3lli.backup.ui.compose.component.MainTopBar
+import com.machiav3lli.backup.ui.compose.component.RefreshButton
+import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
-import com.machiav3lli.backup.ui.compose.component.MainTopBar
-import com.machiav3lli.backup.ui.compose.component.RefreshButton
-import com.machiav3lli.backup.ui.compose.component.RoundButton
-import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
+import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.NeoNavigationSuiteScaffold
 import com.machiav3lli.backup.ui.navigation.SlidePager
@@ -61,6 +62,7 @@ fun MainPage(
     navController: NavHostController,
     viewModel: MainVM = koinNeoViewModel(),
 ) {
+    val main = LocalActivity.current as NeoActivity
     val scope = rememberCoroutineScope()
     val pages = persistentListOf(
         NavItem.Home,
@@ -73,7 +75,7 @@ fun MainPage(
     val currentPage by remember { derivedStateOf { pages[currentPageIndex.value] } }
 
     BackHandler {
-        NeoApp.main?.finishAffinity()
+        main.finishAffinity()
     }
 
     val mainState by viewModel.homeState.collectAsState()
@@ -126,7 +128,7 @@ fun MainPage(
                                     description = stringResource(id = R.string.search),
                                     onClick = { searchExpanded.value = true }
                                 )
-                                RefreshButton { NeoApp.main?.refreshPackagesAndBackups() }
+                                RefreshButton { main.refreshPackagesAndBackups() }
                                 RoundButton(
                                     description = stringResource(id = R.string.prefs_title),
                                     icon = Phosphor.GearSix

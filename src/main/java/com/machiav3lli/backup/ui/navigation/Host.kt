@@ -18,15 +18,14 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.ui.pages.LockPage
+import com.machiav3lli.backup.ui.pages.LogsPage
 import com.machiav3lli.backup.ui.pages.MainPage
 import com.machiav3lli.backup.ui.pages.PermissionsPage
 import com.machiav3lli.backup.ui.pages.PrefsPage
-import com.machiav3lli.backup.ui.pages.WelcomePage
-import com.machiav3lli.backup.ui.pages.LogsPage
 import com.machiav3lli.backup.ui.pages.SchedulesExportsPage
 import com.machiav3lli.backup.ui.pages.TerminalPage
+import com.machiav3lli.backup.ui.pages.WelcomePage
 import com.machiav3lli.backup.ui.pages.persist_beenWelcomed
 
 @Composable
@@ -41,7 +40,7 @@ fun MainNavHost(
         else NavItem.Welcome.destination
     ) {
         slideInComposable(route = NavItem.Lock.destination) {
-            LockPage { NeoApp.main?.resumeMain() }
+            LockPage()
         }
         slideInComposable(route = NavItem.Welcome.destination) {
             WelcomePage()

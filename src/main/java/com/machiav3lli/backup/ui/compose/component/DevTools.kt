@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT
 import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -93,6 +94,7 @@ import com.machiav3lli.backup.data.preferences.pref_trace
 import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.manager.handler.findBackups
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUUpLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
@@ -836,7 +838,7 @@ val pref_loadPreferences = LaunchPref(
                     val serialized = it.readText()
                     preferencesFromSerialized(serialized)
                     NeoApp.addInfoLogText("loaded ${it.name}")
-                    NeoApp.context.recreateActivities()
+                    recreateActivities()
                 }
             }
         }
@@ -1054,6 +1056,7 @@ fun DevTools(
     search: String? = null,
 ) {
     var tab by devToolsTab
+    val activity = LocalActivity.current as NeoActivity
 
     LaunchedEffect(true) {
         goto?.let {
@@ -1120,10 +1123,10 @@ fun DevTools(
                     ) {
                         expanded.value = false
                         try {
-                            if (NeoApp.main?.navController != null)
+                            if (activity.navController != null)
                             ;
                         } catch (e: Throwable) {
-                            NeoApp.main?.restartApp()
+                            activity.restartApp()
                         }
                     }
                 }

@@ -30,20 +30,18 @@ import java.security.cert.X509Certificate
 
 object SystemUtils {
 
-    fun Context.getApplicationInfos(what: Int = 0): PackageInfo? {
-        val packageManager: PackageManager = getPackageManager()
-        return packageManager.getPackageInfo(packageName, what)
-    }
+    private fun Context.getApplicationInfos(what: Int = 0): PackageInfo? =
+        packageManager.getPackageInfo(packageName, what)
 
     @Suppress("DEPRECATION")
-    private fun Context.getApplicationIssuer() : String? {
+    private fun Context.getApplicationIssuer(): String? {
         runCatching {
             val signatures = if (NeoApp.minSDK(28)) {
-                val packageInfo = NeoApp.context.getApplicationInfos(PackageManager.GET_SIGNING_CERTIFICATES)
+                val packageInfo = getApplicationInfos(PackageManager.GET_SIGNING_CERTIFICATES)
                 val signingInfo = packageInfo?.signingInfo
                 signingInfo?.getSigningCertificateHistory() ?: arrayOf()
             } else {
-                val packageInfo = NeoApp.context.getApplicationInfos(PackageManager.GET_SIGNATURES)
+                val packageInfo = getApplicationInfos(PackageManager.GET_SIGNATURES)
                 packageInfo?.signatures ?: arrayOf()
             }
             if (signatures.isEmpty())
@@ -59,7 +57,7 @@ object SystemUtils {
                 field to value
             }.toMap()
             var issuer = names["CN"]
-            names["O"]?.let { if (issuer != it) issuer = "$issuer / $it"}
+            names["O"]?.let { if (issuer != it) issuer = "$issuer / $it" }
             return issuer ?: DN
         }
         return null
@@ -68,10 +66,10 @@ object SystemUtils {
     val packageName get() = com.machiav3lli.backup.BuildConfig.APPLICATION_ID
     val versionCode get() = com.machiav3lli.backup.BuildConfig.VERSION_CODE
     val versionName get() = com.machiav3lli.backup.BuildConfig.VERSION_NAME
-    val updateId get() = "${NeoApp.context.getApplicationInfos()?.lastUpdateTime?.toString()}-${versionName}"
+    val Context.updateId get() = "${getApplicationInfos()?.lastUpdateTime?.toString()}-${versionName}"
     val backupVersionCode get() = com.machiav3lli.backup.BuildConfig.MAJOR * 1000 + com.machiav3lli.backup.BuildConfig.MINOR
 
-    val applicationIssuer get() = NeoApp.context.getApplicationIssuer() ?: "UNKNOWN ISSUER"
+    val Context.applicationIssuer get() = getApplicationIssuer() ?: "UNKNOWN ISSUER"
 
     val numCores get() = Runtime.getRuntime().availableProcessors()
 
@@ -107,9 +105,9 @@ object SystemUtils {
         }
     }
 
-    fun share(text: String, subject: String? = null, asFile: Boolean = true) {
+    fun Context.share(text: String, subject: String? = null, asFile: Boolean = true) {
         if (asFile) {
-            NeoApp.context.getExternalFilesDir(DIRECTORY_DOWNLOADS)
+            getExternalFilesDir(DIRECTORY_DOWNLOADS)
                 ?.resolve("NeoBackup-share.txt")    // TODO hg42 use subject.replace(illegal, "_").truncate(n)
                 ?.also { it.writeText(text) }
                 ?.let { SystemUtils.share(StorageFile(it)) }

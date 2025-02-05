@@ -2,6 +2,7 @@ package com.machiav3lli.backup.ui.pages
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -24,14 +25,14 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.activities.NeoActivity
-import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.data.entity.LinkPref
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.showNotification
+import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.ui.compose.component.InnerBackground
+import com.machiav3lli.backup.ui.compose.component.LaunchPreference
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
@@ -39,9 +40,9 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Bug
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarX
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ListNumbers
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
-import com.machiav3lli.backup.ui.compose.component.LaunchPreference
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.show
+import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.SystemUtils
@@ -64,7 +65,7 @@ fun ToolsPrefsPage(
     viewModel: MainVM = koinNeoViewModel(),
 ) {
     val context = LocalContext.current
-    val neoActivity = NeoApp.main!!
+    val neoActivity = LocalActivity.current as NeoActivity
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val openDialog = remember { mutableStateOf(false) }

@@ -19,6 +19,7 @@ package com.machiav3lli.backup.ui.pages
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,10 +64,10 @@ import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.ALT_MODE_UNSET
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.traceCompose
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.ActionChip
 import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.component.ExpandingFadingVisibility
@@ -98,7 +99,7 @@ fun HomePage(
     viewModel: MainVM = koinNeoViewModel(),
 ) {
     // TODO include tags in search
-    val mActivity = NeoApp.main!!
+    val mActivity = LocalActivity.current as NeoActivity
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()

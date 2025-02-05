@@ -27,6 +27,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -55,12 +56,13 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.data.entity.Permission
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.component.PermissionItem
 import com.machiav3lli.backup.ui.compose.component.TopBar
+import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.SystemUtils.packageName
 import com.machiav3lli.backup.utils.checkBatteryOptimization
@@ -84,8 +86,8 @@ import timber.log.Timber
 @Composable
 fun PermissionsPage(powerManager: PowerManager = koinInject()) {
     val context = LocalContext.current
+    val mainActivity = LocalActivity.current as NeoActivity
     val mScope = CoroutineScope(Dispatchers.Main)
-    val mainActivity = NeoApp.main!!
     val openDialog = remember { mutableStateOf(false) }
     val dialogProp: MutableState<DialogMode> = remember {
         mutableStateOf(DialogMode.NONE)

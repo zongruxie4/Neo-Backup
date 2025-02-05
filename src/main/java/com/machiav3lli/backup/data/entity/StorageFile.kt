@@ -11,13 +11,13 @@ import com.machiav3lli.backup.MIME_TYPE_DIR
 import com.machiav3lli.backup.MIME_TYPE_FILE
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PROP_NAME
+import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.manager.handler.ShellCommands
 import com.machiav3lli.backup.ui.pages.pref_cacheFileLists
 import com.machiav3lli.backup.ui.pages.pref_cacheUris
 import com.machiav3lli.backup.ui.pages.pref_shadowRootFile
-import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.utils.SystemUtils.getShadowPath
 import com.machiav3lli.backup.utils.SystemUtils.isWritablePath
 import timber.log.Timber
@@ -149,10 +149,10 @@ private fun closeQuietly(closeable: AutoCloseable?) {
     }
 }
 
-fun uriFromFile(file: File): Uri =
+fun Context.uriFromFile(file: File): Uri =
     FileProvider.getUriForFile(
-        NeoApp.context,
-        "${NeoApp.context.packageName}.provider",
+        this,
+        "${packageName}.provider",
         file
     )
 
@@ -189,7 +189,7 @@ open class StorageFile {
                     _uri = p.findUri(n)
                     _uri
                 }
-            } ?: uriFromFile(f)
+            } ?: context.uriFromFile(f)
         }
 
     data class DocumentInfo(

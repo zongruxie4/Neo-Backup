@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.machiav3lli.backup.NeoApp
@@ -219,6 +220,7 @@ fun FullScreenBackground(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    val context = LocalContext.current
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
@@ -230,7 +232,7 @@ fun FullScreenBackground(
 
         if (pref_versionOpacity.value > 0)
             Text(
-                text = "$versionName $applicationIssuer",
+                text = "$versionName ${context.applicationIssuer}",
                 fontSize = 8.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = pref_versionOpacity.value / 100f),
                 modifier = Modifier

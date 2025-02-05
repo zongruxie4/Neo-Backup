@@ -150,7 +150,7 @@ fun HelpSheet(onDismiss: () -> Unit) {
                                 text = BuildConfig.APPLICATION_ID,
                                 style = MaterialTheme.typography.labelSmall,
                             )
-                            applicationIssuer?.let {
+                            context.applicationIssuer?.let {
                                 Text(
                                     text = "signed by $it",
                                     style = MaterialTheme.typography.labelSmall,
