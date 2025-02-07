@@ -34,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -70,11 +71,8 @@ class AppVM(
         AppExtras(packageName.value)
     )
 
-    val snackbarText = MutableComposableStateFlow( // TODO change to MutableStateFlow
-        "",
-        viewModelScope,
-        "snackBarText"
-    )
+    val snackbarText: StateFlow<String>
+        private field = MutableStateFlow("")
 
     private var notificationId: Int = SystemUtils.now.toInt()
     val refreshNow = mutableStateOf(true)
@@ -82,6 +80,10 @@ class AppVM(
 
     fun setApp(pn: String) {
         viewModelScope.launch { packageName.update { pn } }
+    }
+
+    fun setSnackbarText(value: String) {
+        viewModelScope.launch { snackbarText.update { value } }
     }
 
     fun uninstallApp() {

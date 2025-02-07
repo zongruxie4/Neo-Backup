@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapLatest
@@ -60,12 +59,12 @@ class MainVM(
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS
 
-    private val _homeState = MutableStateFlow(MainState())
-    val homeState: StateFlow<MainState> = _homeState.asStateFlow()
-    private val _backupState = MutableStateFlow(MainState())
-    val backupState: StateFlow<MainState> = _backupState.asStateFlow()
-    private val _restoreState = MutableStateFlow(MainState())
-    val restoreState: StateFlow<MainState> = _restoreState.asStateFlow()
+    val homeState: StateFlow<MainState>
+        private field = MutableStateFlow(MainState())
+    val backupState: StateFlow<MainState>
+        private field = MutableStateFlow(MainState())
+    val restoreState: StateFlow<MainState>
+        private field = MutableStateFlow(MainState())
 
     private val searchQuery = MutableStateFlow("")
 
@@ -208,7 +207,7 @@ class MainVM(
                     selection = selection
                 )
             }.collect { newState ->
-                _homeState.update { newState }
+                homeState.update { newState }
             }
         }
         viewModelScope.launch {
@@ -233,7 +232,7 @@ class MainVM(
                     selection = selection
                 )
             }.collect { newState ->
-                _backupState.update { newState }
+                backupState.update { newState }
             }
         }
         viewModelScope.launch {
@@ -258,7 +257,7 @@ class MainVM(
                     selection = selection
                 )
             }.collect { newState ->
-                _restoreState.update { newState }
+                restoreState.update { newState }
             }
         }
     }

@@ -129,7 +129,7 @@ fun AppPage(
     }
 
     val thePackage by viewModel.pkg.collectAsState(null)
-    val snackbarText by viewModel.snackbarText.flow.collectAsState("")
+    val snackbarText by viewModel.snackbarText.collectAsState("")
     val appExtras by viewModel.appExtras.collectAsState()
     val refreshNow by viewModel.refreshNow
     val dismissNow by viewModel.dismissNow
@@ -548,7 +548,7 @@ fun AppPage(
                                     BackupActionTask(
                                         pkg, mActivity, NeoApp.shellHandler!!, mode,
                                     ) { message ->
-                                        viewModel.snackbarText.value = message
+                                        viewModel.setSnackbarText(message)
                                     }.execute()
                                 }
                             }
@@ -572,7 +572,7 @@ fun AppPage(
                                             pkg, mActivity, NeoApp.shellHandler!!, mode,
                                             it
                                         ) { message ->
-                                            viewModel.snackbarText.value = message
+                                            viewModel.setSnackbarText(message)
                                         }.execute()
                                     }
                                 }

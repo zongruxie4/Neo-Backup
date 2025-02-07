@@ -23,7 +23,7 @@ import com.machiav3lli.backup.data.dbs.repository.ExportsRepository
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -31,13 +31,12 @@ class ExportsVM(
     private val exportsRepository: ExportsRepository,
 ) : NeoViewModel() {
 
-    private val _exportsList =
-        MutableStateFlow<MutableList<Pair<Schedule, StorageFile>>>(mutableListOf())
-    val exportsList = _exportsList.asStateFlow()
+    val exportsList: StateFlow<List<Pair<Schedule, StorageFile>>>
+        private field = MutableStateFlow<List<Pair<Schedule, StorageFile>>>(mutableListOf())
 
     fun refreshList() {
         viewModelScope.launch {
-            _exportsList.update {
+            exportsList.update {
                 exportsRepository.recreateExports()
             }
         }
