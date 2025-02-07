@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -111,6 +112,9 @@ android {
                 "-P",
                 "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$metricsDir",
             )
+        }
+        kotlinExtension.sourceSets.all {
+            languageSettings.enableLanguageFeature("ExplicitBackingFields")
         }
     }
     lint {
