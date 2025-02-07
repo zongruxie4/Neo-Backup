@@ -34,12 +34,12 @@ object SystemUtils {
         packageManager.getPackageInfo(packageName, what)
 
     @Suppress("DEPRECATION")
-    private fun Context.getApplicationIssuer(): String? {
+    private fun Context.getIssuer(): String? {
         runCatching {
             val signatures = if (NeoApp.minSDK(28)) {
                 val packageInfo = getApplicationInfos(PackageManager.GET_SIGNING_CERTIFICATES)
                 val signingInfo = packageInfo?.signingInfo
-                signingInfo?.getSigningCertificateHistory() ?: arrayOf()
+                signingInfo?.signingCertificateHistory ?: arrayOf()
             } else {
                 val packageInfo = getApplicationInfos(PackageManager.GET_SIGNATURES)
                 packageInfo?.signatures ?: arrayOf()
@@ -51,14 +51,14 @@ object SystemUtils {
             val cf = CertificateFactory.getInstance("X509")
             val x509Certificate: X509Certificate =
                 cf.generateCertificate(ByteArrayInputStream(signatureBytes)) as X509Certificate
-            val DN = x509Certificate.getIssuerDN().getName()
-            val names = DN.split(",").map {
+            val DN_name = x509Certificate.issuerDN.name
+            val names = DN_name.split(",").map {
                 val (field, value) = it.split("=", limit = 2)
                 field to value
             }.toMap()
             var issuer = names["CN"]
             names["O"]?.let { if (issuer != it) issuer = "$issuer / $it" }
-            return issuer ?: DN
+            return issuer ?: DN_name
         }
         return null
     }
@@ -69,7 +69,7 @@ object SystemUtils {
     val Context.updateId get() = "${getApplicationInfos()?.lastUpdateTime?.toString()}-${versionName}"
     val backupVersionCode get() = com.machiav3lli.backup.BuildConfig.MAJOR * 1000 + com.machiav3lli.backup.BuildConfig.MINOR
 
-    val Context.applicationIssuer get() = getApplicationIssuer() ?: "UNKNOWN ISSUER"
+    val Context.applicationIssuer get() = getIssuer() ?: "UNKNOWN ISSUER"
 
     val numCores get() = Runtime.getRuntime().availableProcessors()
 

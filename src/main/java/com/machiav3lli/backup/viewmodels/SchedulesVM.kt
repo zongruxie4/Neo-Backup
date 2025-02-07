@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 class SchedulesVM(
     private val scheduleRepository: ScheduleRepository,
 ) : NeoViewModel() {
-    var schedules = scheduleRepository.getAllFlow()
+    val schedules = scheduleRepository.getAllFlow()
 
     fun addSchedule(withSpecial: Boolean) {
         viewModelScope.launch {

@@ -78,7 +78,7 @@ class ExportsHandler(
     }
 
     @Throws(IOException::class)
-    fun readExports(): MutableList<Pair<Schedule, StorageFile>> {
+    fun readExports(): List<Pair<Schedule, StorageFile>> {
         val exports = mutableListOf<Pair<Schedule, StorageFile>>()
         invalidateCache { it.contains(EXPORTS_FOLDER_NAME) }
         exportsDirectory?.listFiles()?.forEach {

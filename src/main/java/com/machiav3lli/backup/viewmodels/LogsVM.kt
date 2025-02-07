@@ -29,7 +29,7 @@ import kotlinx.coroutines.withContext
 
 class LogsVM : NeoViewModel() {
 
-    var logsList = mutableStateListOf<Log>()
+    val logsList = mutableStateListOf<Log>()
 
     fun refreshList() {
         viewModelScope.launch {

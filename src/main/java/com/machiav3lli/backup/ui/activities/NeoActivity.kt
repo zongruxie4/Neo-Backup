@@ -237,8 +237,7 @@ class NeoActivity : BaseActivity() {
                             traceBold { "******************** freshStart && Main ********************" }
                             mScope.launch(Dispatchers.IO) {
                                 runCatching { findBackups() }
-                                startup =
-                                    false     // ensure backups are no more reported as empty
+                                startup = false     // ensure backups are no more reported as empty
                                 runCatching { updateAppTables() }
                                 //TODO hg42 val time = OABX.endBusy(OABX.startupMsg)
                                 //TODO hg42 addInfoLogText("startup: ${"%.3f".format(time / 1E9)} sec")

@@ -32,12 +32,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.machiav3lli.backup.ui.pages.pref_altBlockLayout
-import com.machiav3lli.backup.data.preferences.traceFlows
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 fun Modifier.vertical() = layout { measurable, constraints ->
@@ -166,39 +162,6 @@ fun ObservedEffect(onChange: () -> Unit) {
         }
     }
 }
-
-class MutableComposableStateFlow<T>(
-    var initial: T,
-    val scope: CoroutineScope,
-    val label: String = "ComposableStateFlow",
-) {
-    var flow = MutableStateFlow<T>(initial)
-
-    val state = flow.asStateFlow()
-
-    var value: T
-        get() {
-            val value = state.value
-            if (value is String)
-                traceFlows { "*** $label => '$value'" }
-            else
-                traceFlows { "*** $label => $value" }
-            return value
-        }
-        set(value: T) {
-            if (value is String)
-                traceFlows { "*** $label <= '$value'" }
-            else
-                traceFlows { "*** $label <= $value" }
-            //initial = value
-            scope.launch { flow.update { value } }
-        }
-
-    init {
-        value = initial
-    }
-}
-
 
 @Composable
 fun LazyListState.isAtTop() = remember {
