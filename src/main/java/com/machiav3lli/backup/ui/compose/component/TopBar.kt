@@ -356,7 +356,7 @@ fun ExpandedSearchView(
     query: String,
     modifier: Modifier = Modifier,
     onClose: () -> Unit,
-    onExpanded: (Boolean) -> Unit,
+    onExpanded: (Boolean) -> Unit = {},
     onQueryChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current

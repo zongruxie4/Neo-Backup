@@ -27,6 +27,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.blockShadow
 import com.machiav3lli.backup.ui.compose.component.DialogNegativeButton
 import com.machiav3lli.backup.ui.compose.component.DialogPositiveButton
+import com.machiav3lli.backup.ui.compose.component.ExpandedSearchView
 import com.machiav3lli.backup.ui.compose.component.MultiSelectionListItem
 
 @Composable
@@ -35,10 +36,12 @@ fun <T> MultiSelectionDialogUI(
     entryMap: Map<T, String>,
     selectedItems: List<T>,
     openDialogCustom: MutableState<Boolean>,
+    withSearchBar: Boolean = false,
     onSave: (List<T>) -> Unit,
 ) {
     val context = LocalContext.current
     var selected by remember { mutableStateOf(selectedItems) }
+    val query = rememberSaveable { mutableStateOf("") }
     val entryPairs = entryMap.toList()
 
     Card(
@@ -55,14 +58,27 @@ fun <T> MultiSelectionDialogUI(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(text = titleText, style = MaterialTheme.typography.titleLarge)
+            if (withSearchBar) {
+                ExpandedSearchView(
+                    query = query.value,
+                    onClose = {
+                        query.value = ""
+                    },
+                    onQueryChanged = {
+                        query.value = it
+                    }
+                )
+            }
             LazyColumn(
                 modifier = Modifier
                     .padding(vertical = 8.dp)
                     .weight(1f, false)
                     .blockShadow()
             ) {
-                items(items = entryPairs) { (key, label) ->
-                    val isSelected = rememberSaveable(selected) {
+                items(items = entryPairs.filter {
+                    it.second.contains(query.value, true)
+                }) { (key, label) ->
+                    val isSelected = rememberSaveable(selected, key) {
                         mutableStateOf(selected.contains(key))
                     }
 

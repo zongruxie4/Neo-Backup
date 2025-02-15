@@ -37,6 +37,7 @@ fun PackagesListDialogUI(
     filter: Int,
     title: String,
     openDialogCustom: MutableState<Boolean>,
+    withSearchBar: Boolean = false,
     onPackagesListChanged: (newList: Set<String>) -> Unit,
 ) {
     val context = LocalContext.current
@@ -85,6 +86,7 @@ fun PackagesListDialogUI(
         titleText = title,
         entryMap = packagePairs.toMap(),
         selectedItems = selectedPackageNames.toList(),
+        withSearchBar = withSearchBar,
         openDialogCustom = openDialogCustom,
     ) {
         onPackagesListChanged(it.toSet())
@@ -102,6 +104,7 @@ fun BlockListDialogUI(
         filter = schedule.filter,
         title = stringResource(id = R.string.sched_blocklist),
         openDialogCustom = openDialogCustom,
+        withSearchBar = true,
         onPackagesListChanged = onPackagesListChanged,
     )
 }
@@ -117,6 +120,7 @@ fun GlobalBlockListDialogUI(
         filter = MAIN_FILTER_DEFAULT,
         title = stringResource(id = R.string.sched_blocklist),
         openDialogCustom = openDialogCustom,
+        withSearchBar = true,
         onPackagesListChanged = onPackagesListChanged,
     )
 }
@@ -132,6 +136,7 @@ fun CustomListDialogUI(
         filter = schedule.filter,
         title = stringResource(id = R.string.customListTitle),
         openDialogCustom = openDialogCustom,
+        withSearchBar = true,
         onPackagesListChanged = onPackagesListChanged,
     )
 }
