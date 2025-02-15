@@ -57,6 +57,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ShieldStar
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
 import com.machiav3lli.backup.ui.compose.mix
 import com.machiav3lli.backup.utils.SystemUtils.numCores
+import com.machiav3lli.backup.utils.extensions.Android
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import org.koin.android.ext.android.get
@@ -560,7 +561,7 @@ val pref_fixNavBarOverlap = IntPref(
     key = "dev-hack.fixNavBarOverlap",
     summary = "fix UI overlapping system navbars [in 'dp', usually needs something like 42]",
     entries = (0..64).toList(),
-    defaultValue = if (NeoApp.minSDK(Build.VERSION_CODES.R)) 0 else 42
+    defaultValue = if (Android.minSDK(Build.VERSION_CODES.R)) 0 else 42
 )
 
 val pref_delayBeforeRefreshAppInfo = IntPref(

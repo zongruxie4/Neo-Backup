@@ -54,7 +54,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.machiav3lli.backup.DialogMode
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.Permission
 import com.machiav3lli.backup.ui.activities.NeoActivity
@@ -67,6 +66,7 @@ import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.SystemUtils.packageName
 import com.machiav3lli.backup.utils.checkBatteryOptimization
 import com.machiav3lli.backup.utils.checkUsageStatsPermission
+import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.getStoragePermission
 import com.machiav3lli.backup.utils.hasStoragePermissions
 import com.machiav3lli.backup.utils.isStorageDirSetAndOk
@@ -131,7 +131,7 @@ fun PermissionsPage(powerManager: PowerManager = koinInject()) {
             ) else null,
             Triple(
                 Permission.PostNotifications,
-                if (NeoApp.minSDK(Build.VERSION_CODES.TIRAMISU)) {
+                if (Android.minSDK(Build.VERSION_CODES.TIRAMISU)) {
                     listOf(Manifest.permission.POST_NOTIFICATIONS)
                 } else emptyList(),
                 DialogMode.NONE

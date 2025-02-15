@@ -39,6 +39,7 @@ import com.machiav3lli.backup.ui.pages.pref_fakeScheduleMin
 import com.machiav3lli.backup.ui.pages.pref_useAlarmClock
 import com.machiav3lli.backup.ui.pages.pref_useExactAlarm
 import com.machiav3lli.backup.ui.pages.textLog
+import com.machiav3lli.backup.utils.extensions.Android
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -204,7 +205,7 @@ suspend fun scheduleNextAlarm(context: Context, scheduleId: Long, rescheduleBool
                 }
 
                 val hasPermission: Boolean =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Android.minSDK(Build.VERSION_CODES.S)) {
                         alarmManager.canScheduleExactAlarms()
                     } else {
                         true

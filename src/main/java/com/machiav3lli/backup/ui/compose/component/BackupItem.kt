@@ -44,6 +44,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.LockOpen
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
 import com.machiav3lli.backup.ui.pages.pref_altBackupDate
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_SHOW_FORMATTER
+import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.getFormattedDate
 import java.io.File
 import java.time.LocalDateTime
@@ -67,7 +68,7 @@ fun BackupItem_headlineContent(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.End
         ) {
-            AnimatedVisibility(visible = (item.cpuArch != android.os.Build.SUPPORTED_ABIS[0])) {
+            AnimatedVisibility(visible = (item.cpuArch != Android.mainPlatform)) {
                 Text(
                     text = " ${item.cpuArch} ",
                     color = Color.Red,

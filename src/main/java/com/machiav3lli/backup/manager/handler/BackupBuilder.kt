@@ -17,7 +17,6 @@
  */
 package com.machiav3lli.backup.manager.handler
 
-import android.os.Build
 import com.machiav3lli.backup.BACKUP_INSTANCE_PROPERTIES_INDIR
 import com.machiav3lli.backup.backupInstanceDir
 import com.machiav3lli.backup.backupInstanceDirFlat
@@ -32,6 +31,7 @@ import com.machiav3lli.backup.ui.pages.pref_flatStructure
 import com.machiav3lli.backup.ui.pages.pref_propertiesInDir
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.DATE_TIME_AS_VERSION_CODE_FORMATTER
+import com.machiav3lli.backup.utils.extensions.Android
 import timber.log.Timber
 import java.io.IOException
 import java.time.LocalDateTime
@@ -50,7 +50,7 @@ class BackupBuilder(
     private var hasMediaData = false
     private var compressionType: String? = null
     private var cipherType: String? = null
-    private val cpuArch: String = Build.SUPPORTED_ABIS[0]
+    private val cpuArch: String = Android.mainPlatform
     private var size: Long = 0L
     val backupDir = ensureBackupPath(backupRoot)
     val backupPropsFile = getPropsFile(backupRoot)
@@ -137,7 +137,7 @@ class BackupBuilder(
     }
 
     @Throws(IOException::class)
-    protected fun saveBackupProperties(
+    private fun saveBackupProperties(
         propertiesFile: UndeterminedStorageFile,
         backup: Backup,
     ): StorageFile? {

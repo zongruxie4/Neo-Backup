@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.os.SystemClock
 import com.machiav3lli.backup.NeoApp
@@ -11,6 +12,7 @@ import com.machiav3lli.backup.data.entity.RootFile
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.ShellCommands
+import com.machiav3lli.backup.utils.extensions.Android
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +38,7 @@ object SystemUtils {
     @Suppress("DEPRECATION")
     private fun Context.getIssuer(): String? {
         runCatching {
-            val signatures = if (NeoApp.minSDK(28)) {
+            val signatures = if (Android.minSDK(Build.VERSION_CODES.P)) {
                 val packageInfo = getApplicationInfos(PackageManager.GET_SIGNING_CERTIFICATES)
                 val signingInfo = packageInfo?.signingInfo
                 signingInfo?.signingCertificateHistory ?: arrayOf()

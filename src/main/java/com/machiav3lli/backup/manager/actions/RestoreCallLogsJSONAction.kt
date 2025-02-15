@@ -27,7 +27,7 @@ import android.provider.CallLog
 import android.util.JsonReader
 import android.util.JsonToken
 import androidx.core.content.PermissionChecker
-import timber.log.Timber
+import com.machiav3lli.backup.utils.extensions.Android
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -38,8 +38,14 @@ object RestoreCallLogsJSONAction {
             throw RuntimeException("Device does not have Call Logs.")
         }
         if (
-            (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.READ_CALL_LOG) == PermissionChecker.PERMISSION_DENIED) ||
-            (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_CALL_LOG) == PermissionChecker.PERMISSION_DENIED)
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.READ_CALL_LOG
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.WRITE_CALL_LOG
+            ) == PermissionChecker.PERMISSION_DENIED)
         ) {
             throw RuntimeException("No permission for Call Logs.")
         }
@@ -47,7 +53,7 @@ object RestoreCallLogsJSONAction {
         inputFile?.use { inputStream ->
             BufferedReader(InputStreamReader(inputStream)).use { reader ->
                 val jsonReader = JsonReader(reader)
-                restoreLogs(context,jsonReader)
+                restoreLogs(context, jsonReader)
                 jsonReader.close()
             }
         }
@@ -58,7 +64,7 @@ object RestoreCallLogsJSONAction {
     private fun restoreLogs(context: Context, jsonReader: JsonReader) {
         jsonReader.beginArray()
         while (jsonReader.hasNext()) {
-            parseLog(context,jsonReader)
+            parseLog(context, jsonReader)
         }
         jsonReader.endArray()
     }
@@ -71,36 +77,36 @@ object RestoreCallLogsJSONAction {
         while (jsonReader.hasNext()) {
             val nextName = jsonReader.nextName()
             var useName = when (nextName) {
-                "DATE" -> CallLog.Calls.DATE
-                "DURATION" -> CallLog.Calls.DURATION
-                "NEW" -> CallLog.Calls.NEW
-                "NUMBER" -> CallLog.Calls.NUMBER
-                "TYPE" -> CallLog.Calls.TYPE
-                "DATA_USAGE" -> CallLog.Calls.DATA_USAGE
-                "COUNTRY_ISO" -> CallLog.Calls.COUNTRY_ISO
-                "GEOCODED_LOCATION" -> CallLog.Calls.GEOCODED_LOCATION
-                "IS_READ" -> CallLog.Calls.IS_READ
-                "FEATURES" -> CallLog.Calls.FEATURES
-                "NUMBER_PRESENTATION" -> CallLog.Calls.NUMBER_PRESENTATION
+                "DATE"                         -> CallLog.Calls.DATE
+                "DURATION"                     -> CallLog.Calls.DURATION
+                "NEW"                          -> CallLog.Calls.NEW
+                "NUMBER"                       -> CallLog.Calls.NUMBER
+                "TYPE"                         -> CallLog.Calls.TYPE
+                "DATA_USAGE"                   -> CallLog.Calls.DATA_USAGE
+                "COUNTRY_ISO"                  -> CallLog.Calls.COUNTRY_ISO
+                "GEOCODED_LOCATION"            -> CallLog.Calls.GEOCODED_LOCATION
+                "IS_READ"                      -> CallLog.Calls.IS_READ
+                "FEATURES"                     -> CallLog.Calls.FEATURES
+                "NUMBER_PRESENTATION"          -> CallLog.Calls.NUMBER_PRESENTATION
                 "PHONE_ACCOUNT_COMPONENT_NAME" -> CallLog.Calls.PHONE_ACCOUNT_COMPONENT_NAME
-                "PHONE_ACCOUNT_ID" -> CallLog.Calls.PHONE_ACCOUNT_ID
-                "POST_DIAL_DIGITS" -> CallLog.Calls.POST_DIAL_DIGITS
-                "TRANSCRIPTION" -> CallLog.Calls.TRANSCRIPTION
-                "VIA_NUMBER" -> CallLog.Calls.VIA_NUMBER
-                else -> "{}"
+                "PHONE_ACCOUNT_ID"             -> CallLog.Calls.PHONE_ACCOUNT_ID
+                "POST_DIAL_DIGITS"             -> CallLog.Calls.POST_DIAL_DIGITS
+                "TRANSCRIPTION"                -> CallLog.Calls.TRANSCRIPTION
+                "VIA_NUMBER"                   -> CallLog.Calls.VIA_NUMBER
+                else                           -> "{}"
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && useName == "{}") {
+            if (Android.minSDK(Build.VERSION_CODES.Q) && useName == "{}") {
                 useName = when (nextName) {
                     "BLOCK_REASON" -> CallLog.Calls.BLOCK_REASON
-                    else -> "{}"
+                    else           -> "{}"
                 }
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && useName == "{}") {
+            if (Android.minSDK(Build.VERSION_CODES.S) && useName == "{}") {
                 useName = when (nextName) {
                     "MISSED_REASON" -> CallLog.Calls.MISSED_REASON
-                    "PRIORITY" -> CallLog.Calls.PRIORITY
-                    "SUBJECT" -> CallLog.Calls.SUBJECT
-                    else -> "{}"
+                    "PRIORITY"      -> CallLog.Calls.PRIORITY
+                    "SUBJECT"       -> CallLog.Calls.SUBJECT
+                    else            -> "{}"
                 }
             }
             if (useName == "{}") {
@@ -111,44 +117,84 @@ object RestoreCallLogsJSONAction {
                         val value = jsonReader.nextString()
                         values.put(useName, value)
                         queryWhere = when (useName) {
-                            CallLog.Calls.DATE -> "$queryWhere $useName = $value AND"
-                            CallLog.Calls.DURATION -> "$queryWhere $useName = $value AND"
-                            CallLog.Calls.NEW -> "$queryWhere $useName = $value AND"
-                            CallLog.Calls.NUMBER -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
-                            CallLog.Calls.TYPE -> "$queryWhere $useName = $value AND"
-                            CallLog.Calls.DATA_USAGE -> "$queryWhere $useName = $value AND"
-                            CallLog.Calls.COUNTRY_ISO -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
-                            CallLog.Calls.GEOCODED_LOCATION -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
-                            CallLog.Calls.IS_READ -> "$queryWhere $useName = $value AND"
-                            CallLog.Calls.FEATURES -> "$queryWhere $useName = $value AND"
-                            CallLog.Calls.NUMBER_PRESENTATION -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
-                            CallLog.Calls.PHONE_ACCOUNT_COMPONENT_NAME -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
-                            CallLog.Calls.PHONE_ACCOUNT_ID -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
-                            CallLog.Calls.POST_DIAL_DIGITS -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
-                            CallLog.Calls.TRANSCRIPTION -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
-                            CallLog.Calls.VIA_NUMBER -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
+                            CallLog.Calls.DATE
+                                 -> "$queryWhere $useName = $value AND"
+
+                            CallLog.Calls.DURATION
+                                 -> "$queryWhere $useName = $value AND"
+
+                            CallLog.Calls.NEW
+                                 -> "$queryWhere $useName = $value AND"
+
+                            CallLog.Calls.NUMBER
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
+                            CallLog.Calls.TYPE
+                                 -> "$queryWhere $useName = $value AND"
+
+                            CallLog.Calls.DATA_USAGE
+                                 -> "$queryWhere $useName = $value AND"
+
+                            CallLog.Calls.COUNTRY_ISO
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
+                            CallLog.Calls.GEOCODED_LOCATION
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
+                            CallLog.Calls.IS_READ
+                                 -> "$queryWhere $useName = $value AND"
+
+                            CallLog.Calls.FEATURES
+                                 -> "$queryWhere $useName = $value AND"
+
+                            CallLog.Calls.NUMBER_PRESENTATION
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
+                            CallLog.Calls.PHONE_ACCOUNT_COMPONENT_NAME
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
+                            CallLog.Calls.PHONE_ACCOUNT_ID
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
+                            CallLog.Calls.POST_DIAL_DIGITS
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
+                            CallLog.Calls.TRANSCRIPTION
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
+                            CallLog.Calls.VIA_NUMBER
+                                 -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
                             else -> queryWhere
                         }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        if (Android.minSDK(Build.VERSION_CODES.Q)) {
                             queryWhere = when (useName) {
                                 CallLog.Calls.BLOCK_REASON -> "$queryWhere $useName = $value AND"
-                                else -> queryWhere
+                                else                       -> queryWhere
                             }
                         }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        if (Android.minSDK(Build.VERSION_CODES.S)) {
                             queryWhere = when (useName) {
-                                CallLog.Calls.MISSED_REASON -> "$queryWhere $useName = $value AND"
-                                CallLog.Calls.PRIORITY -> "$queryWhere $useName = $value AND"
-                                CallLog.Calls.SUBJECT -> "$queryWhere $useName = '${value.replace("'","''")}' AND"
+                                CallLog.Calls.MISSED_REASON
+                                     -> "$queryWhere $useName = $value AND"
+
+                                CallLog.Calls.PRIORITY
+                                     -> "$queryWhere $useName = $value AND"
+
+                                CallLog.Calls.SUBJECT
+                                     -> "$queryWhere $useName = '${value.replace("'", "''")}' AND"
+
                                 else -> queryWhere
                             }
                         }
                     }
-                    JsonToken.NULL -> {
+
+                    JsonToken.NULL   -> {
                         queryWhere = "$queryWhere $useName IS NULL AND"
                         jsonReader.skipValue()
                     }
-                    else -> {
+
+                    else             -> {
                         jsonReader.skipValue()
                     }
                 }
@@ -162,7 +208,13 @@ object RestoreCallLogsJSONAction {
     // Save single Log Entry
     private fun saveLog(context: Context, values: ContentValues, queryWhere: String) {
         // Check for duplicates
-        val existsCursor = context.contentResolver.query(CallLog.Calls.CONTENT_URI, arrayOf(CallLog.Calls._ID), queryWhere, null, null)
+        val existsCursor = context.contentResolver.query(
+            CallLog.Calls.CONTENT_URI,
+            arrayOf(CallLog.Calls._ID),
+            queryWhere,
+            null,
+            null
+        )
         val exists = existsCursor?.count
         existsCursor?.close()
         if (exists == 0) {

@@ -58,6 +58,7 @@ import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.backupDirConfigured
 import com.machiav3lli.backup.utils.backupFolderExists
+import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.getLanguageList
 import com.machiav3lli.backup.utils.isBiometricLockAvailable
 import com.machiav3lli.backup.utils.isDeviceLockAvailable
@@ -167,7 +168,7 @@ val pref_appTheme = EnumPref(
     titleId = R.string.prefs_theme,
     icon = Phosphor.Swatches,
     entries = themeItems,
-    defaultValue = if (NeoApp.minSDK(31)) THEME.DYNAMIC.ordinal
+    defaultValue = if (Android.minSDK(31)) THEME.DYNAMIC.ordinal
     else THEME.SYSTEM.ordinal,
     onChanged = ::onThemeChanged,
 )

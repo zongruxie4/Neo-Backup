@@ -19,12 +19,14 @@ package com.machiav3lli.backup
 
 import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.provider.DocumentsContract
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.data.dbs.entity.PackageInfo
 import com.machiav3lli.backup.data.entity.ChipItem
 import com.machiav3lli.backup.data.entity.Legend
 import com.machiav3lli.backup.data.entity.Link
+import com.machiav3lli.backup.utils.extensions.Android
 
 const val PREFS_SHARED_PRIVATE = "com.machiav3lli.backup"
 
@@ -165,11 +167,11 @@ val themeItems = mutableMapOf(
     THEME.DARK_HIGH.ordinal to R.string.dark_high_contrast,
     THEME.BLACK_HIGH.ordinal to R.string.black_high_contrast,
 ).apply {
-    if (NeoApp.minSDK(29)) {
+    if (Android.minSDK(Build.VERSION_CODES.Q)) {
         set(THEME.SYSTEM.ordinal, R.string.prefs_theme_system)
         set(THEME.SYSTEM_BLACK.ordinal, R.string.prefs_theme_system_black)
     }
-    if (NeoApp.minSDK(31)) {
+    if (Android.minSDK(Build.VERSION_CODES.S)) {
         set(THEME.DYNAMIC.ordinal, R.string.prefs_theme_dynamic)
         set(THEME.DYNAMIC_LIGHT.ordinal, R.string.prefs_theme_dynamic_light)
         set(THEME.DYNAMIC_DARK.ordinal, R.string.prefs_theme_dynamic_dark)
@@ -324,10 +326,10 @@ val IGNORED_PERMISSIONS = listOfNotNull(
     Manifest.permission.ACCESS_WIFI_STATE,
     Manifest.permission.ACCESS_NETWORK_STATE,
     Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
-    if (NeoApp.minSDK(28)) Manifest.permission.FOREGROUND_SERVICE else null,
+    if (Android.minSDK(Build.VERSION_CODES.P)) Manifest.permission.FOREGROUND_SERVICE else null,
     Manifest.permission.INSTALL_SHORTCUT,
     Manifest.permission.INTERNET,
-    if (NeoApp.minSDK(30)) Manifest.permission.QUERY_ALL_PACKAGES else null,
+    if (Android.minSDK(Build.VERSION_CODES.R)) Manifest.permission.QUERY_ALL_PACKAGES else null,
     Manifest.permission.REQUEST_DELETE_PACKAGES,
     Manifest.permission.RECEIVE_BOOT_COMPLETED,
     Manifest.permission.READ_SYNC_SETTINGS,

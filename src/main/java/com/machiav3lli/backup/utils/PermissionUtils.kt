@@ -16,8 +16,8 @@ import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.BACKUP_DIRECTORY_INTENT
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.ui.pages.persist_ignoreBatteryOptimization
+import com.machiav3lli.backup.utils.extensions.Android
 import org.koin.java.KoinJavaComponent.get
 
 // Getters
@@ -37,10 +37,10 @@ val Context.allPermissionsGranted: Boolean
 
 val Context.hasStoragePermissions: Boolean
     get() = when {
-        NeoApp.minSDK(Build.VERSION_CODES.R) ->
+        Android.minSDK(Build.VERSION_CODES.R) ->
             Environment.isExternalStorageManager()
 
-        else                               ->
+        else                                  ->
             checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
                     PackageManager.PERMISSION_GRANTED
     }
@@ -65,7 +65,7 @@ val Context.checkSMSMMSPermission: Boolean
         ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
-            NeoApp.minSDK(Build.VERSION_CODES.Q) ->
+            Android.minSDK(Build.VERSION_CODES.Q) ->
                 appOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_READ_SMS,
                     Process.myUid(),
@@ -73,7 +73,7 @@ val Context.checkSMSMMSPermission: Boolean
                 )
             // Done this way because on (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
             // it always says that the permission is granted even though it is not
-            else                               -> AppOpsManager.MODE_DEFAULT
+            else                                  -> AppOpsManager.MODE_DEFAULT
         }
         return if (mode == AppOpsManager.MODE_DEFAULT) {
             (checkCallingOrSelfPermission(Manifest.permission.READ_SMS) ==
@@ -99,7 +99,7 @@ val Context.checkCallLogsPermission: Boolean
         ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
-            NeoApp.minSDK(Build.VERSION_CODES.Q) ->
+            Android.minSDK(Build.VERSION_CODES.Q) ->
                 appOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_READ_CALL_LOG,
                     Process.myUid(),
@@ -107,7 +107,7 @@ val Context.checkCallLogsPermission: Boolean
                 )
             // Done this way because on (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q)
             // it always says that the permission is granted even though it is not
-            else                               -> AppOpsManager.MODE_DEFAULT
+            else                                  -> AppOpsManager.MODE_DEFAULT
         }
         return if (mode == AppOpsManager.MODE_DEFAULT) {
             (checkCallingOrSelfPermission(Manifest.permission.READ_CALL_LOG) ==
@@ -127,7 +127,7 @@ val Context.checkContactsPermission: Boolean
         ) return true
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
-            NeoApp.minSDK(Build.VERSION_CODES.Q) ->
+            Android.minSDK(Build.VERSION_CODES.Q) ->
                 appOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_READ_CONTACTS,
                     Process.myUid(),
@@ -135,7 +135,7 @@ val Context.checkContactsPermission: Boolean
                 )
             // Done this way because on (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
             // it always says that the permission is granted even though it is not
-            else                               -> AppOpsManager.MODE_DEFAULT
+            else                                  -> AppOpsManager.MODE_DEFAULT
         }
         return if (mode == AppOpsManager.MODE_DEFAULT) {
             checkCallingOrSelfPermission(Manifest.permission.READ_CONTACTS) ==
@@ -150,14 +150,14 @@ val Context.checkUsageStatsPermission: Boolean
     get() {
         val appOps = (getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
         val mode = when {
-            NeoApp.minSDK(Build.VERSION_CODES.Q) ->
+            Android.minSDK(Build.VERSION_CODES.Q) ->
                 appOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_GET_USAGE_STATS,
                     Process.myUid(),
                     packageName
                 )
 
-            else                               ->
+            else                                  ->
                 appOps.checkOpNoThrow(  //TODO 'checkOpNoThrow(String, Int, String): Int' is deprecated. Deprecated in Java. @machiav3lli not replaceable without increasing minSDK as the two functions have different minSDK
                     AppOpsManager.OPSTR_GET_USAGE_STATS,
                     Process.myUid(),
@@ -173,7 +173,7 @@ val Context.checkUsageStatsPermission: Boolean
     }
 
 val Context.postNotificationsPermission: Boolean
-    get() = if (NeoApp.minSDK(Build.VERSION_CODES.TIRAMISU)) {
+    get() = if (Android.minSDK(Build.VERSION_CODES.TIRAMISU)) {
         checkCallingOrSelfPermission(
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
@@ -200,13 +200,13 @@ fun requireStorageLocation(
 
 fun Activity.getStoragePermission() {
     when {
-        NeoApp.minSDK(Build.VERSION_CODES.R) -> {
+        Android.minSDK(Build.VERSION_CODES.R) -> {
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
             intent.data = Uri.parse("package:$packageName")
             startActivity(intent)
         }
 
-        else                               -> {
+        else                                  -> {
             requireWriteStoragePermission()
             requireReadStoragePermission()
         }

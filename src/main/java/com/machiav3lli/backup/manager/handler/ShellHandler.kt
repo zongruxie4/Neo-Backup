@@ -18,7 +18,6 @@
 package com.machiav3lli.backup.manager.handler
 
 import android.content.Context
-import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -35,6 +34,7 @@ import com.machiav3lli.backup.ui.pages.pref_libsuUseRootShell
 import com.machiav3lli.backup.ui.pages.pref_suCommand
 import com.machiav3lli.backup.utils.BUFFER_SIZE
 import com.machiav3lli.backup.utils.FileUtils.translatePosixPermissionToMode
+import com.machiav3lli.backup.utils.extensions.Android
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ShellUtils
 import com.topjohnwu.superuser.io.SuRandomAccessFile
@@ -667,7 +667,7 @@ class ShellHandler {
 
         fun sysInfo() =
             listOf(
-                "system       = Android ${Build.VERSION.RELEASE} - ${ShellUtils.fastCmd("uname -r -m -o")}",
+                "system       = Android ${Android.name} - ${ShellUtils.fastCmd("uname -r -m -o")}",
                 //"has nsenter  = $hasNsEnter", //TODO wech
                 "has bypass-low-target-sdk-block = $hasPmBypassLowTargetSDKBlock",
             )

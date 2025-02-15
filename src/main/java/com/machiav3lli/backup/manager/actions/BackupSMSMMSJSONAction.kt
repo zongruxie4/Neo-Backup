@@ -27,6 +27,7 @@ import android.util.Base64
 import android.util.JsonWriter
 import androidx.core.content.PermissionChecker
 import androidx.core.database.getStringOrNull
+import com.machiav3lli.backup.utils.extensions.Android
 import java.io.BufferedWriter
 import java.io.File
 import java.io.IOException
@@ -39,20 +40,42 @@ object BackupSMSMMSJSONAction {
             throw RuntimeException("Device does not have SMS/MMS.")
         }
         if (
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.READ_SMS) == PermissionChecker.PERMISSION_DENIED) ||
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.SEND_SMS) == PermissionChecker.PERMISSION_DENIED) ||
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.RECEIVE_SMS) == PermissionChecker.PERMISSION_DENIED) ||
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.RECEIVE_MMS) == PermissionChecker.PERMISSION_DENIED) ||
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.RECEIVE_WAP_PUSH) == PermissionChecker.PERMISSION_DENIED)
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.READ_SMS
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.SEND_SMS
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.RECEIVE_SMS
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.RECEIVE_MMS
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.RECEIVE_WAP_PUSH
+            ) == PermissionChecker.PERMISSION_DENIED)
         ) {
             throw RuntimeException("No permission for SMS/MMS.")
         }
-        val outputFile = context.contentResolver.openOutputStream(Uri.fromFile(File(filePath)), "wt")
+        val outputFile = context.contentResolver
+            .openOutputStream(Uri.fromFile(File(filePath)), "wt")
         outputFile?.use { outputStream ->
             BufferedWriter(OutputStreamWriter(outputStream)).use { writer ->
                 val jsonWriter = JsonWriter(writer)
                 jsonWriter.beginArray()
-                val threads = context.contentResolver.query(Telephony.Threads.CONTENT_URI, arrayOf("thread_id"), null, null, "thread_id")
+                val threads = context.contentResolver.query(
+                    Telephony.Threads.CONTENT_URI,
+                    arrayOf("thread_id"),
+                    null,
+                    null,
+                    "thread_id"
+                )
                 threads?.use { thread ->
                     if (thread.moveToFirst()) {
                         do {
@@ -95,28 +118,34 @@ object BackupSMSMMSJSONAction {
         )
         jsonWriter.name("1-SMS")
         jsonWriter.beginArray()
-        val messages = context.contentResolver.query(Telephony.Sms.CONTENT_URI, projection, "${Telephony.Sms.THREAD_ID} = $threadId", null, Telephony.Sms.DATE)
+        val messages = context.contentResolver.query(
+            Telephony.Sms.CONTENT_URI,
+            projection,
+            "${Telephony.Sms.THREAD_ID} = $threadId",
+            null,
+            Telephony.Sms.DATE
+        )
         messages?.use { message ->
             if (message.moveToFirst()) {
                 do {
                     jsonWriter.beginObject()
                     message.columnNames.forEachIndexed { m, columnName ->
                         val useColumnName = when (columnName) {
-                            Telephony.Sms.ADDRESS -> "ADDRESS"
-                            Telephony.Sms.DATE -> "DATE"
-                            Telephony.Sms.DATE_SENT -> "DATE_SENT"
-                            Telephony.Sms.PROTOCOL -> "PROTOCOL"
-                            Telephony.Sms.READ -> "READ"
-                            Telephony.Sms.STATUS -> "STATUS"
-                            Telephony.Sms.TYPE -> "TYPE"
-                            Telephony.Sms.SUBJECT -> "SUBJECT"
-                            Telephony.Sms.BODY -> "BODY"
-                            Telephony.Sms.SERVICE_CENTER -> "SERVICE_CENTER"
-                            Telephony.Sms.LOCKED -> "LOCKED"
+                            Telephony.Sms.ADDRESS         -> "ADDRESS"
+                            Telephony.Sms.DATE            -> "DATE"
+                            Telephony.Sms.DATE_SENT       -> "DATE_SENT"
+                            Telephony.Sms.PROTOCOL        -> "PROTOCOL"
+                            Telephony.Sms.READ            -> "READ"
+                            Telephony.Sms.STATUS          -> "STATUS"
+                            Telephony.Sms.TYPE            -> "TYPE"
+                            Telephony.Sms.SUBJECT         -> "SUBJECT"
+                            Telephony.Sms.BODY            -> "BODY"
+                            Telephony.Sms.SERVICE_CENTER  -> "SERVICE_CENTER"
+                            Telephony.Sms.LOCKED          -> "LOCKED"
                             Telephony.Sms.SUBSCRIPTION_ID -> "SUBSCRIPTION_ID"
-                            Telephony.Sms.ERROR_CODE -> "ERROR_CODE"
-                            Telephony.Sms.SEEN -> "SEEN"
-                            else -> "{}"
+                            Telephony.Sms.ERROR_CODE      -> "ERROR_CODE"
+                            Telephony.Sms.SEEN            -> "SEEN"
+                            else                          -> "{}"
                         }
                         if (useColumnName != "{}") {
                             jsonWriter.name(useColumnName).value(message.getString(m))
@@ -129,7 +158,7 @@ object BackupSMSMMSJSONAction {
         messages?.close()
         jsonWriter.endArray()
     }
-    
+
     private fun backupMMS(context: Context, jsonWriter: JsonWriter, threadId: Long) {
         val projection = arrayOf(
             Telephony.Mms._ID,
@@ -154,33 +183,39 @@ object BackupSMSMMSJSONAction {
         )
         jsonWriter.name("2-MMS")
         jsonWriter.beginArray()
-        val messages = context.contentResolver.query(Telephony.Mms.CONTENT_URI, projection, "${Telephony.Mms.THREAD_ID} = $threadId", null, Telephony.Mms.DATE)
+        val messages = context.contentResolver.query(
+            Telephony.Mms.CONTENT_URI,
+            projection,
+            "${Telephony.Mms.THREAD_ID} = $threadId",
+            null,
+            Telephony.Mms.DATE
+        )
         messages?.use { message ->
             if (message.moveToFirst()) {
                 do {
                     jsonWriter.beginObject()
                     message.columnNames.forEachIndexed { m, columnName ->
                         val useColumnName = when (columnName) {
-                            Telephony.Mms._ID -> "_ID"
-                            Telephony.Mms.CONTENT_TYPE -> "CONTENT_TYPE"
+                            Telephony.Mms._ID             -> "_ID"
+                            Telephony.Mms.CONTENT_TYPE    -> "CONTENT_TYPE"
                             Telephony.Mms.DELIVERY_REPORT -> "DELIVERY_REPORT"
-                            Telephony.Mms.DATE -> "DATE"
-                            Telephony.Mms.DATE_SENT -> "DATE_SENT"
-                            Telephony.Mms.LOCKED -> "LOCKED"
-                            Telephony.Mms.MESSAGE_TYPE -> "MESSAGE_TYPE"
-                            Telephony.Mms.MESSAGE_BOX -> "MESSAGE_BOX"
-                            Telephony.Mms.READ -> "READ"
-                            Telephony.Mms.READ_STATUS -> "READ_STATUS"
-                            Telephony.Mms.READ_REPORT -> "READ_REPORT"
-                            Telephony.Mms.SEEN -> "SEEN"
-                            Telephony.Mms.STATUS -> "STATUS"
-                            Telephony.Mms.SUBJECT -> "SUBJECT"
+                            Telephony.Mms.DATE            -> "DATE"
+                            Telephony.Mms.DATE_SENT       -> "DATE_SENT"
+                            Telephony.Mms.LOCKED          -> "LOCKED"
+                            Telephony.Mms.MESSAGE_TYPE    -> "MESSAGE_TYPE"
+                            Telephony.Mms.MESSAGE_BOX     -> "MESSAGE_BOX"
+                            Telephony.Mms.READ            -> "READ"
+                            Telephony.Mms.READ_STATUS     -> "READ_STATUS"
+                            Telephony.Mms.READ_REPORT     -> "READ_REPORT"
+                            Telephony.Mms.SEEN            -> "SEEN"
+                            Telephony.Mms.STATUS          -> "STATUS"
+                            Telephony.Mms.SUBJECT         -> "SUBJECT"
                             Telephony.Mms.SUBJECT_CHARSET -> "SUBJECT_CHARSET"
                             Telephony.Mms.SUBSCRIPTION_ID -> "SUBSCRIPTION_ID"
-                            Telephony.Mms.TEXT_ONLY -> "TEXT_ONLY"
-                            Telephony.Mms.TRANSACTION_ID -> "TRANSACTION_ID"
-                            Telephony.Mms.MMS_VERSION -> "MMS_VERSION"
-                            else -> "{}"
+                            Telephony.Mms.TEXT_ONLY       -> "TEXT_ONLY"
+                            Telephony.Mms.TRANSACTION_ID  -> "TRANSACTION_ID"
+                            Telephony.Mms.MMS_VERSION     -> "MMS_VERSION"
+                            else                          -> "{}"
                         }
                         if (useColumnName != "{}") {
                             if (useColumnName == "_ID") {
@@ -200,7 +235,7 @@ object BackupSMSMMSJSONAction {
     }
 
     private fun backupParts(context: Context, jsonWriter: JsonWriter, id: Long) {
-        val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val uri = if (Android.minSDK(Build.VERSION_CODES.Q)) {
             Telephony.Mms.Part.CONTENT_URI
         } else {
             Uri.parse("content://mms/part")
@@ -222,7 +257,13 @@ object BackupSMSMMSJSONAction {
         )
         jsonWriter.name("PARTS")
         jsonWriter.beginArray()
-        val parts = context.contentResolver.query(uri, projection, "${Telephony.Mms.Part.MSG_ID} = $id", null, Telephony.Mms.Part._ID)
+        val parts = context.contentResolver.query(
+            uri,
+            projection,
+            "${Telephony.Mms.Part.MSG_ID} = $id",
+            null,
+            Telephony.Mms.Part._ID
+        )
         parts?.use { part ->
             if (part.moveToFirst()) {
                 do {
@@ -232,33 +273,35 @@ object BackupSMSMMSJSONAction {
                     var partContentType = ""
                     part.columnNames.forEachIndexed { m, columnName ->
                         val useColumnName = when (columnName) {
-                            Telephony.Mms.Part._ID -> "_ID"
-                            Telephony.Mms.Part.SEQ -> "SEQ"
-                            Telephony.Mms.Part.CONTENT_TYPE -> "CONTENT_TYPE"
-                            Telephony.Mms.Part.NAME -> "NAME"
-                            Telephony.Mms.Part.CHARSET -> "CHARSET"
+                            Telephony.Mms.Part._ID                 -> "_ID"
+                            Telephony.Mms.Part.SEQ                 -> "SEQ"
+                            Telephony.Mms.Part.CONTENT_TYPE        -> "CONTENT_TYPE"
+                            Telephony.Mms.Part.NAME                -> "NAME"
+                            Telephony.Mms.Part.CHARSET             -> "CHARSET"
                             Telephony.Mms.Part.CONTENT_DISPOSITION -> "CONTENT_DISPOSITION"
-                            Telephony.Mms.Part.FILENAME -> "FILENAME"
-                            Telephony.Mms.Part.CONTENT_ID -> "CONTENT_ID"
-                            Telephony.Mms.Part.CONTENT_LOCATION -> "CONTENT_LOCATION"
-                            Telephony.Mms.Part.CT_START -> "CT_START"
-                            Telephony.Mms.Part.CT_TYPE -> "CT_TYPE"
-                            Telephony.Mms.Part._DATA -> "_DATA"
-                            Telephony.Mms.Part.TEXT -> "TEXT"
-                            else -> "{}"
+                            Telephony.Mms.Part.FILENAME            -> "FILENAME"
+                            Telephony.Mms.Part.CONTENT_ID          -> "CONTENT_ID"
+                            Telephony.Mms.Part.CONTENT_LOCATION    -> "CONTENT_LOCATION"
+                            Telephony.Mms.Part.CT_START            -> "CT_START"
+                            Telephony.Mms.Part.CT_TYPE             -> "CT_TYPE"
+                            Telephony.Mms.Part._DATA               -> "_DATA"
+                            Telephony.Mms.Part.TEXT                -> "TEXT"
+                            else                                   -> "{}"
                         }
                         if (useColumnName != "{}") {
                             if (useColumnName == "CONTENT_TYPE") {
                                 partContentType = part.getStringOrNull(m) ?: ""
                             }
                             when (useColumnName) {
-                                "_ID" -> {
+                                "_ID"   -> {
                                     partID = part.getInt(m)
                                 }
+
                                 "_DATA" -> {
                                     partData = part.getStringOrNull(m) ?: ""
                                 }
-                                else -> {
+
+                                else    -> {
                                     jsonWriter.name(useColumnName).value(part.getString(m))
                                 }
                             }
@@ -277,7 +320,7 @@ object BackupSMSMMSJSONAction {
     }
 
     private fun getPart(partId: Int, context: Context, contentType: String): String {
-        val partUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val partUri = if (Android.minSDK(Build.VERSION_CODES.Q)) {
             Telephony.Mms.Part.CONTENT_URI.buildUpon().appendPath(partId.toString()).build()
         } else {
             Uri.parse("content://mms/part/$partId")
@@ -290,7 +333,8 @@ object BackupSMSMMSJSONAction {
                     contentType.startsWith("image/") -> {
                         Base64.encodeToString(inputStream.readBytes(), Base64.NO_WRAP)
                     }
-                    else -> {
+
+                    else                             -> {
                         inputStream.readBytes().toString(Charsets.UTF_8)
                     }
                 }
@@ -303,7 +347,7 @@ object BackupSMSMMSJSONAction {
     }
 
     private fun backupAddresses(context: Context, jsonWriter: JsonWriter, id: Long) {
-        val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val uri = if (Android.minSDK(Build.VERSION_CODES.R)) {
             Telephony.Mms.Addr.getAddrUriForMessage(id.toString())
         } else {
             Uri.parse("content://mms/$id/addr")
@@ -315,7 +359,8 @@ object BackupSMSMMSJSONAction {
         )
         jsonWriter.name("ADDRESSES")
         jsonWriter.beginArray()
-        val addresses = context.contentResolver.query(uri, projection, null, null, Telephony.Mms.Addr._ID)
+        val addresses = context.contentResolver
+            .query(uri, projection, null, null, Telephony.Mms.Addr._ID)
         addresses?.use { address ->
             if (address.moveToFirst()) {
                 do {
@@ -323,9 +368,9 @@ object BackupSMSMMSJSONAction {
                     address.columnNames.forEachIndexed { m, columnName ->
                         val useColumnName = when (columnName) {
                             Telephony.Mms.Addr.ADDRESS -> "ADDRESS"
-                            Telephony.Mms.Addr.TYPE -> "TYPE"
+                            Telephony.Mms.Addr.TYPE    -> "TYPE"
                             Telephony.Mms.Addr.CHARSET -> "CHARSET"
-                            else -> "{}"
+                            else                       -> "{}"
                         }
                         if (useColumnName != "{}") {
                             jsonWriter.name(useColumnName).value(address.getString(m))

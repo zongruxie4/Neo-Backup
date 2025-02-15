@@ -25,6 +25,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.machiav3lli.backup.FIELD_IS_SYSTEM
 import com.machiav3lli.backup.FIELD_PACKAGE_NAME
+import com.machiav3lli.backup.utils.extensions.Android
 import java.io.File
 
 @Entity(
@@ -53,7 +54,7 @@ open class PackageInfo(
         packageName = pi.packageName,
         packageLabel = pi.applicationInfo?.loadLabel(context.packageManager).toString(),
         versionName = pi.versionName ?: "",
-        versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pi.longVersionCode.toInt()
+        versionCode = if (Android.minSDK(Build.VERSION_CODES.P)) pi.longVersionCode.toInt()
         else pi.versionCode,
         profileId = try {
             pi.applicationInfo?.dataDir?.let { File(it).parentFile?.name?.toInt() } ?: -1

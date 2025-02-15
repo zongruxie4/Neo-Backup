@@ -27,6 +27,7 @@ import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.utilBoxQ
 import com.machiav3lli.backup.manager.handler.ShellHandler.ShellCommandFailedException
 import com.machiav3lli.backup.manager.tasks.AppActionWork
+import com.machiav3lli.backup.utils.extensions.Android
 import org.apache.commons.io.IOUtils
 import timber.log.Timber
 import java.io.File
@@ -59,7 +60,7 @@ class RestoreSystemAppAction(context: Context, work: AppActionWork?, shell: Shel
                 throw RestoreFailedException("Could extract main apk file to temporary location", e)
             }
             var mountPoint = "/"
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (!Android.minSDK(Build.VERSION_CODES.Q)) {
                 // Android versions prior Android 10 use /system
                 mountPoint = "/system"
             }

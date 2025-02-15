@@ -25,6 +25,7 @@ import android.os.Build
 import android.provider.CallLog
 import android.util.JsonWriter
 import androidx.core.content.PermissionChecker
+import com.machiav3lli.backup.utils.extensions.Android
 import java.io.BufferedWriter
 import java.io.File
 import java.io.OutputStreamWriter
@@ -36,12 +37,19 @@ object BackupCallLogsJSONAction {
             throw RuntimeException("Device does not have Call Logs.")
         }
         if (
-            (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.READ_CALL_LOG) == PermissionChecker.PERMISSION_DENIED) ||
-            (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.WRITE_CALL_LOG) == PermissionChecker.PERMISSION_DENIED)
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.READ_CALL_LOG
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.WRITE_CALL_LOG
+            ) == PermissionChecker.PERMISSION_DENIED)
         ) {
             throw RuntimeException("No permission for Call Logs.")
         }
-        val outputFile = context.contentResolver.openOutputStream(Uri.fromFile(File(filePath)), "wt")
+        val outputFile =
+            context.contentResolver.openOutputStream(Uri.fromFile(File(filePath)), "wt")
         outputFile?.use { outputStream ->
             BufferedWriter(OutputStreamWriter(outputStream)).use { writer ->
                 val jsonWriter = JsonWriter(writer)
@@ -72,52 +80,58 @@ object BackupCallLogsJSONAction {
             CallLog.Calls.TRANSCRIPTION,
             CallLog.Calls.VIA_NUMBER
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Android.minSDK(Build.VERSION_CODES.Q)) {
             projection += CallLog.Calls.BLOCK_REASON
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Android.minSDK(Build.VERSION_CODES.S)) {
             projection += CallLog.Calls.MISSED_REASON
             projection += CallLog.Calls.PRIORITY
             projection += CallLog.Calls.SUBJECT
         }
         jsonWriter.beginArray()
-        val callLogs = context.contentResolver.query(CallLog.Calls.CONTENT_URI, projection, null, null, CallLog.Calls.DATE)
+        val callLogs = context.contentResolver.query(
+            CallLog.Calls.CONTENT_URI,
+            projection,
+            null,
+            null,
+            CallLog.Calls.DATE
+        )
         callLogs?.use { callLog ->
             if (callLog.moveToFirst()) {
                 do {
                     jsonWriter.beginObject()
                     callLog.columnNames.forEachIndexed { m, columnName ->
                         var useColumnName = when (columnName) {
-                            CallLog.Calls.DATE -> "DATE"
-                            CallLog.Calls.DURATION -> "DURATION"
-                            CallLog.Calls.NEW -> "NEW"
-                            CallLog.Calls.NUMBER -> "NUMBER"
-                            CallLog.Calls.TYPE -> "TYPE"
-                            CallLog.Calls.DATA_USAGE -> "DATA_USAGE"
-                            CallLog.Calls.COUNTRY_ISO -> "COUNTRY_ISO"
-                            CallLog.Calls.GEOCODED_LOCATION -> "GEOCODED_LOCATION"
-                            CallLog.Calls.IS_READ -> "IS_READ"
-                            CallLog.Calls.FEATURES -> "FEATURES"
-                            CallLog.Calls.NUMBER_PRESENTATION -> "NUMBER_PRESENTATION"
+                            CallLog.Calls.DATE                         -> "DATE"
+                            CallLog.Calls.DURATION                     -> "DURATION"
+                            CallLog.Calls.NEW                          -> "NEW"
+                            CallLog.Calls.NUMBER                       -> "NUMBER"
+                            CallLog.Calls.TYPE                         -> "TYPE"
+                            CallLog.Calls.DATA_USAGE                   -> "DATA_USAGE"
+                            CallLog.Calls.COUNTRY_ISO                  -> "COUNTRY_ISO"
+                            CallLog.Calls.GEOCODED_LOCATION            -> "GEOCODED_LOCATION"
+                            CallLog.Calls.IS_READ                      -> "IS_READ"
+                            CallLog.Calls.FEATURES                     -> "FEATURES"
+                            CallLog.Calls.NUMBER_PRESENTATION          -> "NUMBER_PRESENTATION"
                             CallLog.Calls.PHONE_ACCOUNT_COMPONENT_NAME -> "PHONE_ACCOUNT_COMPONENT_NAME"
-                            CallLog.Calls.PHONE_ACCOUNT_ID -> "PHONE_ACCOUNT_ID"
-                            CallLog.Calls.POST_DIAL_DIGITS -> "POST_DIAL_DIGITS"
-                            CallLog.Calls.TRANSCRIPTION -> "TRANSCRIPTION"
-                            CallLog.Calls.VIA_NUMBER -> "VIA_NUMBER"
-                            else -> "{}"
+                            CallLog.Calls.PHONE_ACCOUNT_ID             -> "PHONE_ACCOUNT_ID"
+                            CallLog.Calls.POST_DIAL_DIGITS             -> "POST_DIAL_DIGITS"
+                            CallLog.Calls.TRANSCRIPTION                -> "TRANSCRIPTION"
+                            CallLog.Calls.VIA_NUMBER                   -> "VIA_NUMBER"
+                            else                                       -> "{}"
                         }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && useColumnName == "{}") {
+                        if (Android.minSDK(Build.VERSION_CODES.Q) && useColumnName == "{}") {
                             useColumnName = when (columnName) {
                                 CallLog.Calls.BLOCK_REASON -> "BLOCK_REASON"
-                                else -> "{}"
+                                else                       -> "{}"
                             }
                         }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && useColumnName == "{}") {
+                        if (Android.minSDK(Build.VERSION_CODES.S) && useColumnName == "{}") {
                             useColumnName = when (columnName) {
                                 CallLog.Calls.MISSED_REASON -> "MISSED_REASON"
-                                CallLog.Calls.PRIORITY -> "PRIORITY"
-                                CallLog.Calls.SUBJECT -> "SUBJECT"
-                                else -> "{}"
+                                CallLog.Calls.PRIORITY      -> "PRIORITY"
+                                CallLog.Calls.SUBJECT       -> "SUBJECT"
+                                else                        -> "{}"
                             }
                         }
                         if (useColumnName != "{}") {

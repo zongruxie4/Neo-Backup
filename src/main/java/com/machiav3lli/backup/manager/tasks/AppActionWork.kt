@@ -53,6 +53,7 @@ import com.machiav3lli.backup.ui.pages.pref_maxRetriesPerPackage
 import com.machiav3lli.backup.ui.pages.pref_useExpedited
 import com.machiav3lli.backup.ui.pages.pref_useForegroundInJob
 import com.machiav3lli.backup.utils.SystemUtils.numCores
+import com.machiav3lli.backup.utils.extensions.Android
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
@@ -93,7 +94,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
 
             var logMessage =
                 "------------------------------------------------------------ Work: $batchName $packageName"
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (Android.minSDK(Build.VERSION_CODES.S)) {
                 logMessage += " ui=${context.isUiContext}"
             }
             Timber.i(logMessage)
@@ -259,7 +260,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
         return ForegroundInfo(
             this.notificationId + 1,
             notification,
-            if (NeoApp.minSDK(Build.VERSION_CODES.Q)) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            if (Android.minSDK(Build.VERSION_CODES.Q)) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             else 0
         )
     }

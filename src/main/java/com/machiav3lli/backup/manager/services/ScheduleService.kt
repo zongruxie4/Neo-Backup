@@ -43,6 +43,7 @@ import com.machiav3lli.backup.ui.pages.pref_fakeScheduleDups
 import com.machiav3lli.backup.ui.pages.pref_useForegroundInService
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.cancelScheduleAlarm
+import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.scheduleAlarmsOnce
 import com.machiav3lli.backup.utils.scheduleNextAlarm
 import kotlinx.coroutines.CoroutineScope
@@ -97,10 +98,10 @@ open class ScheduleService : Service() {
         traceSchedule {
             var message =
                 "[$scheduleId] %%%%% ############################################################ ScheduleService startId=$startId PID=${Process.myPid()} starting for name='$scheduleName'"
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (Android.minSDK(Build.VERSION_CODES.S)) {
                 message += " ui=$isUiContext"
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Android.minSDK(Build.VERSION_CODES.Q)) {
                 message += " fgsv=$foregroundServiceType"
             }
             message

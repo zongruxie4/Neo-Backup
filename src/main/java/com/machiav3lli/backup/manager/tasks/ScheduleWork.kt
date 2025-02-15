@@ -51,6 +51,7 @@ import com.machiav3lli.backup.utils.FileUtils
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.calcRuntimeDiff
+import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.filterPackages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -84,7 +85,7 @@ class ScheduleWork(
         return ForegroundInfo(
             notification.hashCode(),
             notification,
-            if (NeoApp.minSDK(Build.VERSION_CODES.Q)) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            if (Android.minSDK(Build.VERSION_CODES.Q)) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             else 0
         )
     }

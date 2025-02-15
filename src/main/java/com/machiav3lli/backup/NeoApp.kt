@@ -74,6 +74,7 @@ import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.methodName
 import com.machiav3lli.backup.utils.backupDirConfigured
+import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.isDynamicTheme
 import com.machiav3lli.backup.utils.restartApp
 import com.machiav3lli.backup.utils.scheduleAlarmsOnce
@@ -121,7 +122,7 @@ class NeoApp : Application(), KoinStartup {
     }
 
     override fun onCreate() {
-        if (minSDK(Build.VERSION_CODES.S)) {
+        if (Android.minSDK(Build.VERSION_CODES.S)) {
             StrictMode.setVmPolicy(
                 StrictMode.VmPolicy.Builder()
                     .detectUnsafeIntentLaunch()
@@ -482,10 +483,6 @@ class NeoApp : Application(), KoinStartup {
             } catch (e: Throwable) {
                 null
             }
-        }
-
-        fun minSDK(sdk: Int): Boolean { // TODO Move with others to extensions.Android
-            return Build.VERSION.SDK_INT >= sdk
         }
 
         val isRelease get() = SystemUtils.packageName.endsWith(".backup")

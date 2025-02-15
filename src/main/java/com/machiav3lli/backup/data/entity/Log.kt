@@ -22,6 +22,7 @@ import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.utils.LocalDateTimeSerializer
 import com.machiav3lli.backup.utils.TraceUtils.canonicalName
+import com.machiav3lli.backup.utils.extensions.Android
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import java.io.FileNotFoundException
@@ -45,9 +46,9 @@ open class Log {
 
     constructor(text: String, date: LocalDateTime) {
         this.logDate = date
-        this.deviceName = android.os.Build.DEVICE
-        this.sdkCodename = android.os.Build.VERSION.RELEASE
-        this.cpuArch = android.os.Build.SUPPORTED_ABIS[0]
+        this.deviceName = Android.deviceName
+        this.sdkCodename = Android.name
+        this.cpuArch = Android.mainPlatform
         this.logText = text
     }
 
@@ -109,12 +110,15 @@ open class Log {
                                 this.logDate = LocalDateTime.parse(value)
                                 valid = true
                             }
+
                             "deviceName"  -> {
                                 this.deviceName = value
                             }
+
                             "sdkCodename" -> {
                                 this.sdkCodename = value
                             }
+
                             "cpuArch"     -> {
                                 this.cpuArch = value
                             }
