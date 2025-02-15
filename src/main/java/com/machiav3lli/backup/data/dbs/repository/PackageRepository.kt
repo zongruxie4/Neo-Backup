@@ -1,7 +1,6 @@
 package com.machiav3lli.backup.data.dbs.repository
 
 import android.app.Application
-import com.machiav3lli.backup.NeoApp.Companion.getBackups
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.DB
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
@@ -13,11 +12,19 @@ import com.machiav3lli.backup.manager.handler.ShellCommands
 import com.machiav3lli.backup.manager.handler.toPackageList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.concurrent.ConcurrentHashMap
 
 class PackageRepository(
     private val db: DB,
@@ -25,46 +32,61 @@ class PackageRepository(
 ) {
     private val cc = Dispatchers.IO
     private val jcc = Dispatchers.IO + SupervisorJob()
-
-    fun getPackagesFlow(): Flow<List<Package>> =
-        db.getAppInfoDao().getAllFlow()
-            .map { it.toPackageList(appContext, emptyList(), getBackups()) }
-            .flowOn(cc)
+    val theBackupsMap = ConcurrentHashMap<String, List<Backup>>()
+    val mutex = Mutex()
 
     fun getBackupsFlow(): Flow<Map<String, List<Backup>>> =
-        db.getBackupDao().getAllFlow()
-            .map { it.groupBy(Backup::packageName) }
+        flow {
+            emit(theBackupsMap)
+            delay(1000)
+        }.distinctUntilChanged()
             .flowOn(cc)
 
-    suspend fun getBackups(packageName: String): List<Backup> = withContext(jcc) {
-        db.getBackupDao().get(packageName)
-    }
+    fun getPackagesFlow(): Flow<List<Package>> = combine(
+        db.getAppInfoDao().getAllFlow(),
+        getBackupsFlow().map { it.values.flatten() },
+    ) { appInfos, bkps -> appInfos.toPackageList(appContext) }
+        .flowOn(cc)
 
-    suspend fun updatePackage(packageName: String) {
-        withContext(jcc) {
-            invalidateCacheForPackage(packageName)
-            val new = Package(appContext, packageName)
-            if (!new.isSpecial) {
-                new.refreshFromPackageManager(appContext)
-                db.getAppInfoDao().update(new.packageInfo as AppInfo)
-            }
+    fun getBackupsFlow(packageName: String): Flow<List<Backup>> =
+        flow {
+            emit(theBackupsMap[packageName] ?: emptyList())
+            delay(1000)
+        }.distinctUntilChanged()
+            .flowOn(cc)
+
+    fun getBackups(packageName: String): List<Backup> = theBackupsMap[packageName] ?: emptyList()
+
+    fun getBackups(): List<Backup> = theBackupsMap.values.flatten()
+
+    suspend fun updatePackage(packageName: String) = withContext(jcc) {
+        invalidateCacheForPackage(packageName)
+        val new = Package(appContext, packageName)
+        if (!new.isSpecial) {
+            new.refreshFromPackageManager(appContext)
+            db.getAppInfoDao().update(new.packageInfo as AppInfo)
         }
     }
 
-    fun upsertAppInfo(vararg appInfos: AppInfo) {
+    suspend fun upsertAppInfo(vararg appInfos: AppInfo) = withContext(jcc) {
         db.getAppInfoDao().upsert(*appInfos)
     }
 
-    fun replaceAppInfos(vararg appInfos: AppInfo) {
+    suspend fun replaceAppInfos(vararg appInfos: AppInfo) = withContext(jcc) {
         db.getAppInfoDao().updateList(*appInfos)
     }
 
-    suspend fun updateBackups(packageName: String, backups: List<Backup>) {
-        db.getBackupDao().updateList(packageName, backups)
+    fun updateBackups(packageName: String, backups: List<Backup>) = runBlocking(jcc) {
+        mutex.withLock {
+            theBackupsMap.put(packageName, backups)
+        }
     }
 
-    fun replaceBackups(vararg backups: Backup) {
-        db.getBackupDao().updateList(*backups)
+    fun replaceBackups(vararg backups: Backup) = runBlocking(jcc) {
+        mutex.withLock {
+            theBackupsMap.clear()
+            theBackupsMap.putAll(backups.groupBy { it.packageName })
+        }
     }
 
     suspend fun rewriteBackup(pkg: Package?, backup: Backup, changedBackup: Backup) {
@@ -73,9 +95,28 @@ class PackageRepository(
         }
     }
 
+    fun emptyBackupsTable() = runBlocking(jcc) {
+        mutex.withLock {
+            theBackupsMap.clear()
+        }
+    }
+
     fun deleteAppInfoOf(packageName: String) = db.getAppInfoDao().deleteAllOf(packageName)
 
-    suspend fun deleteBackup(pkg: Package?, backup: Backup, onDismiss: () -> Unit) {
+    fun deleteBackupsOf(packageName: String) = runBlocking(jcc) {
+        mutex.withLock {
+            theBackupsMap.remove(packageName)
+        }
+    }
+
+    fun deleteBackupsNotIn(packageNames: List<String>) = runBlocking(jcc) {
+        mutex.withLock {
+            theBackupsMap.keys.removeAll { it !in packageNames }
+        }
+    }
+
+
+    suspend fun deleteBackup(pkg: Package?, backup: Backup, onDismiss: () -> Unit) =
         withContext(jcc) {
             pkg?.let { pkg ->
                 pkg.deleteBackup(backup)
@@ -85,7 +126,6 @@ class PackageRepository(
                 }
             }
         }
-    }
 
     suspend fun deleteAllBackups(pkg: Package?, onDismiss: () -> Unit) {
         withContext(jcc) {

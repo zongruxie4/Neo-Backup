@@ -39,7 +39,6 @@ import com.machiav3lli.backup.NeoApp.Companion.hitBusy
 import com.machiav3lli.backup.NeoApp.Companion.setBackups
 import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.manager.actions.BaseAppAction.Companion.ignoredPackages
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
@@ -47,6 +46,10 @@ import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.Package.Companion.invalidateBackupCacheForPackage
 import com.machiav3lli.backup.data.entity.StorageFile
+import com.machiav3lli.backup.data.preferences.traceBackupsScan
+import com.machiav3lli.backup.data.preferences.traceBackupsScanAll
+import com.machiav3lli.backup.data.preferences.traceTiming
+import com.machiav3lli.backup.manager.actions.BaseAppAction.Companion.ignoredPackages
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
@@ -54,9 +57,6 @@ import com.machiav3lli.backup.ui.pages.pref_backupSuspendApps
 import com.machiav3lli.backup.ui.pages.pref_createInvalidBackups
 import com.machiav3lli.backup.ui.pages.pref_earlyEmptyBackups
 import com.machiav3lli.backup.ui.pages.pref_lookForEmptyBackups
-import com.machiav3lli.backup.data.preferences.traceBackupsScan
-import com.machiav3lli.backup.data.preferences.traceBackupsScanAll
-import com.machiav3lli.backup.data.preferences.traceTiming
 import com.machiav3lli.backup.utils.FileUtils.ensureBackups
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.TraceUtils
@@ -765,9 +765,7 @@ fun List<Package>.toAppInfoList(): List<AppInfo> =
 fun List<AppInfo>.toPackageList(
     context: Context,
     blockList: List<String> = listOf(),
-    backupsMap: Map<String, List<Backup>> = mapOf(),
 ): MutableList<Package> {
-
     var packageList: MutableList<Package> = mutableListOf()
 
     try {
@@ -816,7 +814,8 @@ fun List<AppInfo>.toPackageList(
     return packageList
 }
 
-fun Context.updateAppTables() {
+suspend fun Context.updateAppTables() {
+    val packagesRepo = get<PackageRepository>(PackageRepository::class.java)
 
     try {
         NeoApp.beginBusy("updateAppTables")
@@ -851,8 +850,8 @@ fun Context.updateAppTables() {
             endNanoTimer("unsuspend")
         }
 
-        val backupsMap = ensureBackups()
-        val backups = backupsMap.values.flatten()
+        ensureBackups()
+        val backupsMap = packagesRepo.getBackups().groupBy { it.packageName }
 
         val specialInfos = SpecialInfo.getSpecialInfos(this)
         val specialNames = specialInfos.map { it.packageName }.toSet()
@@ -889,11 +888,10 @@ fun Context.updateAppTables() {
         try {
             beginNanoTimer("dbUpdate")
 
-            get<PackageRepository>(PackageRepository::class.java)
-                .apply {
-                    replaceBackups(*backups.toTypedArray())
-                    replaceAppInfos(*appInfoList.toTypedArray())
-                }
+            packagesRepo.apply {
+                replaceBackups(*backupsMap.values.flatten().toTypedArray())
+                replaceAppInfos(*appInfoList.toTypedArray())
+            }
         } catch (e: Throwable) {
             logException(e, backTrace = true)
         } finally {

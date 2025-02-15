@@ -46,17 +46,12 @@ import java.io.File
 data class Package private constructor(val packageName: String) {
     lateinit var packageInfo: com.machiav3lli.backup.data.dbs.entity.PackageInfo
     var storageStats: StorageStats? = null
+        private set
 
-    var backupList: List<Backup>
-        get() {
-            val backups = NeoApp.getBackups(packageName)
-            //Timber.w("-------------------> backups $packageName -> ${formatSortedBackups(backups)}")
-            return backups
-        }
-        private set(backups) {
-            //Timber.w("<=================== backups $packageName <- ${formatSortedBackups(backups)}")
-            NeoApp.putBackups(packageName, backups)
-        }
+    val backupList: List<Backup>
+        get() = NeoApp.getBackups(packageName)
+
+    fun setBackupList(backups: List<Backup>) = NeoApp.putBackups(packageName, backups)
 
     // toPackageList
     internal constructor(
@@ -155,7 +150,7 @@ data class Package private constructor(val packageName: String) {
                 TraceUtils.formatSortedBackups(backups)
             } ${TraceUtils.methodName(2)}"
         }
-        backupList = backups
+        setBackupList(backups)
     }
 
     fun updateBackupListAndDatabase(backups: List<Backup>) {
@@ -164,7 +159,7 @@ data class Package private constructor(val packageName: String) {
                 TraceUtils.formatSortedBackups(backups)
             } ${TraceUtils.methodName(2)}"
         }
-        backupList = backups
+        setBackupList(backups)
         NeoApp.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
     }
 
@@ -209,15 +204,15 @@ data class Package private constructor(val packageName: String) {
     }
 
     private fun removeBackupFromList(backup: Backup): List<Backup> {
-        backupList = backupList.filterNot {
+        setBackupList(backupList.filterNot {
             it.packageName == backup.packageName
                     && it.backupDate == backup.backupDate
-        }
+        })
         return backupList
     }
 
     private fun addBackupToList(backup: Backup): List<Backup> {
-        backupList = backupList + backup
+        setBackupList(backupList + backup)
         return backupList
     }
 
@@ -312,8 +307,8 @@ data class Package private constructor(val packageName: String) {
             }
             while (deletableBackups.size > 0) {
                 deletableBackups.removeLastOrNull()?.let { backup ->
-                    backups.remove(backup)
                     _deleteBackup(backup)
+                    backups.remove(backup)
                 }
             }
         } else {
@@ -334,7 +329,7 @@ data class Package private constructor(val packageName: String) {
                 }
             }
         }
-        backupList = backups
+        setBackupList(backups)
         NeoApp.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
     }
 

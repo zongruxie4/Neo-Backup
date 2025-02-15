@@ -64,12 +64,11 @@ object FileUtils {
     //TODO hg42 this may work (after invalidateBackups or on startup)
     //TODO hg42 but should probably check an empty backups map instead or additionally?
     //TODO hg42 the name does not reflect all cases
-    fun ensureBackups(): Map<String, List<Backup>> {
+    fun ensureBackups() {
         runCatching {
             if (backupRoot == null)
                 NeoApp.context.findBackups()
         }
-        return NeoApp.getBackups()
     }
 
     /**

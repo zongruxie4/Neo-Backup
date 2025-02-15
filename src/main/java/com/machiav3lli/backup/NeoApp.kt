@@ -39,7 +39,7 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.machiav3lli.backup.data.dbs.databaseModule
 import com.machiav3lli.backup.data.dbs.entity.Backup
-import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
+import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.data.plugins.Plugin
 import com.machiav3lli.backup.data.preferences.NeoPrefs.Companion.prefsModule
@@ -56,7 +56,6 @@ import com.machiav3lli.backup.manager.handler.ExportsHandler
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler
-import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.services.PackageUnInstalledReceiver
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.activities.viewModelsModule
@@ -75,12 +74,9 @@ import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.methodName
 import com.machiav3lli.backup.utils.backupDirConfigured
-import com.machiav3lli.backup.utils.getInstalledPackageInfosWithPermissions
 import com.machiav3lli.backup.utils.isDynamicTheme
 import com.machiav3lli.backup.utils.restartApp
 import com.machiav3lli.backup.utils.scheduleAlarmsOnce
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -683,82 +679,37 @@ class NeoApp : Application(), KoinStartup {
 
         //------------------------------------------------------------------------------------------ backups
 
-        private var theBackupsMap = mutableMapOf<String, List<Backup>>()
-
-        fun getBackups(): ImmutableMap<String, List<Backup>> {
-            synchronized(theBackupsMap) {
-                return theBackupsMap.toImmutableMap()
-            }
-        }
-
-        fun clearBackups() {
-            synchronized(theBackupsMap) {
-                theBackupsMap.clear()
-            }
-        }
-
         fun setBackups(backupsMap: Map<String, List<Backup>>) {
-            synchronized(theBackupsMap) {
-                backupsMap.forEach { (packageName, backups) ->
-                    theBackupsMap[packageName] = backups
-                }
-                // clear no more existing packages
-                (theBackupsMap.keys - backupsMap.keys).forEach {
-                    theBackupsMap.remove(it)
-                }
+            get<PackageRepository>(PackageRepository::class.java).apply {
+                replaceBackups(*backupsMap.values.flatten().toTypedArray())
             }
         }
 
         fun putBackups(packageName: String, backups: List<Backup>) {
-            synchronized(theBackupsMap) {
-                theBackupsMap.put(packageName, backups)
+            get<PackageRepository>(PackageRepository::class.java).apply {
+                updateBackups(packageName, backups)
             }
         }
 
         fun getBackups(packageName: String): List<Backup> {
-            synchronized(theBackupsMap) {       // could be synchronized for a shorter time
-                return theBackupsMap.getOrPut(packageName) {
-                    if (startup) {
-                        emptyList()
-                    } else {
-                        val backups =
-                            context.findBackups(packageName)  //TODO hg42 may also find glob *packageName* for now
-                        backups[packageName]
-                            ?: emptyList()  // so we need to take the correct package here
-                    }
-                }.drop(0)  // copy
-            }
-        }
-
-        fun removeBackups(packageName: String) {
-            synchronized(theBackupsMap) {
-                theBackupsMap.remove(packageName)
+            get<PackageRepository>(PackageRepository::class.java).apply {
+                return if (startup) emptyList()
+                else getBackups(packageName)
             }
         }
 
         fun emptyBackupsForMissingPackages(packageNames: List<String>) {
-            synchronized(theBackupsMap) {
-                (packageNames - theBackupsMap.keys).forEach {
-                    theBackupsMap[it] = emptyList()
-                }
+            get<PackageRepository>(PackageRepository::class.java).apply {
+                deleteBackupsNotIn(packageNames)
             }
         }
 
         fun emptyBackupsForAllPackages(packageNames: List<String>) {
-            synchronized(theBackupsMap) {
-                packageNames.forEach {
-                    theBackupsMap[it] = emptyList()
+            get<PackageRepository>(PackageRepository::class.java).apply {
+                packageNames.forEach { packageName ->
+                    deleteBackupsOf(packageName)
                 }
             }
-        }
-
-        fun emptyBackupsForAllPackages() {
-            val installedPackages = context.packageManager.getInstalledPackageInfosWithPermissions()
-            val specialInfos =
-                SpecialInfo.getSpecialInfos(context)  //TODO hg42 these probably scan for backups
-            val installedNames =
-                installedPackages.map { it.packageName } + specialInfos.map { it.packageName }
-            emptyBackupsForAllPackages(installedNames)
         }
     }
 }
