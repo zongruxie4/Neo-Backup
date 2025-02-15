@@ -127,6 +127,15 @@ const val EXTRA_PERIODIC = "periodic"
 const val EXTRA_NAME = "name"
 const val EXTRA_STATS = "stats"
 
+const val FIELD_BACKUP_DATE = "backupDate"
+const val FIELD_BLOCKLIST_ID = "blocklistId"
+const val FIELD_BLOCK_LIST = "blockList"
+const val FIELD_CUSTOM_LIST = "customList"
+const val FIELD_ID = "id"
+const val FIELD_IS_SYSTEM = "isSystem"
+const val FIELD_NAME = "name"
+const val FIELD_PACKAGE_NAME = "packageName"
+
 enum class THEME {
     LIGHT,
     DARK,

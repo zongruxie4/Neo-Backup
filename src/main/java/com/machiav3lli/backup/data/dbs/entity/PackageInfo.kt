@@ -21,10 +21,18 @@ import android.content.Context
 import android.os.Build
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.machiav3lli.backup.FIELD_IS_SYSTEM
+import com.machiav3lli.backup.FIELD_PACKAGE_NAME
 import java.io.File
 
-@Entity
+@Entity(
+    indices = [
+        Index(FIELD_PACKAGE_NAME, unique = true),
+        Index(FIELD_IS_SYSTEM),
+    ]
+)
 open class PackageInfo(
     @PrimaryKey
     var packageName: String,
@@ -54,7 +62,8 @@ open class PackageInfo(
         },
         sourceDir = pi.applicationInfo?.sourceDir,
         splitSourceDirs = pi.applicationInfo?.splitSourceDirs ?: arrayOf(),
-        isSystem = (pi.applicationInfo?.flags ?: 0) and android.content.pm.ApplicationInfo.FLAG_SYSTEM == android.content.pm.ApplicationInfo.FLAG_SYSTEM,
+        isSystem = (pi.applicationInfo?.flags
+            ?: 0) and android.content.pm.ApplicationInfo.FLAG_SYSTEM == android.content.pm.ApplicationInfo.FLAG_SYSTEM,
         icon = pi.applicationInfo?.icon ?: -1
     )
 

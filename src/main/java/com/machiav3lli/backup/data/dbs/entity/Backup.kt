@@ -20,8 +20,11 @@ package com.machiav3lli.backup.data.dbs.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
+import androidx.room.Index
 import com.machiav3lli.backup.BACKUP_INSTANCE_PROPERTIES_INDIR
 import com.machiav3lli.backup.BACKUP_INSTANCE_REGEX_PATTERN
+import com.machiav3lli.backup.FIELD_BACKUP_DATE
+import com.machiav3lli.backup.FIELD_PACKAGE_NAME
 import com.machiav3lli.backup.MODE_APK
 import com.machiav3lli.backup.MODE_DATA
 import com.machiav3lli.backup.MODE_DATA_DE
@@ -42,7 +45,13 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.time.LocalDateTime
 
-@Entity(primaryKeys = ["packageName", "backupDate"])
+@Entity(
+    primaryKeys = [FIELD_PACKAGE_NAME, FIELD_BACKUP_DATE],
+    indices = [
+        Index(FIELD_PACKAGE_NAME, FIELD_BACKUP_DATE, unique = true),
+        Index(FIELD_PACKAGE_NAME),
+    ]
+)
 @Serializable
 data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class) constructor(
     var backupVersionCode: Int = 0,
@@ -136,7 +145,7 @@ data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::cla
         else            -> false
     }
 
-    fun toAppInfo() = com.machiav3lli.backup.data.dbs.entity.AppInfo(
+    fun toAppInfo() = AppInfo(
         packageName,
         packageLabel,
         versionName,

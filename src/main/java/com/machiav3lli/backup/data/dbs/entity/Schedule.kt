@@ -19,10 +19,15 @@ package com.machiav3lli.backup.data.dbs.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.RenameColumn
 import androidx.room.migration.AutoMigrationSpec
 import com.machiav3lli.backup.EnabledFilter
+import com.machiav3lli.backup.FIELD_BLOCK_LIST
+import com.machiav3lli.backup.FIELD_CUSTOM_LIST
+import com.machiav3lli.backup.FIELD_ID
+import com.machiav3lli.backup.FIELD_NAME
 import com.machiav3lli.backup.InstalledFilter
 import com.machiav3lli.backup.LatestFilter
 import com.machiav3lli.backup.LaunchableFilter
@@ -32,16 +37,23 @@ import com.machiav3lli.backup.MODE_APK
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.data.entity.SpecialFilter
+import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler
-import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.canonicalName
 import kotlinx.serialization.Serializable
 import java.io.FileNotFoundException
 import java.io.IOException
 
-@Entity
+@Entity(
+    indices = [
+        Index(FIELD_ID, unique = true),
+        Index(FIELD_ID, FIELD_BLOCK_LIST),
+        Index(FIELD_ID, FIELD_CUSTOM_LIST),
+        Index(FIELD_NAME),
+    ]
+)
 @Serializable
 data class Schedule(
     @PrimaryKey(autoGenerate = true)

@@ -50,7 +50,7 @@ import org.koin.dsl.module
         SpecialInfo::class,
         Backup::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 2, to = 4),
@@ -60,6 +60,7 @@ import org.koin.dsl.module
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 9, to = 10),
+        AutoMigration(from = 10, to = 11),
     ]
 )
 @TypeConverters(Converters::class)

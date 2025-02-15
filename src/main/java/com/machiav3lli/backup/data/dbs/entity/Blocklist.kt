@@ -18,9 +18,20 @@
 package com.machiav3lli.backup.data.dbs.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.machiav3lli.backup.FIELD_BLOCKLIST_ID
+import com.machiav3lli.backup.FIELD_ID
+import com.machiav3lli.backup.FIELD_PACKAGE_NAME
 
-@Entity
+@Entity(
+    indices = [
+        Index(FIELD_ID, unique = true),
+        Index(FIELD_BLOCKLIST_ID, FIELD_PACKAGE_NAME),
+        Index(FIELD_BLOCKLIST_ID),
+        Index(FIELD_PACKAGE_NAME),
+    ]
+)
 class Blocklist(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

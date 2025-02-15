@@ -18,9 +18,15 @@
 package com.machiav3lli.backup.data.dbs.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.machiav3lli.backup.FIELD_PACKAGE_NAME
 
-@Entity
+@Entity(
+    indices = [
+        Index(FIELD_PACKAGE_NAME, unique = true)
+    ]
+)
 data class AppExtras(
     @PrimaryKey
     val packageName: String = "",
