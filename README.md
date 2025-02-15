@@ -71,24 +71,6 @@ The communication and each contribution in the project community should follow o
 
 Neo Backup is built with gradle, for that you need the android sdk.
 
-## Licenses <img align="right" src="agplv3.png" width="64" />
-
-Neo Backup is licensed under the [GNU's Affero GPL v3](LICENSE.md).
-
-App's icon is based on an Icon made by [Catalin Fertu](https://www.flaticon.com/authors/catalin-fertu) from [www.flaticon.com](https://www.flaticon.com)
-
-All new icons in 7.0.0 based on CC0 icons found on [SVG Repo](https://www.svgrepo.com). A huge thanks for the project's maintainers.
-
-## Credits
-
-[Jens Stein](https://github.com/jensstein) for his unbelievably valuable work on OAndBackup.
-
-[Nils](https://github.com/Tiefkuehlpizze), [Martin](https://github.com/Smojo) and [DL](https://github.com/dl200010) for their active contribution to the project.
-
-[Oliver Pepperell](https://github.com/opepp) for his contribution to the new anniversary design.
-
-[Helena Zheng](https://helenazhang.com/) & [Tobias Fried](https://tobiasfried.com/) for the great [Phosphor Icons](https://phosphoricons.com/), we gladly use.
-
 ### Languages: [<img align="right" src="https://hosted.weblate.org/widgets/neo-backup/-/287x66-white.png" alt="Translation stats" />](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)
 
 [<img src="https://hosted.weblate.org/widgets/neo-backup/-/multi-auto.svg" alt="Übersetzungsstatus" />](https://hosted.weblate.org/engage/neo-backup/)
@@ -106,6 +88,33 @@ I, myself acknowledge the role of the donations to motivate the work on FOSS pro
 Thanks to [Tuta](https://tuta.com) for the premium account.
 [![Tutanota](tuta_logo.png)](https://tuta.com)
 
-## Authors
+## Credits
 
-Antonios Hazim & Harald Gutsche
+[Jens Stein](https://github.com/jensstein) for his unbelievably valuable work on OAndBackup.
+
+[Harald Gutsche](https://github.com/hg42), [Nils](https://github.com/Tiefkuehlpizze), [Martin](https://github.com/Smojo) and [DL](https://github.com/dl200010) for their long and active contribution to the project.
+
+[Oliver Pepperell](https://github.com/opepp) for his contribution to the new anniversary design.
+
+[Helena Zheng](https://helenazhang.com/) & [Tobias Fried](https://tobiasfried.com/) for the great [Phosphor Icons](https://phosphoricons.com/), we gladly use.
+
+
+## Contributors
+
+<a href="https://github.com/NeoApplications/Neo-Backup/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=NeoApplications/Neo-Backup" />
+</a>
+
+## Licenses <img align="right" src="agplv3.png" width="64" />
+
+Licensed under the [GNU's Affero GPL v3](LICENSE.md).
+
+App's icon is based on an Icon made by [Catalin Fertu](https://www.flaticon.com/authors/catalin-fertu) from [www.flaticon.com](https://www.flaticon.com)
+
+All new icons in 7.0.0 based on CC0 icons found on [SVG Repo](https://www.svgrepo.com). A huge thanks for the project's maintainers.
+
+All new icons in 8.0.0 based on [Phosphor Icons](https://phosphoricons.com/). A huge thanks for the project's maintainers.
+
+Copyright © 2025 [Antonios Hazim](https://github.com/machiav3lli) and [contributors](https://github.com/NeoApplications/Neo-Store/graphs/contributors).
+
+![Star History Chart](https://api.star-history.com/svg?repos=NeoApplications/Neo-Backup&type=Date)
