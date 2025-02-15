@@ -19,15 +19,14 @@ package com.machiav3lli.backup.manager.handler
 
 import android.content.Context
 import com.machiav3lli.backup.LOG_INSTANCE
-import com.machiav3lli.backup.NeoApp.Companion.hitBusy
-import com.machiav3lli.backup.NeoApp.Companion.logsDirectory
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.Log
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.data.entity.StorageFile.Companion.invalidateCache
-import com.machiav3lli.backup.ui.pages.onErrorInfo
 import com.machiav3lli.backup.data.preferences.pref_autoLogExceptions
 import com.machiav3lli.backup.data.preferences.pref_maxLogCount
+import com.machiav3lli.backup.ui.pages.onErrorInfo
 import com.machiav3lli.backup.ui.pages.textLog
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
@@ -67,7 +66,7 @@ class LogsHandler {
                     LOG_INSTANCE,
                     BACKUP_DATE_TIME_FORMATTER.format(date)
                 )
-                logsDirectory?.createFile(logFileName)?.let { logFile ->
+                NeoApp.logsDirectory?.createFile(logFileName)?.let { logFile ->
                     BufferedOutputStream(logFile.outputStream()).use { logOut ->
                         logOut.write(
                             logItem.toSerialized().toByteArray(StandardCharsets.UTF_8)
@@ -84,12 +83,12 @@ class LogsHandler {
         @Throws(IOException::class)
         fun readLogs(): MutableList<Log> {
             val logs = mutableListOf<Log>()
-            logsDirectory?.let { logsDir ->
+            NeoApp.logsDirectory?.let { logsDir ->
                 invalidateCache(logsDir)
                 if (logsDir.isDirectory) {
                     logsDir.listFiles().forEach {
 
-                        hitBusy(1000)
+                        NeoApp.hitBusy(1000)
 
                         if (it.isFile) try {
                             logs.add(Log(it))
@@ -127,7 +126,7 @@ class LogsHandler {
         @Throws(IOException::class)
         fun housekeepingLogs() {
             try {
-                logsDirectory?.let { logsDir ->
+                NeoApp.logsDirectory?.let { logsDir ->
                     invalidateCache(logsDir)
                     if (logsDir.isDirectory) {
                         // must be ISO time format with sane sorted fields yyyy-mm-dd hh:mm:ss
@@ -156,7 +155,7 @@ class LogsHandler {
 
         fun getLogFile(date: LocalDateTime): StorageFile? {
             try {
-                logsDirectory?.let { logsDir ->
+                NeoApp.logsDirectory?.let { logsDir ->
                     invalidateCache(logsDir)
                     val timeStr = BACKUP_DATE_TIME_FORMATTER.format(date)
                     //val logFileName = String.format(  //TODO WECH

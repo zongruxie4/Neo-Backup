@@ -34,9 +34,6 @@ import com.machiav3lli.backup.IGNORED_PERMISSIONS
 import com.machiav3lli.backup.MAIN_FILTER_SYSTEM
 import com.machiav3lli.backup.MAIN_FILTER_USER
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.addInfoLogText
-import com.machiav3lli.backup.NeoApp.Companion.hitBusy
-import com.machiav3lli.backup.NeoApp.Companion.setBackups
 import com.machiav3lli.backup.PROP_NAME
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
@@ -165,7 +162,7 @@ suspend fun scanBackups(
             .replace(ERROR_PREFIX, "")
             .let { relPath ->
                 val message = "? $relPath ($reason)"
-                addInfoLogText(message)
+                NeoApp.addInfoLogText(message)
                 traceBackupsScanAll { message }
             }
     }
@@ -174,7 +171,7 @@ suspend fun scanBackups(
         when (damagedOp) {
             "ren" ->
                 runCatching {
-                    hitBusy()
+                    NeoApp.hitBusy()
                     val newName = "$ERROR_PREFIX${file.name}"
                     file.renameTo(newName)
                     suspicious.getAndIncrement()
@@ -192,7 +189,7 @@ suspend fun scanBackups(
         runCatching {
             file.name?.let { name ->
                 if (name.startsWith(ERROR_PREFIX)) {
-                    hitBusy()
+                    NeoApp.hitBusy()
                     when (damagedOp) {
                         "undo" -> {
                             val newName = name.removePrefix(ERROR_PREFIX)
@@ -243,7 +240,7 @@ suspend fun scanBackups(
         onPropsFile: suspend (StorageFile) -> Unit,
         renamer: (suspend () -> Unit)? = null,
     ) {
-        hitBusy()
+        NeoApp.hitBusy()
 
         try {
             if (file.name == BACKUP_INSTANCE_PROPERTIES_INDIR
@@ -277,8 +274,7 @@ suspend fun scanBackups(
         file: StorageFile,
         collector: FlowCollector<StorageFile>? = null,
     ): Boolean {
-
-        hitBusy()
+        NeoApp.hitBusy()
 
         beginNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}listFiles")
         var list = file.listFiles()
@@ -531,7 +527,7 @@ suspend fun scanBackups(
     if (packageName.isEmpty()) {
         traceBackupsScanPackage { "queue total ----> $total" }
         if (suspicious.get() > 0)
-            addInfoLogText(
+            NeoApp.addInfoLogText(
                 "${
                     when (damagedOp) {
                         "ren"  -> "renamed"
@@ -632,7 +628,7 @@ fun Context.findBackups(
 
             traceBackupsScan { "*** --------------------> findBackups: packages: ${backupsMap.keys.size} backups: ${backupsMap.values.flatten().size}" }
 
-            setBackups(backupsMap)
+            NeoApp.setBackups(backupsMap)
 
             // preset installed packages that don't have backups with empty backups lists
             NeoApp.emptyBackupsForMissingPackages(installedNames)
@@ -687,7 +683,6 @@ fun Context.getPackageInfoList(filter: Int): List<PackageInfo> =
         .toList()
 
 fun Context.getInstalledPackageList(): MutableList<Package> { // only used in ScheduledActionTask
-
     var packageList: MutableList<Package> = mutableListOf()
 
     try {
@@ -699,7 +694,6 @@ fun Context.getInstalledPackageList(): MutableList<Package> { // only used in Sc
             val includeSpecial = specialBackupsEnabled
             val packageInfoList = pm.getInstalledPackageInfosWithPermissions()
             packageList = packageInfoList
-                .filterNotNull()
                 .filterNot { it.packageName.matches(ignoredPackages) }
                 .mapNotNull {
                     try {

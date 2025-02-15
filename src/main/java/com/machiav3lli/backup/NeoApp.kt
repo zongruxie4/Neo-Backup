@@ -484,9 +484,7 @@ class NeoApp : Application(), KoinStartup {
             }
         }
 
-        fun getString(resId: Int) = context.getString(resId)
-
-        fun minSDK(sdk: Int): Boolean {
+        fun minSDK(sdk: Int): Boolean { // TODO Move with others to extensions.Android
             return Build.VERSION.SDK_INT >= sdk
         }
 

@@ -26,7 +26,7 @@ import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.machiav3lli.backup.NeoApp.Companion.backupRoot
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.PREFS_SHARED_PRIVATE
 import com.machiav3lli.backup.R
@@ -129,7 +129,7 @@ fun backupFolderExists(uri: String? = null): Boolean {
             if (StorageFile.fromUri(it).exists())
                 return true
         }
-        if (backupRoot?.exists() ?: false)
+        if (NeoApp.backupRoot?.exists() ?: false)
             return true
     } catch (e: Throwable) {
         logException(e)

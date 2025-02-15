@@ -2,17 +2,8 @@ package com.machiav3lli.backup.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.machiav3lli.backup.NeoApp.Companion.isDebug
-import com.machiav3lli.backup.NeoApp.Companion.isHg42
-import com.machiav3lli.backup.NeoApp.Companion.isNeo
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.pages.BatchPage
-import com.machiav3lli.backup.ui.pages.HomePage
-import com.machiav3lli.backup.ui.pages.SchedulerPage
-import com.machiav3lli.backup.ui.pages.AdvancedPrefsPage
-import com.machiav3lli.backup.ui.pages.ServicePrefsPage
-import com.machiav3lli.backup.ui.pages.ToolsPrefsPage
-import com.machiav3lli.backup.ui.pages.UserPrefsPage
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Bug
@@ -28,6 +19,13 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.SlidersHorizontal
 import com.machiav3lli.backup.ui.compose.icons.phosphor.UserGear
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Wrench
+import com.machiav3lli.backup.ui.pages.AdvancedPrefsPage
+import com.machiav3lli.backup.ui.pages.BatchPage
+import com.machiav3lli.backup.ui.pages.HomePage
+import com.machiav3lli.backup.ui.pages.SchedulerPage
+import com.machiav3lli.backup.ui.pages.ServicePrefsPage
+import com.machiav3lli.backup.ui.pages.ToolsPrefsPage
+import com.machiav3lli.backup.ui.pages.UserPrefsPage
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.RestoreBatchVM
@@ -52,9 +50,9 @@ sealed class NavItem(
         NavItem(
             R.string.home,
             when {
-                isNeo -> Phosphor.Infinity
-                isDebug -> Phosphor.Bug
-                isHg42 -> Phosphor.Detective
+                NeoApp.isNeo -> Phosphor.Infinity
+                NeoApp.isDebug -> Phosphor.Bug
+                NeoApp.isHg42 -> Phosphor.Detective
                 else -> Phosphor.House
             },
             "home",

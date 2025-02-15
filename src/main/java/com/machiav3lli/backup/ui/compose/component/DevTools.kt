@@ -70,10 +70,6 @@ import androidx.compose.ui.window.DialogProperties
 import com.machiav3lli.backup.ERROR_PREFIX
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.beginBusy
-import com.machiav3lli.backup.NeoApp.Companion.endBusy
-import com.machiav3lli.backup.NeoApp.Companion.hitBusy
-import com.machiav3lli.backup.NeoApp.Companion.isDebug
 import com.machiav3lli.backup.PREFS_BACKUP_FILE
 import com.machiav3lli.backup.data.entity.LaunchPref
 import com.machiav3lli.backup.data.entity.Pref
@@ -351,7 +347,7 @@ val devToolsTabs = listOf<Pair<String, @Composable () -> Any>>(
     "term" to { DevTerminalTab() },
     "devsett" to { DevSettingsTab() },
     "plugins" to { DevPluginsTab() },
-) + if (isDebug) listOf<Pair<String, @Composable () -> Any>>(
+) + if (NeoApp.isDebug) listOf<Pair<String, @Composable () -> Any>>(
     //"refreshScreen" to { OABX.context.recreateActivities(); devToolsTab.value = "" },
     //"invBackupLoc" to { FileUtils.invalidateBackupLocation() ; devToolsTab.value = "" },
     //"updateAppTables" to { OABX.context.updateAppTables() ; devToolsTab.value = "" },
@@ -776,10 +772,10 @@ val pref_renameDamagedToERROR = LaunchPref(
     summary = "rename damaged backups from xxx to ${ERROR_PREFIX}xxx (e.g. damaged properties file, properties without directory, directory without properties).\nHint: search recursively for ${ERROR_PREFIX} in a capable file manager"
 ) {
     MainScope().launch(Dispatchers.IO) {
-        beginBusy("renameDamagedToERROR")
+        NeoApp.beginBusy("renameDamagedToERROR")
         NeoApp.context.findBackups(damagedOp = "ren")
         devToolsTab.value = "infolog"
-        endBusy("renameDamagedToERROR")
+        NeoApp.endBusy("renameDamagedToERROR")
     }
 }
 
@@ -788,10 +784,10 @@ val pref_undoDamagedToERROR = LaunchPref(
     summary = "rename all ${ERROR_PREFIX}xxx back to xxx"
 ) {
     MainScope().launch(Dispatchers.IO) {
-        beginBusy("undoDamagedToERROR")
+        NeoApp.beginBusy("undoDamagedToERROR")
         NeoApp.context.findBackups(damagedOp = "undo")
         devToolsTab.value = "infolog"
-        endBusy("undoDamagedToERROR")
+        NeoApp.endBusy("undoDamagedToERROR")
     }
 }
 
@@ -800,10 +796,10 @@ val pref_deleteERROR = LaunchPref(
     summary = "delete all ${ERROR_PREFIX}xxx"
 ) {
     MainScope().launch(Dispatchers.IO) {
-        beginBusy("deleteERROR")
+        NeoApp.beginBusy("deleteERROR")
         NeoApp.context.findBackups(damagedOp = "del")
         devToolsTab.value = "infolog"
-        endBusy("deleteERROR")
+        NeoApp.endBusy("deleteERROR")
     }
 }
 
@@ -846,7 +842,7 @@ val pref_loadPreferences = LaunchPref(
 }
 
 fun testOnStart() {
-    if (isDebug) {
+    if (NeoApp.isDebug) {
         if (1 == 0)
             MainScope().launch(Dispatchers.Main) {
                 trace { "############################################################ testOnStart: waiting..." }
@@ -1209,7 +1205,7 @@ fun DevToolsPreview() {
                 NeoApp.addInfoLogText("line $count")
             }
             SimpleButton("busy") {
-                hitBusy(5000)
+                NeoApp.hitBusy(5000)
             }
         }
         if (expanded.value)

@@ -26,8 +26,6 @@ import android.os.Build
 import com.machiav3lli.backup.EXTRA_NAME
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.isDebug
-import com.machiav3lli.backup.NeoApp.Companion.isHg42
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
@@ -195,7 +193,7 @@ suspend fun scheduleNextAlarm(context: Context, scheduleId: Long, rescheduleBool
                         scheduleRepo.update(schedule)
                         val message = "timeLeft < 1 min -> set schedule $schedule"
                         traceSchedule { "[${schedule.id}] **************************************** $message" }
-                        if (isDebug || isHg42 || pref_autoLogSuspicious.value)
+                        if (NeoApp.isDebug || NeoApp.isHg42 || pref_autoLogSuspicious.value)
                             textLog(
                                 listOf(
                                     message,

@@ -53,10 +53,6 @@ import com.machiav3lli.backup.MODE_ALL
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.MenuAction
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.addInfoLogText
-import com.machiav3lli.backup.NeoApp.Companion.beginBusy
-import com.machiav3lli.backup.NeoApp.Companion.endBusy
-import com.machiav3lli.backup.NeoApp.Companion.isDebug
 import com.machiav3lli.backup.SELECTIONS_FOLDER_NAME
 import com.machiav3lli.backup.batchModes
 import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
@@ -472,13 +468,13 @@ fun launchPackagesAction(
     menuScope.launch(menuPool) {
         val name = "menu.$action"
         try {
-            beginBusy(name)
+            NeoApp.beginBusy(name)
             todo()
         } catch (e: Throwable) {
             unexpectedException(e)
         } finally {
-            val time = endBusy(name)
-            addInfoLogText("$name: ${"%.3f".format(time / 1E9)} sec")
+            val time = NeoApp.endBusy(name)
+            NeoApp.addInfoLogText("$name: ${"%.3f".format(time / 1E9)} sec")
         }
     }
 }
@@ -669,7 +665,7 @@ fun MainPackageContextMenu(
         onDismissRequest = { expanded.value = false }
     ) {
 
-        if (isDebug) {
+        if (NeoApp.isDebug) {
             val number = remember { mutableIntStateOf(0) }
             DropdownMenuItem(
                 text = { Text("test = ${number.intValue}") },

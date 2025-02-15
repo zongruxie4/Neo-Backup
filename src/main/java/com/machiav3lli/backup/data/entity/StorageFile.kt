@@ -206,9 +206,47 @@ open class StorageFile {
                 field = retrieveDocumentInfo()
             return field
         }
-        private set(value) {
-            field = value
-        }
+
+    constructor(
+        parent: StorageFile?,
+        uri: Uri?,
+        name: String? = null,
+        allowShadowing: Boolean = false, // mandatory usage of SAF is less used (e.g. for sharing)
+    ) {
+        initializeFromUri(parent, uri, name, allowShadowing)
+    }
+
+    constructor(file: RootFile) {
+        this.file = file
+    }
+
+    constructor(file: File) {
+        this.file = RootFile(file)
+    }
+
+    constructor(parent: StorageFile, file: RootFile) {
+        this.parent = parent
+        this.file = file
+    }
+
+    constructor(parentFile: RootFile, subPath: String) {
+        this.parent = StorageFile(parentFile)
+        this.file = RootFile(parentFile, subPath)
+    }
+
+    constructor(parentFile: File, subPath: String) {
+        this.parent = StorageFile(parentFile)
+        this.file = RootFile(parentFile, subPath)
+    }
+
+    //constructor(parent: StorageFile, subPath: String) {
+    //    this.parent = parent
+    //    parent.file?.let {
+    //        file = RootFile(parent.file, subPath)
+    //    } ?: run {
+    //        initializeFromUri(parent, Uri.withAppendedPath(parent.uri, subPath))
+    //    }
+    //}
 
     private fun retrieveDocumentInfo(cursor: Cursor): DocumentInfo {
         val id = getCursorString(
@@ -326,47 +364,6 @@ open class StorageFile {
         }
         cacheSetUri(uri.toString(), this)
     }
-
-    constructor(
-        parent: StorageFile?,
-        uri: Uri?,
-        name: String? = null,
-        allowShadowing: Boolean = true, // mandatory usage of SAF is less used (e.g. for sharing)
-    ) {
-        initializeFromUri(parent, uri, name, allowShadowing)
-    }
-
-    constructor(file: RootFile) {
-        this.file = file
-    }
-
-    constructor(file: File) {
-        this.file = RootFile(file)
-    }
-
-    constructor(parent: StorageFile, file: RootFile) {
-        this.parent = parent
-        this.file = file
-    }
-
-    constructor(parentFile: RootFile, subPath: String) {
-        this.parent = StorageFile(parentFile)
-        this.file = RootFile(parentFile, subPath)
-    }
-
-    constructor(parentFile: File, subPath: String) {
-        this.parent = StorageFile(parentFile)
-        this.file = RootFile(parentFile, subPath)
-    }
-
-    //constructor(parent: StorageFile, subPath: String) {
-    //    this.parent = parent
-    //    parent.file?.let {
-    //        file = RootFile(parent.file, subPath)
-    //    } ?: run {
-    //        initializeFromUri(parent, Uri.withAppendedPath(parent.uri, subPath))
-    //    }
-    //}
 
     var name: String? = null
         get() {

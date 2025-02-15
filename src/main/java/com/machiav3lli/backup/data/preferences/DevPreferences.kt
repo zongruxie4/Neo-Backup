@@ -1,7 +1,6 @@
 package com.machiav3lli.backup.data.preferences
 
-import com.machiav3lli.backup.NeoApp.Companion.isDebug
-import com.machiav3lli.backup.NeoApp.Companion.isHg42
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.BooleanPref
 import com.machiav3lli.backup.data.entity.IntPref
@@ -76,7 +75,7 @@ val pref_autoLogUnInstallBroadcast = BooleanPref(
 val pref_trace = BooleanPref(
     key = "dev-trace.trace",
     summary = "global switch for all traceXXX options",
-    defaultValue = isDebug || isHg42
+    defaultValue = NeoApp.isDebug || NeoApp.isHg42
 )
 
 val traceSection = TraceUtils.TracePrefBold(

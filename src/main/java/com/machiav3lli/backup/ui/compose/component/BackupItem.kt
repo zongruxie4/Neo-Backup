@@ -31,7 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.NeoApp.Companion.backupRoot
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.entity.PackageInfo
@@ -310,7 +310,7 @@ fun BackupPreview(item: (@Composable (item: Backup) -> Unit) = { BackupItem(it) 
     var note by remember { mutableStateOf("a very very very very very very very very long note text and even longer") }
 
     val backupRootLocal = File("/tmp", "backup")
-    backupRoot = StorageFile(backupRootLocal)
+    NeoApp.backupRoot = StorageFile(backupRootLocal)
 
     val backup = Backup(
         base = PackageInfo(
@@ -346,7 +346,7 @@ fun BackupPreview(item: (@Composable (item: Backup) -> Unit) = { BackupItem(it) 
         FlowRow {
             ActionButton("none") {
                 note = ""
-                backup.dir = backupRoot
+                backup.dir = NeoApp.backupRoot
             }
             ActionButton("short") {
                 note = "note text"

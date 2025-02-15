@@ -27,7 +27,6 @@ import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.beginLogSection
 import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.AppExtras
@@ -287,7 +286,7 @@ class ScheduleWork(
     private fun beginSchedule(name: String, details: String = ""): Boolean {
         return if (NeoApp.runningSchedules[scheduleId] != true) {
             NeoApp.runningSchedules[scheduleId] = true
-            beginLogSection("schedule $name")
+            NeoApp.beginLogSection("schedule $name")
             true
         } else {
             val message =

@@ -28,7 +28,6 @@ import androidx.room.migration.AutoMigrationSpec
 import com.machiav3lli.backup.MAIN_DB_NAME
 import com.machiav3lli.backup.data.dbs.dao.AppExtrasDao
 import com.machiav3lli.backup.data.dbs.dao.AppInfoDao
-import com.machiav3lli.backup.data.dbs.dao.BackupDao
 import com.machiav3lli.backup.data.dbs.dao.BlocklistDao
 import com.machiav3lli.backup.data.dbs.dao.ScheduleDao
 import com.machiav3lli.backup.data.dbs.dao.SpecialInfoDao
@@ -68,7 +67,6 @@ abstract class DB : RoomDatabase() {
     abstract fun getScheduleDao(): ScheduleDao
     abstract fun getBlocklistDao(): BlocklistDao
     abstract fun getAppExtrasDao(): AppExtrasDao
-    abstract fun getBackupDao(): BackupDao
     abstract fun getAppInfoDao(): AppInfoDao
     abstract fun getSpecialInfoDao(): SpecialInfoDao
 
@@ -110,7 +108,6 @@ val databaseModule = module {
     single { get<DB>().getScheduleDao() }
     single { get<DB>().getBlocklistDao() }
     single { get<DB>().getAppExtrasDao() }
-    single { get<DB>().getBackupDao() }
     single { get<DB>().getAppInfoDao() }
     single { get<DB>().getSpecialInfoDao() }
 }

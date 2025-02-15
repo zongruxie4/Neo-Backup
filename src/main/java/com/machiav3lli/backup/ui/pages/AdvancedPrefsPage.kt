@@ -28,10 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.busyTick
-import com.machiav3lli.backup.NeoApp.Companion.isDebug
-import com.machiav3lli.backup.NeoApp.Companion.isHg42
-import com.machiav3lli.backup.NeoApp.Companion.isRelease
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.BooleanPref
 import com.machiav3lli.backup.data.entity.IntPref
@@ -40,15 +36,18 @@ import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.data.entity.PrefUI
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.data.entity.StringPref
+import com.machiav3lli.backup.data.preferences.NeoPrefs
+import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.findSuCommand
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.isLikeRoot
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.suCommand
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.validateSuCommand
-import com.machiav3lli.backup.data.preferences.NeoPrefs
-import com.machiav3lli.backup.data.preferences.traceDebug
+import com.machiav3lli.backup.ui.compose.component.BasePreference
+import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.PrefsExpandableGroupHeader
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.ui.compose.component.PrefsGroupCollapsed
+import com.machiav3lli.backup.ui.compose.component.TextInput
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
@@ -56,10 +55,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ShieldStar
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
-import com.machiav3lli.backup.ui.compose.component.BasePreference
-import com.machiav3lli.backup.ui.compose.component.TextInput
 import com.machiav3lli.backup.ui.compose.mix
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -140,12 +136,12 @@ fun AdvancedPrefsPage() {
 }
 
 
-val debug = if (isDebug)
+val debug = if (NeoApp.isDebug)
     "dev"
 else
     "debug"
 
-val hg42 = if (isHg42)
+val hg42 = if (NeoApp.isHg42)
     "dev"
 else
     "hg42"
@@ -486,14 +482,14 @@ val pref_versionOpacity = IntPref(
     key = "dev-alt.versionOpacity",
     summary = "opacity of version [percent]",
     entries = ((0..9 step 1) + (10..100 step 5)).toList(),
-    defaultValue = if (isRelease) 1 else 75
+    defaultValue = if (NeoApp.isRelease) 1 else 75
     // invisible but can be seen with image processing
 )
 
 val pref_busyHitTime = IntPref(
     key = "dev-alt.busyHitTime",
     summary = "time being busy after hitting the watchdog (ms)",
-    entries = (busyTick..4000 step busyTick).toList(),
+    entries = (NeoApp.busyTick..4000 step NeoApp.busyTick).toList(),
     defaultValue = 2000
 )
 

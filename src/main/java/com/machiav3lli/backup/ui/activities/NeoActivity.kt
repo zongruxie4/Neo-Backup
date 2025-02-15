@@ -49,8 +49,6 @@ import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.addInfoLogText
-import com.machiav3lli.backup.NeoApp.Companion.startup
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.RESCUE_NAV
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
@@ -237,7 +235,7 @@ class NeoActivity : BaseActivity() {
                             traceBold { "******************** freshStart && Main ********************" }
                             mScope.launch(Dispatchers.IO) {
                                 runCatching { findBackups() }
-                                startup = false     // ensure backups are no more reported as empty
+                                NeoApp.startup = false // ensure backups no more reported as empty
                                 runCatching { updateAppTables() }
                                 //TODO hg42 val time = OABX.endBusy(OABX.startupMsg)
                                 //TODO hg42 addInfoLogText("startup: ${"%.3f".format(time / 1E9)} sec")
@@ -373,7 +371,7 @@ class NeoActivity : BaseActivity() {
                     }
 
                     else                         -> {
-                        addInfoLogText("Main: command '$command'")
+                        NeoApp.addInfoLogText("Main: command '$command'")
                     }
                 }
             }

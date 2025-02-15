@@ -19,8 +19,6 @@ package com.machiav3lli.backup.utils
 
 import android.content.Context
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.backupRoot
-import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.manager.handler.LogsHandler
@@ -66,7 +64,7 @@ object FileUtils {
     //TODO hg42 the name does not reflect all cases
     fun ensureBackups() {
         runCatching {
-            if (backupRoot == null)
+            if (NeoApp.backupRoot == null)
                 NeoApp.context.findBackups()
         }
     }
@@ -75,10 +73,10 @@ object FileUtils {
      * Invalidates the cached value for the backup location URI so that the next call to
      * `getBackupDir` will set it again.
      */
-    fun invalidateBackupLocation() {
+    suspend fun invalidateBackupLocation() {
         Package.invalidateBackupCacheForPackage()
         SpecialInfo.clearCache()
-        backupRoot = null // after clearing caches, because they probably need the location
+        NeoApp.backupRoot = null // after clearing caches, because they probably need the location
         try {
             // updateAppTables does ensureBackups, but make intention clear here
             NeoApp.context.findBackups()

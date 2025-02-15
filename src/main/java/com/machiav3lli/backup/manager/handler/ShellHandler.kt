@@ -24,8 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.NeoApp.Companion.addErrorCommand
-import com.machiav3lli.backup.NeoApp.Companion.isDebug
 import com.machiav3lli.backup.data.plugins.InternalShellScriptPlugin
 import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
@@ -185,7 +183,7 @@ class ShellHandler {
     }
 
     init {
-        Shell.enableVerboseLogging = isDebug
+        Shell.enableVerboseLogging = NeoApp.isDebug
         initPrivilegedShell()
 
         runCatching {
@@ -931,12 +929,12 @@ class ShellHandler {
                 result = Shell.cmd(command).to(stdout, stderr).exec()
                 Timber.d("Command(s) $command ended with ${result.code}")
                 if (!result.isSuccess) {
-                    addErrorCommand(command)
+                    NeoApp.addErrorCommand(command)
                     if (throwFail)
                         throw ShellCommandFailedException(result, command)
                 }
             } catch (e: Throwable) {
-                addErrorCommand(command)
+                NeoApp.addErrorCommand(command)
                 if (throwFail)
                     throw ShellCommandFailedException(result, command = command, cause = e)
             }
@@ -980,7 +978,7 @@ class ShellHandler {
                     val code = process.exitValue()
 
                     if (code != 0)
-                        addErrorCommand(command)
+                        NeoApp.addErrorCommand(command)
 
                     (code to err)
                 }.getOrElse {
@@ -1023,7 +1021,7 @@ class ShellHandler {
                         process.destroyForcibly()
                     val code = process.exitValue()
                     if (code != 0)
-                        addErrorCommand(command)
+                        NeoApp.addErrorCommand(command)
 
                     (code to err)
                 }.getOrElse {
