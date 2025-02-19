@@ -98,7 +98,6 @@
     <!--filebrowser_createDirectoryError: an error occured while trying to create the directory. format: string + " " + directory name-->
     <string name="apptype_special">Sauvegarde spéciale</string>
     <string name="sched_add">Ajouter une sauvegarde planifiée</string>
-    <string name="sort_and_filter">Trier et filtrer</string>
     <string name="enable_encryption_message">Ce n\'est pas sûr de garder vos données sur votre appareil non chiffrées. Pour la sécurité de vos données, activez le chiffrement et définissez un mot de passe.</string>
     <string name="enable_encryption_title">Chiffrement des données</string>
     <string name="help_license">Licence</string>
@@ -341,7 +340,6 @@
     <string name="batch">Par lots</string>
     <string name="sortAppSize">Taille de l\'app</string>
     <string name="sortBackupSize">Taille de la sauvegarde</string>
-    <string name="sortAppDataSize">Taille des données de l\'app</string>
     <string name="prefs_installerpackagename">Le nom du paquet d\'installation :</string>
     <string name="prefs_sessionIinstaller_summary">Utiliser installateur de session plutôt que la version basique. Plus lent mais évite certains problèmes avec Android 13 et plus</string>
     <string name="prefs_sessionIinstaller">Utiliser l\'installateur de session</string>

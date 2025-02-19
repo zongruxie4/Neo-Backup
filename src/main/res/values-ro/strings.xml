@@ -66,7 +66,6 @@
     <string name="sortPackageName">Numele pachetelor</string>
     <string name="sortDataSize">Dimensiunea datelor</string>
     <string name="other_filters_options">Filtre speciale:</string>
-    <string name="sort_and_filter">Sortează și filtrează</string>
     <string name="help_license">Licență</string>
     <string name="help_group_telegram">Grupul nostru pe Telegram</string>
     <string name="help_group_matrix">Grupul nostru pe Matrix</string>
@@ -261,7 +260,6 @@
     <string name="add_tag">Adaugă un tag nou</string>
     <string name="edit_note">Editează nota</string>
     <string name="delete">Șterge</string>
-    <string name="sortAppDataSize">Dimensiunea aplicațiilor și datelor</string>
     <string name="prefs_installerpackagename">Numele pachetului installerului:</string>
     <string name="prefs_sessionIinstaller">Folosește installerul sesiunii</string>
     <string name="prefs_sessionIinstaller_summary">Folosește installerul sesiunii în locul installerului de bază. Mai lent, însă evită problemele cu Android 13+</string>

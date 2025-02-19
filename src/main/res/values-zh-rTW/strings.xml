@@ -129,7 +129,6 @@
     <string name="prefs_deviceprotecteddata">備份受裝置保護的資料</string>
     <string name="welcome_to_oabx">歡迎使用 OABX！</string>
     <string name="storage_access">儲存空間存取</string>
-    <string name="sort_and_filter"><![CDATA[Sort & Filter]]></string>
     <string name="enable_encryption_message">將資料放在裝置上而不加密不安全。為了資料安全，請啟用加密並設定密碼。</string>
     <string name="enable_encryption_title">資料加密</string>
     <string name="help_legend">圖例：</string>
@@ -317,7 +316,6 @@
     <string name="enabled">已啟用</string>
     <string name="prefs_mediadata_rst_summary">還原應用程式位於外部儲存空間的媒體檔案（例如：/storage/emulated/0/Android/media/）</string>
     <string name="dialog_export_schedules">匯出我的排程</string>
-    <string name="sortAppDataSize"><![CDATA[App \& data size]]></string>
     <string name="sortDesc">遞減</string>
     <string name="prefs_secondary_6">石板灰</string>
     <string name="prefs_accent_5">蕁麻綠</string>

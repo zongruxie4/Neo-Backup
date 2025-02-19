@@ -238,7 +238,6 @@
     <string name="prefs_schedulesexportimport">Izvezi/uvezi zakazivanja</string>
     <string name="logs_text_empty">Nema ništa za prikazati!</string>
     <string name="no_file_manager_message">Nema upravitelja datoteka za upravljanje SAF-om. Možda ste onemogućili ugrađeni upravitelj datoteka. Molimo da ga vratite ili omogućite.</string>
-    <string name="sortAppDataSize">"Veličina aplikacije  podataka"</string>
     <string name="help_group_matrix">Naša Grupa na Matrixu</string>
     <string name="prefs_theme_dynamic">Dinamična tema</string>
     <string name="sched_imported">Zakazivanje uspješno uvezeno</string>
@@ -391,7 +390,6 @@
     <string name="prefs_tools_short">Alati</string>
     <string name="prefs_secondary_5">Flamingo Roza</string>
     <string name="radio_launchable">Aplikacije Koje se Mogu Pokrenuti</string>
-    <string name="sort_and_filter">Poredaj i Filtriraj</string>
     <string name="grant_usage_access_title">Dozvoli Pristup Korištenja</string>
     <string name="error_updating_schedule_mode">Greška pri ažuriranju %1$s rasporeda %2$d</string>
     <string name="prefs_theme_dynamic_dark">Tamna sa dinamičnim bojama</string>

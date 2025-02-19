@@ -62,7 +62,6 @@
 \n• Các bản sao lưu có thể được lên lịch không giới hạn số lượng lịch trình riêng lẻ và có khả năng tạo các danh sách tuỳ chỉnh từ danh sách ứng dụng đã cài đặt.</string>
     <string name="welcome_to_oabx">Chào mừng đến Neo Backup!</string>
     <string name="storage_access">Quyền truy cập bộ nhớ</string>
-    <string name="sort_and_filter">Sắp xếp &amp; Lọc</string>
     <string name="enable_encryption_message">Việc giữ cho dữ liệu của bạn trên thiết bị không được mã hoá là không an toàn. Vì sự an toàn dữ liệu của bạn, hãy bật mã hoá và đặt một mật khẩu.</string>
     <string name="enable_encryption_title">Mã hoá dữ liệu</string>
     <string name="help_appTypeHint">* Biểu tượng loại ứng dụng sẽ là xám nếu ứng dụng bị gỡ cài đặt và xám đậm nếu ứng dụng bị tắt.</string>
@@ -325,7 +324,6 @@
     <string name="root_is_mandatory">Bởi vì các ứng dụng bị cô lập với nhau, quyền superuser là bắt buộc để có thể sao lưu và khôi phục dữ liệu của chúng.</string>
     <string name="see_faq">Hãy xem Câu hỏi thường gặp!</string>
     <string name="sortAppSize">Kích cỡ ứng dụng</string>
-    <string name="sortAppDataSize">Kích cỡ dữ liệu ứng dụng</string>
     <string name="sortBackupSize">Kích cỡ bản sao lưu</string>
     <string name="add_tag">Thêm thẻ mới</string>
     <string name="edit_note">Sửa ghi chú</string>

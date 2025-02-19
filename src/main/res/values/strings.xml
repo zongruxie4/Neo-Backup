@@ -253,7 +253,6 @@
     <string name="sortPackageName">Package Name</string>
     <string name="sortAppSize">App size</string>
     <string name="sortDataSize">Data size</string>
-    <string name="sortAppDataSize"><![CDATA[App \& data size]]></string>
     <string name="sortBackupSize">Backup size</string>
     <string name="app_s_icon">App\'s icon</string>
     <string name="bothBackedUp">APK and data</string>
@@ -300,7 +299,6 @@
     <string name="help_appTypeHint">* App type\'s icon would be gray if the app is uninstalled and dark gray if the app is disabled.</string>
     <string name="enable_encryption_title">Data Encryption</string>
     <string name="enable_encryption_message">It\'s not safe to keep your data on your device not encrypted. For the safety of your data, enable encryption and set a password.</string>
-    <string name="sort_and_filter"><![CDATA[Sort & Filter]]></string>
     <string name="storage_access">Storage Access</string>
     <string name="welcome_to_oabx">Welcome to Neo Backup!</string>
     <string name="intro_welcome_message"> Neo Backup (formerly OAndBackupX) is a fork of the famous OAndBackup with the aim to bring OAndBackup to 202X and part of Neo Applications suite. For now the app is already fully rewritten, coming up would be making it robust and adding some lengthily planned features which could ease the backup/restore workflow with any device.
@@ -454,4 +452,6 @@
     <string name="black_medium_contrast">Black (medium contrast)</string>
     <string name="black_high_contrast">Black (high contrast)</string>
     <string name="about_build_FORMAT">%s (Build %s)</string>
+    <string name="sort_filter">Sort &amp; Filter</string>
+    <string name="sort_appdata_size">App &amp; data size</string>
 </resources>

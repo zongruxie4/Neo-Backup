@@ -180,7 +180,7 @@ data class ChipItem(
         )
         val AppDataSize = ChipItem(
             Sort.APPDATA_SIZE.ordinal,
-            R.string.sortAppDataSize,
+            R.string.sort_appdata_size,
             Phosphor.FloppyDisk
         )
         val BackupSize = ChipItem(

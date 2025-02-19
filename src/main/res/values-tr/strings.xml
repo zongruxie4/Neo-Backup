@@ -221,7 +221,6 @@
     <string name="sortPackageName">Paket Adı</string>
     <string name="sortAppSize">Uygulama boyutu</string>
     <string name="sortDataSize">Veri boyutu</string>
-    <string name="sortAppDataSize"><![CDATA[Uygulama & veri boyutu]]></string>
     <string name="sortBackupSize">Yedekleme boyutu</string>
     <string name="app_s_icon">Uygulamanın simgesi</string>
     <string name="bothBackedUp">APK ve veri</string>
@@ -267,7 +266,6 @@
     <string name="help_appTypeHint">* Uygulama türünün ikonu uygulama kaldırıldıysa gri, devre dışı bırakıldıysa koyu gri olur.</string>
     <string name="enable_encryption_title">Veri Şifreleme</string>
     <string name="enable_encryption_message">Verilerinizi şifrelemeden cihazınızda tutmak güvenli değildir. Verilerinizin güvenliği için şifrelemeyi etkinleştirin ve bir parola belirleyin.</string>
-    <string name="sort_and_filter"><![CDATA[Sırala ve Filtrele]]></string>
     <string name="storage_access">Depolama Erişimi</string>
     <string name="welcome_to_oabx">Neo Backup\'a Hoş Geldiniz!</string>
     <string name="intro_welcome_message"> Neo Backup (eski adıyla OAndBackupX), ünlü OAndBackup\'ın bir çatalıdır ve OAndBackup\'ı 202X\'e taşımayı ve Neo Applications paketi içinde yer almayı amaçlar. Şu an için uygulama tamamen yeniden yazılmış olup, robust hale getirilmesi ve yedekleme/geri yükleme iş akışını herhangi bir cihazda kolaylaştıracak uzun süredir planlanan bazı özelliklerin eklenmesi hedeflenmektedir.

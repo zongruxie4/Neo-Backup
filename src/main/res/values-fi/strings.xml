@@ -168,7 +168,6 @@
     <string name="help_appTypeHint">* Sovellustyypin kuvake on harmaa, jos sovellus ei ole asennettuna ja tummanharmaa, jos se on poistettu käytöstä.</string>
     <string name="enable_encryption_title">Datan salaus</string>
     <string name="enable_encryption_message">Salaamattoman tiedon pitäminen laitteella ei ole turvallista. Ota salaus käyttöön ja aseta salasana.</string>
-    <string name="sort_and_filter">Lajittele &amp; suodata</string>
     <string name="storage_access">Tallennustilan käyttö</string>
     <string name="welcome_to_oabx">Tervetuloa Neo Backupiin!</string>
     <string name="delete_all_backups">Poista kaikki varmuuskopiot</string>
@@ -328,7 +327,6 @@
 \n • Järjestelmäsovellusten palauttaminen pitäisi olla mahdollista ilman uudelleenkäynnistystä.
 \n • Varmuuskopiot voidaan ajastaa rajoittamattomin ajastuksin ja mukautettavien varmuuskopiointilistoin.</string>
     <string name="sortAppSize">Sovelluksen koko</string>
-    <string name="sortAppDataSize">Sovelluksen ja datan koko</string>
     <string name="sortBackupSize">Varmuuskopion koko</string>
     <string name="prefs_user_short">Käyttäjä</string>
     <string name="prefs_service_short">Palvelu</string>

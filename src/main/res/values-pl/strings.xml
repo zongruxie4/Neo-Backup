@@ -178,7 +178,6 @@
     <string name="intro_permission_storage">Aplikacja korzysta z uprawnień do odczytu/zapisu pamięci masowej, aby uzyskać dostęp do zewnętrznej pamięci masowej i zapewnić możliwość tworzenia kopii zapasowych danych zewnętrznych/obb innych aplikacji.</string>
     <string name="welcome_to_oabx">Witamy w Neo Backup!</string>
     <string name="storage_access">Dostęp do pamięci</string>
-    <string name="sort_and_filter">Sortowanie i filtrowanie</string>
     <string name="enable_encryption_message">Przechowywanie danych na urządzeniu nie jest bezpieczne. Dla bezpieczeństwa włącz szyfrowanie i ustaw hasło.</string>
     <string name="enable_encryption_title">Szyfrowanie danych</string>
     <string name="cache_size">Rozmiar pamięci podręcznej:</string>
@@ -345,7 +344,6 @@
     <string name="prefs_deviceprotecteddata_summary">Tworzenie kopii zapasowych danych umieszczonych w data/user_de</string>
     <string name="prefs_dev_settings">Ustawienia programisty</string>
     <string name="spec_calllogsjson">Logi połączeń JSON</string>
-    <string name="sortAppDataSize">Rozmiar danych aplikacji</string>
     <string name="prefs_secondary_0">Arktyczny Cyjan</string>
     <string name="prefs_secondary_2">Limonka</string>
     <string name="prefs_secondary_3">Tygrysi Bursztyn</string>

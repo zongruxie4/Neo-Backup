@@ -104,7 +104,6 @@
     <string name="help_group_telegram">Mūsų Telegram grupė</string>
     <string name="help_faq">Dažniausiai užduodami klausimai</string>
     <string name="enable_encryption_title">Duomenų šifravimas</string>
-    <string name="sort_and_filter">Rikiuoti ir filtruoti</string>
     <string name="storage_access">Prieiga prie saugyklos</string>
     <string name="welcome_to_oabx">Sveiki atvykę į Neo Backup!</string>
     <string name="delete_all_backups">Ištrinti visas atsargines kopijas</string>
@@ -301,7 +300,6 @@
     <string name="error_pmDataIncompleteException_dataRestoreFailed">Programėlės duomenys nebuvo atkurti.</string>
     <string name="prefs_compression_level_summary">Mažesnė reikšmė glaudina greičiau, bet padaro failus didesniais. Didesnė vertė suglaudina geriau, bet tai užima daugiau laiko.</string>
     <string name="sortAppSize">Programėlės dydis</string>
-    <string name="sortAppDataSize">Programėlės duomenų dydis</string>
     <string name="sortBackupSize">Atsarginės kopijos dydis</string>
     <string name="smsmms_permission_title">SMS / MMS leidimai</string>
     <string name="prefs_installerpackagename">Diegiklio paketo pavadinimas:</string>

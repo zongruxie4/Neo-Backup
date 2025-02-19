@@ -221,7 +221,6 @@
     <string name="sortLabel">Štítek</string>
     <string name="sortAppSize">Velikost aplikace</string>
     <string name="sortDataSize">Velikost dat</string>
-    <string name="sortAppDataSize"><![CDATA[Velikost aplikace a dat]]></string>
     <string name="sortBackupSize">Velikost zálohy</string>
     <string name="app_s_icon">Ikona aplikace</string>
     <string name="bothBackedUp">APK a data</string>
@@ -241,7 +240,6 @@
     <string name="help_faq">Často kladené dotazy</string>
     <string name="help_appTypeHint">* Ikona typu aplikace bude šedá, pokud je aplikace odinstalována, a tmavě šedá, pokud je aplikace zakázána.</string>
     <string name="enable_encryption_title">Šifrování dat</string>
-    <string name="sort_and_filter"><![CDATA[Řazení a filtr]]></string>
     <string name="storage_access">Přístup k úložišti</string>
     <string name="welcome_to_oabx">Vítejte v Neo Backup!</string>
     <string name="intro_permission_storage">Aplikace využívá oprávnění ke čtení/zápisu do úložiště, aby mohla přistupovat k externímu úložišti a poskytovala možnost zálohování externích dat/obb jiných aplikací.</string>

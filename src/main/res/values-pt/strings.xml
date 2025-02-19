@@ -167,7 +167,6 @@
     <string name="cache_size">Tamanho da cache:</string>
     <string name="enable_encryption_title">Cifra de dados</string>
     <string name="enable_encryption_message">Não é seguro manter os seus dados no aparelho não encriptados. Para a segurança dos seus dados, ative a encriptação e defina uma palavra-passe.</string>
-    <string name="sort_and_filter">Ordenar e filtrar</string>
     <string name="storage_access">Acesso ao Armazenamento</string>
     <string name="welcome_to_oabx">Bem-vindo a Neo Backup!</string>
     <string name="intro_permission_storage">A aplicação usa a permissão armazenamento ler/escrever para ser capaz de aceder o armazenamento externo e fornecer a possibilidade para o backup de dados/obb externos de outras aplicações.</string>
@@ -348,7 +347,6 @@
     <string name="prefs_sessionIinstaller">Usar instalador de sessão</string>
     <string name="prefs_sessionIinstaller_summary">Usar instalador de sessão invés do instalador padrão. Lento porém evita problemas com Android 13+</string>
     <string name="prefs_installerpackagename">O nome do instalador de pacotes:</string>
-    <string name="sortAppDataSize">Tamanho dos dados do app</string>
     <string name="sortAppSize">Tamanho do App</string>
     <string name="sortBackupSize">Tamanho do backup</string>
     <string name="prefs_theme_system_black">Tema do sistema (Preto)</string>

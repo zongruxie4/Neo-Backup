@@ -162,7 +162,7 @@ fun BatchPage(
                     ActionChip(
                         modifier = Modifier.weight(1f),
                         icon = Phosphor.FunnelSimple,
-                        text = stringResource(id = R.string.sort_and_filter),
+                        text = stringResource(id = R.string.sort_filter),
                         positive = true,
                         fullWidth = true,
                     ) {

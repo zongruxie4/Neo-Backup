@@ -167,7 +167,6 @@
     <string name="enable_encryption_title">Datenverschlüsselung</string>
     <string name="enable_encryption_message">Es ist nicht sicher, deine Daten unverschlüsselt auf deinem Gerät zu speichern. Für die Sicherheit deiner Daten aktiviere die Verschlüsselung und setze ein Passwort.</string>
     <string name="sched_add">Geplante Sicherung hinzufügen</string>
-    <string name="sort_and_filter">Sortieren und filtern</string>
     <string name="sortDataSize">Datengröße</string>
     <string name="prefs_biometriclock">Biometrische Sperre</string>
     <string name="prefs_biometriclock_summary">Die App mit der biometrischen Sperre des Geräts sichern (z. B. Fingerabdruck, Gesichtsentsperrung)</string>
@@ -338,7 +337,6 @@
     <string name="prefs_installerpackagename">Packetname des Installationsprogramms:</string>
     <string name="prefs_restorepermissions_summary">Wiederherstellung der Berechtigungen, die der App zum Zeitpunkt der Sicherung gewährt waren. Beachte, dass einige Berechtigungen nicht programmatisch gewährt werden können und daher die Wiederherstellung des Pakets insgesamt fehlschlägt, was Neo Backup dann für die Wiederherstellung des Pakets ohne Berechtigungen übernimmt.</string>
     <string name="supended_apps_cleanup">Bereinigung aller übrig gebliebenen angehaltenen Apps</string>
-    <string name="sortAppDataSize">App-Datengröße</string>
     <string name="sortBackupSize">Sicherungsgröße</string>
     <string name="edit_note">Notiz bearbeiten</string>
     <string name="sortAppSize">App-Größe</string>

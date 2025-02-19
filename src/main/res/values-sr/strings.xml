@@ -202,11 +202,9 @@
     <string name="help_appTypeHint">* Иконица апликације ће бити сива ако је апликација деинсталирана и тамно сива ако је апликација онемогућена.</string>
     <string name="enable_encryption_title">Шифровање Података</string>
     <string name="enable_encryption_message">Држање не шифрованих података на уређају није безбедно. Ради сигурности ваших података, омогућите шифровање и поставите лозинку.</string>
-    <string name="sort_and_filter"><![CDATA[Sort & Filter]]></string>
     <string name="storage_access">Приступ Складишту</string>
     <string name="prefs_numBackupRevisions">Број ревизија резервне копије</string>
     <string name="sortAppSize">Величина апликације</string>
-    <string name="sortAppDataSize"><![CDATA[App \& data size]]></string>
     <string name="sortBackupSize">Величина резервне копије</string>
     <string name="help_group_telegram">Наша група на Телеграму</string>
     <string name="welcome_to_oabx">Добродошли у Нео Бекап!</string>

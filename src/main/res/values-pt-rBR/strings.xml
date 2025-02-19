@@ -34,7 +34,6 @@
 \n• Há suporte ao backup e restauração de um único app por vez e também de vários apps em lote.
 \n• A restauração de apps do sistema deve ser possível sem exigir uma reinicialização posterior.
 \n• Os backups podem ser programados sem limite no número de programações individuais e há a possibilidade de criar listas personalizadas exclusivas.</string>
-    <string name="sort_and_filter">Classificar &amp; Filtrar</string>
     <string name="enable_encryption_message">Não é seguro manter seus dados em seu dispositivo não criptografado. Para a segurança dos seus dados, habilite a criptografia e defina uma senha.</string>
     <string name="enable_encryption_title">Criptografia de Dados</string>
     <string name="help_appTypeHint">*O ícone do tipo de app será cinza se o app for desinstalado e cinza escuro se o app for desativado.</string>
@@ -378,7 +377,6 @@
     <string name="prefs_externaldata_rst_summary">Restaura dados que são colocados no armazenamento externo (Ex: /storage/emulated/0/Android/data/)</string>
     <string name="prefs_nobackupdata_rst_summary">Restaura arquivos dos dados que são marcados para não ser feito o backup</string>
     <string name="prefs_restorepermissions_summary">Restaurar permissões que foram concedidas ao aplicativo no momento do backup. Note que algumas permissões não podem ser concedidas de forma programática e assim fazer com que a restauração do pacote falhe como um todo, que o Neo Backup então cobre restaurar o pacote sem permissões.</string>
-    <string name="sortAppDataSize">"Aplicativo  tamanho dos dados"</string>
     <string name="post_notifications_permission_message">A partir do Android 13, os aplicativos exigem essa permissão para poder postar notificações.</string>
     <string name="post_notifications_permission_title">Postar Notificações</string>
     <string name="filters_launchable">Inicializável</string>

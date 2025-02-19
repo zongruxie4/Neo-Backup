@@ -160,7 +160,6 @@
     <string name="help_legend">목차:</string>
     <string name="help_appTypeHint">* 앱이 제거된 경우 \'앱 유형\'의 아이콘은 회색이고, 앱이 비활성화된 경우 짙은 회색입니다.</string>
     <string name="enable_encryption_title">데이터 암호화</string>
-    <string name="sort_and_filter">정렬 &amp; 필터</string>
     <string name="storage_access">저장소 액세스</string>
     <string name="welcome_to_oabx">Neo Backup에 오신 것을 환영합니다!</string>
     <string name="radio_launchable">실행 가능한 앱</string>
@@ -328,7 +327,6 @@
     <string name="sortAsc">오름차순</string>
     <string name="prefs_secondary_1">Ocean Teal</string>
     <string name="sortAppSize">앱 크기</string>
-    <string name="sortAppDataSize">앱 데이터 크기</string>
     <string name="sortBackupSize">백업 크기</string>
     <string name="add_tag">새 태그 추가</string>
     <string name="edit_note">노트 수정</string>
