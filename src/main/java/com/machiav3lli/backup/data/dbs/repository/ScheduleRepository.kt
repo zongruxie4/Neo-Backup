@@ -6,6 +6,7 @@ import com.machiav3lli.backup.data.dbs.DB
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.preferences.traceSchedule
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
+import com.machiav3lli.backup.utils.cancelScheduleAlarm
 import com.machiav3lli.backup.utils.scheduleNextAlarm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,6 +77,7 @@ class ScheduleRepository(
                 )
             } else {
                 traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> cancelAlarm" }
+                cancelScheduleAlarm(appContext, schedule.id, schedule.name)
                 ScheduleWork.cancel(schedule.id)
             }
         }
