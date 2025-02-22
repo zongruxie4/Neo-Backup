@@ -1,6 +1,40 @@
 CHANGELOG
 =========
 
+8.3.12 (XX.XX.2025) +70 Commits, +30 Translations
+------------
+
+### Function
+
+- Add: Indices to room entities
+- Add: Strict mode (logging) for unsafe intents
+- Add: Su-command(s) for APatch (credits @hg42)
+- Fix: Missing/overdoing delete of backups
+- Fix: Scheduling (Return to ScheduleService scheduling)
+- Fix: Launching on refused magisk/root permission
+- Fix: Check working su-command if pref_suCommand is empty (credits @hg42)
+- Fix: Recomposing navigation suite on changing pager state
+- Fix: Loose checkroot (accepted finding one entry in /data/user) (credits @hg42)
+- Fix: BackupDir not working at start (credits @hg42)
+- Update: Replace backups' map with a repository instance
+- Remove: CDATA usage in strings
+- TargetSDK 35
+
+### UI & UX
+
+- Add: Search bar to block and custom list dialogs
+- Add: About card to help sheet and welcome page (revamp layout)
+- Add: Contrast themes
+- Fix: Dialogs on targetSDK 35 don't respect system insets
+- Fix: Reactivity of selectable rows in pref dialogs
+- Fix: Behaviour of navigating back on pages with details
+- Update: Restore main NB icon colors
+- Update: Make last backup choices default for backup dialog
+- Update: Improve Dialog box's padding
+- Update: Main themes colors
+- Update: Revamp coloring and style of some components
+- Update: Only use colored pref icons for more informative purposes (credits @hg42)
+
 8.3.11 (10.01.2025) +15 Commits, 6 Translations
 ------------
 
