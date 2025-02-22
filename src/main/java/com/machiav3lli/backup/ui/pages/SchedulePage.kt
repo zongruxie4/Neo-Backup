@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.EnabledFilter
 import com.machiav3lli.backup.LatestFilter
@@ -122,7 +123,7 @@ fun SchedulePage(
     }
 
     schedule?.let { schedule ->
-        val times by schedule.timeLeft().collectAsState()
+        val times by schedule.timeLeft().collectAsStateWithLifecycle()
 
         fun refresh(
             schedule: Schedule,
@@ -221,10 +222,10 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.CheckCircle,
                             description = stringResource(id = R.string.customListTitle),
-                            containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onTertiaryContainer,
+                            containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.tertiary,
+                            contentColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onTertiary,
                         ) {
                             dialogProps.value = Pair(DialogMode.CUSTOMLIST, schedule)
                             openDialog.value = true
@@ -233,10 +234,10 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.Prohibit,
                             description = stringResource(id = R.string.sched_blocklist),
-                            containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onTertiaryContainer,
+                            containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.tertiary,
+                            contentColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onTertiary,
                         ) {
                             dialogProps.value = Pair(DialogMode.BLOCKLIST, schedule)
                             openDialog.value = true

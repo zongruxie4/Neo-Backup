@@ -88,8 +88,8 @@ fun ExportedScheduleItem(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     ElevatedActionButton(
-                        icon = Phosphor.TrashSimple,
                         text = stringResource(id = R.string.delete),
+                        icon = Phosphor.TrashSimple,
                         withText = false,
                         positive = false,
                         onClick = onDelete
@@ -98,8 +98,8 @@ fun ExportedScheduleItem(
                     Spacer(modifier = Modifier.weight(1f))
 
                     ElevatedActionButton(
-                        icon = Phosphor.ClockCounterClockwise,
                         text = stringResource(id = R.string.dialog_import),
+                        icon = Phosphor.ClockCounterClockwise,
                         positive = true,
                         onClick = { onRestore(item) }
                     )
@@ -112,5 +112,5 @@ fun ExportedScheduleItem(
 @Preview
 @Composable
 fun PreviewExportedScheduleItem() {
-    //ExportedScheduleItem(Schedule())
+    ExportedScheduleItem(Schedule())
 }

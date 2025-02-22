@@ -156,10 +156,10 @@ fun ActionButton(
 
 @Composable
 fun ElevatedActionButton(
-    modifier: Modifier = Modifier,
     text: String,
+    icon: ImageVector?,
+    modifier: Modifier = Modifier,
     positive: Boolean = true,
-    icon: ImageVector? = null,
     fullWidth: Boolean = false,
     enabled: Boolean = true,
     colored: Boolean = true,
@@ -175,7 +175,7 @@ fun ElevatedActionButton(
                 else     -> MaterialTheme.colorScheme.onTertiaryContainer
             },
             containerColor = when {
-                !colored -> MaterialTheme.colorScheme.surfaceContainer
+                !colored -> MaterialTheme.colorScheme.surfaceContainerHighest
                 positive -> MaterialTheme.colorScheme.primaryContainer
                 else     -> MaterialTheme.colorScheme.tertiaryContainer
             }
@@ -183,7 +183,7 @@ fun ElevatedActionButton(
         enabled = enabled,
         onClick = onClick
     ) {
-        if (icon != null) {
+        icon?.let {
             Icon(
                 imageVector = icon,
                 contentDescription = text

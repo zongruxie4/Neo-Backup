@@ -2,6 +2,7 @@ package com.machiav3lli.backup.ui.compose.component
 
 import android.text.format.Formatter
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -188,6 +190,18 @@ fun BackupItem(
     onNote: (Backup) -> Unit = { },
     rewriteBackup: (Backup, Backup) -> Unit = { _, _ -> },
 ) {
+    var persistent by remember(item.persistent) {
+        mutableStateOf(item.persistent)
+    }
+    val togglePersistent = {
+        persistent = !persistent
+        rewriteBackup(item, item.copy(persistent = persistent))
+    }
+    val lockColor by animateColorAsState(
+        if (persistent) Color.Red else LocalContentColor.current,
+        label = "lockColor",
+    )
+
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
@@ -206,14 +220,6 @@ fun BackupItem(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    var persistent by remember(item.persistent) {
-                        mutableStateOf(item.persistent)
-                    }
-                    val togglePersistent = {
-                        persistent = !persistent
-                        rewriteBackup(item, item.copy(persistent = persistent))
-                    }
-
                     NoteTagItem(
                         item = item,
                         modifier = Modifier
@@ -226,17 +232,12 @@ fun BackupItem(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        if (persistent)
-                            RoundButton(
-                                icon = Phosphor.Lock,
-                                tint = Color.Red,
-                                onClick = togglePersistent
-                            )
-                        else
-                            RoundButton(
-                                icon = Phosphor.LockOpen,
-                                onClick = togglePersistent
-                            )
+                        RoundButton(
+                            icon = if (persistent) Phosphor.Lock
+                            else Phosphor.LockOpen,
+                            tint = lockColor,
+                            onClick = togglePersistent
+                        )
                         FilledRoundButton(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.deleteBackup),
@@ -246,8 +247,8 @@ fun BackupItem(
                         )
                         if (!item.packageLabel.contains("INVALID"))
                             ElevatedActionButton(
-                                icon = Phosphor.ClockCounterClockwise,
                                 text = stringResource(id = R.string.restore),
+                                icon = Phosphor.ClockCounterClockwise,
                                 positive = true,
                                 onClick = { onRestore(item) },
                             )

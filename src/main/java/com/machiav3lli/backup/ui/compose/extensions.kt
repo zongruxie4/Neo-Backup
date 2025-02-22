@@ -112,6 +112,7 @@ fun Modifier.blockBorderTop(altStyle: Boolean = !pref_altBlockLayout.value) =
 fun Modifier.blockShadow(altStyle: Boolean = !pref_altBlockLayout.value) =
     composed {
         this
+            .clip(MaterialTheme.shapes.extraLarge)
             .ifThenElse(altStyle,
                 modifier = {
                     border(

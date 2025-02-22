@@ -76,6 +76,7 @@ import com.machiav3lli.backup.ui.compose.component.MainPackageContextMenu
 import com.machiav3lli.backup.ui.compose.component.UpdatedPackageRecycler
 import com.machiav3lli.backup.ui.compose.component.cachedAsyncImagePainter
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CircleWavyWarning
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FunnelSimple
@@ -228,14 +229,16 @@ fun HomePage(
                                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                                 ) {
                                                     ElevatedActionButton(
-                                                        modifier = Modifier.weight(1f),
                                                         text = stringResource(id = R.string.backup_all_updated),
+                                                        icon = Phosphor.ArchiveTray,
+                                                        modifier = Modifier.weight(1f),
+                                                        fullWidth = true,
                                                         positive = true,
                                                     ) {
                                                         openBatchDialog.value = true
                                                     }
                                                     ElevatedActionButton(
-                                                        text = "",
+                                                        text = stringResource(id = R.string.dialogCancel),
                                                         icon = Phosphor.CaretDown,
                                                         withText = false,
                                                         positive = false,

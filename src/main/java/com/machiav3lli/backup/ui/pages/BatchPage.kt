@@ -57,6 +57,8 @@ import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.StateChip
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.DiamondsFour
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FunnelSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.HardDrives
@@ -277,9 +279,12 @@ fun BatchPage(
                     }
                 }
                 ElevatedActionButton(
-                    modifier = Modifier.weight(1f),
                     text = stringResource(id = if (backupBoolean) R.string.backup else R.string.restore),
-                    positive = true
+                    icon = if (backupBoolean) Phosphor.ArchiveTray
+                    else Phosphor.ClockCounterClockwise,
+                    modifier = Modifier.weight(1f),
+                    positive = true,
+                    fullWidth = true,
                 ) {
                     if (viewModel.apkBackupCheckedList.filterValues { it != -1 }.isNotEmpty()
                         || viewModel.dataBackupCheckedList.filterValues { it != -1 }.isNotEmpty()

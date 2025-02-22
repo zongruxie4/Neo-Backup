@@ -85,15 +85,15 @@ fun LogItem(
                             }
                         }
                         ElevatedActionButton(
-                            icon = Phosphor.TrashSimple,
                             text = stringResource(id = R.string.delete),
+                            icon = Phosphor.TrashSimple,
                             withText = false,
                             positive = false,
                             onClick = { onDelete(item) }
                         )
                         ElevatedActionButton(       // TODO: remove?, share button already in TerminalText
-                            icon = Phosphor.ShareNetwork,
                             text = stringResource(id = R.string.shareTitle),
+                            icon = Phosphor.ShareNetwork,
                             withText = false,
                             positive = true,
                             onClick = { onShare(item) }

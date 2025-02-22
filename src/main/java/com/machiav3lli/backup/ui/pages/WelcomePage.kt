@@ -173,9 +173,9 @@ fun WelcomePage() {
                 horizontalArrangement = Arrangement.Center
             ) {
                 ElevatedActionButton(
-                    modifier = Modifier.padding(horizontal = 24.dp),
                     text = stringResource(id = R.string.dialog_start),
                     icon = Phosphor.ArrowRight,
+                    modifier = Modifier.padding(horizontal = 24.dp),
                 ) {
                     main.moveTo(NavItem.Permissions.destination)
                 }

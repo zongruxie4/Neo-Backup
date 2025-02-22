@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -34,7 +35,7 @@ fun ScheduleItem(
     onCheckChanged: (Schedule, Boolean) -> Unit = { _: Schedule, _: Boolean -> },
 ) {
     val (checked, check) = mutableStateOf(schedule.enabled)
-    val times by schedule.timeLeft().collectAsState()
+    val times by schedule.timeLeft().collectAsStateWithLifecycle()
 
     ListItem(
         modifier = Modifier
