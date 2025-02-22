@@ -37,8 +37,6 @@ import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils
-import com.machiav3lli.backup.viewmodels.MainVM
-import org.koin.androidx.viewmodel.ext.android.getViewModel
 import timber.log.Timber
 import java.io.File
 
@@ -160,7 +158,6 @@ data class Package private constructor(val packageName: String) {
             } ${TraceUtils.methodName(2)}"
         }
         setBackupList(backups)
-        NeoApp.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
     }
 
     fun getBackupsFromBackupDir(): List<Backup> {
@@ -203,17 +200,22 @@ data class Package private constructor(val packageName: String) {
         }
     }
 
-    private fun removeBackupFromList(backup: Backup): List<Backup> {
+    private fun addBackupToList(backup: Backup) {
+        setBackupList(backupList + backup)
+    }
+
+    private fun replaceBackupFromList(backup: Backup, newBackup: Backup) {
+        setBackupList(backupList.filterNot {
+            it.packageName == backup.packageName
+                    && it.backupDate == backup.backupDate
+        }.plus(newBackup))
+    }
+
+    private fun removeBackupFromList(backup: Backup) {
         setBackupList(backupList.filterNot {
             it.packageName == backup.packageName
                     && it.backupDate == backup.backupDate
         })
-        return backupList
-    }
-
-    private fun addBackupToList(backup: Backup): List<Backup> {
-        setBackupList(backupList + backup)
-        return backupList
     }
 
     fun addNewBackup(backup: Backup) {
@@ -277,8 +279,7 @@ data class Package private constructor(val packageName: String) {
             runOrLog { refreshBackupList() }                // get real state of file system
         else {
             //backupList = backupList - backup + changedBackup
-            removeBackupFromList(backup)
-            addBackupToList(changedBackup)
+            replaceBackupFromList(backup, changedBackup)
             updateBackupListAndDatabase(backupList)
         }
     }
@@ -296,41 +297,22 @@ data class Package private constructor(val packageName: String) {
         // the algorithm could eventually be more elegant, without managing two lists,
         // but it's on the safe side for now
         val backups = backupsNewestFirst.toMutableList()
-        if (pref_ignoreLockedInHousekeeping.value) {
-            val deletableBackups = backups.filterNot { it.persistent }.drop(keep).toMutableList()
-            traceBackups {
-                "<$packageName> deleteOldestBackups keep=$keep ${
-                    TraceUtils.formatBackups(
-                        backups
-                    )
-                } --> delete ${TraceUtils.formatBackups(deletableBackups)}"
-            }
-            while (deletableBackups.size > 0) {
-                deletableBackups.removeLastOrNull()?.let { backup ->
-                    _deleteBackup(backup)
-                    backups.remove(backup)
-                }
-            }
-        } else {
-            val deletableBackups = backups.filterNot { it.persistent }.drop(1).toMutableList()
-            traceBackups {
-                "<$packageName> deleteOldestBackups keep=$keep ${
-                    TraceUtils.formatBackups(
-                        backups
-                    )
-                } --> delete ${TraceUtils.formatBackups(deletableBackups)}"
-            }
-            while (keep < backups.size && deletableBackups.size > 0) {
-
-
-                deletableBackups.removeLastOrNull()?.let { backup ->
-                    backups.remove(backup)
-                    _deleteBackup(backup)
-                }
+        val deletableBackups = backups.let {
+            if (pref_ignoreLockedInHousekeeping.value) it
+            else it.filterNot { it.persistent }
+        }.drop(keep).toMutableList()
+        traceBackups {
+            "<$packageName> deleteOldestBackups keep=$keep ${
+                TraceUtils.formatBackups(
+                    backups
+                )
+            } --> delete ${TraceUtils.formatBackups(deletableBackups)}"
+        }
+        while (deletableBackups.isNotEmpty()) {
+            deletableBackups.removeLastOrNull()?.let { backup ->
+                _deleteBackup(backup)
             }
         }
-        setBackupList(backups)
-        NeoApp.main?.getViewModel<MainVM>()?.updateBackups(packageName, backups)
     }
 
     val backupsNewestFirst: List<Backup>
