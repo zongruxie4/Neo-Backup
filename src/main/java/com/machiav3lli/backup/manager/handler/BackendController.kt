@@ -631,7 +631,7 @@ fun Context.findBackups(
             NeoApp.setBackups(backupsMap)
 
             // preset installed packages that don't have backups with empty backups lists
-            NeoApp.emptyBackupsForMissingPackages(installedNames)
+            //NeoApp.emptyBackupsForMissingPackages(installedNames)
 
         } else {
             if (NeoApp.startup)

@@ -109,13 +109,6 @@ class PackageRepository(
         }
     }
 
-    fun deleteBackupsNotIn(packageNames: List<String>) = runBlocking(jcc) {
-        mutex.withLock {
-            theBackupsMap.keys.removeAll { it !in packageNames }
-        }
-    }
-
-
     suspend fun deleteBackup(pkg: Package?, backup: Backup, onDismiss: () -> Unit) =
         withContext(jcc) {
             pkg?.let { pkg ->

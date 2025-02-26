@@ -693,12 +693,6 @@ class NeoApp : Application(), KoinStartup {
             }
         }
 
-        fun emptyBackupsForMissingPackages(packageNames: List<String>) {
-            get<PackageRepository>(PackageRepository::class.java).apply {
-                deleteBackupsNotIn(packageNames)
-            }
-        }
-
         fun emptyBackupsForAllPackages(packageNames: List<String>) {
             get<PackageRepository>(PackageRepository::class.java).apply {
                 packageNames.forEach { packageName ->
