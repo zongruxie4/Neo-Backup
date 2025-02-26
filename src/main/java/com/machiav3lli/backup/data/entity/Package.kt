@@ -39,6 +39,7 @@ import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils
 import timber.log.Timber
 import java.io.File
+import kotlin.collections.toList
 
 // TODO need to handle some emergent props with empty backupList constructors
 data class Package private constructor(val packageName: String) {
@@ -142,34 +143,15 @@ data class Package private constructor(val packageName: String) {
         return true
     }
 
-    fun updateBackupList(backups: List<Backup>) {
-        traceBackups {
-            "<$packageName> updateBackupList: ${
-                TraceUtils.formatSortedBackups(backups)
-            } ${TraceUtils.methodName(2)}"
-        }
-        setBackupList(backups)
-    }
-
-    fun updateBackupListAndDatabase(backups: List<Backup>) {
-        traceBackups {
-            "<$packageName> updateBackupListAndDatabase: ${
-                TraceUtils.formatSortedBackups(backups)
-            } ${TraceUtils.methodName(2)}"
-        }
-        setBackupList(backups)
-    }
-
     fun getBackupsFromBackupDir(): List<Backup> {
         // TODO hg42 may also find glob *packageName* for now so we need to take the correct package
         return NeoApp.context.findBackups(packageName)[packageName] ?: emptyList()
     }
 
-    fun refreshBackupList(): List<Backup> {
+    fun refreshBackupList() {
         traceBackups { "<$packageName> refreshbackupList" }
         val backups = getBackupsFromBackupDir()
-        updateBackupListAndDatabase(backups)
-        return backups
+        setBackupList(backups)
     }
 
     @Throws(
@@ -200,11 +182,25 @@ data class Package private constructor(val packageName: String) {
         }
     }
 
-    private fun addBackupToList(backup: Backup) {
+    private fun addBackupToList(vararg backup: Backup) {
+        traceBackups {
+            "<$packageName> addBackupToList: ${
+                TraceUtils.formatBackups(backup.toList())
+            } into ${
+                TraceUtils.formatBackups(backupsNewestFirst)
+            } ${TraceUtils.methodName(2)}"
+        }
         setBackupList(backupList + backup)
     }
 
     private fun replaceBackupFromList(backup: Backup, newBackup: Backup) {
+        traceBackups {
+            "<$packageName> replaceBackupFromList: ${
+                TraceUtils.formatBackups(listOf(newBackup))
+            } in ${
+                TraceUtils.formatBackups(backupsNewestFirst)
+            } ${TraceUtils.methodName(2)}"
+        }
         setBackupList(backupList.filterNot {
             it.packageName == backup.packageName
                     && it.backupDate == backup.backupDate
@@ -212,6 +208,13 @@ data class Package private constructor(val packageName: String) {
     }
 
     private fun removeBackupFromList(backup: Backup) {
+        traceBackups {
+            "<$packageName> removeBackupFromList: ${
+                TraceUtils.formatBackups(listOf(backup))
+            } from ${
+                TraceUtils.formatBackups(backupsNewestFirst)
+            } ${TraceUtils.methodName(2)}"
+        }
         setBackupList(backupList.filterNot {
             it.packageName == backup.packageName
                     && it.backupDate == backup.backupDate
@@ -223,9 +226,7 @@ data class Package private constructor(val packageName: String) {
         if (pref_paranoidBackupLists.value)
             refreshBackupList()  // no more necessary, because members file/dir/tag are set by createBackup
         else {
-            //backupList = backupList + changedBackup
             addBackupToList(backup)
-            updateBackupListAndDatabase(backupList)
         }
     }
 
@@ -243,9 +244,7 @@ data class Package private constructor(val packageName: String) {
         }
         if (!pref_paranoidBackupLists.value)
             runOrLog {
-                //backupList = backupList - backup
                 removeBackupFromList(backup)
-                updateBackupListAndDatabase(backupList)
             }
     }
 
@@ -278,9 +277,7 @@ data class Package private constructor(val packageName: String) {
         if (pref_paranoidBackupLists.value)
             runOrLog { refreshBackupList() }                // get real state of file system
         else {
-            //backupList = backupList - backup + changedBackup
             replaceBackupFromList(backup, changedBackup)
-            updateBackupListAndDatabase(backupList)
         }
     }
 
