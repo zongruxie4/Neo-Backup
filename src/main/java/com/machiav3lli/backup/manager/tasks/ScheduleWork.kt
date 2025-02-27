@@ -52,13 +52,16 @@ import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.calcRuntimeDiff
 import com.machiav3lli.backup.utils.extensions.Android
+import com.machiav3lli.backup.utils.extensions.takeUntilSignal
 import com.machiav3lli.backup.utils.filterPackages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -126,8 +129,7 @@ class ScheduleWork(
 
             repeat(1 + pref_fakeScheduleDups.value) {
                 val now = SystemUtils.now
-                //scheduleNext(context, scheduleId, true)
-
+                runningSchedules[scheduleId] = true
                 val result = processSchedule(name, now)
                 if (!result) {
                     return@withContext Result.failure()
@@ -141,12 +143,14 @@ class ScheduleWork(
             Timber.e(e)
             Result.failure()
         } finally {
+            runningSchedules.remove(scheduleId)
             NeoApp.wakelock(false)
         }
     }
 
     private suspend fun processSchedule(name: String, now: Long): Boolean =
         coroutineScope {
+            val finishSignal = MutableStateFlow(false)
             val schedule = scheduleRepo.getSchedule(scheduleId) ?: return@coroutineScope false
 
             val selectedItems = getFilteredPackages(schedule)
@@ -185,6 +189,7 @@ class ScheduleWork(
 
                 async {
                     get<WorkManager>(WorkManager::class.java).getWorkInfoByIdFlow(oneTimeWorkRequest.id)
+                        .takeUntilSignal(finishSignal)
                         .collectLatest { workInfo ->
                             when (workInfo?.state) {
                                 androidx.work.WorkInfo.State.SUCCEEDED,
@@ -208,11 +213,17 @@ class ScheduleWork(
                                     resultsSuccess = resultsSuccess && succeeded
 
                                     if (finished >= queued) {
+                                        finishSignal.update { true }
                                         endSchedule(name, "all jobs finished")
                                     }
                                 }
 
-                                else                                   -> {}
+                                else                                   -> {
+                                    if (finished >= queued) {
+                                        finishSignal.update { true }
+                                        endSchedule(name, "all jobs finished")
+                                    }
+                                }
                             }
                         }
                 }
