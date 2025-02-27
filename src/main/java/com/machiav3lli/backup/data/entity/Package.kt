@@ -283,8 +283,10 @@ data class Package private constructor(val packageName: String) {
 
     fun deleteAllBackups() {
         val backups = backupsNewestFirst.toMutableList()
-        backups.removeLastOrNull()?.let { backup ->
-            _deleteBackup(backup)
+        while (backups.isNotEmpty()) {
+            backups.removeLastOrNull()?.let { backup ->
+                _deleteBackup(backup)
+            }
         }
         if (pref_paranoidBackupLists.value)
             runOrLog { refreshBackupList() }                // get real state of file system only once
