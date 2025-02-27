@@ -18,32 +18,26 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.MainState
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.data.preferences.NeoPrefs
-import com.machiav3lli.backup.data.preferences.traceBackups
 import com.machiav3lli.backup.data.preferences.traceFlows
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.pages.pref_newAndUpdatedNotification
-import com.machiav3lli.backup.utils.TraceUtils.formatSortedBackups
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.applySearchAndFilter
 import com.machiav3lli.backup.utils.extensions.IconCache
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -72,37 +66,6 @@ class MainVM(
     private val homeSortFilterModelFlow = prefs.homeSortFilterFlow()
     private val backupSortFilterModelFlow = prefs.backupSortFilterFlow()
     private val restoreSortFilterModelFlow = prefs.restoreSortFilterFlow()
-
-    // TODO move logic to observeData()
-    private val backupsUpdateFlow = MutableSharedFlow<Pair<String, List<Backup>>?>()
-
-    // Used as channel to update the database
-    val backupsUpdate = backupsUpdateFlow
-        // don't skip anything here (no conflate or map Latest etc.)
-        // we need to process each update as it's the update for a single package
-        .filterNotNull()
-        //.buffer(UNLIMITED)   // use in case the flow isn't collected, yet, e.g. if using Lazily
-        .trace { "*** backupsUpdate <<- ${it.first} ${formatSortedBackups(it.second)}" }
-        .onEach {
-            viewModelScope.launch(Dispatchers.IO) {
-                traceBackups {
-                    "*** updating database ---------------------------> ${it.first} ${
-                        formatSortedBackups(
-                            it.second
-                        )
-                    }"
-                }
-                packageRepository.updateBackups(
-                    it.first,
-                    it.second.sortedByDescending { it.backupDate },
-                )
-            }
-        }
-        .stateIn(
-            ioScope,
-            SharingStarted.Eagerly,
-            null
-        )
 
     val packageMap =
         //========================================================================================== packageList
@@ -305,14 +268,6 @@ class MainVM(
                     prefs.enabledFilterHome.value = value.enabledFilter
                 }
             }
-        }
-    }
-
-    fun updateBackups(packageName: String, backups: List<Backup>) {
-        viewModelScope.launch {
-            backupsUpdateFlow.emit(
-                Pair(packageName, backups.sortedByDescending { it.backupDate })
-            )
         }
     }
 

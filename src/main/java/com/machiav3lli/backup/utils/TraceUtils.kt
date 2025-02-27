@@ -261,7 +261,7 @@ object TraceUtils {
         return "(${elements.size})${elements.map { "${it}" }}"
     }
 
-    fun formatBackups(backups: List<Backup>?): String {
+    fun formatBackups(backups: Collection<Backup>?): String {
         return "(${backups?.size ?: 0})${
             backups?.map {
                 "${
@@ -270,20 +270,6 @@ object TraceUtils {
                     if (it.persistent) "🔒" else ""
                 }"
             }
-                ?: "<null>"
-        }"
-    }
-
-    fun formatSortedBackups(backups: List<Backup>?): String {
-        return "(${backups?.size ?: 0})${
-            backups?.map {
-                "${
-                    it.backupDate
-                }${
-                    if (it.persistent) "🔒" else ""
-                }"
-            }
-                ?.sortedDescending()
                 ?: "<null>"
         }"
     }

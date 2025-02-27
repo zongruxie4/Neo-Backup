@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -32,8 +31,8 @@ class PackageRepository(
 ) {
     private val cc = Dispatchers.IO
     private val jcc = Dispatchers.IO + SupervisorJob()
-    val theBackupsMap = ConcurrentHashMap<String, List<Backup>>()
-    val mutex = Mutex()
+    private val theBackupsMap = ConcurrentHashMap<String, List<Backup>>()
+    private val mutex = Mutex()
 
     fun getBackupsFlow(): Flow<Map<String, List<Backup>>> =
         flow {
@@ -42,9 +41,15 @@ class PackageRepository(
         }.distinctUntilChanged()
             .flowOn(cc)
 
+    fun getBackupsListFlow(): Flow<List<Backup>> = flow {
+        emit(theBackupsMap.values.flatten())
+        delay(1000)
+    }.distinctUntilChanged()
+        .flowOn(cc)
+
     fun getPackagesFlow(): Flow<List<Package>> = combine(
         db.getAppInfoDao().getAllFlow(),
-        getBackupsFlow().map { it.values.flatten() },
+        getBackupsListFlow(),
     ) { appInfos, bkps -> appInfos.toPackageList(appContext) }
         .flowOn(cc)
 
@@ -57,12 +62,18 @@ class PackageRepository(
 
     fun getBackups(packageName: String): List<Backup> = theBackupsMap[packageName] ?: emptyList()
 
-    fun getBackups(): List<Backup> = theBackupsMap.values.flatten()
+    fun getBackupsMap(): Map<String, List<Backup>> = theBackupsMap.toMap()
+
+    fun getBackupsList(): List<Backup> = theBackupsMap.values.flatten()
 
     suspend fun updatePackage(packageName: String) = withContext(jcc) {
         invalidateCacheForPackage(packageName)
-        val new = Package(appContext, packageName)
-        if (!new.isSpecial) {
+        val new = try {
+            Package(appContext, packageName)
+        } catch (e: AssertionError) {
+            null
+        }
+        if (new != null && !new.isSpecial) {
             new.refreshFromPackageManager(appContext)
             db.getAppInfoDao().update(new.packageInfo as AppInfo)
         }

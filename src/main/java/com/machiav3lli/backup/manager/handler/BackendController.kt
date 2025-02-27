@@ -845,7 +845,7 @@ suspend fun Context.updateAppTables() {
         }
 
         ensureBackups()
-        val backupsMap = packagesRepo.getBackups().groupBy { it.packageName }
+        val backupsMap = packagesRepo.getBackupsMap()
 
         val specialInfos = SpecialInfo.getSpecialInfos(this)
         val specialNames = specialInfos.map { it.packageName }.toSet()

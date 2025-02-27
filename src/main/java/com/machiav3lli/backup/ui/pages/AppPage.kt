@@ -158,13 +158,13 @@ fun AppPage(
                 else "android.resource://${pkg.packageName}/${pkg.packageInfo.icon}"
             )
         }
-        if (refreshNow) {
-            viewModel.refreshNow.value = false
-            mActivity.updatePackage(pkg.packageName)
-        }
         if (dismissNow) {
             viewModel.dismissNow.value = false
             onDismiss()
+        }
+        if (refreshNow) {
+            viewModel.refreshNow.value = false
+            mActivity.updatePackage(pkg.packageName)
         }
 
         Scaffold(
