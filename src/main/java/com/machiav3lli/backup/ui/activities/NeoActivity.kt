@@ -493,6 +493,7 @@ class NeoActivity : BaseActivity() {
                                     }\n"
 
                                 resultsSuccess = resultsSuccess and succeeded
+                                updatePackage(packageName)
                                 oneTimeWorkLiveData.removeObserver(this)
                             }
 

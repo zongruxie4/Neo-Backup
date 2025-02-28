@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import androidx.compose.ui.util.fastForEach
 import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -33,6 +34,7 @@ import com.machiav3lli.backup.data.dbs.entity.AppExtras
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
+import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.data.preferences.pref_autoLogAfterSchedule
 import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
@@ -50,6 +52,7 @@ import com.machiav3lli.backup.ui.pages.textLog
 import com.machiav3lli.backup.utils.FileUtils
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
+import com.machiav3lli.backup.utils.SystemUtils.packageName
 import com.machiav3lli.backup.utils.calcRuntimeDiff
 import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.extensions.takeUntilSignal
@@ -74,6 +77,7 @@ class ScheduleWork(
     private val context: Context,
     params: WorkerParameters
 ) : CoroutineWorker(context, params), KoinComponent {
+    private val packageRepo: PackageRepository by inject()
     private val scheduleRepo: ScheduleRepository by inject()
     private val blocklistRepo: BlocklistRepository by inject()
     private val appExtrasRepo: AppExtrasRepository by inject()
@@ -215,6 +219,9 @@ class ScheduleWork(
                                     if (finished >= queued) {
                                         finishSignal.update { true }
                                         endSchedule(name, "all jobs finished")
+                                        selectedItems.fastForEach {
+                                            packageRepo.updatePackage(it)
+                                        }
                                     }
                                 }
 
@@ -222,6 +229,9 @@ class ScheduleWork(
                                     if (finished >= queued) {
                                         finishSignal.update { true }
                                         endSchedule(name, "all jobs finished")
+                                        selectedItems.fastForEach {
+                                            packageRepo.updatePackage(it)
+                                        }
                                     }
                                 }
                             }
