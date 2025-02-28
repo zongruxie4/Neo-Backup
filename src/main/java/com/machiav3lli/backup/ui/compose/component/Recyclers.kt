@@ -75,7 +75,11 @@ fun UpdatedPackageRecycler(
         list = productsList,
         itemKey = { it.packageName }
     ) {
-        UpdatedPackageItem(it, onClick)
+        UpdatedPackageItem(
+            it,
+            Modifier.animateItem(),
+            onClick,
+        )
     }
 }
 
@@ -358,6 +362,7 @@ fun <T> HorizontalItemList(
 
             else           -> {
                 LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Absolute.spacedBy(4.dp),
                     contentPadding = PaddingValues(vertical = 4.dp, horizontal = 4.dp),
                 ) {

@@ -24,6 +24,7 @@ import com.machiav3lli.backup.data.entity.Package
 @Composable
 fun UpdatedPackageItem(
     item: Package,
+    modifier: Modifier = Modifier,
     onClick: (Package) -> Unit = {},
 ) {
     val imageData by remember(item) {
@@ -34,7 +35,7 @@ fun UpdatedPackageItem(
     }
 
     Card(
-        modifier = Modifier,
+        modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.outlinedCardColors(
             containerColor = Color.Transparent
