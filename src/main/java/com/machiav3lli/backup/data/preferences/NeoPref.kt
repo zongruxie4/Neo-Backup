@@ -9,7 +9,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 
@@ -42,7 +43,7 @@ abstract class PrefDelegate<T : Any>(
 ) {
     var value: T
         get() = runBlocking(Dispatchers.IO) {
-            get().firstOrNull() ?: defaultValue
+            dataStore.data.first()[key] ?: defaultValue
         }
         set(value) = runBlocking(Dispatchers.IO) {
             set(value)
@@ -53,7 +54,9 @@ abstract class PrefDelegate<T : Any>(
         get() = get().collectAsState(initial = defaultValue)
 
     open fun get(): Flow<T> {
-        return dataStore.data.map { prefs -> prefs[key] ?: defaultValue }
+        return dataStore.data
+            .map { prefs -> prefs[key] ?: defaultValue }
+            .distinctUntilChanged()
     }
 
     protected open suspend fun set(newValue: T) {
