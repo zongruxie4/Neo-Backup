@@ -92,7 +92,6 @@ import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.icon.Exodus
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowSquareOut
-import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Leaf
@@ -101,6 +100,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ProhibitInset
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
+import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.show
 import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.ui.dialogs.BackupDialogUI
@@ -236,7 +236,7 @@ fun AppPage(
                             }
                         }
                         RoundButton(
-                            icon = Phosphor.CaretDown,
+                            icon = Phosphor.X,
                             modifier = Modifier.fillMaxHeight()
                         ) {
                             onDismiss()

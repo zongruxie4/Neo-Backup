@@ -79,13 +79,13 @@ import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.TitleText
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
-import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CheckCircle
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Clock
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Play
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
+import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.BlockListDialogUI
@@ -167,7 +167,7 @@ fun SchedulePage(
                     },
                     trailingContent = {
                         RoundButton(
-                            icon = Phosphor.CaretDown,
+                            icon = Phosphor.X,
                             description = stringResource(id = R.string.dismiss),
                             onClick = { onDismiss() }
                         )
