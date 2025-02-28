@@ -6,7 +6,6 @@ import com.machiav3lli.backup.data.dbs.DB
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.entity.Package
-import com.machiav3lli.backup.data.entity.Package.Companion.invalidateCacheForPackage
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.ShellCommands
 import com.machiav3lli.backup.manager.handler.toPackageList
@@ -67,7 +66,7 @@ class PackageRepository(
     fun getBackupsList(): List<Backup> = theBackupsMap.values.flatten()
 
     suspend fun updatePackage(packageName: String) = withContext(jcc) {
-        invalidateCacheForPackage(packageName)
+        Package.invalidateCacheForPackage(packageName)
         val new = try {
             Package(appContext, packageName)
         } catch (e: AssertionError) {

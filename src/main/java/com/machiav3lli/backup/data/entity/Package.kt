@@ -41,7 +41,7 @@ import timber.log.Timber
 import java.io.File
 import kotlin.collections.toList
 
-// TODO need to handle some emergent props with empty backupList constructors
+// TODO consider separating package & backupsList to allow granular compose updates
 data class Package private constructor(val packageName: String) {
     lateinit var packageInfo: com.machiav3lli.backup.data.dbs.entity.PackageInfo
     var storageStats: StorageStats? = null

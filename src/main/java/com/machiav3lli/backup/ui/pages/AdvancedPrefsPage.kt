@@ -633,6 +633,8 @@ val pref_enableSpecialBackups = BooleanPref(
     onChanged = {
         NeoApp.main?.get<NeoPrefs>()?.let {
             it.mainFilterHome.value = it.mainFilterHome.value and MAIN_FILTER_DEFAULT
+            it.mainFilterBackup.value = it.mainFilterBackup.value and MAIN_FILTER_DEFAULT
+            it.mainFilterRestore.value = it.mainFilterRestore.value and MAIN_FILTER_DEFAULT
         }
     }
 )

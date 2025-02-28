@@ -22,6 +22,7 @@ import android.text.format.Formatter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.util.fastForEach
 import com.machiav3lli.backup.CHIP_SIZE_APP
 import com.machiav3lli.backup.CHIP_SIZE_CACHE
 import com.machiav3lli.backup.CHIP_SIZE_DATA
@@ -30,8 +31,9 @@ import com.machiav3lli.backup.CHIP_TYPE
 import com.machiav3lli.backup.CHIP_VERSION
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.AppExtras
-import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.data.entity.InfoChipItem
 import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CircleWavyWarning
@@ -43,7 +45,6 @@ import com.machiav3lli.backup.ui.compose.theme.ColorSpecial
 import com.machiav3lli.backup.ui.compose.theme.ColorSystem
 import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 import com.machiav3lli.backup.ui.compose.theme.ColorUser
-import com.machiav3lli.backup.data.entity.InfoChipItem
 
 data class AppStats(
     val nApps: Int,
@@ -58,7 +59,7 @@ fun getStats(appsList: List<Package>): AppStats {   //TODO hg42 we actually want
     var nUpdated = 0
     var szApps = 0L
     var szData = 0L
-    appsList.forEach {
+    appsList.fastForEach {
         if (it.hasBackups) {
             nBackups += it.numberOfBackups
             if (it.isUpdated) nUpdated += 1
