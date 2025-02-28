@@ -96,7 +96,6 @@ fun SortFilterSheet(
     onDismiss: () -> Unit,
 ) {
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
-    val packageList by viewModel.notBlockedList.collectAsState()
     val state by remember(sourcePage) {
         mutableStateOf(
             when (sourcePage) {
@@ -111,10 +110,10 @@ fun SortFilterSheet(
         mutableStateOf(state.value.sortFilter)
     }
 
-    fun currentStats() = getStats(
-        packageList.applyFilter(
-            model,
-        )
+    val stats = getStats(
+        stateModel.packages
+            .filterNot { it.packageName in stateModel.blocklist }
+            .applyFilter(model)
     )  //TODO hg42 use central function for all the filtering
 
     Scaffold(
@@ -138,7 +137,6 @@ fun SortFilterSheet(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val stats = currentStats()
                                 DoubleVerticalText(
                                     upperText = stats.nApps.toString(),
                                     bottomText = stringResource(id = R.string.stats_apps),
@@ -162,7 +160,6 @@ fun SortFilterSheet(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val stats = currentStats()
                                 InfoChipsBlock(
                                     list = listOf(
                                         InfoChipItem(

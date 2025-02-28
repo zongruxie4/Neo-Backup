@@ -93,31 +93,6 @@ class MainVM(
                 emptyMap()
             )
 
-    val notBlockedList =
-        //========================================================================================== notBlockedList
-        combine(
-            packageRepository.getPackagesFlow(),
-            blocklistRepository.getBlocklistFlow()
-        ) { pkgs, block ->
-
-            traceFlows {
-                "******************** blocking - list: ${pkgs.size} block: ${
-                    block.joinToString(",")
-                }"
-            }
-
-            val list = pkgs.filterNot { block.contains(it.packageName) }
-
-            traceFlows { "***** blocked ->> ${list.size}" }
-            list
-        }
-            .mapLatest { it }
-            .trace { "*** notBlockedList <<- ${it.size}" }
-            .stateIn(
-                ioScope,
-                SharingStarted.Eagerly,
-                emptyList()
-            )
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS end
 
     init {
