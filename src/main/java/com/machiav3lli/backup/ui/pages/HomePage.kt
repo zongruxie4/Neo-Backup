@@ -106,8 +106,7 @@ fun HomePage(
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val mainState by viewModel.homeState.collectAsState()
-    val updatedPackages by viewModel.updatedPackages.collectAsState(emptyList())
-    val updaterVisible = updatedPackages.isNotEmpty()  // recompose is already triggered above
+    val updaterVisible = mainState.updatedPackages.isNotEmpty()
     var updaterExpanded by remember { mutableStateOf(false) }
     var menuPackage by remember { mutableStateOf<Package?>(null) }
     val menuExpanded = rememberSaveable { mutableStateOf(false) }
@@ -121,7 +120,7 @@ fun HomePage(
         "HomePage filtered=${
             mainState.filteredPackages.size
         } updated=${
-            updatedPackages.size
+            mainState.updatedPackages.size
         }->${
             if (updaterVisible) "visible" else "hidden"
         } menu=${
@@ -247,7 +246,7 @@ fun HomePage(
                                                     }
                                                 }
                                                 UpdatedPackageRecycler(
-                                                    productsList = updatedPackages,
+                                                    productsList = mainState.updatedPackages,
                                                     onClick = { item ->
                                                         scope.launch {
                                                             paneNavigator.navigateTo(
@@ -262,8 +261,8 @@ fun HomePage(
                                         collapsedView = {
                                             val text = pluralStringResource(
                                                 id = R.plurals.updated_apps,
-                                                count = updatedPackages.size,
-                                                updatedPackages.size
+                                                count = mainState.updatedPackages.size,
+                                                mainState.updatedPackages.size
                                             )
                                             ExtendedFloatingActionButton(
                                                 text = { Text(text = text) },
@@ -375,12 +374,12 @@ fun HomePage(
         }
     }
     if (openBatchDialog.value) BaseDialog(onDismiss = { openBatchDialog.value = false }) {
-        val selectedList = updatedPackages
+        val selectedList = mainState.updatedPackages
             .map { it.packageInfo }
             .toCollection(ArrayList())
         val selectedApk = mutableMapOf<String, Int>()
         val selectedData = mutableMapOf<String, Int>()
-        val selectedListModes = updatedPackages
+        val selectedListModes = mainState.updatedPackages
             .map {
                 altModeToMode(
                     it.latestBackup?.let { bp ->

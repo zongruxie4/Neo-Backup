@@ -118,29 +118,6 @@ class MainVM(
                 SharingStarted.Eagerly,
                 emptyList()
             )
-
-    val updatedPackages = // TODO move into state
-        //------------------------------------------------------------------------------------------ updatedPackages
-        notBlockedList
-            .trace { "updatePackages? ..." }
-            .mapLatest {
-                it.filter { item ->
-                    item.isUpdated || (pref_newAndUpdatedNotification.value && item.isNew)
-                }
-            }
-            .trace {
-                "*** updatedPackages <<- updated: (${it.size})${
-                    it.map { item ->
-                        "${item.packageName}(${item.versionCode}!=${item.latestBackup?.versionCode ?: ""})"
-                    }
-                }"
-            }
-            .stateIn(
-                ioScope,
-                SharingStarted.Eagerly,
-                emptyList()
-            )
-
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS end
 
     init {
@@ -154,17 +131,24 @@ class MainVM(
                 blocklistRepository.getBlocklistFlow(),
                 homeSortFilterModelFlow,
                 searchQuery,
-                selection
+                selection,
             ) { packages, blocklist, sortFilter, search, selection ->
-                val filteredPackages = packages
-                    .filterNot { blocklist.contains(it.packageName) }
-                    .applySearchAndFilter(search, emptyMap(), sortFilter)
+                val (filteredPackages, updatedPackages) = packages
+                    .filterNot { it.packageName in blocklist }
+                    .let {
+                        Pair(
+                            it.applySearchAndFilter(search, emptyMap(), sortFilter),
+                            it.filter { item ->
+                                item.isUpdated || (pref_newAndUpdatedNotification.value && item.isNew)
+                            }
+                        )
+                    }
 
                 MainState(
                     packages = packages,
                     filteredPackages = filteredPackages,
+                    updatedPackages = updatedPackages,
                     blocklist = blocklist,
-                    schedules = emptyList(), // Add schedule repository if needed
                     searchQuery = search,
                     sortFilter = sortFilter,
                     selection = selection
@@ -179,17 +163,16 @@ class MainVM(
                 blocklistRepository.getBlocklistFlow(),
                 backupSortFilterModelFlow,
                 searchQuery,
-                selection
+                selection,
             ) { packages, blocklist, sortFilter, search, selection ->
                 val filteredPackages = packages
-                    .filterNot { blocklist.contains(it.packageName) }
+                    .filterNot { it.packageName in blocklist }
                     .applySearchAndFilter(search, emptyMap(), sortFilter)
 
                 MainState(
                     packages = packages,
                     filteredPackages = filteredPackages,
                     blocklist = blocklist,
-                    schedules = emptyList(), // Add schedule repository if needed
                     searchQuery = search,
                     sortFilter = sortFilter,
                     selection = selection
@@ -204,17 +187,16 @@ class MainVM(
                 blocklistRepository.getBlocklistFlow(),
                 restoreSortFilterModelFlow,
                 searchQuery,
-                selection
+                selection,
             ) { packages, blocklist, sortFilter, search, selection ->
                 val filteredPackages = packages
-                    .filterNot { blocklist.contains(it.packageName) }
+                    .filterNot { it.packageName in blocklist }
                     .applySearchAndFilter(search, emptyMap(), sortFilter)
 
                 MainState(
                     packages = packages,
                     filteredPackages = filteredPackages,
                     blocklist = blocklist,
-                    schedules = emptyList(), // Add schedule repository if needed
                     searchQuery = search,
                     sortFilter = sortFilter,
                     selection = selection
@@ -232,7 +214,7 @@ class MainVM(
     fun setSortFilter(value: SortFilterModel, sourcePage: NavItem) {
         viewModelScope.launch {
             when (sourcePage) {
-                NavItem.Backup  -> {
+                NavItem.Backup -> {
                     prefs.sortBackup.value = value.sort
                     prefs.sortAscBackup.value = value.sortAsc
                     prefs.mainFilterBackup.value = value.mainFilter
@@ -256,7 +238,7 @@ class MainVM(
                     prefs.enabledFilterRestore.value = value.enabledFilter
                 }
 
-                else            -> {
+                else -> {
                     prefs.sortHome.value = value.sort
                     prefs.sortAscHome.value = value.sortAsc
                     prefs.mainFilterHome.value = value.mainFilter
