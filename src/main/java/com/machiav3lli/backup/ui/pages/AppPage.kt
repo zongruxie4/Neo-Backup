@@ -131,7 +131,6 @@ fun AppPage(
     val thePackage by viewModel.pkg.collectAsState(null)
     val snackbarText by viewModel.snackbarText.collectAsState("")
     val appExtras by viewModel.appExtras.collectAsState()
-    val refreshNow by viewModel.refreshNow
     val dismissNow by viewModel.dismissNow
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarVisible = snackbarText.isNotEmpty()
@@ -161,10 +160,6 @@ fun AppPage(
         if (dismissNow) {
             viewModel.dismissNow.value = false
             onDismiss()
-        }
-        if (refreshNow) {
-            viewModel.refreshNow.value = false
-            mActivity.updatePackage(pkg.packageName)
         }
 
         Scaffold(
@@ -633,7 +628,7 @@ fun AppPage(
                                     try {
                                         Timber.i("${pkg.packageLabel}: Wiping cache")
                                         ShellCommands.wipeCache(context, pkg)
-                                        viewModel.refreshNow.value = true
+                                        viewModel.updatePackage(pkg.packageName)
                                     } catch (e: ShellCommands.ShellActionFailedException) {
                                         // Not a critical issue
                                         val errorMessage: String =

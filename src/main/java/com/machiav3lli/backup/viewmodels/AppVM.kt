@@ -74,7 +74,6 @@ class AppVM(
         private field = MutableStateFlow("")
 
     private var notificationId: Int = SystemUtils.now.toInt()
-    val refreshNow = mutableStateOf(true)
     val dismissNow = mutableStateOf(false)
 
     fun setApp(pn: String) {
@@ -85,24 +84,32 @@ class AppVM(
         viewModelScope.launch { snackbarText.update { value } }
     }
 
+    fun updatePackage(packageName: String) {
+        viewModelScope.launch {
+            packageRepository.updatePackage(packageName)
+        }
+    }
+
     fun uninstallApp() {
         viewModelScope.launch {
-            val users = listOf(currentProfile.toString())
-            packageRepository.uninstall(
-                mPackage = pkg.value,
-                users = users,
-                onDismiss = { dismissNow.value = true }
-            ) { message ->
-                showNotification(
-                    NeoApp.NB,
-                    NeoActivity::class.java,
-                    notificationId++,
-                    pkg.value?.packageLabel,
-                    message,
-                    true
-                )
+            pkg.value?.let { pkg ->
+                val users = listOf(currentProfile.toString())
+                packageRepository.uninstall(
+                    mPackage = pkg,
+                    users = users,
+                    onDismiss = { dismissNow.value = true }
+                ) { message ->
+                    showNotification(
+                        NeoApp.NB,
+                        NeoActivity::class.java,
+                        notificationId++,
+                        pkg.packageLabel,
+                        message,
+                        true
+                    )
+                }
+                updatePackage(pkg.packageName)
             }
-            refreshNow.value = true
         }
     }
 
@@ -110,7 +117,7 @@ class AppVM(
         viewModelScope.launch {
             val users = listOf(currentProfile.toString())
             packageRepository.enableDisable(packageName, users, enable)
-            refreshNow.value = true
+            updatePackage(packageName)
         }
     }
 
@@ -119,7 +126,7 @@ class AppVM(
             packageRepository.deleteBackup(pkg.value, backup) {
                 dismissNow.value = true
             }
-            refreshNow.value = true
+            updatePackage(backup.packageName)
         }
     }
 
@@ -128,14 +135,14 @@ class AppVM(
             packageRepository.deleteAllBackups(pkg.value) {
                 dismissNow.value = true
             }
-            refreshNow.value = true
+            updatePackage(packageName.value)
         }
     }
 
     fun setExtras(packageName: String, appExtras: AppExtras?) {
         viewModelScope.launch {
             appExtrasRepository.replaceExtras(packageName, appExtras)
-            refreshNow.value = true
+            updatePackage(packageName)
         }
     }
 
