@@ -431,8 +431,8 @@ fun AppPage(
                             icon = Phosphor.ArchiveTray,
                             description = stringResource(id = R.string.backup),
                             enabled = !snackbarVisible,
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
                         ) {
                             dialogProps.value = Pair(DialogMode.BACKUP, pkg)
                             openDialog.value = true

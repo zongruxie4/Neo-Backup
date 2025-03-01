@@ -241,8 +241,8 @@ fun BackupItem(
                         FilledRoundButton(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.deleteBackup),
-                            tint = MaterialTheme.colorScheme.tertiaryContainer,
-                            onTint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            onTint = MaterialTheme.colorScheme.onTertiary,
                             onClick = { onDelete(item) }
                         )
                         if (!item.packageLabel.contains("INVALID"))

@@ -113,6 +113,8 @@ fun SelectionChip(
         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
         labelColor = MaterialTheme.colorScheme.onSurface,
         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        iconColor = MaterialTheme.colorScheme.onSurface,
+        selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
     ),
     onClick: () -> Unit,
 ) {
@@ -218,12 +220,12 @@ fun CheckChip(
         modifier = modifier,
         selected = checked,
         colors = FilterChipDefaults.filterChipColors(
+            containerColor = Color.Transparent,
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
             labelColor = MaterialTheme.colorScheme.onSurface,
             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
             iconColor = MaterialTheme.colorScheme.onSurface,
             selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            containerColor = Color.Transparent,
-            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         shape = MaterialTheme.shapes.medium,
         leadingIcon = {
@@ -273,12 +275,12 @@ fun ActionChip(
         },
         shape = MaterialTheme.shapes.large,
         colors = AssistChipDefaults.assistChipColors(
-            containerColor = if (positive) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.tertiary,
-            labelColor = if (positive) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onTertiary,
-            leadingIconContentColor = if (positive) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onTertiary,
+            containerColor = if (positive) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.tertiaryContainer,
+            labelColor = if (positive) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onTertiaryContainer,
+            leadingIconContentColor = if (positive) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onTertiaryContainer,
         ),
         border = null,
         onClick = onClick

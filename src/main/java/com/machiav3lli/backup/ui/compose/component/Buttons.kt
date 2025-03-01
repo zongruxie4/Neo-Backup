@@ -171,13 +171,13 @@ fun ElevatedActionButton(
         colors = ButtonDefaults.elevatedButtonColors(
             contentColor = when {
                 !colored -> MaterialTheme.colorScheme.onSurface
-                positive -> MaterialTheme.colorScheme.onPrimaryContainer
-                else     -> MaterialTheme.colorScheme.onTertiaryContainer
+                positive -> MaterialTheme.colorScheme.onPrimary
+                else     -> MaterialTheme.colorScheme.onTertiary
             },
             containerColor = when {
                 !colored -> MaterialTheme.colorScheme.surfaceContainerHighest
-                positive -> MaterialTheme.colorScheme.primaryContainer
-                else     -> MaterialTheme.colorScheme.tertiaryContainer
+                positive -> MaterialTheme.colorScheme.primary
+                else     -> MaterialTheme.colorScheme.tertiary
             }
         ),
         enabled = enabled,
@@ -273,8 +273,8 @@ fun FilledRoundButton(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     size: Dp = ICON_SIZE_SMALL,
-    tint: Color = MaterialTheme.colorScheme.primaryContainer,
-    onTint: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    tint: Color = MaterialTheme.colorScheme.primary,
+    onTint: Color = MaterialTheme.colorScheme.onPrimary,
     description: String = "",
     onClick: () -> Unit,
 ) {

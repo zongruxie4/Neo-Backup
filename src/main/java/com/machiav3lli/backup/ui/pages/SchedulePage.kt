@@ -192,7 +192,7 @@ fun SchedulePage(
                         CardButton(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.Clock,
-                            contentColor = MaterialTheme.colorScheme.inverseSurface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                             description = "${stringResource(id = R.string.sched_hourOfDay)} ${
                                 LocalTime.of(
                                     schedule.timeHour,
@@ -206,7 +206,7 @@ fun SchedulePage(
                         CardButton(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.ClockClockwise,
-                            contentColor = MaterialTheme.colorScheme.inverseSurface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                             description = "${stringResource(id = R.string.sched_interval)} ${schedule.interval}",
                         ) {
                             dialogProps.value = Pair(DialogMode.INTERVAL_SETTER, schedule)
@@ -222,10 +222,10 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.CheckCircle,
                             description = stringResource(id = R.string.customListTitle),
-                            containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.tertiary,
-                            contentColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onTertiary,
+                            containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.CUSTOMLIST, schedule)
                             openDialog.value = true
@@ -234,10 +234,10 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.Prohibit,
                             description = stringResource(id = R.string.sched_blocklist),
-                            containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.tertiary,
-                            contentColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onTertiary,
+                            containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.BLOCKLIST, schedule)
                             openDialog.value = true

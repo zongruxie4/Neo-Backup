@@ -122,12 +122,10 @@ fun SimpleButton(
     important: Boolean = false,
     action: () -> Unit,
 ) {
-    val color =
-        if (important) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainerHighest
-    val textColor =
-        if (important) MaterialTheme.colorScheme.onPrimaryContainer
-        else MaterialTheme.colorScheme.onSurface
+    val color = if (important) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.surfaceContainerHighest
+    val textColor = if (important) MaterialTheme.colorScheme.onPrimary
+    else MaterialTheme.colorScheme.onSurface
     SmallFloatingActionButton(
         modifier = Modifier
             .padding(2.dp, 0.dp)
