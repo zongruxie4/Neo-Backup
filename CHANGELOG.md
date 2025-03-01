@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-8.3.12 (XX.XX.2025) +70 Commits, +30 Translations
+8.3.12 (XX.XX.2025) +90 Commits, +30 Translations
 ------------
 
 ### Function
@@ -9,6 +9,7 @@ CHANGELOG
 - Add: Indices to room entities
 - Add: Strict mode (logging) for unsafe intents
 - Add: Su-command(s) for APatch (credits @hg42)
+- Add: Update package map after finishing a batch/schedule
 - Fix: Missing/overdoing delete of backups
 - Fix: Scheduling (Return to ScheduleService scheduling)
 - Fix: Launching on refused magisk/root permission
@@ -16,6 +17,10 @@ CHANGELOG
 - Fix: Recomposing navigation suite on changing pager state
 - Fix: Loose checkroot (accepted finding one entry in /data/user) (credits @hg42)
 - Fix: BackupDir not working at start (credits @hg42)
+- Fix: ScheduleWork not running to end
+- Fix: Deleting all backups
+- Fix: Not showing backups of uninstalled packages
+- Fix: Updating package cache even when app page is closed
 - Update: Replace backups' map with a repository instance
 - Remove: CDATA usage in strings
 - TargetSDK 35
@@ -34,6 +39,7 @@ CHANGELOG
 - Update: Main themes colors
 - Update: Revamp coloring and style of some components
 - Update: Only use colored pref icons for more informative purposes (credits @hg42)
+- Update: Animate updated package items
 
 8.3.11 (10.01.2025) +15 Commits, 6 Translations
 ------------
