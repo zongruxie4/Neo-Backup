@@ -24,7 +24,7 @@ class AssetHandler(context: Context) {
         // the version file is written at the end of the copy to validate the transaction
         // this may upgrade or downgrade files, but always all at once
 
-        directory = context.filesDir
+        directory = File(context.filesDir, "assets")
         directory.mkdirs()
         val updateId = context.updateId   //versionName
         val lastId = try {
