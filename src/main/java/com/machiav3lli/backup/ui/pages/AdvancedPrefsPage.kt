@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.BooleanPref
@@ -36,7 +35,6 @@ import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.data.entity.PrefUI
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.data.entity.StringPref
-import com.machiav3lli.backup.data.preferences.NeoPrefs
 import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.findSuCommand
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.isLikeRoot
@@ -60,7 +58,6 @@ import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.extensions.Android
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
-import org.koin.android.ext.android.get
 
 @Composable
 fun DevPrefGroups() {
@@ -630,13 +627,7 @@ val pref_enableSpecialBackups = BooleanPref(
     summaryId = R.string.prefs_enablespecial_summary,
     icon = Phosphor.AsteriskSimple,
     defaultValue = false,
-    onChanged = {
-        NeoApp.main?.get<NeoPrefs>()?.let {
-            it.mainFilterHome.value = it.mainFilterHome.value and MAIN_FILTER_DEFAULT
-            it.mainFilterBackup.value = it.mainFilterBackup.value and MAIN_FILTER_DEFAULT
-            it.mainFilterRestore.value = it.mainFilterRestore.value and MAIN_FILTER_DEFAULT
-        }
-    }
+    onChanged = { NeoApp.main?.enableSpecials((it as BooleanPref).value) }
 )
 
 val pref_disableVerification = BooleanPref(

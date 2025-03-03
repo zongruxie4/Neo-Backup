@@ -395,6 +395,10 @@ class NeoActivity : BaseActivity() {
         viewModel.updatePackage(packageName)
     }
 
+    fun enableSpecials(enable: Boolean) {
+        viewModel.onEnableSpecials(enable)
+    }
+
     fun refreshPackagesAndBackups() {
         MainScope().launch(Dispatchers.IO) {
             invalidateBackupLocation()

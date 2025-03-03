@@ -23,7 +23,7 @@ import com.machiav3lli.backup.EnabledFilter
 import com.machiav3lli.backup.InstalledFilter
 import com.machiav3lli.backup.LatestFilter
 import com.machiav3lli.backup.LaunchableFilter
-import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
+import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
 import com.machiav3lli.backup.Sort
 import com.machiav3lli.backup.UpdatedFilter
 import kotlinx.parcelize.Parcelize
@@ -32,7 +32,7 @@ import kotlinx.parcelize.Parcelize
 data class SortFilterModel(
     val sort: Int = Sort.LABEL.ordinal,
     val sortAsc: Boolean = true,
-    val mainFilter: Int = MAIN_FILTER_DEFAULT,
+    val mainFilter: Int = MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL,
     val backupFilter: Int = BACKUP_FILTER_DEFAULT,
     val installedFilter: Int = InstalledFilter.ALL.ordinal,
     val launchableFilter: Int = LaunchableFilter.ALL.ordinal,
