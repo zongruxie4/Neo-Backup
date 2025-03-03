@@ -5,10 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -41,27 +44,34 @@ abstract class PrefDelegate<T : Any>(
     private val defaultValue: T,
     val onChange: (T) -> Unit
 ) {
-    var value: T
-        get() = runBlocking(Dispatchers.IO) {
-            dataStore.data.first()[key] ?: defaultValue
+    private val flow: Flow<T> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences())
+            else throw exception
         }
-        set(value) = runBlocking(Dispatchers.IO) {
-            set(value)
+        .map { preferences ->
+            preferences[key] ?: defaultValue
+        }
+        .distinctUntilChanged()
+
+    val value: T
+        get() = runBlocking(Dispatchers.IO) {
+            currentValue()
         }
 
     val state: State<T>
         @Composable
-        get() = get().collectAsState(initial = defaultValue)
+        get() = flow.collectAsState(initial = defaultValue)
 
-    open fun get(): Flow<T> {
-        return dataStore.data
-            .map { prefs -> prefs[key] ?: defaultValue }
-            .distinctUntilChanged()
-    }
+    fun flow(): Flow<T> = flow
 
-    protected open suspend fun set(newValue: T) {
-        if (value == newValue) return
+    suspend fun set(newValue: T) {
+        if (newValue == currentValue()) return
         dataStore.edit { prefs -> prefs[key] = newValue }
         onChange(newValue)
+    }
+
+    private suspend fun currentValue(): T {
+        return dataStore.data.first()[key] ?: defaultValue
     }
 }

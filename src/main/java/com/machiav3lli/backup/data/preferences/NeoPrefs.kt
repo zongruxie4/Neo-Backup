@@ -215,15 +215,15 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
     )
 
     fun homeSortFilterFlow(): Flow<SortFilterModel> = combine(
-        sortHome.get(),
-        sortAscHome.get(),
-        mainFilterHome.get(),
-        backupFilterHome.get(),
-        installedFilterHome.get(),
-        launchableFilterHome.get(),
-        updatedFilterHome.get(),
-        latestFilterHome.get(),
-        enabledFilterHome.get(),
+        sortHome.flow(),
+        sortAscHome.flow(),
+        mainFilterHome.flow(),
+        backupFilterHome.flow(),
+        installedFilterHome.flow(),
+        launchableFilterHome.flow(),
+        updatedFilterHome.flow(),
+        latestFilterHome.flow(),
+        enabledFilterHome.flow(),
     ) { args ->
         SortFilterModel(
             sort = args[0] as Int,
@@ -239,15 +239,15 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
     }.flowOn(Dispatchers.IO)
 
     fun backupSortFilterFlow(): Flow<SortFilterModel> = combine(
-        sortBackup.get(),
-        sortAscBackup.get(),
-        mainFilterBackup.get(),
-        backupFilterBackup.get(),
-        installedFilterBackup.get(),
-        launchableFilterBackup.get(),
-        updatedFilterBackup.get(),
-        latestFilterBackup.get(),
-        enabledFilterBackup.get(),
+        sortBackup.flow(),
+        sortAscBackup.flow(),
+        mainFilterBackup.flow(),
+        backupFilterBackup.flow(),
+        installedFilterBackup.flow(),
+        launchableFilterBackup.flow(),
+        updatedFilterBackup.flow(),
+        latestFilterBackup.flow(),
+        enabledFilterBackup.flow(),
     ) { args ->
         SortFilterModel(
             sort = args[0] as Int,
@@ -263,15 +263,15 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
     }.flowOn(Dispatchers.IO)
 
     fun restoreSortFilterFlow(): Flow<SortFilterModel> = combine(
-        sortRestore.get(),
-        sortAscRestore.get(),
-        mainFilterRestore.get(),
-        backupFilterRestore.get(),
-        installedFilterRestore.get(),
-        launchableFilterRestore.get(),
-        updatedFilterRestore.get(),
-        latestFilterRestore.get(),
-        enabledFilterRestore.get(),
+        sortRestore.flow(),
+        sortAscRestore.flow(),
+        mainFilterRestore.flow(),
+        backupFilterRestore.flow(),
+        installedFilterRestore.flow(),
+        launchableFilterRestore.flow(),
+        updatedFilterRestore.flow(),
+        latestFilterRestore.flow(),
+        enabledFilterRestore.flow(),
     ) { args ->
         SortFilterModel(
             sort = args[0] as Int,

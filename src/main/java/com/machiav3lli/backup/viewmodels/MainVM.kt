@@ -190,39 +190,39 @@ class MainVM(
         viewModelScope.launch {
             when (sourcePage) {
                 NavItem.Backup -> {
-                    prefs.sortBackup.value = value.sort
-                    prefs.sortAscBackup.value = value.sortAsc
-                    prefs.mainFilterBackup.value = value.mainFilter
-                    prefs.backupFilterBackup.value = value.backupFilter
-                    prefs.installedFilterBackup.value = value.installedFilter
-                    prefs.launchableFilterBackup.value = value.launchableFilter
-                    prefs.updatedFilterBackup.value = value.updatedFilter
-                    prefs.latestFilterBackup.value = value.latestFilter
-                    prefs.enabledFilterBackup.value = value.enabledFilter
+                    prefs.sortBackup.set(value.sort)
+                    prefs.sortAscBackup.set(value.sortAsc)
+                    prefs.mainFilterBackup.set(value.mainFilter)
+                    prefs.backupFilterBackup.set(value.backupFilter)
+                    prefs.installedFilterBackup.set(value.installedFilter)
+                    prefs.launchableFilterBackup.set(value.launchableFilter)
+                    prefs.updatedFilterBackup.set(value.updatedFilter)
+                    prefs.latestFilterBackup.set(value.latestFilter)
+                    prefs.enabledFilterBackup.set(value.enabledFilter)
                 }
 
                 NavItem.Restore -> {
-                    prefs.sortRestore.value = value.sort
-                    prefs.sortAscRestore.value = value.sortAsc
-                    prefs.mainFilterRestore.value = value.mainFilter
-                    prefs.backupFilterRestore.value = value.backupFilter
-                    prefs.installedFilterRestore.value = value.installedFilter
-                    prefs.launchableFilterRestore.value = value.launchableFilter
-                    prefs.updatedFilterRestore.value = value.updatedFilter
-                    prefs.latestFilterRestore.value = value.latestFilter
-                    prefs.enabledFilterRestore.value = value.enabledFilter
+                    prefs.sortRestore.set(value.sort)
+                    prefs.sortAscRestore.set(value.sortAsc)
+                    prefs.mainFilterRestore.set(value.mainFilter)
+                    prefs.backupFilterRestore.set(value.backupFilter)
+                    prefs.installedFilterRestore.set(value.installedFilter)
+                    prefs.launchableFilterRestore.set(value.launchableFilter)
+                    prefs.updatedFilterRestore.set(value.updatedFilter)
+                    prefs.latestFilterRestore.set(value.latestFilter)
+                    prefs.enabledFilterRestore.set(value.enabledFilter)
                 }
 
                 else -> {
-                    prefs.sortHome.value = value.sort
-                    prefs.sortAscHome.value = value.sortAsc
-                    prefs.mainFilterHome.value = value.mainFilter
-                    prefs.backupFilterHome.value = value.backupFilter
-                    prefs.installedFilterHome.value = value.installedFilter
-                    prefs.launchableFilterHome.value = value.launchableFilter
-                    prefs.updatedFilterHome.value = value.updatedFilter
-                    prefs.latestFilterHome.value = value.latestFilter
-                    prefs.enabledFilterHome.value = value.enabledFilter
+                    prefs.sortHome.set(value.sort)
+                    prefs.sortAscHome.set(value.sortAsc)
+                    prefs.mainFilterHome.set(value.mainFilter)
+                    prefs.backupFilterHome.set(value.backupFilter)
+                    prefs.installedFilterHome.set(value.installedFilter)
+                    prefs.launchableFilterHome.set(value.launchableFilter)
+                    prefs.updatedFilterHome.set(value.updatedFilter)
+                    prefs.latestFilterHome.set(value.latestFilter)
+                    prefs.enabledFilterHome.set(value.enabledFilter)
                 }
             }
         }
