@@ -134,7 +134,8 @@ android {
                 "/META-INF/**.pro",
                 "/META-INF/**.version",     // comment out to enable layout inspector
                 "/META-INF/LICENSE-notice.md",
-                "/META-INF/LICENSE.md"
+                "/META-INF/LICENSE.md",
+                "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
             )
         }
     }
@@ -171,6 +172,7 @@ dependencies {
     implementation(libs.commons.io)
     implementation(libs.commons.compress)
     implementation(variantOf(libs.zstd.jni) { artifactType("aar") })
+    implementation(libs.pgpainless)
     implementation(libs.timber)
     implementation(libs.semver)
     implementation(libs.libsu.core)

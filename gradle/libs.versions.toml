@@ -22,6 +22,7 @@ libsu = "6.0.0"
 lifecycle = "2.8.7"
 material = "1.12.0"
 navigation = "2.8.8"
+pgpainless = "1.7.2"
 preference = "1.2.1"
 room = "2.6.1"
 security = "1.1.0-alpha06"
@@ -68,6 +69,7 @@ security-crypto = { module = "androidx.security:security-crypto-ktx", version.re
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
 zstd-jni = { module = "com.github.luben:zstd-jni", version.ref = "zstd-jni" }
+pgpainless = { module = "org.pgpainless:pgpainless-core", version.ref = "pgpainless" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 semver = { module = "de.voize:semver4k", version.ref = "semver" }
 
