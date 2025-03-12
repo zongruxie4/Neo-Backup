@@ -35,6 +35,7 @@ import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.RootFile
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.data.plugins.InternalShellScriptPlugin
+import com.machiav3lli.backup.manager.handler.PGPHandler
 import com.machiav3lli.backup.manager.handler.ShellCommands
 import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.hasPmBypassLowTargetSDKBlock
@@ -64,11 +65,14 @@ import com.machiav3lli.backup.utils.getCryptoSalt
 import com.machiav3lli.backup.utils.getEncryptionPassword
 import com.machiav3lli.backup.utils.isAllowDowngrade
 import com.machiav3lli.backup.utils.isDisableVerification
+import com.machiav3lli.backup.utils.isPGPEncryptionEnabled
+import com.machiav3lli.backup.utils.isPasswordEncryptionEnabled
 import com.machiav3lli.backup.utils.isRestoreAllPermissions
 import com.machiav3lli.backup.utils.suUnpackTo
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream
+import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.File
@@ -446,14 +450,23 @@ open class RestoreAppAction(context: Context, work: AppActionWork?, shell: Shell
         iv: ByteArray?,
     ): InputStream {
         var inputStream: InputStream = BufferedInputStream(archive.inputStream()!!)
-        if (isEncrypted) {
-            val password = getEncryptionPassword()
-            if (password.isEmpty())
-                throw RestoreFailedException("Password is empty, set it in preferences!")
-            if (iv == null)
-                throw RestoreFailedException("IV vector could not be read from properties file, decryption impossible")
-            Timber.d("Decryption enabled")
-            inputStream = inputStream.decryptStream(password, getCryptoSalt(), iv)
+        when {
+            isEncrypted && isPasswordEncryptionEnabled() -> {
+                val password = getEncryptionPassword()
+                if (password.isEmpty())
+                    throw RestoreFailedException("Password is empty, set it in preferences!")
+                if (iv == null)
+                    throw RestoreFailedException("IV vector could not be read from properties file, decryption impossible")
+                Timber.d("Decryption enabled")
+                inputStream = inputStream.decryptStream(password, getCryptoSalt(), iv)
+            }
+
+            isEncrypted && isPGPEncryptionEnabled()      -> {
+                get<PGPHandler>(PGPHandler::class.java).decryptStream(inputStream).fold(
+                    onSuccess = { inputStream = it },
+                    onFailure = { throw RestoreFailedException(it.message) },
+                )
+            }
         }
         if (isCompressed) {
             when (compressionType) {

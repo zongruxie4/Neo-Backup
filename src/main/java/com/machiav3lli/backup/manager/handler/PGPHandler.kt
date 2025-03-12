@@ -7,18 +7,24 @@ import com.machiav3lli.backup.ui.pages.pref_pgpPasscode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
+import org.bouncycastle.jcajce.BCFKSLoadStoreParameter
 import org.bouncycastle.openpgp.PGPPublicKeyRing
 import org.bouncycastle.openpgp.PGPSecretKeyRing
 import org.pgpainless.PGPainless
 import org.pgpainless.algorithm.SymmetricKeyAlgorithm
 import org.pgpainless.decryption_verification.ConsumerOptions
+import org.pgpainless.decryption_verification.DecryptionStream
 import org.pgpainless.encryption_signing.EncryptionOptions
 import org.pgpainless.encryption_signing.EncryptionResult
+import org.pgpainless.encryption_signing.EncryptionStream
 import org.pgpainless.encryption_signing.ProducerOptions
 import org.pgpainless.key.protection.SecretKeyRingProtector.Companion.unlockAnyKeyWith
 import org.pgpainless.key.protection.SecretKeyRingProtector.Companion.unprotectedKeys
 import org.pgpainless.util.Passphrase
+import java.io.InputStream
+import java.io.OutputStream
 
+// https://pgpainless.readthedocs.io
 class PGPHandler(private val context: Context) {
     val cc = Dispatchers.IO + SupervisorJob()
 
@@ -39,6 +45,8 @@ class PGPHandler(private val context: Context) {
         secretKeyRing = PGPainless.readKeyRing().secretKeyRing(pref_pgpKey.value)
             ?: PGPSecretKeyRing(emptyList())
         reloadPublicKey()
+        BCFKSLoadStoreParameter.EncryptionAlgorithm.AES256_KWP
+        secretKeyRing.secretKey?.keyEncryptionAlgorithm
     }
 
     suspend fun loadKeyFromUri(uri: Uri): Result<Boolean> = runCatching {
@@ -97,6 +105,19 @@ class PGPHandler(private val context: Context) {
             }
         }
 
+    fun encryptStream(outputStream: OutputStream): Result<EncryptionStream?> =
+        runCatching {
+            PGPainless.encryptAndOrSign()
+                .onOutputStream(outputStream)
+                .withOptions(
+                    ProducerOptions.encrypt(
+                        EncryptionOptions.encryptDataAtRest()
+                            .addHiddenRecipient(publicKeyRing)
+                            .overrideEncryptionAlgorithm(SymmetricKeyAlgorithm.AES_256)
+                    )
+                )
+        }
+
     suspend fun decryptFile(inputUri: Uri, outputUri: Uri): Result<Unit> = runCatching {
         withContext(cc) {
             val keyProtector = pref_pgpPasscode.value.takeIf { it.isNotBlank() }
@@ -117,4 +138,18 @@ class PGPHandler(private val context: Context) {
             }
         }
     }
+
+    fun decryptStream(inputStream: InputStream): Result<DecryptionStream> =
+        runCatching {
+            val keyProtector = pref_pgpPasscode.value.takeIf { it.isNotBlank() }
+                ?.let { unlockAnyKeyWith(Passphrase(it.toCharArray())) }
+                ?: unprotectedKeys()
+
+            PGPainless.decryptAndOrVerify()
+                .onInputStream(inputStream)
+                .withOptions(
+                    ConsumerOptions()
+                        .addDecryptionKey(secretKeyRing, keyProtector)
+                )
+        }
 }

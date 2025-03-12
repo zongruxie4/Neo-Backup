@@ -37,6 +37,7 @@ import com.machiav3lli.backup.data.plugins.InternalShellScriptPlugin
 import com.machiav3lli.backup.data.preferences.traceAccess
 import com.machiav3lli.backup.manager.handler.BackupBuilder
 import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.manager.handler.PGPHandler
 import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.isFileNotFoundException
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.quote
@@ -64,12 +65,16 @@ import com.machiav3lli.backup.utils.getEncryptionPassword
 import com.machiav3lli.backup.utils.initIv
 import com.machiav3lli.backup.utils.isCompressionEnabled
 import com.machiav3lli.backup.utils.isEncryptionEnabled
+import com.machiav3lli.backup.utils.isPGPEncryptionEnabled
+import com.machiav3lli.backup.utils.isPasswordEncryptionEnabled
 import com.machiav3lli.backup.utils.suAddFiles
 import com.topjohnwu.superuser.ShellUtils
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream
+import org.koin.java.KoinJavaComponent.get
+import org.pgpainless.algorithm.SymmetricKeyAlgorithm
 import timber.log.Timber
 import java.io.IOException
 import java.io.OutputStream
@@ -183,8 +188,12 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                     Timber.i("$app: Compressing backup using ${getCompressionType()}")
                     backupBuilder.setCompressionType(getCompressionType())
                 }
-                if (isEncryptionEnabled()) {
-                    backupBuilder.setCipherType(CIPHER_ALGORITHM)
+                when {
+                    isPasswordEncryptionEnabled() ->
+                        backupBuilder.setCipherType(CIPHER_ALGORITHM)
+
+                    isPGPEncryptionEnabled()      ->
+                        backupBuilder.setCipherType(SymmetricKeyAlgorithm.AES_256.name)
                 }
                 StorageFile.invalidateCache(backupInstanceDir)
                 val backupSize = backupInstanceDir.listFiles().sumOf { it.size }
@@ -229,8 +238,6 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
         compress: Boolean,
         iv: ByteArray?
     ): OutputStream {
-
-        val password = getEncryptionPassword()
         val shouldCompress = compress && isCompressionEnabled()
 
         val backupFilename = getBackupArchiveFilename(
@@ -243,10 +250,20 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
 
         var outStream: OutputStream = backupFile.outputStream()!!
 
-        if (isEncryptionEnabled()) {
-            if (iv == null) throw CryptoSetupException(Exception("IV is null"))
-            if (password.isEmpty()) throw CryptoSetupException(Exception("password is empty"))
-            outStream = outStream.encryptStream(password, getCryptoSalt(), iv)
+        when {
+            isPasswordEncryptionEnabled() -> {
+                val password = getEncryptionPassword()
+                if (iv == null) throw CryptoSetupException(Exception("IV is null"))
+                if (password.isEmpty()) throw CryptoSetupException(Exception("password is empty"))
+                outStream = outStream.encryptStream(password, getCryptoSalt(), iv)
+            }
+
+            isPGPEncryptionEnabled()      -> {
+                get<PGPHandler>(PGPHandler::class.java).encryptStream(outStream).fold(
+                    onSuccess = { it?.let { outStream = it } },
+                    onFailure = { throw CryptoSetupException(it) },
+                )
+            }
         }
 
         if (shouldCompress) {
