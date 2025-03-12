@@ -14,6 +14,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Flask
 import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.compose.icons.phosphor.House
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Infinity
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Key
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Lock
 import com.machiav3lli.backup.ui.compose.icons.phosphor.SlidersHorizontal
 import com.machiav3lli.backup.ui.compose.icons.phosphor.UserGear
@@ -98,6 +99,12 @@ sealed class NavItem(
     data object ToolsPrefs : NavItem(R.string.prefs_tools_short, Phosphor.Wrench, "prefs_tools", {
         ToolsPrefsPage()
     })
+
+    data object Encryption : NavItem(
+        R.string.prefs_encryption,
+        Phosphor.Key,
+        "prefs_service/encryption"
+    )
 
     data object Terminal :
         NavItem(R.string.prefs_tools_terminal, Phosphor.Bug, "prefs_tools/terminal")

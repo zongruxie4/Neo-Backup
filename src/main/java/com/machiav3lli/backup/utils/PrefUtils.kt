@@ -26,6 +26,7 @@ import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.machiav3lli.backup.ENCRYPTION
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.PREFS_SHARED_PRIVATE
@@ -47,7 +48,7 @@ import com.machiav3lli.backup.ui.pages.pref_compressionType
 import com.machiav3lli.backup.ui.pages.pref_deviceLock
 import com.machiav3lli.backup.ui.pages.pref_disableVerification
 import com.machiav3lli.backup.ui.pages.pref_enableSpecialBackups
-import com.machiav3lli.backup.ui.pages.pref_encryption
+import com.machiav3lli.backup.ui.pages.pref_encryption_mode
 import com.machiav3lli.backup.ui.pages.pref_giveAllPermissions
 import com.machiav3lli.backup.ui.pages.pref_languages
 import com.machiav3lli.backup.ui.pages.pref_password
@@ -92,7 +93,7 @@ fun getCryptoSalt(): ByteArray {
 }
 
 fun isEncryptionEnabled(): Boolean =
-    pref_encryption.value && getEncryptionPassword().isNotEmpty()
+    pref_encryption_mode.value != ENCRYPTION.NONE.ordinal && getEncryptionPassword().isNotEmpty()
 
 fun getEncryptionPassword(): String = pref_password.value
 

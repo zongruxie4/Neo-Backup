@@ -454,4 +454,11 @@
     <string name="about_build_FORMAT">%s (Build %s)</string>
     <string name="sort_filter">Sort &amp; Filter</string>
     <string name="sort_appdata_size">App &amp; data size</string>
+    <string name="prefs_pgp_key">PGP key</string>
+    <string name="prefs_pgp_key_summary">Select the PGP key file in order to use it to encrypt the backups.</string>
+    <string name="prefs_pgp_passcode">PGP key passcode</string>
+    <string name="prefs_pgp_passcode_summary">The passcode to unlock the PGP key if protected.</string>
+    <string name="prefs_encryption_none">No encryption</string>
+    <string name="prefs_encryption_password">Password</string>
+    <string name="prefs_encryption_pgp">PGP key</string>
 </resources>

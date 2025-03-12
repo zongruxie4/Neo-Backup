@@ -9,10 +9,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.manager.handler.LogsHandler
-import com.machiav3lli.backup.ui.pages.publicPreferences
 import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.data.preferences.tracePrefs
+import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.ui.compose.component.BooleanPreference
 import com.machiav3lli.backup.ui.compose.component.EnumPreference
 import com.machiav3lli.backup.ui.compose.component.IntPreference
@@ -21,6 +20,7 @@ import com.machiav3lli.backup.ui.compose.component.ListPreference
 import com.machiav3lli.backup.ui.compose.component.PasswordPreference
 import com.machiav3lli.backup.ui.compose.component.StringEditPreference
 import com.machiav3lli.backup.ui.compose.component.StringPreference
+import com.machiav3lli.backup.ui.pages.publicPreferences
 import com.machiav3lli.backup.utils.getDefaultSharedPreferences
 import com.machiav3lli.backup.utils.getPrivateSharedPrefs
 import kotlinx.coroutines.CoroutineScope
@@ -483,6 +483,31 @@ class PasswordPref(
     onChanged = onChanged
 )
 
+class KeyPref(
+    key: String,
+    private: Boolean = true,
+    defaultValue: String,
+    @StringRes titleId: Int = -1,
+    @StringRes summaryId: Int = -1,
+    summary: String? = null,
+    UI: PrefUI? = null,
+    icon: ImageVector? = null,
+    iconTint: ((Pref) -> Color)? = null,
+    enableIf: (() -> Boolean)? = null,
+    onChanged: ((Pref) -> Unit)? = null,
+) : StringPref(
+    key = key,
+    private = private,
+    defaultValue = defaultValue,
+    titleId = titleId,
+    summaryId = summaryId,
+    summary = summary,
+    UI = UI,
+    icon = icon,
+    iconTint = iconTint,
+    enableIf = enableIf,
+    onChanged = onChanged
+)
 
 class ListPref(
     key: String,

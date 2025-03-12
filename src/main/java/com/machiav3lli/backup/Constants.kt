@@ -179,6 +179,18 @@ val themeItems = mutableMapOf(
     }
 }
 
+enum class ENCRYPTION {
+    NONE,
+    PASSWORD,
+    PGP,
+}
+
+val encryptionModes = mutableMapOf(
+    ENCRYPTION.NONE.ordinal to R.string.prefs_encryption_none,
+    ENCRYPTION.PASSWORD.ordinal to R.string.prefs_encryption_password,
+    ENCRYPTION.PGP.ordinal to R.string.prefs_encryption_pgp,
+)
+
 val BUTTON_SIZE_MEDIUM = 48.dp
 val ICON_SIZE_SMALL = 24.dp // Default
 val ICON_SIZE_MEDIUM = 32.dp

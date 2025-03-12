@@ -15,19 +15,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.COMPRESSION_TYPES
+import com.machiav3lli.backup.ENCRYPTION
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
-import com.machiav3lli.backup.ui.dialogs.EnumPrefDialogUI
-import com.machiav3lli.backup.ui.dialogs.ListPrefDialogUI
-import com.machiav3lli.backup.ui.dialogs.StringPrefDialogUI
 import com.machiav3lli.backup.data.entity.BooleanPref
 import com.machiav3lli.backup.data.entity.EnumPref
 import com.machiav3lli.backup.data.entity.IntPref
+import com.machiav3lli.backup.data.entity.KeyPref
+import com.machiav3lli.backup.data.entity.LaunchPref
 import com.machiav3lli.backup.data.entity.ListPref
 import com.machiav3lli.backup.data.entity.PasswordPref
 import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.data.entity.StringPref
+import com.machiav3lli.backup.encryptionModes
+import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FileZip
@@ -43,7 +44,11 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ShieldCheckered
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ShieldStar
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TagSimple
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Textbox
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
+import com.machiav3lli.backup.ui.dialogs.EnumPrefDialogUI
+import com.machiav3lli.backup.ui.dialogs.ListPrefDialogUI
+import com.machiav3lli.backup.ui.dialogs.StringPrefDialogUI
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -130,9 +135,16 @@ val pref_encryption = BooleanPref(
     defaultValue = false
 )
 
+val pref_encryption_mode = EnumPref(
+    key = "encryption.mode",
+    titleId = R.string.prefs_encryption,
+    icon = Phosphor.Key,
+    entries = encryptionModes,
+    defaultValue = ENCRYPTION.NONE.ordinal,
+)
 
 val pref_password = PasswordPref(
-    key = "srv.password",
+    key = "encryption.password",
     titleId = R.string.prefs_password,
     summaryId = R.string.prefs_password_summary,
     icon = Phosphor.Password,
@@ -140,6 +152,7 @@ val pref_password = PasswordPref(
         val pref = it as PasswordPref
         if (pref.value.isNotEmpty()) Color.Green else Color.Gray
     },
+    enableIf = { pref_encryption_mode.value == ENCRYPTION.PASSWORD.ordinal },
     defaultValue = "",
 )
 
@@ -149,6 +162,24 @@ val kill_password = PasswordPref(   // make sure password is never saved in non-
     defaultValue = ""
 )
 val kill_password_set = run { kill_password.value = "" }
+
+val pref_pgpKey = KeyPref(
+    key = "encryption.pgpKey",
+    titleId = R.string.prefs_pgp_key,
+    summaryId = R.string.prefs_pgp_key_summary,
+    icon = Phosphor.Key,
+    enableIf = { pref_encryption_mode.value == ENCRYPTION.PGP.ordinal },
+    defaultValue = "",
+)
+
+val pref_pgpPasscode = PasswordPref(
+    key = "encryption.pgpPasscode",
+    titleId = R.string.prefs_pgp_passcode,
+    summaryId = R.string.prefs_pgp_passcode_summary,
+    icon = Phosphor.Password,
+    enableIf = { pref_encryption_mode.value == ENCRYPTION.PGP.ordinal },
+    defaultValue = "",
+)
 
 
 val pref_backupDeviceProtectedData = BooleanPref(

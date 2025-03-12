@@ -1,7 +1,11 @@
 package tests.tests
 
 import androidx.test.platform.app.InstrumentationRegistry
+import com.machiav3lli.backup.ENCRYPTION
 import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.data.entity.RootFile
+import com.machiav3lli.backup.data.entity.StorageFile
+import com.machiav3lli.backup.data.entity.UndeterminedStorageFile
 import com.machiav3lli.backup.manager.actions.BackupAppAction
 import com.machiav3lli.backup.manager.actions.RestoreAppAction
 import com.machiav3lli.backup.manager.handler.ShellHandler
@@ -9,10 +13,7 @@ import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.quote
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.utilBox
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.utilBoxQ
-import com.machiav3lli.backup.data.entity.RootFile
-import com.machiav3lli.backup.data.entity.StorageFile
-import com.machiav3lli.backup.data.entity.UndeterminedStorageFile
-import com.machiav3lli.backup.ui.pages.pref_encryption
+import com.machiav3lli.backup.ui.pages.pref_encryption_mode
 import com.topjohnwu.superuser.ShellUtils.fastCmd
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -252,7 +253,7 @@ class Test_BackupRestore {
 
     fun backup(compress: Boolean) {
         if (!backupCreated) {
-            pref_encryption.value = false
+            pref_encryption_mode.value = ENCRYPTION.NONE.ordinal
             val iv = null     //initIv(CIPHER_ALGORITHM)
             val backupAction = BackupAppAction(context, null, shellHandler)
             val fromDir = StorageFile(testDir)
