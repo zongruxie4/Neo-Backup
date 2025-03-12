@@ -53,6 +53,7 @@ import com.machiav3lli.backup.ui.pages.pref_giveAllPermissions
 import com.machiav3lli.backup.ui.pages.pref_languages
 import com.machiav3lli.backup.ui.pages.pref_password
 import com.machiav3lli.backup.ui.pages.pref_pathBackupFolder
+import com.machiav3lli.backup.ui.pages.pref_pgpPasscode
 import com.machiav3lli.backup.ui.pages.pref_restoreDeviceProtectedData
 import com.machiav3lli.backup.ui.pages.pref_restoreExternalData
 import com.machiav3lli.backup.ui.pages.pref_restoreMediaData
@@ -95,7 +96,17 @@ fun getCryptoSalt(): ByteArray {
 fun isEncryptionEnabled(): Boolean =
     pref_encryption_mode.value != ENCRYPTION.NONE.ordinal && getEncryptionPassword().isNotEmpty()
 
-fun getEncryptionPassword(): String = pref_password.value
+fun isPasswordEncryptionEnabled(): Boolean =
+    pref_encryption_mode.value == ENCRYPTION.PASSWORD.ordinal && getEncryptionPassword().isNotEmpty()
+
+fun isPGPEncryptionEnabled(): Boolean =
+    pref_encryption_mode.value == ENCRYPTION.PGP.ordinal && getEncryptionPassword().isNotEmpty()
+
+fun getEncryptionPassword(): String = when (pref_encryption_mode.value) {
+    ENCRYPTION.PASSWORD.ordinal -> pref_password.value
+    ENCRYPTION.PGP.ordinal      -> pref_pgpPasscode.value
+    else                        -> ""
+}
 
 fun isCompressionEnabled(): Boolean =
     getCompressionType().isNotEmpty() && getCompressionLevel() > 0
