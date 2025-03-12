@@ -461,4 +461,7 @@
     <string name="prefs_encryption_none">No encryption</string>
     <string name="prefs_encryption_password">Password</string>
     <string name="prefs_encryption_pgp">PGP key</string>
+    <string name="create_pgp_key">Create a new PGP key</string>
+    <string name="user_id">User ID</string>
+    <string name="passcode">Passcode</string>
 </resources>
