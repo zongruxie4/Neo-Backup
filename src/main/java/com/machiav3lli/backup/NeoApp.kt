@@ -54,6 +54,7 @@ import com.machiav3lli.backup.data.preferences.traceSerialize
 import com.machiav3lli.backup.manager.handler.AssetHandler
 import com.machiav3lli.backup.manager.handler.ExportsHandler
 import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.manager.handler.PGPHandler
 import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.manager.services.PackageUnInstalledReceiver
@@ -94,6 +95,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androix.startup.KoinStartup
 import org.koin.core.annotation.KoinExperimentalAPI
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.get
@@ -708,4 +710,5 @@ val handlersModule = module {
     single { WorkHandler(get(), get()) }
     single { ExportsHandler(get()) }
     single { get<Context>().getSystemService(Context.POWER_SERVICE) as PowerManager }
+    singleOf(::PGPHandler)
 }
