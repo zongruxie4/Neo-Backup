@@ -18,6 +18,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.machiav3lli.backup.ui.pages.EncryptionPage
 import com.machiav3lli.backup.ui.pages.LockPage
 import com.machiav3lli.backup.ui.pages.LogsPage
 import com.machiav3lli.backup.ui.pages.MainPage
@@ -67,6 +68,9 @@ fun MainNavHost(
                 pageIndex = pi,
                 navController = navController
             )
+        }
+        slideInComposable(NavItem.Encryption.destination) {
+            EncryptionPage()
         }
         slideInComposable(NavItem.Exports.destination) {
             SchedulesExportsPage()

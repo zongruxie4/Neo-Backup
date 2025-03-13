@@ -134,12 +134,12 @@ fun LazyListScope.ServicePrefGroups(onPrefDialog: (Pref) -> Unit) {
     }
 }
 
-val pref_encryption = BooleanPref(
-    key = "srv.encryption",
+val pref_encryption = LaunchPref(
+    key = "srv.enc",
     titleId = R.string.prefs_encryption,
     summaryId = R.string.prefs_encryption_summary,
     icon = Phosphor.Key,
-    defaultValue = false
+    onClick = { NeoApp.main?.moveTo(NavItem.Encryption.destination) }
 )
 
 val pref_encryption_mode = EnumPref(
