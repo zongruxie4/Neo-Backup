@@ -464,4 +464,5 @@
     <string name="create_pgp_key">Create a new PGP key</string>
     <string name="user_id">User ID</string>
     <string name="passcode">Passcode</string>
+    <string name="prefs_pgp_key_management">OpenPGP key management</string>
 </resources>
