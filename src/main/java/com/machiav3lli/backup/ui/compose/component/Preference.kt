@@ -195,6 +195,7 @@ fun BasePreference(
                         text = it,
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 5,
                     )
                 }
                 bottomWidget?.let { widget ->
