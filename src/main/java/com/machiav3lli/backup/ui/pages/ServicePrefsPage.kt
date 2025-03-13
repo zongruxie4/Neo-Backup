@@ -1,5 +1,7 @@
 package com.machiav3lli.backup.ui.pages
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,8 +31,10 @@ import com.machiav3lli.backup.data.entity.PasswordPref
 import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.data.entity.StringPref
 import com.machiav3lli.backup.encryptionModes
+import com.machiav3lli.backup.manager.handler.PGPHandler
 import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
+import com.machiav3lli.backup.ui.compose.component.StringPreference
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FileZip
 import com.machiav3lli.backup.ui.compose.icons.phosphor.FloppyDisk
@@ -52,6 +57,8 @@ import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.get
 
 @Composable
 fun ServicePrefsPage() {
@@ -74,12 +81,12 @@ fun ServicePrefsPage() {
     if (openDialog.value) {
         BaseDialog(onDismiss = { openDialog.value = false }) {
             when (dialogsPref) {
-                is ListPref     -> ListPrefDialogUI(
+                is ListPref -> ListPrefDialogUI(
                     pref = dialogsPref as ListPref,
                     openDialogCustom = openDialog,
                 )
 
-                is EnumPref     -> EnumPrefDialogUI(
+                is EnumPref -> EnumPrefDialogUI(
                     pref = dialogsPref as EnumPref,
                     openDialogCustom = openDialog
                 )
@@ -91,7 +98,7 @@ fun ServicePrefsPage() {
                     openDialogCustom = openDialog
                 )
 
-                is StringPref   -> StringPrefDialogUI(
+                is StringPref -> StringPrefDialogUI(
                     pref = dialogsPref as StringPref,
                     openDialogCustom = openDialog
                 )
@@ -169,6 +176,34 @@ val pref_pgpKey = KeyPref(
     summaryId = R.string.prefs_pgp_key_summary,
     icon = Phosphor.Key,
     enableIf = { pref_encryption_mode.value == ENCRYPTION.PGP.ordinal },
+    UI = { it, _, index, groupSize ->
+        val scope = rememberCoroutineScope()
+        val pgpManager: PGPHandler = get<PGPHandler>(PGPHandler::class.java)
+
+        val pref = it as KeyPref
+        val launcher =
+            rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                uri?.let {
+                    scope.launch {
+                        pgpManager.loadKeyFromUri(it).fold(
+                            onSuccess = {
+                                pgpManager.isKeyLoaded()
+                            },
+                            onFailure = { _ -> }
+                        )
+                    }
+                }
+            }
+
+        StringPreference(
+            pref = pref,
+            index = index,
+            groupSize = groupSize,
+            onClick = {
+                launcher.launch(arrayOf("*/*"))
+            },
+        )
+    },
     defaultValue = "",
 )
 
