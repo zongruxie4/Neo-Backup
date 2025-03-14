@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.machiav3lli.backup.DamagedOp
 import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
@@ -29,6 +30,7 @@ import com.machiav3lli.backup.data.entity.LinkPref
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
+import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.InnerBackground
@@ -52,6 +54,7 @@ import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.BufferedOutputStream
@@ -113,6 +116,27 @@ fun ToolsPrefsPage(
                                         openDialog.value = true
                                     }
 
+                                    pref_cleanupBackupDir      -> {
+                                        dialogProps.value = Triple(
+                                            DialogMode.TOOL_CLEANUP_BACKUP_DIR,
+                                            {
+                                                MainScope().launch(Dispatchers.IO) {
+                                                    NeoApp.beginBusy("cleanupBackupDir")
+                                                    NeoApp.context.findBackups(damagedOp = DamagedOp.CLEANUP)
+                                                    NeoApp.endBusy("cleanupBackupDir")
+                                                }
+                                            },
+                                            {
+                                                MainScope().launch(Dispatchers.IO) {
+                                                    NeoApp.beginBusy("renameDamagedToERROR")
+                                                    NeoApp.context.findBackups(damagedOp = DamagedOp.RENAME)
+                                                    NeoApp.endBusy("renameDamagedToERROR")
+                                                }
+                                            }
+                                        )
+                                        openDialog.value = true
+                                    }
+
                                     pref_copySelfApk           -> context.onClickCopySelf(
                                         snackbarHostState,
                                         coroutineScope
@@ -156,6 +180,17 @@ fun ToolsPrefsPage(
                     onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialogYes),
                     primaryAction = second as () -> Unit,
+                )
+
+                DialogMode.TOOL_CLEANUP_BACKUP_DIR
+                     -> ActionsDialogUI(
+                    titleText = stringResource(R.string.prefs_cleanup_backupdir),
+                    messageText = stringResource(R.string.prefs_cleanup_backupdir_summary),
+                    onDismiss = { openDialog.value = false },
+                    primaryText = stringResource(R.string.dialogDelete),
+                    primaryAction = primary as () -> Unit,
+                    secondaryText = stringResource(R.string.dialogLabel),
+                    secondaryAction = second as () -> Unit,
                 )
 
                 DialogMode.TOOL_SAVE_APPS_LIST
@@ -244,6 +279,13 @@ private fun Context.deleteBackups(deleteList: List<Package>) {
     )
 }
 
+val pref_cleanupBackupDir = LinkPref(
+    key = "tool.cleanupBackupDir",
+    titleId = R.string.prefs_cleanup_backupdir,
+    summaryId = R.string.prefs_cleanup_backupdir_summary,
+    icon = Phosphor.TrashSimple, //Phosphor.Broom,
+)
+
 val pref_copySelfApk = LinkPref(
     key = "tool.copySelfApk",
     titleId = R.string.prefs_copyselfapk,
@@ -327,9 +369,10 @@ private fun Context.onClickSaveAppsList(
     if (packageList.isNotEmpty()) {
         showDialog(
             {
-                writeAppsListFile(packageList
-                    .filter { it.isSystem }
-                    .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
+                writeAppsListFile(
+                    packageList
+                        .filter { it.isSystem }
+                        .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     false  //TODO hg42 name first because of ":", better for scripts
                 )
             },

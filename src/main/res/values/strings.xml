@@ -465,4 +465,9 @@
     <string name="user_id">User ID</string>
     <string name="passcode">Passcode</string>
     <string name="prefs_pgp_key_management">OpenPGP key management</string>
+    <string name="prefs_cleanup_backupdir">Clean up backup directory</string>
+    <string name="prefs_cleanup_backupdir_summary">Scan for damaged backups (e.g. damaged properties file, properties without directory, directory without properties), label and then delete them.</string>
+    <string name="prefs_cleanup_backupdir_message">Scan for damaged backups (e.g. damaged properties file, properties without directory, directory without properties), then either just label them or label and delete them.</string>
+    <string name="dialogDelete">Delete</string>
+    <string name="dialogLabel">Just label</string>
 </resources>
