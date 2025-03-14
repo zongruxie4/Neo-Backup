@@ -118,6 +118,7 @@ enum class DialogMode {
     PERMISSION_CONTACTS,
     PERMISSION_BATTERY_OPTIMIZATION,
     TOOL_DELETE_BACKUP_UNINSTALLED,
+    TOOL_CLEANUP_BACKUP_DIR,
     TOOL_SAVE_APPS_LIST,
 }
 
@@ -358,6 +359,13 @@ const val CHIP_SIZE_APP = 2
 const val CHIP_SIZE_DATA = 3
 const val CHIP_SIZE_CACHE = 4
 const val CHIP_SPLIT = 5
+
+enum class DamagedOp {
+    RENAME,
+    UNDO,
+    DELETE,
+    CLEANUP,
+}
 
 const val HELP_CHANGELOG = "https://github.com/NeoApplications/Neo-Backup/blob/master/CHANGELOG.md"
 const val HELP_TELEGRAM = "https://t.me/neo_backup"

@@ -29,6 +29,7 @@ import com.machiav3lli.backup.BACKUP_INSTANCE_REGEX_PATTERN
 import com.machiav3lli.backup.BACKUP_PACKAGE_FOLDER_REGEX_PATTERN
 import com.machiav3lli.backup.BACKUP_SPECIAL_FILE_REGEX_PATTERN
 import com.machiav3lli.backup.BACKUP_SPECIAL_FOLDER_REGEX_PATTERN
+import com.machiav3lli.backup.DamagedOp
 import com.machiav3lli.backup.ERROR_PREFIX
 import com.machiav3lli.backup.IGNORED_PERMISSIONS
 import com.machiav3lli.backup.MAIN_FILTER_SYSTEM
@@ -72,7 +73,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.java.KoinJavaComponent.get
 import timber.log.Timber
 import java.io.IOException
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
@@ -128,7 +129,7 @@ suspend fun scanBackups(
     backupRoot: StorageFile,
     level: Int = 0,
     forceTrace: Boolean = false,
-    damagedOp: String? = null,
+    damagedOp: DamagedOp? = null,
     onValidBackup: suspend (StorageFile) -> Unit,
     onInvalidBackup: suspend (StorageFile, StorageFile?, String?, String?) -> Unit,
 ) {
@@ -169,7 +170,9 @@ suspend fun scanBackups(
 
     fun renameDamagedToERROR(file: StorageFile, reason: String) {
         when (damagedOp) {
-            "ren" ->
+            DamagedOp.RENAME,
+            DamagedOp.CLEANUP
+                 ->
                 runCatching {
                     NeoApp.hitBusy()
                     val newName = "$ERROR_PREFIX${file.name}"
@@ -178,10 +181,12 @@ suspend fun scanBackups(
                     logSuspicious(file, reason)
                 }
 
-            null  -> {
+            null -> {
                 suspicious.getAndIncrement()
                 logSuspicious(file, reason)
             }
+
+            else -> {}
         }
     }
 
@@ -191,7 +196,7 @@ suspend fun scanBackups(
                 if (name.startsWith(ERROR_PREFIX)) {
                     NeoApp.hitBusy()
                     when (damagedOp) {
-                        "undo" -> {
+                        DamagedOp.UNDO -> {
                             val newName = name.removePrefix(ERROR_PREFIX)
                             if (file.renameTo(newName)) {
                                 suspicious.getAndIncrement()
@@ -199,12 +204,16 @@ suspend fun scanBackups(
                             }
                         }
 
-                        "del"  -> {
+                        DamagedOp.DELETE,
+                        DamagedOp.CLEANUP,
+                                       -> {
                             if (file.deleteRecursive()) {
                                 suspicious.getAndIncrement()
                                 logSuspicious(file, "delete")
                             }
                         }
+
+                        else           -> {}
                     }
                 }
             }
@@ -284,13 +293,13 @@ suspend fun scanBackups(
             return false
 
         // all files for undo or del, otherwise filter
-        if (damagedOp in listOf("ren", null)) {
+        if (damagedOp in listOf(DamagedOp.RENAME, DamagedOp.CLEANUP, null)) {
             // queue at front of queue (depth first)
             // filter out dir matching dir.properties
             val props = list.mapNotNull { it.name }.filter { it.endsWith(".$PROP_NAME") }
             val propDirs = props.map { it.removeSuffix(".$PROP_NAME") }
 
-            if (damagedOp == "ren" || pref_lookForEmptyBackups.value) {
+            if (damagedOp == DamagedOp.RENAME || damagedOp == DamagedOp.CLEANUP || pref_lookForEmptyBackups.value) {
                 list.filter { it.name in propDirs }.forEach { dir ->
                     runCatching {   // in case it's not a directory etc.
                         if (dir.listFiles().isEmpty())
@@ -406,7 +415,7 @@ suspend fun scanBackups(
         if (forceTrace)
             traceBackupsScanPackage { traceLine(">", level, file, "++++++++++++++++++++ file") }
 
-        if (damagedOp in listOf("undo", "del")) {
+        if (damagedOp in listOf(DamagedOp.UNDO, DamagedOp.DELETE, DamagedOp.CLEANUP)) {
             // undo for each file
             onErrorPrefix(file)
             // scan all files
@@ -530,10 +539,11 @@ suspend fun scanBackups(
             NeoApp.addInfoLogText(
                 "${
                     when (damagedOp) {
-                        "ren"  -> "renamed"
-                        "del"  -> "deleted"
-                        "undo" -> "undo"
-                        else   -> "suspicious"
+                        DamagedOp.RENAME  -> "renamed"
+                        DamagedOp.DELETE  -> "deleted"
+                        DamagedOp.CLEANUP -> "cleaned-up"
+                        DamagedOp.UNDO    -> "undo"
+                        else              -> "suspicious"
                     }
                 }: ${suspicious.get()}"
             )
@@ -542,7 +552,7 @@ suspend fun scanBackups(
 
 fun Context.findBackups(
     packageName: String = "",
-    damagedOp: String? = null,
+    damagedOp: DamagedOp? = null,
     forceTrace: Boolean = false,
 ): Map<String, List<Backup>> {
 

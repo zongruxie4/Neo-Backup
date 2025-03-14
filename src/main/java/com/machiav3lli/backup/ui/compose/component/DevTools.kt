@@ -67,6 +67,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.machiav3lli.backup.DamagedOp
 import com.machiav3lli.backup.ERROR_PREFIX
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.NeoApp
@@ -771,7 +772,7 @@ val pref_renameDamagedToERROR = LaunchPref(
 ) {
     MainScope().launch(Dispatchers.IO) {
         NeoApp.beginBusy("renameDamagedToERROR")
-        NeoApp.context.findBackups(damagedOp = "ren")
+        NeoApp.context.findBackups(damagedOp = DamagedOp.RENAME)
         devToolsTab.value = "infolog"
         NeoApp.endBusy("renameDamagedToERROR")
     }
@@ -783,7 +784,7 @@ val pref_undoDamagedToERROR = LaunchPref(
 ) {
     MainScope().launch(Dispatchers.IO) {
         NeoApp.beginBusy("undoDamagedToERROR")
-        NeoApp.context.findBackups(damagedOp = "undo")
+        NeoApp.context.findBackups(damagedOp = DamagedOp.UNDO)
         devToolsTab.value = "infolog"
         NeoApp.endBusy("undoDamagedToERROR")
     }
@@ -795,7 +796,7 @@ val pref_deleteERROR = LaunchPref(
 ) {
     MainScope().launch(Dispatchers.IO) {
         NeoApp.beginBusy("deleteERROR")
-        NeoApp.context.findBackups(damagedOp = "del")
+        NeoApp.context.findBackups(damagedOp = DamagedOp.DELETE)
         devToolsTab.value = "infolog"
         NeoApp.endBusy("deleteERROR")
     }
