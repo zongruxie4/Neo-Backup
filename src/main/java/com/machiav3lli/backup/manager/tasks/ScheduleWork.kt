@@ -52,7 +52,6 @@ import com.machiav3lli.backup.ui.pages.textLog
 import com.machiav3lli.backup.utils.FileUtils
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
-import com.machiav3lli.backup.utils.SystemUtils.packageName
 import com.machiav3lli.backup.utils.calcRuntimeDiff
 import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.extensions.takeUntilSignal
@@ -260,7 +259,9 @@ class ScheduleWork(
     private suspend fun getFilteredPackages(schedule: Schedule): List<String> {
         return withContext(Dispatchers.IO) {
             try {
-                FileUtils.ensureBackups()
+                //FileUtils.ensureBackups()
+                // TODO follow this down the rabbit hole to clean up the logic
+                FileUtils.invalidateBackupLocation()
 
                 val customBlocklist = schedule.blockList
                 val globalBlocklist = blocklistRepo.getBlocklistedPackages(PACKAGES_LIST_GLOBAL_ID)

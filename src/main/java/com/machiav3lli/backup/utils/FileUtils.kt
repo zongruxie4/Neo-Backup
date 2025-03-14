@@ -58,17 +58,19 @@ object FileUtils {
         return mode
     }
 
-    //TODO hg42 move the following to somewhere else, maybe a class that handles (multiple) BackupLocations
-    //TODO hg42 this may work (after invalidateBackups or on startup)
-    //TODO hg42 but should probably check an empty backups map instead or additionally?
-    //TODO hg42 the name does not reflect all cases
+    // hg42 move the following to somewhere else, maybe a class that handles (multiple) BackupLocations
+    // hg42 this may work (after invalidateBackups or on startup)
+    // hg42 but should probably check an empty backups map instead or additionally?
+    // hg42 the name does not reflect all cases
+    // TODO revamp & cleanup reads of backups
     fun ensureBackups() {
         runCatching {
-            if (NeoApp.backupRoot == null)
+            if (NeoApp.backupRoot == null) // never null because of its getter
                 NeoApp.context.findBackups()
         }
     }
 
+    // TODO revamp & cleanup reads of backups
     /**
      * Invalidates the cached value for the backup location URI so that the next call to
      * `getBackupDir` will set it again.
