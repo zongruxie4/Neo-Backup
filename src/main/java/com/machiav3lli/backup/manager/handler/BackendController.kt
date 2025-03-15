@@ -415,7 +415,7 @@ suspend fun scanBackups(
         if (forceTrace)
             traceBackupsScanPackage { traceLine(">", level, file, "++++++++++++++++++++ file") }
 
-        if (damagedOp in listOf(DamagedOp.UNDO, DamagedOp.DELETE, DamagedOp.CLEANUP)) {
+        if (damagedOp in listOf(DamagedOp.UNDO, DamagedOp.DELETE)) {
             // undo for each file
             onErrorPrefix(file)
             // scan all files
@@ -504,6 +504,16 @@ suspend fun scanBackups(
                 }
 
             }
+        }
+
+        if (damagedOp == DamagedOp.CLEANUP) {
+            // undo for each file
+            onErrorPrefix(file)
+            // scan all files
+            if (file.isDirectory)
+                handleDirectory(file)
+            // do nothing else
+            return
         }
     }
 
