@@ -38,6 +38,7 @@ import com.machiav3lli.backup.ui.compose.component.LaunchPreference
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Broom
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Bug
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarX
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ListNumbers
@@ -283,7 +284,7 @@ val pref_cleanupBackupDir = LinkPref(
     key = "tool.cleanupBackupDir",
     titleId = R.string.prefs_cleanup_backupdir,
     summaryId = R.string.prefs_cleanup_backupdir_summary,
-    icon = Phosphor.TrashSimple, //Phosphor.Broom,
+    icon = Phosphor.Broom,
 )
 
 val pref_copySelfApk = LinkPref(
