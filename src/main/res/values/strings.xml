@@ -470,4 +470,7 @@
     <string name="prefs_cleanup_backupdir_message">Scan for damaged backups (e.g. damaged properties file, properties without directory, directory without properties), then either just label them or label and delete them.</string>
     <string name="dialogDelete">Delete</string>
     <string name="dialogLabel">Just label</string>
+    <string name="enforce_backups_limit_FORMAT">Enforce the backups limit of %d on the following apps: %s</string>
+    <string name="enforced_backups_limit_FORMAT">Enforced the backups limit of %d on the following apps: %s</string>
+    <string name="no_apps_to_enforce_backups_limit">No apps to enforce the backups limit on</string>
 </resources>

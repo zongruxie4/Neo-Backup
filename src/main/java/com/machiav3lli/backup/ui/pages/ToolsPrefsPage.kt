@@ -41,6 +41,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Broom
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Bug
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarX
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ListNumbers
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
 import com.machiav3lli.backup.ui.compose.show
@@ -138,6 +139,19 @@ fun ToolsPrefsPage(
                                         openDialog.value = true
                                     }
 
+                                    pref_enforceBackupsLimit   -> context.onClickEnforceBackupsLimit(
+                                        viewModel,
+                                        snackbarHostState,
+                                        coroutineScope
+                                    ) { message, action ->
+                                        dialogProps.value = Triple(
+                                            DialogMode.ENFORCE_LIMIT,
+                                            message,
+                                            action
+                                        )
+                                        openDialog.value = true
+                                    }
+
                                     pref_copySelfApk           -> context.onClickCopySelf(
                                         snackbarHostState,
                                         coroutineScope
@@ -177,6 +191,15 @@ fun ToolsPrefsPage(
                 DialogMode.TOOL_DELETE_BACKUP_UNINSTALLED
                      -> ActionsDialogUI(
                     titleText = stringResource(R.string.prefs_batchdelete),
+                    messageText = primary.toString(),
+                    onDismiss = { openDialog.value = false },
+                    primaryText = stringResource(R.string.dialogYes),
+                    primaryAction = second as () -> Unit,
+                )
+
+                DialogMode.ENFORCE_LIMIT
+                     -> ActionsDialogUI(
+                    titleText = stringResource(R.string.enforce_backups_limit),
                     messageText = primary.toString(),
                     onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialogYes),
@@ -286,6 +309,52 @@ val pref_cleanupBackupDir = LinkPref(
     summaryId = R.string.prefs_cleanup_backupdir_summary,
     icon = Phosphor.Broom,
 )
+
+val pref_enforceBackupsLimit = LinkPref(
+    key = "tool.enforceBackupsLimit",
+    titleId = R.string.prefs_cleanup_backupdir,
+    summaryId = R.string.prefs_cleanup_backupdir_summary,
+    icon = Phosphor.Hash,
+)
+
+private fun Context.onClickEnforceBackupsLimit(
+    viewModel: MainVM,
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope,
+    showDialog: (String, () -> Unit) -> Unit,
+): Boolean {
+    val packagesForHousekeeping = viewModel.packageMap.value.values
+        .filter { it.numberOfBackups > pref_numBackupRevisions.value }
+    if (packagesForHousekeeping.isNotEmpty()) {
+        showDialog(
+            getString(
+                R.string.enforce_backups_limit_FORMAT,
+                pref_numBackupRevisions.value,
+                packagesForHousekeeping.joinToString { it.packageLabel }
+            ),
+            {
+                packagesForHousekeeping.forEach {
+                    BackupRestoreHelper.housekeepingPackageBackups(it)
+                    Package.invalidateCacheForPackage(it.packageName)
+                }
+                snackbarHostState.show(
+                    coroutineScope,
+                    getString(
+                        R.string.enforced_backups_limit_FORMAT,
+                        pref_numBackupRevisions.value,
+                        packagesForHousekeeping.joinToString { it.packageLabel }
+                    ),
+                )
+            },
+        )
+    } else {
+        snackbarHostState.show(
+            coroutineScope,
+            getString(R.string.no_apps_to_enforce_backups_limit),
+        )
+    }
+    return true
+}
 
 val pref_copySelfApk = LinkPref(
     key = "tool.copySelfApk",
