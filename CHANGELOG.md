@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-8.3.12 (XX.XX.2025) +90 Commits, +30 Translations
+8.3.12 (XX.XX.2025) +110 Commits, +30 Translations
 ------------
 
 ### Function
@@ -10,6 +10,9 @@ CHANGELOG
 - Add: Strict mode (logging) for unsafe intents
 - Add: Su-command(s) for APatch (credits @hg42)
 - Add: Update package map after finishing a batch/schedule
+- Add: Tool to clean up backup directory of damaged backups
+- Add: Tool to enforce the backups limit on all apps
+- Add: Pref to use PGP key for encryption
 - Fix: Missing/overdoing delete of backups
 - Fix: Scheduling (Return to ScheduleService scheduling)
 - Fix: Launching on refused magisk/root permission
@@ -21,6 +24,11 @@ CHANGELOG
 - Fix: Deleting all backups
 - Fix: Not showing backups of uninstalled packages
 - Fix: Updating package cache even when app page is closed
+- Fix: File name value on renaming
+- Fix: Schedules not respecting backup limits when NB not running
+- Fix: Avoid removing sort/filter-related prefs on update
+- Update: Improve robustness of enabling/disabling specials logic
+- Update: Improve NeoPref logic
 - Update: Replace backups' map with a repository instance
 - Remove: CDATA usage in strings
 - TargetSDK 35
@@ -30,6 +38,7 @@ CHANGELOG
 - Add: Search bar to block and custom list dialogs
 - Add: About card to help sheet and welcome page (revamp layout)
 - Add: Contrast themes
+- Add: Encryption prefs page
 - Fix: Dialogs on targetSDK 35 don't respect system insets
 - Fix: Reactivity of selectable rows in pref dialogs
 - Fix: Behaviour of navigating back on pages with details
