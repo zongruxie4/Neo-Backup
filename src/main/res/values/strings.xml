@@ -473,4 +473,5 @@
     <string name="enforce_backups_limit_FORMAT">Enforce the backups limit of %d on the following apps: %s</string>
     <string name="enforced_backups_limit_FORMAT">Enforced the backups limit of %d on the following apps: %s</string>
     <string name="no_apps_to_enforce_backups_limit">No apps to enforce the backups limit on</string>
+    <string name="enforce_backups_limit_summary">Enforce the set backup revisions limit on all apps that surpass it.</string>
 </resources>

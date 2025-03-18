@@ -312,8 +312,8 @@ val pref_cleanupBackupDir = LinkPref(
 
 val pref_enforceBackupsLimit = LinkPref(
     key = "tool.enforceBackupsLimit",
-    titleId = R.string.prefs_cleanup_backupdir,
-    summaryId = R.string.prefs_cleanup_backupdir_summary,
+    titleId = R.string.enforce_backups_limit,
+    summaryId = R.string.enforce_backups_limit_summary,
     icon = Phosphor.Hash,
 )
 
@@ -323,6 +323,7 @@ private fun Context.onClickEnforceBackupsLimit(
     coroutineScope: CoroutineScope,
     showDialog: (String, () -> Unit) -> Unit,
 ): Boolean {
+    // TODO consider locked backups for the list
     val packagesForHousekeeping = viewModel.packageMap.value.values
         .filter { it.numberOfBackups > pref_numBackupRevisions.value }
     if (packagesForHousekeeping.isNotEmpty()) {
