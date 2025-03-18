@@ -46,14 +46,14 @@ import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
-import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
-import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
+import com.machiav3lli.backup.ui.compose.component.ScheduleRecycler
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarPlus
-import com.machiav3lli.backup.ui.compose.component.ScheduleRecycler
-import com.machiav3lli.backup.utils.getStartScheduleMessage
+import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
+import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
+import com.machiav3lli.backup.utils.getStartScheduleMessage
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.viewmodels.SchedulesVM
 import kotlinx.coroutines.launch
@@ -116,7 +116,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
         },
         detailPane = {
             scheduleSheetId.value = paneNavigator.currentDestination
-                ?.takeIf { it.pane == this.role }?.content
+                ?.takeIf { it.pane == this.paneRole }?.contentKey
                 .toString().toLongOrDefault(-1L)
 
             scheduleSheetId.longValue.takeIf { it != -1L }?.let { id ->
@@ -124,7 +124,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
                     SchedulePage(
                         scheduleId = id,
                         onDismiss = {
-                            scope.launch { 
+                            scope.launch {
                                 paneNavigator.navigateBack()
                             }
                         }

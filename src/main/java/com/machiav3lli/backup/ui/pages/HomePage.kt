@@ -352,7 +352,7 @@ fun HomePage(
         },
         detailPane = {
             appSheetPN.value = paneNavigator.currentDestination
-                ?.takeIf { it.pane == this.role }?.content?.toString()
+                ?.takeIf { it.pane == this.paneRole }?.contentKey?.toString()
 
             appSheetPN.value?.let { packageName ->
                 AnimatedPane {
