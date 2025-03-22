@@ -262,6 +262,7 @@ class ScheduleWork(
                 //FileUtils.ensureBackups()
                 // TODO follow this down the rabbit hole to clean up the logic
                 FileUtils.invalidateBackupLocation()
+                NeoApp.startup = false
 
                 val customBlocklist = schedule.blockList
                 val globalBlocklist = blocklistRepo.getBlocklistedPackages(PACKAGES_LIST_GLOBAL_ID)
