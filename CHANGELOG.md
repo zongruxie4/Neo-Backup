@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-8.3.12 (XX.XX.2025) +110 Commits, +30 Translations
+8.3.12 (22.03.2025) +120 Commits, +40 Translations
 ------------
 
 ### Function
@@ -25,7 +25,7 @@ CHANGELOG
 - Fix: Not showing backups of uninstalled packages
 - Fix: Updating package cache even when app page is closed
 - Fix: File name value on renaming
-- Fix: Schedules not respecting backup limits when NB not running
+- Fix: Schedules not respecting backup limits when in background
 - Fix: Avoid removing sort/filter-related prefs on update
 - Update: Improve robustness of enabling/disabling specials logic
 - Update: Improve NeoPref logic
@@ -42,6 +42,7 @@ CHANGELOG
 - Fix: Dialogs on targetSDK 35 don't respect system insets
 - Fix: Reactivity of selectable rows in pref dialogs
 - Fix: Behaviour of navigating back on pages with details
+- Fix: Reactivity on enforcing backups limit in AppPage
 - Update: Restore main NB icon colors
 - Update: Make last backup choices default for backup dialog
 - Update: Improve Dialog box's padding
@@ -49,6 +50,7 @@ CHANGELOG
 - Update: Revamp coloring and style of some components
 - Update: Only use colored pref icons for more informative purposes (credits @hg42)
 - Update: Animate updated package items
+- Update: Navigation icon and text follow standards
 
 8.3.11 (10.01.2025) +15 Commits, 6 Translations
 ------------
