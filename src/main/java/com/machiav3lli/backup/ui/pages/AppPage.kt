@@ -72,7 +72,6 @@ import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.traceCompose
 import com.machiav3lli.backup.exodusUrl
-import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.ShellCommands
 import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.manager.handler.ShellHandler
@@ -742,8 +741,7 @@ fun AppPage(
                                 onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
-                                    BackupRestoreHelper.housekeepingPackageBackups(obj as Package)
-                                    Package.invalidateCacheForPackage(obj.packageName)
+                                    viewModel.enforceBackupsLimit(obj as Package)
                                 }
                             )
                         }

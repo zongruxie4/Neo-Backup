@@ -24,6 +24,8 @@ import com.machiav3lli.backup.data.dbs.entity.AppExtras
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
+import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.ui.activities.NeoActivity
@@ -143,6 +145,13 @@ class AppVM(
         viewModelScope.launch {
             appExtrasRepository.replaceExtras(packageName, appExtras)
             updatePackage(packageName)
+        }
+    }
+
+    fun enforceBackupsLimit(pkg: Package) {
+        viewModelScope.launch {
+            BackupRestoreHelper.housekeepingPackageBackups(pkg)
+            updatePackage(pkg.packageName)
         }
     }
 
