@@ -5,7 +5,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -21,11 +20,9 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.machiav3lli.backup.ui.pages.pref_altNavBarItem
 import kotlinx.collections.immutable.ImmutableList
@@ -104,7 +101,6 @@ fun NavigationSuiteScope.navItem(
             Icon(
                 imageVector = item.icon,
                 contentDescription = stringResource(id = item.title),
-                modifier = Modifier.size(24.dp),
             )
         },
         label = {
@@ -115,7 +111,6 @@ fun NavigationSuiteScope.navItem(
             ) {
                 Text(
                     text = stringResource(id = item.title),
-                    style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
