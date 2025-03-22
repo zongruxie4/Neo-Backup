@@ -117,4 +117,10 @@ All new icons in 8.0.0 based on [Phosphor Icons](https://phosphoricons.com/). A 
 
 Copyright © 2025 [Antonios Hazim](https://github.com/machiav3lli) and [contributors](https://github.com/NeoApplications/Neo-Store/graphs/contributors).
 
-![Star History Chart](https://api.star-history.com/svg?repos=NeoApplications/Neo-Backup&type=Date)
+<a href="https://www.star-history.com/#NeoApplications/Neo-Backup&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=NeoApplications/Neo-Backup&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=NeoApplications/Neo-Backup&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=NeoApplications/Neo-Backup&type=Date" />
+ </picture>
+</a>
