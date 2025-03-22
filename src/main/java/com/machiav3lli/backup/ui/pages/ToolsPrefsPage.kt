@@ -56,7 +56,6 @@ import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.BufferedOutputStream
@@ -122,14 +121,14 @@ fun ToolsPrefsPage(
                                         dialogProps.value = Triple(
                                             DialogMode.TOOL_CLEANUP_BACKUP_DIR,
                                             {
-                                                MainScope().launch(Dispatchers.IO) {
+                                                coroutineScope.launch(Dispatchers.IO) {
                                                     NeoApp.beginBusy("cleanupBackupDir")
                                                     NeoApp.context.findBackups(damagedOp = DamagedOp.CLEANUP)
                                                     NeoApp.endBusy("cleanupBackupDir")
                                                 }
                                             },
                                             {
-                                                MainScope().launch(Dispatchers.IO) {
+                                                coroutineScope.launch(Dispatchers.IO) {
                                                     NeoApp.beginBusy("renameDamagedToERROR")
                                                     NeoApp.context.findBackups(damagedOp = DamagedOp.RENAME)
                                                     NeoApp.endBusy("renameDamagedToERROR")
@@ -325,7 +324,7 @@ private fun Context.onClickEnforceBackupsLimit(
 ): Boolean {
     // TODO consider locked backups for the list
     val packagesForHousekeeping = viewModel.packageMap.value.values
-        .filter { it.numberOfBackups > pref_numBackupRevisions.value }
+        .filter { pref_numBackupRevisions.value > 0 && it.numberOfBackups > pref_numBackupRevisions.value }
     if (packagesForHousekeeping.isNotEmpty()) {
         showDialog(
             getString(
@@ -333,7 +332,8 @@ private fun Context.onClickEnforceBackupsLimit(
                 pref_numBackupRevisions.value,
                 packagesForHousekeeping.joinToString { it.packageLabel }
             ),
-            {
+        ) {
+            coroutineScope.launch(Dispatchers.IO) {
                 packagesForHousekeeping.forEach {
                     BackupRestoreHelper.housekeepingPackageBackups(it)
                     Package.invalidateCacheForPackage(it.packageName)
@@ -346,8 +346,8 @@ private fun Context.onClickEnforceBackupsLimit(
                         packagesForHousekeeping.joinToString { it.packageLabel }
                     ),
                 )
-            },
-        )
+            }
+        }
     } else {
         snackbarHostState.show(
             coroutineScope,

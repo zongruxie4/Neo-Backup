@@ -39,7 +39,6 @@ import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils
 import timber.log.Timber
 import java.io.File
-import kotlin.collections.toList
 
 // TODO consider separating package & backupsList to allow granular compose updates
 data class Package private constructor(val packageName: String) {
