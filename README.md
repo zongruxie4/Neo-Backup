@@ -1,42 +1,58 @@
-# Neo Backup  <img title="" src="./fastlane/metadata/android/en-US/images/icon.png" align="left" width="64" style="padding: 12px;">
+<h1 align="center">
+  <img src="fastlane/metadata/android/en-US/images/icon.png" alt="Neo Backup's icon" width="128" height="128"/>
+  <br>
+  Neo Backup
+</h1>
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](COC.md)
-[![GitHub repo stars](https://img.shields.io/github/stars/NeoApplications/Neo-Backup?style=flat)](https://github.com/NeoApplications/Neo-Backup/stargazers)
-[![GitHub License](https://img.shields.io/github/license/NeoApplications/Neo-Backup)](https://github.com/NeoApplications/Neo-Backup/blob/master/COPYING)
-[![GitHub All Releases](https://img.shields.io/github/downloads/NeoApplications/Neo-Backup/total.svg)](https://github.com/NeoApplications/Neo-Backup/releases/)
-[![GitHub release](https://img.shields.io/github/v/release/NeoApplications/Neo-Backup?display_name=tag)](https://github.com/NeoApplications/Neo-Backup/releases/latest)
-[![Small translation badge](https://hosted.weblate.org/widgets/neo-backup/-/svg-badge.svg)](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)    
+<p align="center"><strong>Android's modern backup solution for everyone!</strong></p>
 
-Neo Backup (formerly OAndBackupX) is a fork of the famous OAndBackup with the aim to bring OAndBackup to 202X and part of Neo Applications suite. For now the app is already fully rewritten, coming up would be making it robust and adding some lengthily planned features which could ease the backup/restore workflow with any device. Therefore all types of contribution are always welcome.
+<div align="center">
+
+[![Latest stable release version](https://img.shields.io/github/v/release/NeoApplications/Neo-Backup?style=flat&labelColor=FFCCCC&color=FF4444)](https://github.com/NeoApplications/Neo-Backup/releases/latest)
+[![Github downloads](https://img.shields.io/github/downloads/NeoApplications/Neo-Backup/total.svg?style=flat&labelColor=FFCCCC&color=FF4444)](https://github.com/NeoApplications/Neo-Backup/releases/)
+[![GitHub repo stars](https://img.shields.io/github/stars/NeoApplications/Neo-Backup?style=flat&labelColor=FFCCCC&color=FF4444)](https://github.com/NeoApplications/Neo-Backup/stargazers)
+[![Small translation badge](https://img.shields.io/weblate/progress/neo-backup?style=flat&labelColor=FFCCCC&color=FF4444)](https://hosted.weblate.org/engage/neo-backup)
+[![Project's License](https://img.shields.io/github/license/NeoApplications/Neo-Backup?style=flat&labelColor=FFCCCC&color=FF4444)](./COPYING)
+
+</div>
+
+<div align="center">
+
+[<img src="get_iod.svg" alt="Get it on IzzyOnDroid" width="24%" align="center">](https://apt.izzysoft.de/fdroid/index/apk/com.machiav3lli.backup)
+[<img src="get_fdroid.svg" alt="Get it on F-Droid" width="24%" align="center">](https://f-droid.org/packages/com.machiav3lli.backup)
+[<img src="get_codeberg.svg" alt="Get it on Codeberg" width="24%" align="center">](https://codeberg.org/NeoApplications/Neo-Backup/releases)
+[<img src="get_github.svg" alt="Get it on GitHub" width="24%" align="center">](https://github.com/NeoApplications/Neo-Backup/releases)
+
+</div>
 
 [![Neo Applications Banner](neo_banner.png)](https://github.com/NeoApplications)
 
-Now on functionality of our App:
+Neo Backup (formerly OAndBackupX) is a fork of the famous OAndBackup with the aim to bring OAndBackup to 202X and part of Neo Applications suite. For now the app is already fully rewritten, coming up would be making it robust and adding some lengthily planned features which could ease the backup/restore workflow with any device. Therefore all types of contribution are always welcome.
+
+## Features :abacus:
 
 * It requires root and allows you to backup individual apps and their data.
 * Both backup and restore of individual programs one at a time and batch backup and restore of multiple programs are supported.
 * Restoring system apps should be possible without requiring a reboot afterwards.
 * Backups can be scheduled with no limit on the number of individual schedules and there is the possibility of creating custom lists from the list of installed apps.
+* To find more info just visit the project's [FAQ](FAQ.md).
 
-And here's the project's [FAQ](FAQ.md).
+### Upcoming plans :eyes: [<img align="right" src="get_taiga.svg" alt="Follow our project on Taiga" width="24%" />](https://tree.taiga.io/project/machiav3lli-neo-backup/kanban)
 
-### A Stance: I stand with Ukraine, as I stood and still stand with Yemen, Syria, Afghanistan, Myanmar, Sudan, Columbia, Somalia, Hong Kong (not China) and everywhere human beings are being oppressed by bigger states and/or local dictatorships.
+We also have a Kanban board on Taiga where you can see our future plans. Feel free to contact us if you'd like to contribute to any of the planned changes.
 
-## Installation
+## Screenshots :framed_picture:
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.machiav3lli.backup/)
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.machiav3lli.backup)
-[<img src="badge_github.png" alt="Get it on GitHub" height="80">](https://github.com/NeoApplications/Neo-Backup/releases)
+<p float="left">
+ <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="24%" />
+ <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="24%" />
+ <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="24%" />
+ <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="24%" />
+</p>
 
 ## Recommendation
 
 A combination with your favourite sync solution (e.g. Syncthing, Nextcloud...)  keeping an encrypted copy of your apps and their data on your server or "stable" device could bring a lot of benefits and save you a lot of work while changing ROMs or just cleaning your mobile device.
-
-## Community
-
-You can join either our [Telegram](https://t.me/neo_backup) or [Matrix](https://matrix.to/#/#neo-backup:matrix.org) groups to make suggestions, ask questions, receive news, or just chat.
-
-Our **[Code of Conduct](COC.md)** applies to the communication in the community same as for all contributors.
 
 ## Encryption
 
@@ -50,34 +66,24 @@ Version 4.0.0 marks a full overhaul of the app structure and thus breaks compati
 
 Till the version 0.9.3 there's been no structural change in how the app handles backup/restore. So you could use that version to restore the old backups, then move to the newest version and renew your backups so that they'll stay compatible as long as the logic of the app doesn't radically change.
 
-## Changes & TODOs
+## Community :speech_balloon:
 
-#### [Changelog](CHANGELOG.md)  &  [Known Issues](ISSUES.md)
+You can join either our [Telegram](https://t.me/neo_backup) or [Matrix](https://matrix.to/#/#neo-backup:matrix.org) groups to make suggestions, ask questions, receive news, install test builds, or just chat.
 
-if you have some kotlin and android knowledge and like to contribute to the project, see our Taiga.io project **[here](https://tree.taiga.io/project/machiav3lli-neo-backup/kanban)** to see what is still needed to be done, where a help could be needed or if you'd like to fix one of the issues.
+Our **[Code of Conduct](COC.md)** applies to the communication in the community same as for all contributors.
 
-The communication and each contribution in the project community should follow our **[Code of Conduct](COC.md)**.
-
-## Screenshots
-
-<p float="left">
- <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="170" />
- <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="170" />
- <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="170" />
- <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="170" />
+<p align="center">
+<a href="https://t.me/neo_backup"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Join Telegram Channel" width="11%" align="center"></a>
+<a href="https://matrix.to/#/#neo-backup:matrix.org"><img src="https://docs.cloudron.io/img/element-logo.png" alt="Join Matrix Channel" width="11%" align="center" /></a>
 </p>
 
-## Building
+## Translation :left_speech_bubble: [<img align="right" src="https://hosted.weblate.org/widgets/neo-backup/-/287x66-white.png" alt="Translation stats" />](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)
 
-Neo Backup is built with gradle, for that you need the android sdk.
+Contribute your translations to Neo Backup on [Hosted Weblate](https://hosted.weblate.org/engage/neo-backup/). <br> Adding new languages is always accepted and supported.
 
-### Languages: [<img align="right" src="https://hosted.weblate.org/widgets/neo-backup/-/287x66-white.png" alt="Translation stats" />](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)
+[![Translation stats](https://hosted.weblate.org/widgets/neo-backup/-/multi-auto.svg)](https://hosted.weblate.org/engage/neo-backup/?utm_source=widget)
 
-[<img src="https://hosted.weblate.org/widgets/neo-backup/-/multi-auto.svg" alt="Übersetzungsstatus" />](https://hosted.weblate.org/engage/neo-backup/)
-
-The Translations are now being hosted by [Weblate.org](https://hosted.weblate.org/engage/neo-backup/).
-
-Before that, translations were done analog/offline by those great people:
+Before being hosted at Weblate, translations were done manually by those great people:
 
 [Kostas Giapis](https://github.com/tsiflimagas), [Urnyx05](https://github.com/Urnyx05), [Atrate](https://github.com/Atrate), [Tuchit](https://github.com/tuchit), [Linsui](https://github.com/linsui), [scrubjay55](https://github.com/scrubjay55), [Antyradek](https://github.com/Antyradek), [Ninja1998](https://github.com/NiNjA1998), [elea11](https://github.com/elea11).
 
@@ -85,10 +91,7 @@ Before that, translations were done analog/offline by those great people:
 
 I, myself acknowledge the role of the donations to motivate the work on FOSS projects, but in the state of how dynamic everything around my FOSS-contributions is, I would prefer to not take donations for now (the same answer as the last years). Nevertheless this project wouldn't have the accessibility it has without translations, which you the community drive and for which Weblate provides a platform. That's why I would suggest you to consider [donating to Weblate](https://weblate.org/donate).
 
-Thanks to [Tuta](https://tuta.com) for the premium account.
-[![Tutanota](tuta_logo.png)](https://tuta.com)
-
-## Credits
+## Special Thanks :heart:
 
 [Jens Stein](https://github.com/jensstein) for his unbelievably valuable work on OAndBackup.
 
@@ -98,8 +101,11 @@ Thanks to [Tuta](https://tuta.com) for the premium account.
 
 [Helena Zheng](https://helenazhang.com/) & [Tobias Fried](https://tobiasfried.com/) for the great [Phosphor Icons](https://phosphoricons.com/), we gladly use.
 
+Thanks to [Tuta](https://tuta.com) for the premium account.
 
-## Contributors
+[![Tutanota](tuta_logo.png)](https://tuta.com)
+
+## Contributors :handshake:
 
 <a href="https://github.com/NeoApplications/Neo-Backup/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=NeoApplications/Neo-Backup" />
@@ -115,7 +121,7 @@ All new icons in 7.0.0 based on CC0 icons found on [SVG Repo](https://www.svgrep
 
 All new icons in 8.0.0 based on [Phosphor Icons](https://phosphoricons.com/). A huge thanks for the project's maintainers.
 
-Copyright © 2025 [Antonios Hazim](https://github.com/machiav3lli) and [contributors](https://github.com/NeoApplications/Neo-Store/graphs/contributors).
+Copyright © 2025 [Antonios Hazim](https://github.com/machiav3lli) and [contributors](https://github.com/NeoApplications/Neo-Backup/graphs/contributors).
 
 <a href="https://www.star-history.com/#NeoApplications/Neo-Backup&Date">
  <picture>
