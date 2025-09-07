@@ -717,7 +717,7 @@ The Intent must contain the package name, that is:
 The broadcast receiver is:
 
 ```url
-    com.machiav3lli.backup.services.CommandReceiver
+    com.machiav3lli.backup.manager.services.CommandReceiver
 ```
 
 note, this is a fixed name, `com.machiav3lli.backup` is a namespace not a package name.
@@ -743,7 +743,7 @@ trigger a schedule (like pressing the run button)
 * example: start a specific schedule
 
     ```bash
-    am broadcast -a schedule -e name "the name of the schedule" -n com.machiav3lli.backup/com.machiav3lli.backup.services.CommandReceiver
+    am broadcast -a schedule -e name "the name of the schedule" -n com.machiav3lli.backup/com.machiav3lli.backup.manager.services.CommandReceiver
     ```
 
 **cancel**
