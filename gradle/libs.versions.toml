@@ -1,46 +1,40 @@
 [versions]
-
 activity = "1.10.1"
 agp = "8.9.0"
 biometric = "1.2.0-alpha05"
 coil = "2.7.0"
-commons-compress = "1.27.1"
-commons-io = "2.18.0"
-compose = "1.8.0-rc01"
-compose-bom = "2025.03.00"
-compose-accompanist = "0.37.2"
-compose-markdown = "0.5.0"
-coroutines = "1.10.1"
-datastore = "1.1.3"
-immutables = "0.3.8"
-kaml = "0.72.0"
-koin = "4.0.2"
-koin-ksp = "2.0.0"
-kotlin = "2.1.10"
-ksp = "2.1.10-1.0.31"
+commons-compress = "1.28.0"
+commons-io = "2.20.0"
+compose = "1.9.0"
+compose-bom = "2025.08.01"
+compose-accompanist = "0.37.3"
+compose-markdown = "0.5.7"
+coroutines = "1.10.2"
+datastore = "1.1.7"
+immutables = "0.4.0"
+kaml = "0.94.0"
+koin = "4.1.1"
+koin-ksp = "2.1.0"
+kotlin = "2.2.10"
+ksp = "2.2.10-2.0.2"
 libsu = "6.0.0"
-lifecycle = "2.8.7"
-material = "1.12.0"
-navigation = "2.8.9"
-pgpainless = "1.7.3"
+lifecycle = "2.9.3"
+material = "1.13.0"
+navigation = "2.9.3"
+pgpainless = "1.7.6"
 preference = "1.2.1"
-room = "2.6.1"
-security = "1.1.0-alpha06"
+room = "2.7.2"
+security = "1.1.0"
 semver = "4.3.0"
-serialization = "1.8.0"
-test = "1.6.1"
-test-rules = "1.6.1"
-test-ext = "1.2.1"
+serialization = "1.9.0"
+test = "1.7.0"
+test-rules = "1.7.0"
+test-ext = "1.3.0"
 timber = "5.0.1"
-work = "2.10.0"
-zstd-jni = "1.5.6-4"
-
-######################################## hg42
-
-####################################################################################################
+work = "2.10.3"
+zstd-jni = "1.5.7-4"
 
 [libraries]
-
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -72,6 +66,7 @@ zstd-jni = { module = "com.github.luben:zstd-jni", version.ref = "zstd-jni" }
 pgpainless = { module = "org.pgpainless:pgpainless-core", version.ref = "pgpainless" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 semver = { module = "de.voize:semver4k", version.ref = "semver" }
+kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "kotlin" }
 
 lifecycle = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -83,12 +78,12 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-runtime = { module = "androidx.compose.runtime:runtime" }
-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test", version.ref = "compose" }
-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "compose" }
-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-ui-test = { module = "androidx.compose.ui:ui-test" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4"}
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-navigationsuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
@@ -105,13 +100,7 @@ test-runner = { module = "androidx.test:runner", version.ref = "test" }
 test-rules = { module = "androidx.test:rules", version.ref = "test-rules" }
 test-ext = { module = "androidx.test.ext:junit-ktx", version.ref = "test-ext" }
 
-######################################## hg42
-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "kotlin" }
-
-####################################################################################################
-
 [plugins]
-
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -119,5 +108,3 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-scripting = { id = "org.jetbrains.kotlin.plugin.scripting", version.ref = "kotlin" }
-
-######################################## hg42
