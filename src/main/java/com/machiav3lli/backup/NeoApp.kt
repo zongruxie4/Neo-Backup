@@ -107,11 +107,11 @@ import kotlin.system.exitProcess
 
 val RESCUE_NAV get() = "rescue"
 
-@KoinExperimentalAPI
 class NeoApp : Application(), KoinStartup {
 
     val work: WorkHandler by inject()
 
+    @KoinExperimentalAPI
     override fun onKoinStartup() = koinConfiguration {
         androidLogger()
         androidContext(this@NeoApp)

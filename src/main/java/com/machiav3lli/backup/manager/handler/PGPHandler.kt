@@ -25,6 +25,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 // https://pgpainless.readthedocs.io
+// TODO migrate to 2.0.X when ready https://pgpainless.readthedocs.io/en/latest/pgpainless-core/migration_2.0.html
 class PGPHandler(private val context: Context) {
     val cc = Dispatchers.IO + SupervisorJob()
 

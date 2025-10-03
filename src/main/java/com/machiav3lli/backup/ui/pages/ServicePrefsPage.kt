@@ -178,7 +178,7 @@ val pref_pgpKey = KeyPref(
     enableIf = { pref_encryption_mode.value == ENCRYPTION.PGP.ordinal },
     UI = { it, _, index, groupSize ->
         val scope = rememberCoroutineScope()
-        val pgpManager: PGPHandler = get<PGPHandler>(PGPHandler::class.java)
+        val pgpManager: PGPHandler = get(PGPHandler::class.java)
 
         val pref = it as KeyPref
         val launcher =
