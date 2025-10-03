@@ -18,6 +18,7 @@
 package com.machiav3lli.backup.manager.handler
 
 import android.content.Context
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -50,7 +51,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 
@@ -856,16 +858,23 @@ class ShellHandler {
         }
 
         fun findSuCommand(command: String? = null): String {
-            for (tryCommand in listOfNotNull(
-                if (command == "") null else command,
-                "su -c 'nsenter --mount=/proc/1/ns/mnt sh'",
-                "su --mount-master",
-                "sh -c \"exec \$(which su kp) -c 'nsenter --mount=/proc/1/ns/mnt sh'\"",  // APatch workaround
+            for (tryCommand in buildList {
+                if (!command.isNullOrEmpty()) add(command)
+                if (!Android.minSDK((Build.VERSION_CODES.Q))) {
+                    add("su")
+                    add("/system/bin/su")
+                    add("sh")
+                }
+                add("su -c 'nsenter --mount=/proc/1/ns/mnt sh'")
+                add("su --mount-master")
+                add("sh -c \"exec \$(which su kp) -c 'nsenter --mount=/proc/1/ns/mnt sh'\"")  // APatch workaround
                 //"sh -c \"(echo 'nsenter --mount=/proc/1/ns/mnt sh'; cat) | \$(which su kp)\"",  // TODO to be fixed: APatch workaround
-                "su",
-                "/system/bin/su",
-                "sh"
-            )) {
+                if (Android.minSDK((Build.VERSION_CODES.Q))) {
+                    add("su")
+                    add("/system/bin/su")
+                    add("sh")
+                }
+            }) {
                 if (validateSuCommand(tryCommand))
                     return suCommand
             }
