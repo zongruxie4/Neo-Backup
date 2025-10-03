@@ -201,8 +201,8 @@ fun AppPage(
                         AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
                             RoundButton(
                                 icon = Phosphor.Info,
-                                modifier = Modifier.fillMaxHeight(),
-                                description = stringResource(id = R.string.app_info)
+                                description = stringResource(id = R.string.app_info),
+                                filled = true,
                             ) {
                                 val intent =
                                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -218,8 +218,8 @@ fun AppPage(
                         AnimatedVisibility(visible = !pkg.isInstalled && !pkg.isSpecial) {
                             RoundButton(
                                 icon = Phosphor.MagnifyingGlass,
-                                modifier = Modifier.fillMaxHeight(),
-                                description = stringResource(id = R.string.search_package)
+                                description = stringResource(id = R.string.search_package),
+                                filled = true,
                             ) {
                                 context.startActivity(
                                     Intent(
@@ -231,7 +231,7 @@ fun AppPage(
                         }
                         RoundButton(
                             icon = Phosphor.X,
-                            modifier = Modifier.fillMaxHeight()
+                            description = stringResource(R.string.dialogCancel)
                         ) {
                             onDismiss()
                         }

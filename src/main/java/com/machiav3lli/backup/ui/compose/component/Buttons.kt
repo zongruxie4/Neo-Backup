@@ -2,6 +2,7 @@ package com.machiav3lli.backup.ui.compose.component
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -19,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -249,20 +251,24 @@ fun CardButton(
 @Composable
 fun RoundButton(
     modifier: Modifier = Modifier,
-    size: Dp = ICON_SIZE_SMALL,
     icon: ImageVector,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
     description: String = "",
+    tint: Color = MaterialTheme.colorScheme.onSurface,
+    filled: Boolean = false,
     onClick: () -> Unit,
 ) {
     IconButton(
         modifier = modifier,
+        colors = if (filled) IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ) else IconButtonDefaults.iconButtonColors(),
+        shape = MaterialTheme.shapes.medium,
         onClick = onClick
     ) {
         Icon(
-            modifier = Modifier.size(size),
             imageVector = icon,
-            tint = tint,
+            tint = if (filled) LocalContentColor.current
+            else tint,
             contentDescription = description
         )
     }
@@ -297,7 +303,6 @@ fun FilledRoundButton(
 @Composable
 fun RefreshButton(
     modifier: Modifier = Modifier,
-    size: Dp = ICON_SIZE_SMALL,
     tint: Color = MaterialTheme.colorScheme.onSurface,
     hideIfNotBusy: Boolean = false,
     onClick: () -> Unit = {},
@@ -307,31 +312,32 @@ fun RefreshButton(
     if (hideIfNotBusy && isBusy.not())
         return
 
-    val (angle, scale) = if (isBusy) {
-        val infiniteTransition = rememberInfiniteTransition(label = "infiniteTransition")
+    val scale by animateFloatAsState(
+        if (isBusy) 0.01f * pref_busyIconScale.value
+        else 1f, label = "iconScale"
+    )
+    val angle by animateFloatAsState(
+        if (isBusy) {
+            val infiniteTransition = rememberInfiniteTransition(label = "infiniteTransition")
 
-        // Animate from 0f to 1f
-        val animationProgress by infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(
-                    durationMillis = pref_busyIconTurnTime.value,
-                    easing = LinearEasing
-                )
-            ), label = "animationProgress"
-        )
-        val angle = 360f * animationProgress
-        val scale = 0.01f * pref_busyIconScale.value
-        angle to scale
-    } else {
-        0f to 1f
-    }
+            val animationProgress by infiniteTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = pref_busyIconTurnTime.value,
+                        easing = LinearEasing
+                    )
+                ), label = "animationProgress"
+            )
+            val angle = 360f * animationProgress
+            angle
+        } else 0f, label = "iconAngle"
+    )
 
     RoundButton(
         description = stringResource(id = R.string.refresh),
         icon = Phosphor.ArrowsClockwise,
-        size = size,
         tint = if (isBusy) Color.Red else tint,
         modifier = modifier
             .scale(scale)
