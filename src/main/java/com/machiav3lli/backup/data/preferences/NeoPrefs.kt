@@ -10,7 +10,7 @@ import com.machiav3lli.backup.EnabledFilter
 import com.machiav3lli.backup.InstalledFilter
 import com.machiav3lli.backup.LatestFilter
 import com.machiav3lli.backup.LaunchableFilter
-import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
+import com.machiav3lli.backup.MAIN_FILTER_USER
 import com.machiav3lli.backup.Sort
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.batchModesSequence
@@ -70,21 +70,21 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
     val mainFilterHome = PrefInt(
         dataStore = dataStore,
         key = PrefKey.MAIN_FILTER_HOME,
-        defaultValue = MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL,
+        defaultValue = MAIN_FILTER_USER,
         entries = possibleMainFilters, // not really, but shouldn't have an effect
     )
 
     val mainFilterBackup = PrefInt(
         dataStore = dataStore,
         key = PrefKey.MAIN_FILTER_BACKUP,
-        defaultValue = MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL,
+        defaultValue = MAIN_FILTER_USER,
         entries = possibleMainFilters, // not really, but shouldn't have an effect
     )
 
     val mainFilterRestore = PrefInt(
         dataStore = dataStore,
         key = PrefKey.MAIN_FILTER_RESTORE,
-        defaultValue = MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL,
+        defaultValue = MAIN_FILTER_USER,
         entries = possibleMainFilters, // not really, but shouldn't have an effect
     )
 

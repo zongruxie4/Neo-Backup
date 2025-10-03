@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -31,6 +31,15 @@ plugins {
 
 val jvmVersion = JavaVersion.VERSION_17
 
+val detectedLocales = detectLocales()
+val langsListString = "{${detectedLocales.sorted().joinToString(",") { "\"$it\"" }}}"
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", "true")
+    arg("room.generateKotlin", "true")
+}
+
 android {
     namespace = "com.machiav3lli.backup"
     compileSdk = 35
@@ -43,19 +52,10 @@ android {
         versionName = "8.3.12"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
+        buildConfigField("String[]", "DETECTED_LOCALES", langsListString)
 
         testApplicationId = "$applicationId.tests"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                ksp {
-                    arg("room.schemaLocation", "$projectDir/schemas")
-                    arg("room.incremental", "true")
-                    arg("room.generateKotlin", "true")
-                }
-            }
-        }
     }
 
     applicationVariants.all {
@@ -95,28 +95,6 @@ android {
         sourceCompatibility = jvmVersion
         targetCompatibility = jvmVersion
     }
-    kotlinOptions {
-        jvmTarget = jvmVersion.toString()
-        freeCompilerArgs += listOf(
-            "-Xjvm-default=all-compatibility",
-            //"-Xuse-fir-lt=false",   // Scripts are not yet supported with K2 in LightTree mode
-            //"-Xallow-any-scripts-in-source-roots",
-        )
-        if (project.findProperty("enableComposeCompilerReports") == "true") {
-            val metricsDir =
-                "${project.layout.buildDirectory.asFile.get().absolutePath}/compose_metrics"
-            println("--- enableComposeCompilerReports -> $metricsDir")
-            freeCompilerArgs += listOf(
-                "-P",
-                "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=$metricsDir",
-                "-P",
-                "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$metricsDir",
-            )
-        }
-        kotlinExtension.sourceSets.all {
-            languageSettings.enableLanguageFeature("ExplicitBackingFields")
-        }
-    }
     lint {
         checkReleaseBuilds = false
     }
@@ -137,6 +115,9 @@ android {
                 "/META-INF/LICENSE.md",
                 "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
             )
+        }
+        kotlinExtension.sourceSets.all {
+            languageSettings.enableLanguageFeature("ExplicitBackingFields")
         }
     }
 }
@@ -217,28 +198,20 @@ dependencies {
     implementation(kotlin("script-runtime"))    // for intellisense in kts scripts
 }
 
-// using a task as a preBuild dependency instead of a function that takes some time insures that it runs
-tasks.register("detectAndroidLocals") {
-    val langsList: MutableSet<String> = HashSet()
-
-    // in /res are (almost) all languages that have a translated string is saved. this is safer and saves some time
+fun detectLocales(): Set<String> {
+    val langsList = mutableSetOf<String>()
     fileTree("src/main/res").visit {
-        if (this.file.path.endsWith("strings.xml") &&
-            this.file.canonicalFile
-                .readText()
+        if (this.file.name == "strings.xml" && this.file.canonicalFile.readText()
                 .contains("<string")
         ) {
-            var languageCode =
-                this.file.parentFile.name
-                    .replace("values-", "")
-            languageCode = if (languageCode == "values") "en" else languageCode
-            langsList.add(languageCode)
+            val languageCode = this.file.parentFile?.name?.removePrefix("values-")?.let {
+                if (it == "values") "en" else it
+            }
+            languageCode?.let { langsList.add(it) }
         }
     }
-    val langsListString = "{${langsList.sorted().joinToString(",") { "\"${it}\"" }}}"
-    android.defaultConfig.buildConfigField("String[]", "DETECTED_LOCALES", langsListString)
+    return langsList
 }
-tasks.preBuild.dependsOn("detectAndroidLocals")
 
 tasks.withType<Test> {
     useJUnit() // we still use junit4
@@ -253,4 +226,25 @@ tasks.withType<KotlinCompile>().configureEach {
         //it.name.endsWith(".generator.kts")
         it.extension == "kts"
     })
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs = listOf(
+            "-Xjvm-default=all-compatibility",
+            //"-Xuse-fir-lt=false",   // Scripts are not yet supported with K2 in LightTree mode
+            //"-Xallow-any-scripts-in-source-roots",
+            "-XXLanguage:+ExplicitBackingFields",
+        )
+
+        if (project.findProperty("enableComposeCompilerReports") == "true") {
+            val metricsDir =
+                "${project.layout.buildDirectory.asFile.get().absolutePath}/compose_metrics"
+            println("--- enableComposeCompilerReports -> $metricsDir")
+            freeCompilerArgs.addAll(
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=$metricsDir",
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$metricsDir",
+            )
+        }
+    }
 }
