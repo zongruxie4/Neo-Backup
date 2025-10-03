@@ -108,6 +108,7 @@ fun TarArchiveOutputStream.suAddFiles(allFiles: List<ShellHandler.FileInfo>) {
         var entry: TarArchiveEntry
         when (file.fileType) {
             FileType.REGULAR_FILE  -> {
+                Timber.d("Adding regular file ${file.filePath} to archive (filesize: ${file.fileSize})")
                 entry = TarArchiveEntry(file.filePath)
                 entry.size = file.fileSize
                 entry.setNames(file.owner, file.group)
@@ -121,6 +122,7 @@ fun TarArchiveOutputStream.suAddFiles(allFiles: List<ShellHandler.FileInfo>) {
                 }
             }
             FileType.DIRECTORY     -> {
+                Timber.d("Adding directory ${file.filePath} to archive (filesize: ${file.fileSize})")
                 entry = TarArchiveEntry(file.filePath, TarConstants.LF_DIR)
                 entry.setNames(file.owner, file.group)
                 entry.mode = DIR_MODE_OR_MASK or file.fileMode
@@ -128,6 +130,7 @@ fun TarArchiveOutputStream.suAddFiles(allFiles: List<ShellHandler.FileInfo>) {
                 closeArchiveEntry()
             }
             FileType.SYMBOLIC_LINK -> {
+                Timber.d("Adding symbolic link ${file.filePath} to archive (filesize: ${file.fileSize})")
                 entry = TarArchiveEntry(file.filePath, TarConstants.LF_SYMLINK)
                 entry.linkName = file.linkName
                 entry.setNames(file.owner, file.group)
@@ -136,6 +139,7 @@ fun TarArchiveOutputStream.suAddFiles(allFiles: List<ShellHandler.FileInfo>) {
                 closeArchiveEntry()
             }
             FileType.NAMED_PIPE    -> {
+                Timber.d("Adding named pipe ${file.filePath} to archive (filesize: ${file.fileSize})")
                 entry = TarArchiveEntry(file.filePath, TarConstants.LF_FIFO)
                 entry.setNames(file.owner, file.group)
                 entry.mode = FIFO_MODE_OR_MASK or file.fileMode
