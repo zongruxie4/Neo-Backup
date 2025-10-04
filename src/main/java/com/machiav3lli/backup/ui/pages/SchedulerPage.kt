@@ -77,41 +77,43 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
     NavigableListDetailPaneScaffold(
         navigator = paneNavigator,
         listPane = {
-            Scaffold(
-                containerColor = Color.Transparent,
-                floatingActionButton = {
-                    ExtendedFloatingActionButton(
-                        text = { Text(stringResource(id = R.string.sched_add)) },
-                        icon = {
-                            Icon(
-                                modifier = Modifier.size(ICON_SIZE_SMALL),
-                                imageVector = Phosphor.CalendarPlus,
-                                contentDescription = stringResource(id = R.string.sched_add)
-                            )
-                        },
-                        onClick = { viewModel.addSchedule(specialBackupsEnabled) }
-                    )
-                }
-            ) { _ ->
-                ScheduleRecycler(
-                    modifier = Modifier.fillMaxSize(),
-                    productsList = schedules,
-                    onClick = { item ->
-                        scope.launch {
-                            paneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, item.id)
-                        }
-                    },
-                    onRun = { item ->
-                        dialogProps.value = Pair(DialogMode.SCHEDULE_RUN, item)
-                        openDialog.value = true
-                    },
-                    onCheckChanged = { item: Schedule, b: Boolean ->
-                        viewModel.updateSchedule(
-                            item.copy(enabled = b),
-                            true,
+            AnimatedPane {
+                Scaffold(
+                    containerColor = Color.Transparent,
+                    floatingActionButton = {
+                        ExtendedFloatingActionButton(
+                            text = { Text(stringResource(id = R.string.sched_add)) },
+                            icon = {
+                                Icon(
+                                    modifier = Modifier.size(ICON_SIZE_SMALL),
+                                    imageVector = Phosphor.CalendarPlus,
+                                    contentDescription = stringResource(id = R.string.sched_add)
+                                )
+                            },
+                            onClick = { viewModel.addSchedule(specialBackupsEnabled) }
                         )
                     }
-                )
+                ) { _ ->
+                    ScheduleRecycler(
+                        modifier = Modifier.fillMaxSize(),
+                        productsList = schedules,
+                        onClick = { item ->
+                            scope.launch {
+                                paneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, item.id)
+                            }
+                        },
+                        onRun = { item ->
+                            dialogProps.value = Pair(DialogMode.SCHEDULE_RUN, item)
+                            openDialog.value = true
+                        },
+                        onCheckChanged = { item: Schedule, b: Boolean ->
+                            viewModel.updateSchedule(
+                                item.copy(enabled = b),
+                                true,
+                            )
+                        }
+                    )
+                }
             }
         },
         detailPane = {
