@@ -22,7 +22,7 @@ import com.machiav3lli.backup.data.entity.EnumPref
 import com.machiav3lli.backup.data.entity.PasswordPref
 import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.manager.handler.PGPHandler
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
+import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
 import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
@@ -81,7 +81,7 @@ fun EncryptionPage(pgpManager: PGPHandler = koinInject()) {
                     ExpandableBlock(
                         heading = stringResource(R.string.prefs_pgp_key_management),
                     ) {
-                        ElevatedActionButton(
+                        ActionButton(
                             text = stringResource(R.string.create_pgp_key),
                             icon = Phosphor.Key,
                             positive = true,

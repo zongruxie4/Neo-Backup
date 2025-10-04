@@ -32,8 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.DevTools
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
@@ -117,7 +117,7 @@ fun RootMissing(activity: Activity? = null) {
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.weight(1f))
-            ElevatedActionButton(
+            ActionButton(
                 text = stringResource(id = R.string.dialogOK),
                 icon = Phosphor.Warning,
                 fullWidth = true,
@@ -127,7 +127,7 @@ fun RootMissing(activity: Activity? = null) {
                 exitProcess(0)
             }
             Spacer(modifier = Modifier.weight(1f))
-            ElevatedActionButton(
+            ActionButton(
                 text = stringResource(id = R.string.prefs_title),
                 icon = Phosphor.GearSix,
                 fullWidth = true,
@@ -136,7 +136,7 @@ fun RootMissing(activity: Activity? = null) {
                 showDevTools.value = true
             }
             Spacer(modifier = Modifier.weight(1f))
-            ElevatedActionButton(
+            ActionButton(
                 text = "Retry",
                 icon = Phosphor.ArrowsClockwise,
                 fullWidth = true,
@@ -174,7 +174,7 @@ fun LockPage() {
                     .navigationBarsPadding(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                ElevatedActionButton(
+                ActionButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     text = stringResource(id = R.string.dialog_unlock),
                     icon = Phosphor.LockOpen,

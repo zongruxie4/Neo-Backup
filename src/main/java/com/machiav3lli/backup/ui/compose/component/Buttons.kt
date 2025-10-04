@@ -42,7 +42,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,79 +61,35 @@ fun ActionButton(
     text: String,
     modifier: Modifier = Modifier,
     positive: Boolean = true,
-    iconOnSide: Boolean = false,
+    fullWidth: Boolean = false,
     icon: ImageVector? = null,
     onClick: () -> Unit,
 ) {
-    TextButton(
+    FilledTonalButton(
         modifier = modifier,
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = if (positive) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.tertiary
-        ),
-        onClick = onClick
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            text = text,
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.titleSmall
-        )
-        if (icon != null) {
-            if (iconOnSide) Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                imageVector = icon,
-                contentDescription = text
-            )
-        }
-    }
-}
-
-@Composable
-fun ElevatedActionButton(
-    text: String,
-    icon: ImageVector?,
-    modifier: Modifier = Modifier,
-    positive: Boolean = true,
-    fullWidth: Boolean = false,
-    enabled: Boolean = true,
-    colored: Boolean = true,
-    withText: Boolean = text.isNotEmpty(),
-    onClick: () -> Unit,
-) {
-    ElevatedButton(
-        modifier = modifier,
-        colors = ButtonDefaults.elevatedButtonColors(
+        colors = ButtonDefaults.filledTonalButtonColors(
             contentColor = when {
-                !colored -> MaterialTheme.colorScheme.onSurface
-                positive -> MaterialTheme.colorScheme.onPrimary
-                else     -> MaterialTheme.colorScheme.onTertiary
+                positive -> MaterialTheme.colorScheme.onPrimaryContainer
+                else     -> MaterialTheme.colorScheme.onTertiaryContainer
             },
             containerColor = when {
-                !colored -> MaterialTheme.colorScheme.surfaceContainerHighest
-                positive -> MaterialTheme.colorScheme.primary
-                else     -> MaterialTheme.colorScheme.tertiary
+                positive -> MaterialTheme.colorScheme.primaryContainer
+                else     -> MaterialTheme.colorScheme.tertiaryContainer
             }
         ),
-        enabled = enabled,
-        onClick = onClick
+        onClick = onClick,
     ) {
-        icon?.let {
-            Icon(
-                imageVector = icon,
-                contentDescription = text
-            )
-        }
-        if (withText)
-            Text(
-                modifier = when {
-                    fullWidth -> Modifier.weight(1f)
-                    else      -> Modifier.padding(start = 8.dp)
-                },
-                text = text,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleSmall
-            )
+        if (icon != null) Icon(imageVector = icon, contentDescription = text)
+        Text(
+            modifier = when {
+                fullWidth -> Modifier.weight(1f)
+                icon != null -> Modifier.padding(start = 8.dp)
+                else -> Modifier
+            },
+            text = text,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleSmall,
+        )
     }
 }
 
@@ -142,8 +97,8 @@ fun ElevatedActionButton(
 fun CardButton(
     modifier: Modifier = Modifier,
     icon: ImageVector,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    contentColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    containerColor: Color = MaterialTheme.colorScheme.onSurface,
     description: String,
     enabled: Boolean = true,
     onClick: () -> Unit,

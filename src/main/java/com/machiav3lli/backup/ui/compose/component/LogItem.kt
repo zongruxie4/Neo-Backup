@@ -20,10 +20,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.Log
-import com.machiav3lli.backup.ui.pages.TerminalText
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ShareNetwork
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
+import com.machiav3lli.backup.ui.pages.TerminalText
 import com.machiav3lli.backup.utils.getFormattedDate
 
 @Composable
@@ -84,18 +84,18 @@ fun LogItem(
                                     )
                             }
                         }
-                        ElevatedActionButton(
-                            text = stringResource(id = R.string.delete),
+                        FilledRoundButton(
+                            description = stringResource(id = R.string.delete),
                             icon = Phosphor.TrashSimple,
-                            withText = false,
-                            positive = false,
+                            tint = MaterialTheme.colorScheme.tertiaryContainer,
+                            onTint = MaterialTheme.colorScheme.onTertiaryContainer,
                             onClick = { onDelete(item) }
                         )
-                        ElevatedActionButton(       // TODO: remove?, share button already in TerminalText
-                            text = stringResource(id = R.string.shareTitle),
+                        FilledRoundButton(       // TODO: remove?, share button already in TerminalText
+                            description = stringResource(id = R.string.shareTitle),
                             icon = Phosphor.ShareNetwork,
-                            withText = false,
-                            positive = true,
+                            tint = MaterialTheme.colorScheme.primaryContainer,
+                            onTint = MaterialTheme.colorScheme.onPrimaryContainer,
                             onClick = { onShare(item) }
                         )
                     }

@@ -70,9 +70,9 @@ import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainFilterChipItems
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import com.machiav3lli.backup.scheduleBackupModeChipItems
+import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.CardButton
 import com.machiav3lli.backup.ui.compose.component.CheckChip
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
 import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.RoundButton
@@ -401,7 +401,7 @@ fun SchedulePage(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    ElevatedActionButton(
+                    ActionButton(
                         text = stringResource(id = R.string.delete),
                         icon = Phosphor.TrashSimple,
                         positive = false,
@@ -410,7 +410,7 @@ fun SchedulePage(
                         viewModel.deleteSchedule()
                         onDismiss()
                     }
-                    ElevatedActionButton(
+                    ActionButton(
                         text = stringResource(id = R.string.sched_activateButton),
                         icon = Phosphor.Play,
                         fullWidth = true,

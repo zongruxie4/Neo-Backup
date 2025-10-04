@@ -68,9 +68,10 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.traceCompose
 import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.ActionChip
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.component.ExpandingFadingVisibility
+import com.machiav3lli.backup.ui.compose.component.FilledRoundButton
 import com.machiav3lli.backup.ui.compose.component.HomePackageRecycler
 import com.machiav3lli.backup.ui.compose.component.MainPackageContextMenu
 import com.machiav3lli.backup.ui.compose.component.UpdatedPackageRecycler
@@ -225,12 +226,12 @@ fun HomePage(
                                             expandedView = {
                                                 Column {
                                                     Row(
-                                                        modifier = Modifier.padding(horizontal = 8.dp),
+                                                        modifier = Modifier.padding(4.dp),
                                                         horizontalArrangement = Arrangement.spacedBy(
                                                             8.dp
                                                         )
                                                     ) {
-                                                        ElevatedActionButton(
+                                                        ActionButton(
                                                             text = stringResource(id = R.string.backup_all_updated),
                                                             icon = Phosphor.ArchiveTray,
                                                             modifier = Modifier.weight(1f),
@@ -239,11 +240,9 @@ fun HomePage(
                                                         ) {
                                                             openBatchDialog.value = true
                                                         }
-                                                        ElevatedActionButton(
-                                                            text = stringResource(id = R.string.dialogCancel),
+                                                        FilledRoundButton(
+                                                            description = stringResource(id = R.string.dialogCancel),
                                                             icon = Phosphor.CaretDown,
-                                                            withText = false,
-                                                            positive = false,
                                                         ) {
                                                             updaterExpanded = !updaterExpanded
                                                         }

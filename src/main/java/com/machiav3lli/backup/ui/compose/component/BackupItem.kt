@@ -246,7 +246,7 @@ fun BackupItem(
                             onClick = { onDelete(item) }
                         )
                         if (!item.packageLabel.contains("INVALID"))
-                            ElevatedActionButton(
+                            ActionButton(
                                 text = stringResource(id = R.string.restore),
                                 icon = Phosphor.ClockCounterClockwise,
                                 positive = true,

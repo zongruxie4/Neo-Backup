@@ -87,17 +87,15 @@ fun ExportedScheduleItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ElevatedActionButton(
-                        text = stringResource(id = R.string.delete),
+                    FilledRoundButton(
+                        description = stringResource(id = R.string.delete),
                         icon = Phosphor.TrashSimple,
-                        withText = false,
-                        positive = false,
+                        tint = MaterialTheme.colorScheme.tertiaryContainer,
+                        onTint = MaterialTheme.colorScheme.onTertiaryContainer,
                         onClick = onDelete
                     )
-
                     Spacer(modifier = Modifier.weight(1f))
-
-                    ElevatedActionButton(
+                    ActionButton(
                         text = stringResource(id = R.string.dialog_import),
                         icon = Phosphor.ClockCounterClockwise,
                         positive = true,

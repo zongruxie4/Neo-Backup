@@ -57,7 +57,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.linksList
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
+import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.LinkChip
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowRight
@@ -163,7 +163,7 @@ fun WelcomePage() {
                     .navigationBarsPadding(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                ElevatedActionButton(
+                ActionButton(
                     text = stringResource(id = R.string.dialog_start),
                     icon = Phosphor.ArrowRight,
                     modifier = Modifier.padding(horizontal = 24.dp),

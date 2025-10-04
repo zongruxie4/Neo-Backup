@@ -28,7 +28,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.PackageInfo
-import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.DialogNegativeButton
 import com.machiav3lli.backup.ui.compose.component.DialogPositiveButton
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -96,7 +95,10 @@ fun ActionsDialogUI(
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
             ) {
-                ActionButton(text = stringResource(id = R.string.dialogCancel), onClick = onDismiss)
+                DialogNegativeButton(
+                    text = stringResource(id = R.string.dialogCancel),
+                    onClick = onDismiss
+                )
                 Spacer(Modifier.weight(1f))
                 if (secondaryAction != null && secondaryText.isNotEmpty()) {
                     DialogNegativeButton(

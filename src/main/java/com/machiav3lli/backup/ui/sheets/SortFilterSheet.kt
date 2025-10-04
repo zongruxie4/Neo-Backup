@@ -67,8 +67,8 @@ import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainBackupModeChipItems
 import com.machiav3lli.backup.mainFilterChipItems
 import com.machiav3lli.backup.sortChipItems
+import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.DoubleVerticalText
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
 import com.machiav3lli.backup.ui.compose.component.InfoChipsBlock
 import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
@@ -203,7 +203,7 @@ fun SortFilterSheet(
                         .navigationBarsPadding(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ElevatedActionButton(
+                    ActionButton(
                         text = stringResource(id = R.string.resetFilter),
                         icon = Phosphor.ArrowUUpLeft,
                         modifier = Modifier.weight(1f),
@@ -214,7 +214,7 @@ fun SortFilterSheet(
                             onDismiss()
                         }
                     )
-                    ElevatedActionButton(
+                    ActionButton(
                         text = stringResource(id = R.string.applyFilter),
                         icon = Phosphor.Check,
                         modifier = Modifier.weight(1f),

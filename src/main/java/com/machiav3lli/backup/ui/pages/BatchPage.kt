@@ -51,9 +51,9 @@ import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.ActionChip
 import com.machiav3lli.backup.ui.compose.component.BatchPackageRecycler
-import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.StateChip
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -278,7 +278,7 @@ fun BatchPage(
                         scaffoldState.bottomSheetState.expand()
                     }
                 }
-                ElevatedActionButton(
+                ActionButton(
                     text = stringResource(id = if (backupBoolean) R.string.backup else R.string.restore),
                     icon = if (backupBoolean) Phosphor.ArchiveTray
                     else Phosphor.ClockCounterClockwise,
