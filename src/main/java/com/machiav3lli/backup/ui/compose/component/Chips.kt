@@ -1,11 +1,11 @@
 package com.machiav3lli.backup.ui.compose.component
 
 import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,11 +38,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.ChipItem
 import com.machiav3lli.backup.data.entity.InfoChipItem
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
-import com.machiav3lli.backup.ui.compose.icons.phosphor.Checks
+import com.machiav3lli.backup.ui.compose.icons.phosphor.CheckCircle
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Circle
 import com.machiav3lli.backup.ui.compose.ifThen
 import com.machiav3lli.backup.utils.launchView
 
@@ -85,11 +85,16 @@ fun SelectionChip(
     ),
     onClick: () -> Unit,
 ) {
-    val selectableChipTransitionState = selectableChipTransition(selected = isSelected)
+    val selectionCornerRadius by animateDpAsState(
+        when {
+            isSelected -> 4.dp
+            else       -> 16.dp
+        }
+    )
 
     FilterChip(
         colors = colors,
-        shape = RoundedCornerShape(selectableChipTransitionState.cornerRadius),
+        shape = RoundedCornerShape(selectionCornerRadius),
         border = null,
         selected = isSelected,
         leadingIcon = {
@@ -116,11 +121,16 @@ fun SelectionChip(
     ),
     onClick: () -> Unit,
 ) {
-    val selectableChipTransitionState = selectableChipTransition(selected = isSelected)
+    val selectionCornerRadius by animateDpAsState(
+        when {
+            isSelected -> 4.dp
+            else       -> 16.dp
+        }
+    )
 
     FilterChip(
         colors = colors,
-        shape = RoundedCornerShape(selectableChipTransitionState.cornerRadius),
+        shape = RoundedCornerShape(selectionCornerRadius),
         border = null,
         selected = isSelected,
         onClick = onClick,
@@ -133,6 +143,14 @@ fun SelectionChip(
 @Composable
 fun InfoChip(
     item: InfoChipItem,
+    colors: SelectableChipColors = FilterChipDefaults.filterChipColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        labelColor = MaterialTheme.colorScheme.onSurface,
+        iconColor = MaterialTheme.colorScheme.onSurface,
+        selectedContainerColor = item.color ?: MaterialTheme.colorScheme.onPrimaryContainer,
+        selectedLabelColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        selectedLeadingIconColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+    ),
 ) {
     FilterChip(
         leadingIcon = {
@@ -146,14 +164,7 @@ fun InfoChip(
         label = {
             Text(text = item.text)
         },
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-            labelColor = MaterialTheme.colorScheme.onSurface,
-            iconColor = MaterialTheme.colorScheme.onSurface,
-            selectedContainerColor = item.color ?: MaterialTheme.colorScheme.onPrimaryContainer,
-            selectedLabelColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            selectedLeadingIconColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        colors = colors,
         onClick = {}
     )
 }
@@ -212,33 +223,47 @@ fun CheckChip(
     checked: Boolean,
     textId: Int,
     checkedTextId: Int,
+    colors: SelectableChipColors = FilterChipDefaults.filterChipColors(
+        labelColor = MaterialTheme.colorScheme.onBackground,
+        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+        iconColor = MaterialTheme.colorScheme.onBackground,
+        selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = Color.Transparent,
+        selectedContainerColor = MaterialTheme.colorScheme.primary
+    ),
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val (checked, check) = remember(checked) { mutableStateOf(checked) }   //TODO hg42 should probably be removed like for MultiChips
+    val selectionCornerRadius by animateDpAsState(
+        when {
+            checked -> 4.dp
+            else    -> 28.dp
+        }
+    )
 
     FilterChip(
         modifier = modifier,
         selected = checked,
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = Color.Transparent,
-            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-            labelColor = MaterialTheme.colorScheme.onSurface,
-            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            iconColor = MaterialTheme.colorScheme.onSurface,
-            selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ),
-        shape = MaterialTheme.shapes.medium,
+        colors = colors,
+        shape = RoundedCornerShape(selectionCornerRadius),
         leadingIcon = {
-            if (checked) ButtonIcon(Phosphor.Checks, R.string.enabled)
+            Icon(
+                imageVector = when {
+                    checked -> Phosphor.CheckCircle
+                    else    -> Phosphor.Circle
+                },
+                contentDescription = null,
+            )
         },
         onClick = {
             onCheckedChange(!checked)
             check(!checked)
         },
         label = {
-            Row(modifier = Modifier.padding(vertical = 10.dp)) {
-                Text(text = stringResource(id = if (checked) checkedTextId else textId))
-            }
+            Text(
+                modifier = Modifier.padding(vertical = 8.dp),
+                text = stringResource(id = if (checked) checkedTextId else textId),
+            )
         }
     )
 }
