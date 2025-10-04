@@ -148,7 +148,7 @@ fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
     )
 
 // TODO fix for future replacement of Alarm
-fun scheduleNextWork(context: Context, scheduleId: Long, rescheduleBoolean: Boolean) {
+suspend fun scheduleNextWork(context: Context, scheduleId: Long, rescheduleBoolean: Boolean) {
     if (scheduleId >= 0) {
         val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
         var schedule = scheduleRepo.getSchedule(scheduleId)

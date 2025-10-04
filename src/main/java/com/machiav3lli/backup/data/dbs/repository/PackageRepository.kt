@@ -65,7 +65,7 @@ class PackageRepository(
 
     fun getBackupsList(): List<Backup> = theBackupsMap.values.flatten()
 
-    suspend fun updatePackage(packageName: String) = withContext(jcc) {
+    suspend fun updatePackage(packageName: String) {
         Package.invalidateCacheForPackage(packageName)
         val new = try {
             Package(appContext, packageName)
@@ -78,13 +78,11 @@ class PackageRepository(
         }
     }
 
-    suspend fun upsertAppInfo(vararg appInfos: AppInfo) = withContext(jcc) {
+    suspend fun upsertAppInfo(vararg appInfos: AppInfo) =
         db.getAppInfoDao().upsert(*appInfos)
-    }
 
-    suspend fun replaceAppInfos(vararg appInfos: AppInfo) = withContext(jcc) {
+    suspend fun replaceAppInfos(vararg appInfos: AppInfo) =
         db.getAppInfoDao().updateList(*appInfos)
-    }
 
     fun updateBackups(packageName: String, backups: List<Backup>) = runBlocking(jcc) {
         mutex.withLock {
@@ -111,7 +109,7 @@ class PackageRepository(
         }
     }
 
-    fun deleteAppInfoOf(packageName: String) = db.getAppInfoDao().deleteAllOf(packageName)
+    suspend fun deleteAppInfoOf(packageName: String) = db.getAppInfoDao().deleteAllOf(packageName)
 
     fun deleteBackupsOf(packageName: String) = runBlocking(jcc) {
         mutex.withLock {
@@ -120,33 +118,27 @@ class PackageRepository(
     }
 
     suspend fun deleteBackup(pkg: Package?, backup: Backup, onDismiss: () -> Unit) =
-        withContext(jcc) {
-            pkg?.let { pkg ->
-                pkg.deleteBackup(backup)
-                if (!pkg.isInstalled && pkg.backupList.isEmpty() && backup.packageLabel != "? INVALID") {
-                    db.getAppInfoDao().deleteAllOf(pkg.packageName)
-                    onDismiss()
-                }
+        pkg?.let { pkg ->
+            pkg.deleteBackup(backup)
+            if (!pkg.isInstalled && pkg.backupList.isEmpty() && backup.packageLabel != "? INVALID") {
+                db.getAppInfoDao().deleteAllOf(pkg.packageName)
+                onDismiss()
             }
         }
 
     suspend fun deleteAllBackups(pkg: Package?, onDismiss: () -> Unit) {
-        withContext(jcc) {
-            pkg?.let { pkg ->
-                pkg.deleteAllBackups()
-                if (!pkg.isInstalled && pkg.backupList.isEmpty()) {
-                    db.getAppInfoDao().deleteAllOf(pkg.packageName)
-                    onDismiss()
-                }
+        pkg?.let { pkg ->
+            pkg.deleteAllBackups()
+            if (!pkg.isInstalled && pkg.backupList.isEmpty()) {
+                db.getAppInfoDao().deleteAllOf(pkg.packageName)
+                onDismiss()
             }
         }
     }
 
     @Throws(ShellCommands.ShellActionFailedException::class)
     suspend fun enableDisable(packageName: String, users: List<String>, enable: Boolean) {
-        withContext(jcc) {
-            ShellCommands.enableDisable(users, packageName, enable)
-        }
+        ShellCommands.enableDisable(users, packageName, enable)
     }
 
     suspend fun uninstall(
@@ -155,24 +147,22 @@ class PackageRepository(
         onDismiss: () -> Unit,
         showNotification: (String) -> Unit,
     ) {
-        withContext(jcc) {
-            mPackage?.let { mPackage ->
-                Timber.i("uninstalling: ${mPackage.packageLabel}")
-                try {
-                    ShellCommands.uninstall(
-                        users,
-                        mPackage.packageName, mPackage.apkPath,
-                        mPackage.dataPath, mPackage.isSystem
-                    )
-                    if (mPackage.backupList.isEmpty()) {
-                        db.getAppInfoDao().deleteAllOf(mPackage.packageName)
-                        onDismiss()
-                    }
-                    showNotification(appContext.getString(R.string.uninstallSuccess))
-                } catch (e: ShellCommands.ShellActionFailedException) {
-                    showNotification(appContext.getString(R.string.uninstallFailure))
-                    e.message?.let { message -> LogsHandler.logErrors(message) }
+        mPackage?.let { mPackage ->
+            Timber.i("uninstalling: ${mPackage.packageLabel}")
+            try {
+                ShellCommands.uninstall(
+                    users,
+                    mPackage.packageName, mPackage.apkPath,
+                    mPackage.dataPath, mPackage.isSystem
+                )
+                if (mPackage.backupList.isEmpty()) {
+                    db.getAppInfoDao().deleteAllOf(mPackage.packageName)
+                    onDismiss()
                 }
+                showNotification(appContext.getString(R.string.uninstallSuccess))
+            } catch (e: ShellCommands.ShellActionFailedException) {
+                showNotification(appContext.getString(R.string.uninstallFailure))
+                e.message?.let { message -> LogsHandler.logErrors(message) }
             }
         }
     }

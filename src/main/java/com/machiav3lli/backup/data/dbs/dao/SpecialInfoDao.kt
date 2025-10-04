@@ -25,17 +25,17 @@ import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
 @Dao
 interface SpecialInfoDao : BaseDao<SpecialInfo> {
     @Query("SELECT COUNT(*) FROM specialinfo")
-    fun count(): Long
+    suspend fun count(): Long
 
     @Query("SELECT * FROM specialinfo ORDER BY packageName ASC")
-    fun getAll(): List<SpecialInfo>
+    suspend fun getAll(): List<SpecialInfo>
 
     @Query("SELECT * FROM specialinfo WHERE packageName = :packageName")
-    fun get(packageName: String): List<SpecialInfo>
+    suspend fun get(packageName: String): List<SpecialInfo>
 
     @Query("DELETE FROM specialinfo")
-    fun emptyTable()
+    suspend fun emptyTable()
 
     @Query("DELETE FROM specialinfo WHERE packageName = :packageName")
-    fun deleteAllOf(packageName: String)
+    suspend fun deleteAllOf(packageName: String)
 }

@@ -27,25 +27,25 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BackupDao : BaseDao<Backup> {
     @Query("SELECT COUNT(*) FROM backup")
-    fun count(): Long
+    suspend fun count(): Long
 
     @Query("SELECT * FROM backup ORDER BY packageName ASC")
-    fun getAll(): List<Backup>
+    suspend fun getAll(): List<Backup>
 
     @Query("SELECT * FROM backup ORDER BY packageName ASC")
     fun getAllFlow(): Flow<List<Backup>>
 
     @Query("SELECT * FROM backup WHERE packageName = :packageName")
-    fun get(packageName: String): List<Backup>
+    suspend fun get(packageName: String): List<Backup>
 
     @Query("SELECT * FROM backup WHERE packageName = :packageName")
     fun getFlow(packageName: String): Flow<List<Backup>>
 
     @Query("DELETE FROM backup")
-    fun emptyTable()
+    suspend fun emptyTable()
 
     @Query("DELETE FROM backup WHERE packageName = :packageName")
-    fun deleteAllOf(packageName: String)
+    suspend fun deleteAllOf(packageName: String)
 
     @Transaction
     suspend fun updateList(packageName: String, backups: Collection<Backup>) {
@@ -60,7 +60,7 @@ interface BackupDao : BaseDao<Backup> {
     }
 
     @Transaction
-    fun updateList(vararg backups: Backup) {
+    suspend fun updateList(vararg backups: Backup) {
         emptyTable()
         upsert(*backups)
     }

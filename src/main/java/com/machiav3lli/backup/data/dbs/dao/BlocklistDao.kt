@@ -25,20 +25,20 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BlocklistDao : BaseDao<Blocklist> {
     @Query("SELECT COUNT(*) FROM blocklist")
-    fun count(): Long
+    suspend fun count(): Long
 
     @Query("SELECT * FROM blocklist ORDER BY blocklistId ASC")
-    fun getAll(): List<Blocklist>
+    suspend fun getAll(): List<Blocklist>
 
     @Query("SELECT * FROM blocklist ORDER BY blocklistId ASC")
     fun getAllFlow(): Flow<List<Blocklist>>
 
     @Query("SELECT packageName FROM blocklist WHERE blocklistId = :blocklistId")
-    fun getBlocklistedPackages(blocklistId: Long): List<String>
+    suspend fun getBlocklistedPackages(blocklistId: Long): List<String>
 
     @Query("DELETE FROM blocklist")
-    fun emptyTable()
+    suspend fun emptyTable()
 
     @Query("DELETE FROM blocklist WHERE blocklistId = :blocklistId")
-    fun deleteById(blocklistId: Long)
+    suspend fun deleteById(blocklistId: Long)
 }

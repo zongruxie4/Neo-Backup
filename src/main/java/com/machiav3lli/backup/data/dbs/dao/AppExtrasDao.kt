@@ -25,23 +25,23 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AppExtrasDao : BaseDao<AppExtras> {
     @Query("SELECT COUNT(*) FROM appextras")
-    fun count(): Long
+    suspend fun count(): Long
 
     @Query("SELECT * FROM appextras ORDER BY packageName ASC")
-    fun getAll(): List<AppExtras>
+    suspend fun getAll(): List<AppExtras>
 
     @Query("SELECT * FROM appextras ORDER BY packageName ASC")
     fun getAllFlow(): Flow<List<AppExtras>>
 
     @Query("SELECT * FROM appextras WHERE packageName = :packageName")
-    fun get(packageName: String): AppExtras
+    suspend fun get(packageName: String): AppExtras
 
     @Query("SELECT * FROM appextras WHERE packageName = :packageName")
     fun getFlow(packageName: String?): Flow<AppExtras?>
 
     @Query("DELETE FROM appextras")
-    fun deleteAll()
+    suspend fun deleteAll()
 
     @Query("DELETE FROM appextras WHERE packageName = :packageName")
-    fun deleteByPackageName(packageName: String)
+    suspend fun deleteByPackageName(packageName: String)
 }

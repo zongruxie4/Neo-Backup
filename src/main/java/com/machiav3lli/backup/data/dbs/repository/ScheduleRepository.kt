@@ -10,12 +10,10 @@ import com.machiav3lli.backup.utils.cancelScheduleAlarm
 import com.machiav3lli.backup.utils.scheduleNextAlarm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ScheduleRepository(
@@ -23,22 +21,19 @@ class ScheduleRepository(
     private val appContext: Application,
 ) {
     private val cc = Dispatchers.IO
-    private val jcc = Dispatchers.IO + SupervisorJob()
 
     fun getAllFlow() = db.getScheduleDao().getAllFlow()
         .flowOn(cc)
 
-    suspend fun getAll() = withContext(jcc) {
-        db.getScheduleDao().getAll()
-    }
+    suspend fun getAll() = db.getScheduleDao().getAll()
 
     fun getScheduleFlow(id: Flow<Long>) = id.flatMapLatest {
         db.getScheduleDao().getByIdFlow(it)
     }.flowOn(cc)
 
-    fun getSchedule(id: Long) = db.getScheduleDao().getById(id)
+    suspend fun getSchedule(id: Long) = db.getScheduleDao().getById(id)
 
-    fun getSchedule(name: String) = db.getScheduleDao().getByName(name)
+    suspend fun getSchedule(name: String) = db.getScheduleDao().getByName(name)
 
     fun getCustomListFlow(id: Flow<Long>): Flow<Set<String>> = id.flatMapLatest {
         db.getScheduleDao().getCustomListFlow(it)
@@ -51,43 +46,35 @@ class ScheduleRepository(
     }.flowOn(cc)
 
     suspend fun addNew(withSpecial: Boolean) {
-        withContext(jcc) {
-            db.getScheduleDao().insert(
-                Schedule.Builder() // Set id to 0 to make the database generate a new id
-                    .withId(0)
-                    .withSpecial(withSpecial)
-                    .build()
-            )
-        }
+        db.getScheduleDao().insert(
+            Schedule.Builder() // Set id to 0 to make the database generate a new id
+                .withId(0)
+                .withSpecial(withSpecial)
+                .build()
+        )
     }
 
-    fun update(value: Schedule) {
-        db.getScheduleDao().update(value)
-    }
+    suspend fun update(value: Schedule) = db.getScheduleDao().update(value)
 
     suspend fun updateSchedule(schedule: Schedule, rescheduleBoolean: Boolean) {
-        withContext(jcc) {
-            db.getScheduleDao().update(schedule)
-            if (schedule.enabled) {
-                traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
-                scheduleNextAlarm(
-                    appContext,
-                    schedule.id,
-                    rescheduleBoolean
-                )
-            } else {
-                traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> cancelAlarm" }
-                cancelScheduleAlarm(appContext, schedule.id, schedule.name)
-                ScheduleWork.cancel(schedule.id)
-            }
+        db.getScheduleDao().update(schedule)
+        if (schedule.enabled) {
+            traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> ${if (rescheduleBoolean) "re-" else ""}schedule" }
+            scheduleNextAlarm(
+                appContext,
+                schedule.id,
+                rescheduleBoolean
+            )
+        } else {
+            traceSchedule { "[$schedule.id] ScheduleViewModel.updateS -> cancelAlarm" }
+            cancelScheduleAlarm(appContext, schedule.id, schedule.name)
+            ScheduleWork.cancel(schedule.id)
         }
     }
 
     suspend fun deleteById(id: Long) {
-        withContext(jcc) {
-            db.getScheduleDao().deleteById(id)
-            ScheduleWork.cancel(id)
-        }
+        db.getScheduleDao().deleteById(id)
+        ScheduleWork.cancel(id)
     }
 }
 

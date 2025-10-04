@@ -25,13 +25,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ScheduleDao : BaseDao<Schedule> {
     @Query("SELECT COUNT(*) FROM schedule")
-    fun count(): Long
+    suspend fun count(): Long
 
     @Query("SELECT * FROM schedule WHERE id = :id")
-    fun getById(id: Long): Schedule?
+    suspend fun getById(id: Long): Schedule?
 
     @Query("SELECT * FROM schedule WHERE name = :name")
-    fun getByName(name: String): Schedule?
+    suspend fun getByName(name: String): Schedule?
 
     @Query("SELECT * FROM schedule WHERE id = :id")
     fun getByIdFlow(id: Long): Flow<Schedule?>
@@ -43,14 +43,14 @@ interface ScheduleDao : BaseDao<Schedule> {
     fun getBlockListFlow(id: Long): Flow<String?>
 
     @Query("SELECT * FROM schedule ORDER BY id ASC")
-    fun getAll(): List<Schedule>
+    suspend fun getAll(): List<Schedule>
 
     @Query("SELECT * FROM schedule ORDER BY id ASC")
     fun getAllFlow(): Flow<List<Schedule>>
 
     @Query("DELETE FROM schedule")
-    fun emptyTable()
+    suspend fun emptyTable()
 
     @Query("DELETE FROM schedule WHERE id = :id")
-    fun deleteById(id: Long)
+    suspend fun deleteById(id: Long)
 }

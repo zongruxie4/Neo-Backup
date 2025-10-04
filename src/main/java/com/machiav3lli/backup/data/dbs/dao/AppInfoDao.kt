@@ -26,28 +26,28 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AppInfoDao : BaseDao<AppInfo> {
     @Query("SELECT COUNT(*) FROM appinfo")
-    fun count(): Long
+    suspend fun count(): Long
 
     @Query("SELECT * FROM appinfo ORDER BY packageName ASC")
-    fun getAll(): List<AppInfo>
+    suspend fun getAll(): List<AppInfo>
 
     @Query("SELECT * FROM appinfo ORDER BY packageName ASC")
     fun getAllFlow(): Flow<List<AppInfo>>
 
     @Query("SELECT * FROM appinfo WHERE packageName = :packageName")
-    fun get(packageName: String): AppInfo
+    suspend fun get(packageName: String): AppInfo
 
     @Query("SELECT * FROM appinfo WHERE packageName = :packageName")
     fun getFlow(packageName: String): Flow<AppInfo>
 
     @Query("DELETE FROM appinfo")
-    fun emptyTable()
+    suspend fun emptyTable()
 
     @Query("DELETE FROM appinfo WHERE packageName = :packageName")
-    fun deleteAllOf(packageName: String)
+    suspend fun deleteAllOf(packageName: String)
 
     @Transaction
-    fun updateList(vararg appInfos: AppInfo) {
+    suspend fun updateList(vararg appInfos: AppInfo) {
         emptyTable()
         upsert(*appInfos)
     }
