@@ -24,7 +24,6 @@ import android.graphics.Canvas
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -63,7 +62,6 @@ import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.legendList
 import com.machiav3lli.backup.linksList
-import com.machiav3lli.backup.ui.compose.BlockTopShape
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.component.LegendItem
 import com.machiav3lli.backup.ui.compose.component.LinkChip
@@ -88,15 +86,7 @@ fun HelpSheet(onDismiss: () -> Unit) {
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-                    .background(
-                        MaterialTheme.colorScheme.surfaceContainerHighest,
-                        BlockTopShape,
-                    )
-                    .clip(BlockTopShape),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ListItem(

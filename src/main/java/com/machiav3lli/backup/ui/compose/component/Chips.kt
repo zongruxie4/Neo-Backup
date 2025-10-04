@@ -299,9 +299,8 @@ fun LinkChip(
     AssistChip(
         modifier = modifier,
         border = null,
-        shape = MaterialTheme.shapes.medium,
         colors = AssistChipDefaults.assistChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         ),
         leadingIcon = {
             Icon(

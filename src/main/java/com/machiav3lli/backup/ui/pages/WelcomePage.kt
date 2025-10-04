@@ -22,7 +22,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -57,7 +56,6 @@ import com.machiav3lli.backup.BuildConfig
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.linksList
 import com.machiav3lli.backup.ui.activities.NeoActivity
-import com.machiav3lli.backup.ui.compose.BlockTopShape
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.component.ElevatedActionButton
 import com.machiav3lli.backup.ui.compose.component.LinkChip
@@ -79,14 +77,7 @@ fun WelcomePage() {
             Column(
                 modifier = Modifier
                     .windowInsetsPadding(TopAppBarDefaults.windowInsets)
-                    .fillMaxWidth()
-                    .padding(4.dp)
-                    .background(
-                        MaterialTheme.colorScheme.surfaceContainerHighest,
-                        BlockTopShape,
-                    )
-                    .clip(BlockTopShape),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ListItem(
