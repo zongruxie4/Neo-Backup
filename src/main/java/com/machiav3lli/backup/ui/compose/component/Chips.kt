@@ -20,8 +20,6 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SelectableChipColors
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -136,23 +134,25 @@ fun SelectionChip(
 fun InfoChip(
     item: InfoChipItem,
 ) {
-    SuggestionChip(
-        icon = {
+    FilterChip(
+        leadingIcon = {
             if (item.icon != null) Icon(
                 imageVector = item.icon,
                 contentDescription = item.text,
             )
         },
         border = null,
+        selected = item.color != null,
         label = {
             Text(text = item.text)
         },
-        colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = item.color ?: MaterialTheme.colorScheme.surfaceContainerHigh,
-            labelColor = if (item.color != null) MaterialTheme.colorScheme.surfaceContainerHigh
-            else MaterialTheme.colorScheme.onSurface,
-            iconContentColor = if (item.color != null) MaterialTheme.colorScheme.surfaceContainerHigh
-            else MaterialTheme.colorScheme.onSurface,
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            labelColor = MaterialTheme.colorScheme.onSurface,
+            iconColor = MaterialTheme.colorScheme.onSurface,
+            selectedContainerColor = item.color ?: MaterialTheme.colorScheme.onPrimaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            selectedLeadingIconColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ),
         onClick = {}
     )
