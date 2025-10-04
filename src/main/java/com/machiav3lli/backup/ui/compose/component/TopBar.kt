@@ -187,7 +187,6 @@ fun TopBar(
             modifier = modifier
                 .windowInsetsPadding(TopAppBarDefaults.windowInsets)
                 .heightIn(min = 72.dp)
-                .blockBorderTop()
                 .fillMaxWidth(),
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent,
@@ -254,7 +253,6 @@ fun MainTopBar(
             modifier = modifier
                 .windowInsetsPadding(TopAppBarDefaults.windowInsets)
                 .height(72.dp)
-                .blockBorderTop()
                 .fillMaxWidth(),
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent,
