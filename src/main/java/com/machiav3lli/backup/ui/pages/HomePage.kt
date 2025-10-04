@@ -144,6 +144,10 @@ fun HomePage(
         //endNanoTimer("prefetchIcons")
     }
 
+    BackHandler {
+        mActivity.moveTaskToBack(true)
+    }
+
     BackHandler(scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
         scope.launch { scaffoldState.bottomSheetState.partialExpand() }
     }
