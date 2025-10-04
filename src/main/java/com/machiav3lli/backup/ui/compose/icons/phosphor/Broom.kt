@@ -17,10 +17,10 @@ val Phosphor.Broom: ImageVector
         }
         _Broom = ImageVector.Builder(
             name = "Broom",
-            defaultWidth = 256.dp,
-            defaultHeight = 256.dp,
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
             viewportWidth = 256f,
-            viewportHeight = 256f
+            viewportHeight = 256f,
         ).apply {
             path(fill = SolidColor(Color(0xFF000000))) {
                 moveTo(235.5f, 216.81f)
