@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -80,7 +79,7 @@ import com.machiav3lli.backup.manager.tasks.BackupActionTask
 import com.machiav3lli.backup.manager.tasks.RestoreActionTask
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.BackupItem
-import com.machiav3lli.backup.ui.compose.component.CardButton
+import com.machiav3lli.backup.ui.compose.component.IconTextButton
 import com.machiav3lli.backup.ui.compose.component.InfoChipsBlock
 import com.machiav3lli.backup.ui.compose.component.PackageIcon
 import com.machiav3lli.backup.ui.compose.component.RoundButton
@@ -91,6 +90,7 @@ import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.icon.Exodus
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArchiveTray
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowSquareOut
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Broom
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Leaf
@@ -134,7 +134,7 @@ fun AppPage(
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarVisible = snackbarText.isNotEmpty()
     val coroutineScope = rememberCoroutineScope()
-    val columns = 2
+    val columns = 4
 
     LaunchedEffect(packageName) {
         viewModel.setApp(packageName)
@@ -160,6 +160,8 @@ fun AppPage(
             viewModel.dismissNow.value = false
             onDismiss()
         }
+        val launchIntent = context.packageManager
+            .getLaunchIntentForPackage(pkg.packageName)
 
         Scaffold(
             containerColor = Color.Transparent,
@@ -197,37 +199,6 @@ fun AppPage(
                                 maxLines = 1,
                                 style = MaterialTheme.typography.labelMedium,
                             )
-                        }
-                        AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
-                            RoundButton(
-                                icon = Phosphor.Info,
-                                description = stringResource(id = R.string.app_info),
-                                filled = true,
-                            ) {
-                                val intent =
-                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                intent.data =
-                                    Uri.fromParts(
-                                        "package",
-                                        pkg.packageName,
-                                        null
-                                    )
-                                context.startActivity(intent)
-                            }
-                        }
-                        AnimatedVisibility(visible = !pkg.isInstalled && !pkg.isSpecial) {
-                            RoundButton(
-                                icon = Phosphor.MagnifyingGlass,
-                                description = stringResource(id = R.string.search_package),
-                                filled = true,
-                            ) {
-                                context.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("market://search?q=${pkg.packageName}")
-                                    )
-                                )
-                            }
                         }
                         RoundButton(
                             icon = Phosphor.X,
@@ -270,13 +241,62 @@ fun AppPage(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(8.dp)
             ) {
-                item {
+                if (launchIntent != null) item {
+                    AnimatedVisibility(visible = launchIntent != null) {
+                        IconTextButton(
+                            icon = Phosphor.ArrowSquareOut,
+                            description = stringResource(id = R.string.launch_app),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ) {
+                            context.startActivity(launchIntent)
+                        }
+                    }
+                }
+                if (!pkg.isInstalled && !pkg.isSpecial) item {
+                    AnimatedVisibility(visible = !pkg.isInstalled && !pkg.isSpecial) {
+                        IconTextButton(
+                            icon = Phosphor.MagnifyingGlass,
+                            description = stringResource(id = R.string.search_package),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ) {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("market://search?q=${pkg.packageName}")
+                                )
+                            )
+                        }
+                    }
+                }
+                if (pkg.isInstalled && !pkg.isSpecial) item {
+                    AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
+                        IconTextButton(
+                            icon = Phosphor.Info,
+                            description = stringResource(id = R.string.app_info),
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ) {
+                            val intent =
+                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.data =
+                                Uri.fromParts(
+                                    "package",
+                                    pkg.packageName,
+                                    null
+                                )
+                            context.startActivity(intent)
+                        }
+                    }
+                }
+                if (!pkg.isSpecial) item {
                     AnimatedVisibility(visible = !pkg.isSpecial) {
-                        CardButton(
-                            modifier = Modifier.fillMaxHeight(),
+                        IconTextButton(
                             icon = Icon.Exodus,
-                            contentColor = colorResource(id = R.color.ic_exodus),
-                            description = stringResource(id = R.string.exodus_report)
+                            description = stringResource(id = R.string.exodus_report),
+                            containerColor = colorResource(id = R.color.ic_exodus),
+                            contentColor = MaterialTheme.colorScheme.onTertiary,
                         ) {
                             context.startActivity(
                                 Intent(
@@ -288,57 +308,63 @@ fun AppPage(
                     }
                 }
                 item {
-                    CardButton(
-                        modifier = Modifier,
+                    IconTextButton(
                         icon = Phosphor.Prohibit,
-                        description = stringResource(id = R.string.global_blocklist_add)
+                        description = stringResource(id = R.string.global_blocklist_add),
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
                     ) {
                         mainVM.addToBlocklist(
                             pkg.packageName
                         )
                     }
                 }
-                item {
-                    val launchIntent = context.packageManager
-                        .getLaunchIntentForPackage(pkg.packageName)
-                    AnimatedVisibility(visible = launchIntent != null) {
-                        CardButton(
-                            modifier = Modifier.fillMaxHeight(),
-                            icon = Phosphor.ArrowSquareOut,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            description = stringResource(id = R.string.launch_app)
+                if (pkg.isInstalled && !pkg.isSpecial) item(
+                    span = { GridItemSpan(columns) }
+                ) {
+                    TitleText(textId = R.string.title_app_management)
+                }
+                if (pkg.isInstalled && !pkg.isSpecial
+                    && ((pkg.storageStats?.dataBytes ?: 0L) >= 0L)
+                ) item {
+                    AnimatedVisibility(
+                        visible = pkg.isInstalled &&
+                                !pkg.isSpecial &&
+                                ((pkg.storageStats?.dataBytes ?: 0L) >= 0L)
+                    ) {
+                        IconTextButton(
+                            icon = Phosphor.TrashSimple,
+                            description = stringResource(id = R.string.clear_cache),
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         ) {
-                            launchIntent?.let {
-                                context.startActivity(it)
-                            }
+                            dialogProps.value = Pair(DialogMode.CLEAN_CACHE, pkg)
+                            openDialog.value = true
                         }
                     }
                 }
-                item {
-                    AnimatedVisibility(
-                        visible = pkg.isInstalled && !pkg.isSpecial
-                    ) {
-                        CardButton(
-                            modifier = Modifier,
+                if (pkg.isInstalled && !pkg.isSpecial) item {
+                    AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
+                        IconTextButton(
                             icon = Phosphor.Warning,
-                            contentColor = colorResource(id = R.color.ic_updated),
-                            description = stringResource(id = R.string.forceKill)
+                            description = stringResource(id = R.string.forceKill),
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.FORCE_KILL, pkg)
                             openDialog.value = true
                         }
                     }
                 }
-                item {
-                    AnimatedVisibility(
-                        visible = pkg.isInstalled && !pkg.isSpecial
-                    ) {
-                        CardButton(
-                            modifier = Modifier.fillMaxHeight(),
+                if (pkg.isInstalled && !pkg.isSpecial) item {
+                    AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
+                        IconTextButton(
                             icon = if (pkg.isDisabled) Phosphor.Leaf
                             else Phosphor.ProhibitInset,
-                            contentColor = if (pkg.isDisabled) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.tertiary,
+                            containerColor = if (pkg.isDisabled) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = if (pkg.isDisabled) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onTertiaryContainer,
                             description = stringResource(
                                 id = if (pkg.isDisabled) R.string.enablePackage
                                 else R.string.disablePackage
@@ -351,15 +377,13 @@ fun AppPage(
                         )
                     }
                 }
-                item {
-                    AnimatedVisibility(
-                        visible = pkg.isInstalled && !pkg.isSystem,
-                    ) {
-                        CardButton(
-                            modifier = Modifier.fillMaxHeight(),
+                if (pkg.isInstalled && !pkg.isSystem) item {
+                    AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSystem) {
+                        IconTextButton(
                             icon = Phosphor.TrashSimple,
-                            contentColor = MaterialTheme.colorScheme.tertiary,
                             description = stringResource(id = R.string.uninstall),
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                             onClick = {
                                 dialogProps.value = Pair(DialogMode.UNINSTALL, pkg)
                                 openDialog.value = true
@@ -417,59 +441,45 @@ fun AppPage(
                     }
                 }
                 item(span = { GridItemSpan(columns) }) {
-                    TitleText(textId = R.string.available_actions)
+                    TitleText(textId = R.string.title_backup_management)
                 }
-                item {
+                if (pkg.isInstalled || pkg.isSpecial) item(span = { GridItemSpan(2) }) {
                     AnimatedVisibility(visible = pkg.isInstalled || pkg.isSpecial) {
-                        CardButton(
+                        IconTextButton(
                             icon = Phosphor.ArchiveTray,
                             description = stringResource(id = R.string.backup),
                             enabled = !snackbarVisible,
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            aspectRatio = 4f,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.BACKUP, pkg)
                             openDialog.value = true
                         }
                     }
                 }
-                item {
-                    AnimatedVisibility(
-                        visible = pkg.isInstalled &&
-                                !pkg.isSpecial &&
-                                ((pkg.storageStats?.dataBytes ?: 0L) >= 0L)
-                    ) {
-                        CardButton(
-                            icon = Phosphor.TrashSimple,
-                            description = stringResource(id = R.string.clear_cache),
-                        ) {
-                            dialogProps.value = Pair(DialogMode.CLEAN_CACHE, pkg)
-                            openDialog.value = true
-                        }
-                    }
-                }
-                item {
+                if (pkg.hasBackups) item {
                     AnimatedVisibility(visible = pkg.hasBackups) {
-                        CardButton(
-                            icon = Phosphor.TrashSimple,
+                        IconTextButton(
+                            icon = Phosphor.Broom,
                             description = stringResource(id = R.string.delete_all_backups),
                             enabled = !snackbarVisible,
-                            contentColor = MaterialTheme.colorScheme.tertiary,
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.DELETE_ALL, pkg)
                             openDialog.value = true
                         }
                     }
                 }
-                item {
-                    AnimatedVisibility(
-                        visible = pkg.hasBackups
-                    ) {
-                        CardButton(
+                if (pkg.hasBackups) item {
+                    AnimatedVisibility(visible = pkg.hasBackups) {
+                        IconTextButton(
                             icon = Phosphor.Hash,
                             description = stringResource(id = R.string.enforce_backups_limit),
                             enabled = !snackbarVisible,
-                            contentColor = colorResource(id = R.color.ic_updated),
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.ENFORCE_LIMIT, pkg)
                             openDialog.value = true

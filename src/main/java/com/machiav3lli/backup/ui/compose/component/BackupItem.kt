@@ -231,6 +231,7 @@ fun BackupItem(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         RoundButton(
                             icon = if (persistent) Phosphor.Lock
@@ -241,8 +242,8 @@ fun BackupItem(
                         FilledRoundButton(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.deleteBackup),
-                            tint = MaterialTheme.colorScheme.tertiary,
-                            onTint = MaterialTheme.colorScheme.onTertiary,
+                            tint = MaterialTheme.colorScheme.tertiaryContainer,
+                            onTint = MaterialTheme.colorScheme.onTertiaryContainer,
                             onClick = { onDelete(item) }
                         )
                         if (!item.packageLabel.contains("INVALID"))
@@ -280,14 +281,16 @@ fun RestoreBackupItem(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Checkbox(checked = apkChecked,
+            Checkbox(
+                checked = apkChecked,
                 enabled = showApk,
                 onCheckedChange = {
                     apkChecked = it
                     onApkClick(item.packageName, it, index)
                 }
             )
-            Checkbox(checked = dataChecked,
+            Checkbox(
+                checked = dataChecked,
                 enabled = showData,
                 onCheckedChange = {
                     dataChecked = it
