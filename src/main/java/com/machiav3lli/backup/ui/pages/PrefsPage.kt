@@ -77,9 +77,8 @@ fun PrefsPage(
         }
     }
 
-    BackHandler {
-        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) onDismiss()
-        else navController.navigateUp()
+    BackHandler(scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+        onDismiss()
     }
 
     FullScreenBackground {
