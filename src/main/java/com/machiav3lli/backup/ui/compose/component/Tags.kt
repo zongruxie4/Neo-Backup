@@ -14,14 +14,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -53,7 +59,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.icons.phosphor.XCircle
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TagsBlock(
     modifier: Modifier = Modifier,
@@ -67,12 +73,17 @@ fun TagsBlock(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             tags?.forEach { tag -> TagItem(tag = tag, onClick = onRemove) }
-            TagItem(
-                tag = stringResource(id = R.string.add_tag),
-                icon = Phosphor.PlusCircle,
-                action = true,
-                onClick = { onAdd() },
-            )
+            TooltipBox(
+                positionProvider =
+                    TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                tooltip = { PlainTooltip { Text(stringResource(id = R.string.add_tag)) } },
+                state = rememberTooltipState(),
+            ) {
+                FilledRoundButton(
+                    description = stringResource(id = R.string.add_tag),
+                    icon = Phosphor.PlusCircle,
+                ) { onAdd() }
+            }
         }
     }
 }
@@ -90,7 +101,7 @@ fun TagItem(
         selected = false,
         colors = InputChipDefaults.inputChipColors(
             containerColor = if (action) MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surfaceContainerHigh,
+            else MaterialTheme.colorScheme.surfaceContainerHighest,
             labelColor = if (action) MaterialTheme.colorScheme.onPrimaryContainer
             else MaterialTheme.colorScheme.onSurface,
             trailingIconColor = if (action) MaterialTheme.colorScheme.onPrimaryContainer
@@ -108,10 +119,7 @@ fun TagItem(
             onClick(tag)
         },
         label = {
-            Text(
-                text = tag,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(text = tag)
         }
     )
 }
