@@ -277,8 +277,8 @@ class ScheduleWork(
                     tagsMap = tagsMap,
                     filter = schedule.filter,
                     specialFilter = schedule.specialFilter,
-                    whiteList = schedule.customList.toList(),
-                    blackList = blockList,
+                    customList = schedule.customList,
+                    blockList = blockList,
                     tagsList = tagsList,
                 ).map { it.packageName }
 

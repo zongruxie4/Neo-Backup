@@ -54,24 +54,23 @@ import java.time.temporal.ChronoUnit
 
 fun filterPackages(
     packages: List<Package>,
-    extrasMap: Map<String, AppExtras>,
+    tagsMap: Map<String, Set<String>>,
     filter: Int,
     specialFilter: SpecialFilter,
-    whiteList: List<String> = emptyList(),
-    blackList: List<String>,
-    tagsList: List<String>,
+    customList: Set<String> = emptySet(),
+    blockList: Set<String>,
+    tagsList: Set<String>,
 ): List<Package> {
 
     val startPackages = (
-            if (tagsList.isNotEmpty()) packages
-                .filter {
-                    extrasMap[it.packageName]?.customTags
-                        ?.any { tag -> tagsList.contains(tag) } ?: false
-                }
-            else packages
+            if (tagsList.isNotEmpty()) packages.filter {
+                tagsMap[it.packageName]?.any { tag -> tagsList.contains(tag) }
+                    ?: false
+            } else packages
             ).let {
-            if (whiteList.isNotEmpty()) it.filter { whiteList.contains(it.packageName) }
-            else it
+            if (customList.isNotEmpty()) it.filter { pkg ->
+                customList.contains(pkg.packageName)
+            } else it
         }
 
     val predicate: (Package) -> Boolean = {
@@ -82,7 +81,7 @@ fun filterPackages(
 
     return startPackages
         .filterNot {
-            blackList.contains(it.packageName)
+            blockList.contains(it.packageName)
         }
         .filter(predicate)
         .applySpecialFilter(specialFilter) // filter last, with fewer packages, e.g. old backups is expensive
