@@ -392,8 +392,8 @@ fun SchedulePage(
                         positive = false,
                         fullWidth = false
                     ) {
-                        viewModel.deleteSchedule()
-                        onDismiss()
+                        dialogProps.value = Pair(DialogMode.DELETE, schedule)
+                        openDialog.value = true
                     }
                     ActionButton(
                         text = stringResource(id = R.string.sched_activateButton),
@@ -430,6 +430,19 @@ fun SchedulePage(
                         refresh(
                             schedule.copy(customList = newSet),
                             rescheduleBoolean = false,
+                        )
+                    }
+
+                    DialogMode.DELETE -> {
+                        ActionsDialogUI(
+                            titleText = schedule.name,
+                            messageText = stringResource(id = R.string.deleteScheduleDialogMessage),
+                            onDismiss = { openDialog.value = false },
+                            primaryText = stringResource(id = R.string.dialogYes),
+                            primaryAction = {
+                                viewModel.deleteSchedule()
+                                onDismiss()
+                            }
                         )
                     }
 
