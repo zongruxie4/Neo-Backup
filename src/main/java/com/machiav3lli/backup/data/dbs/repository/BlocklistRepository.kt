@@ -18,10 +18,15 @@ class BlocklistRepository(
             .map { it.mapNotNull { item -> item.packageName }.toSet() }
             .flowOn(cc)
 
-    suspend fun getBlocklistedPackages(blocklistId: Long) =
-        db.getBlocklistDao().getBlocklistedPackages(blocklistId)
+    fun getGlobalBlocklist(): Flow<Set<String>> =
+        db.getBlocklistDao().getGlobalFlow()
+            .map { it.mapNotNull { item -> item.packageName }.toSet() }
+            .flowOn(cc)
 
-    suspend fun addToBlocklist(packageName: String) {
+    suspend fun loadGlobalBlocklistOf() =
+        db.getBlocklistDao().getBlocklistedPackages(PACKAGES_LIST_GLOBAL_ID)
+
+    suspend fun addToGlobalBlocklist(packageName: String) {
         db.getBlocklistDao().insert(
             Blocklist.Builder()
                 .withId(0)
@@ -31,7 +36,7 @@ class BlocklistRepository(
         )
     }
 
-    suspend fun updateBlocklist(packages: Set<String>) {
+    suspend fun updateGlobalBlocklist(packages: Set<String>) {
         db.getBlocklistDao().deleteById(PACKAGES_LIST_GLOBAL_ID)
         packages.forEach { packageName ->
             db.getBlocklistDao().insert(

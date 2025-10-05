@@ -28,9 +28,7 @@ import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.data.dbs.entity.AppExtras
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
@@ -56,6 +54,7 @@ import com.machiav3lli.backup.utils.calcRuntimeDiff
 import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.extensions.takeUntilSignal
 import com.machiav3lli.backup.utils.filterPackages
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -264,18 +263,18 @@ class ScheduleWork(
                 FileUtils.invalidateBackupLocation()
                 NeoApp.startup = false
 
-                val customBlocklist = schedule.blockList
-                val globalBlocklist = blocklistRepo.getBlocklistedPackages(PACKAGES_LIST_GLOBAL_ID)
+                val customBlocklist = schedule.blockList.toPersistentSet()
+                val globalBlocklist = blocklistRepo.loadGlobalBlocklistOf().toPersistentSet()
                 val blockList = globalBlocklist.plus(customBlocklist)
-                val extrasMap = appExtrasRepo.getAll().associateBy(AppExtras::packageName)
+                val tagsMap = appExtrasRepo.getAll().associate { it.packageName to it.customTags }
                 val allTags = appExtrasRepo.getAll().flatMap { it.customTags }.distinct()
-                val tagsList = schedule.tagsList.filter { it in allTags }
+                val tagsList = schedule.tagsList.filter { it in allTags }.toPersistentSet()
 
                 val unfilteredPackages = context.getInstalledPackageList()
 
                 filterPackages(
                     packages = unfilteredPackages,
-                    extrasMap = extrasMap,
+                    tagsMap = tagsMap,
                     filter = schedule.filter,
                     specialFilter = schedule.specialFilter,
                     whiteList = schedule.customList.toList(),

@@ -260,13 +260,13 @@ class MainVM(
 
     fun addToBlocklist(packageName: String) {
         viewModelScope.launch {
-            blocklistRepository.addToBlocklist(packageName)
+            blocklistRepository.addToGlobalBlocklist(packageName)
         }
     }
 
     fun updateBlocklist(packages: Set<String>) {
         viewModelScope.launch {
-            blocklistRepository.updateBlocklist(packages)
+            blocklistRepository.updateGlobalBlocklist(packages)
         }
     }
 }

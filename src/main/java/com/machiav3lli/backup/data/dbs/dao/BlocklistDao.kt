@@ -19,6 +19,7 @@ package com.machiav3lli.backup.data.dbs.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.data.dbs.entity.Blocklist
 import kotlinx.coroutines.flow.Flow
 
@@ -32,6 +33,12 @@ interface BlocklistDao : BaseDao<Blocklist> {
 
     @Query("SELECT * FROM blocklist ORDER BY blocklistId ASC")
     fun getAllFlow(): Flow<List<Blocklist>>
+
+    @Query("SELECT * FROM blocklist WHERE blocklistId = $PACKAGES_LIST_GLOBAL_ID ORDER BY packageName ASC")
+    suspend fun getGlobal(): List<Blocklist>
+
+    @Query("SELECT * FROM blocklist WHERE blocklistId = $PACKAGES_LIST_GLOBAL_ID ORDER BY packageName ASC")
+    fun getGlobalFlow(): Flow<List<Blocklist>>
 
     @Query("SELECT packageName FROM blocklist WHERE blocklistId = :blocklistId")
     suspend fun getBlocklistedPackages(blocklistId: Long): List<String>
