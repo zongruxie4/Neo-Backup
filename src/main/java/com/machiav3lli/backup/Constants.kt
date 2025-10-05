@@ -29,6 +29,7 @@ import com.machiav3lli.backup.data.entity.Link
 import com.machiav3lli.backup.utils.extensions.Android
 
 const val PREFS_SHARED_PRIVATE = "com.machiav3lli.backup"
+const val STATEFLOW_SUBSCRIBE_BUFFER = 60_000L // 1 minute buffer
 
 const val ADMIN_PREFIX = "!-"
 

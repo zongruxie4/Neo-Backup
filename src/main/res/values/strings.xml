@@ -477,4 +477,13 @@
     <string name="title_app_management">App management:</string>
     <string name="title_backup_management">Backup management:</string>
     <string name="dialogUndo">Undo</string>
+    <string name="deleteScheduleDialogMessage">Delete schedule?</string>
+    <string name="sched_blocklist_dialog_message">Blocklist: %s</string>
+    <string name="sched_customlist_dialog_message">Custom list: %s</string>
+    <plurals name="package_num">
+        <item quantity="one">%d package</item>
+        <item quantity="other">%d packages</item>
+    </plurals>
+    <string name="packagesToBackup">Number of packages to backup: %d</string>
+    <string name="addBlocklistDialogMessage">Add the app to the global blocklist?</string>
 </resources>

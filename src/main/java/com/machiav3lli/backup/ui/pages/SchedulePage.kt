@@ -74,7 +74,6 @@ import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.TextEditBlock
-import com.machiav3lli.backup.ui.compose.component.TitleText
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CheckCircle
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Clock
@@ -112,6 +111,8 @@ fun SchedulePage(
     val schedule by viewModel.schedule.collectAsState(null)
     val customList by viewModel.customList.collectAsState(emptySet())
     val blockList by viewModel.blockList.collectAsState(emptySet())
+    val globalBlockList by viewModel.globalBlockList.collectAsState()
+    val tagsMap by viewModel.tagsMap.collectAsState()
     val allTags by viewModel.allTags.collectAsState()
 
     LaunchedEffect(scheduleId) {
@@ -462,7 +463,12 @@ fun SchedulePage(
                     DialogMode.SCHEDULE_RUN
                         -> ActionsDialogUI(
                         titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
-                        messageText = context.getStartScheduleMessage(schedule),
+                        messageText = context.getStartScheduleMessage(
+                            schedule,
+                            globalBlockList,
+                            tagsMap,
+                            allTags
+                        ),
                         onDismiss = { openDialog.value = false },
                         primaryText = stringResource(R.string.dialogOK),
                         primaryAction = {

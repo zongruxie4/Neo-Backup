@@ -31,6 +31,7 @@ import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
 import com.machiav3lli.backup.data.preferences.traceSchedule
+import com.machiav3lli.backup.manager.handler.getInstalledPackageList
 import com.machiav3lli.backup.manager.services.ScheduleReceiver
 import com.machiav3lli.backup.manager.services.ScheduleService
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
@@ -298,7 +299,12 @@ fun scheduleAlarmsOnce(context: Context) { // TODO replace with ScheduleWorker.s
     }
 }
 
-fun Context.getStartScheduleMessage(schedule: Schedule) = StringBuilder()
+fun Context.getStartScheduleMessage(
+    schedule: Schedule,
+    globalBlockList: Set<String>,
+    tagsMap: Map<String, Set<String>>,
+    allTags: Set<String>,
+) = StringBuilder()
     .append(
         "\n${getString(R.string.sched_mode)} ${
             modesToString(
@@ -325,24 +331,41 @@ fun Context.getStartScheduleMessage(schedule: Schedule) = StringBuilder()
     )
     // TODO list the CL packages
     .append(
-        "\n${getString(R.string.customListTitle)}: ${
-            if (schedule.customList.isNotEmpty()) getString(
-                R.string.dialogYes
+        "\n" + getString(
+            R.string.sched_customlist_dialog_message,
+            if (schedule.customList.isNotEmpty()) resources.getQuantityString(
+                R.plurals.package_num,
+                schedule.customList.size
             ) else getString(R.string.dialogNo)
-        }"
+        )
     )
     // TODO list the BL packages
     .append(
-        "\n${getString(R.string.sched_blocklist)}: ${
-            if (schedule.blockList.isNotEmpty()) getString(
-                R.string.dialogYes
+        "\n" + getString(
+            R.string.sched_blocklist_dialog_message,
+            if (schedule.blockList.isNotEmpty()) resources.getQuantityString(
+                R.plurals.package_num,
+                schedule.blockList.size
             ) else getString(R.string.dialogNo)
-        }"
+        )
     )
     .append(
         "\n${getString(R.string.filters_tags)}: ${
             if (schedule.tagsList.isNotEmpty()) schedule.tagsList.joinToString(",")
             else getString(R.string.dialogNo)
         }"
+    )
+    .append(
+        "\n" + getString(
+            R.string.packagesToBackup, filterPackages(
+                packages = getInstalledPackageList(),
+                tagsMap = tagsMap,
+                filter = schedule.filter,
+                specialFilter = schedule.specialFilter,
+                customList = schedule.customList,
+                blockList = globalBlockList.plus(schedule.blockList.toSet()),
+                tagsList = schedule.tagsList.filter { it in allTags }.toSet(),
+            ).size
+        )
     )
     .toString()

@@ -18,15 +18,54 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.viewModelScope
+import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.entity.Schedule
+import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
+import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
+import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SchedulesVM(
     private val scheduleRepository: ScheduleRepository,
+    appExtrasRepository: AppExtrasRepository,
+    blocklistRepository: BlocklistRepository,
 ) : NeoViewModel() {
     val schedules = scheduleRepository.getAllFlow()
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptyList()
+        )
+
+    val globalBlockList = blocklistRepository.getGlobalBlocklist()
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptySet()
+        )
+
+    val tagsMap = appExtrasRepository.getAllFlow()
+        .mapLatest { it.associate { extra -> extra.packageName to extra.customTags } }
+        .trace { "*** tagsMap <<- ${it.size}" }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptyMap()
+        )
+
+    val allTags = tagsMap
+        .mapLatest { it.values.flatten().toSet() }
+        .trace { "*** tags <<- ${it.size}" }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptySet()
+        )
 
     fun addSchedule(withSpecial: Boolean) {
         viewModelScope.launch {

@@ -71,6 +71,9 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
     }
 
     val schedules by viewModel.schedules.collectAsState(emptyList())
+    val globalBlockList by viewModel.globalBlockList.collectAsState()
+    val tagsMap by viewModel.tagsMap.collectAsState()
+    val allTags by viewModel.allTags.collectAsState()
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val scheduleSheetId = remember { mutableLongStateOf(-1L) }
 
@@ -142,7 +145,12 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
                 DialogMode.SCHEDULE_RUN
                     -> ActionsDialogUI(
                     titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
-                    messageText = context.getStartScheduleMessage(schedule),
+                    messageText = context.getStartScheduleMessage(
+                        schedule,
+                        globalBlockList,
+                        tagsMap,
+                        allTags,
+                    ),
                     onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialogOK),
                     primaryAction = {

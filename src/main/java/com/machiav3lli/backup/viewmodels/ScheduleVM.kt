@@ -18,12 +18,13 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.data.dbs.entity.AppExtras
+import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
+import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
-import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import com.machiav3lli.backup.utils.TraceUtils.trace
+import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +40,7 @@ import kotlinx.coroutines.plus
 class ScheduleVM(
     private val scheduleRepository: ScheduleRepository,
     appExtrasRepository: AppExtrasRepository,
+    blocklistRepository: BlocklistRepository,
 ) : NeoViewModel() {
     private val ioScope = viewModelScope.plus(Dispatchers.IO)
     private val _scheduleID = MutableStateFlow(-1L)
@@ -54,16 +56,30 @@ class ScheduleVM(
     val customList = scheduleRepository.getCustomListFlow(_scheduleID)
     val blockList = scheduleRepository.getBlockListFlow(_scheduleID)
 
-    val allTags =
-        //------------------------------------------------------------------------------------------ allTags
-        appExtrasRepository.getAllFlow()
-            .mapLatest { it.flatMap(AppExtras::customTags) }
-            .trace { "*** tags <<- ${it.size}" }
-            .stateIn(
-                ioScope,
-                SharingStarted.Eagerly,
-                emptyList()
-            )
+    val globalBlockList = blocklistRepository.getGlobalBlocklist()
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptySet()
+        )
+
+    val tagsMap = appExtrasRepository.getAllFlow()
+        .mapLatest { it.associate { extra -> extra.packageName to extra.customTags } }
+        .trace { "*** tagsMap <<- ${it.size}" }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptyMap()
+        )
+
+    val allTags = tagsMap
+        .mapLatest { it.values.flatten().toSet() }
+        .trace { "*** tags <<- ${it.size}" }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptySet()
+        )
 
     fun setSchedule(value: Long) {
         viewModelScope.launch { _scheduleID.update { value } }
