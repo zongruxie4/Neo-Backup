@@ -476,4 +476,5 @@
     <string name="enforce_backups_limit_summary">Enforce the set backup revisions limit on all apps that surpass it.</string>
     <string name="title_app_management">App management:</string>
     <string name="title_backup_management">Backup management:</string>
+    <string name="dialogUndo">Undo</string>
 </resources>

@@ -17,7 +17,6 @@
  */
 package com.machiav3lli.backup.ui.pages
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -28,13 +27,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -49,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.machiav3lli.backup.DialogMode
@@ -77,6 +73,7 @@ import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
 import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
+import com.machiav3lli.backup.ui.compose.component.TextEditBlock
 import com.machiav3lli.backup.ui.compose.component.TitleText
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CheckCircle
@@ -91,7 +88,6 @@ import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.BlockListDialogUI
 import com.machiav3lli.backup.ui.dialogs.CustomListDialogUI
 import com.machiav3lli.backup.ui.dialogs.IntPickerDialogUI
-import com.machiav3lli.backup.ui.dialogs.StringInputDialogUI
 import com.machiav3lli.backup.ui.dialogs.TimePickerDialogUI
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
@@ -140,30 +136,18 @@ fun SchedulePage(
                     colors = ListItemDefaults.colors(
                         containerColor = Color.Transparent,
                     ),
-                    leadingContent = {
-                        TitleText(R.string.sched_name)
-                    },
                     headlineContent = {
-                        OutlinedCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.outlinedCardColors(
-                                containerColor = Color.Transparent
-                            ),
-                            shape = MaterialTheme.shapes.large,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                            onClick = {
-                                dialogProps.value = Pair(DialogMode.SCHEDULE_NAME, schedule)
-                                openDialog.value = true
+                        TextEditBlock(
+                            initText = schedule.name,
+                            label = stringResource(R.string.sched_name),
+                            onCancel = { },
+                            onSave = {
+                                refresh(
+                                    schedule.copy(name = it),
+                                    rescheduleBoolean = false,
+                                )
                             }
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 16.dp),
-                                text = schedule.name,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
+                        )
                     },
                     trailingContent = {
                         RoundButton(
@@ -192,7 +176,7 @@ fun SchedulePage(
                         CardButton(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.Clock,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            //contentColor = MaterialTheme.colorScheme.onSurface,
                             description = "${stringResource(id = R.string.sched_hourOfDay)} ${
                                 LocalTime.of(
                                     schedule.timeHour,
@@ -206,7 +190,7 @@ fun SchedulePage(
                         CardButton(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.ClockClockwise,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            //contentColor = MaterialTheme.colorScheme.onSurface,
                             description = "${stringResource(id = R.string.sched_interval)} ${schedule.interval}",
                         ) {
                             dialogProps.value = Pair(DialogMode.INTERVAL_SETTER, schedule)
@@ -222,9 +206,9 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.CheckCircle,
                             description = stringResource(id = R.string.customListTitle),
-                            containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
+                            contentColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
+                            containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
                             else MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.CUSTOMLIST, schedule)
@@ -234,9 +218,9 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.Prohibit,
                             description = stringResource(id = R.string.sched_blocklist),
-                            containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
+                            contentColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
+                            containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
                             else MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.BLOCKLIST, schedule)
@@ -389,11 +373,11 @@ fun SchedulePage(
                     FlowRow(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.Center,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                         maxLines = 2
                     ) {
-                        Text(text = "🕒 ${times.first}")
                         if (schedule.enabled) Text(text = "⏳ ${times.second}") // TODO replace by resource icons
+                        Text(text = "🕒 ${times.first}")
                     }
                 }
                 Row(
@@ -472,18 +456,6 @@ fun SchedulePage(
                         refresh(
                             schedule.copy(interval = it),
                             rescheduleBoolean = true,
-                        )
-                    }
-
-                    DialogMode.SCHEDULE_NAME
-                        -> StringInputDialogUI(
-                        titleText = stringResource(id = R.string.sched_name),
-                        initValue = schedule.name,
-                        openDialogCustom = openDialog
-                    ) {
-                        refresh(
-                            schedule.copy(name = it),
-                            rescheduleBoolean = false,
                         )
                     }
 
