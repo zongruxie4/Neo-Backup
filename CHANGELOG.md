@@ -1,6 +1,30 @@
 CHANGELOG
 =========
 
+8.3.13 (05.10.2025) +40 Commits, +40 Translations
+------------
+
+### Function
+
+- Fix: ScheduleService not being started after reboot (credits @jenna-66)
+- Fix: Getting fitting shell command on Android 9 - or earlier.
+- Update: Make respective DAO and repository functions suspend
+- Update: Don't kill the app on pressing back in home page
+- Update: Revamp schedule packages' filtering
+- CompileSDK 36
+
+### UI & UX
+
+- Add: Details on custom list, block list and packages-to-backup when manually starting a schedule
+- Add: Warning dialog on adding app to global block list or deleting schedule
+- Fix: Predictive back gesture for preferences page
+- Fix: Transition animation of opening/closing app/schedule pages
+- Update: Default to user apps as main sorting filter and for schedules
+- Update: Reduce slide pages pre-composition to default (0)
+- Update: Revamp welcome page, app page, schedule page and help sheet layouts
+- Update: Replace the top-bottom-blocks layout with one-block
+- Update: Revamp chips, tags and buttons layouts
+
 8.3.12 (22.03.2025) +120 Commits, +40 Translations
 ------------
 
