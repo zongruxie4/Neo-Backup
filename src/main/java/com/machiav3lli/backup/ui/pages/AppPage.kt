@@ -314,9 +314,8 @@ fun AppPage(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
                     ) {
-                        mainVM.addToBlocklist(
-                            pkg.packageName
-                        )
+                        dialogProps.value = Pair(DialogMode.BLOCKLIST, pkg)
+                        openDialog.value = true
                     }
                 }
                 if (pkg.isInstalled && !pkg.isSpecial) item(
@@ -581,6 +580,20 @@ fun AppPage(
                                     }
                                 }
                             }
+                        }
+
+                        DialogMode.BLOCKLIST      -> {
+                            ActionsDialogUI(
+                                titleText = pkg.packageLabel,
+                                messageText = stringResource(id = R.string.addBlocklistDialogMessage),
+                                onDismiss = { openDialog.value = false },
+                                primaryText = stringResource(id = R.string.dialogYes),
+                                primaryAction = {
+                                    mainVM.addToBlocklist(
+                                        pkg.packageName
+                                    )
+                                }
+                            )
                         }
 
                         DialogMode.DELETE         -> {
