@@ -285,12 +285,12 @@ val sortChipItems = listOf(
     ChipItem.BackupDate
 )
 
-const val MAIN_FILTER_DEFAULT = 0b111
-const val MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL = 0b110
 const val MAIN_FILTER_UNSET = 0b000
 const val MAIN_FILTER_SYSTEM = 0b100
 const val MAIN_FILTER_USER = 0b010
 const val MAIN_FILTER_SPECIAL = 0b001
+const val MAIN_FILTER_DEFAULT = MAIN_FILTER_SYSTEM or MAIN_FILTER_USER or MAIN_FILTER_SPECIAL
+const val MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL = MAIN_FILTER_SYSTEM or MAIN_FILTER_USER
 val possibleMainFilters = listOf(MAIN_FILTER_SYSTEM, MAIN_FILTER_USER, MAIN_FILTER_SPECIAL)
 
 val mainFilterChipItems = listOf(ChipItem.System, ChipItem.User, ChipItem.Special)

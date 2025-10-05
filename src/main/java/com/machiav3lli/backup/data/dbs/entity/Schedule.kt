@@ -31,8 +31,8 @@ import com.machiav3lli.backup.FIELD_NAME
 import com.machiav3lli.backup.InstalledFilter
 import com.machiav3lli.backup.LatestFilter
 import com.machiav3lli.backup.LaunchableFilter
-import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
-import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
+import com.machiav3lli.backup.MAIN_FILTER_SPECIAL
+import com.machiav3lli.backup.MAIN_FILTER_USER
 import com.machiav3lli.backup.MODE_APK
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.UpdatedFilter
@@ -65,7 +65,7 @@ data class Schedule(
     val interval: Int = 1,
     val timePlaced: Long = SystemUtils.now,
 
-    val filter: Int = MAIN_FILTER_DEFAULT,
+    val filter: Int = MAIN_FILTER_USER,
     val mode: Int = MODE_APK,
     @ColumnInfo(defaultValue = "0")
     val launchableFilter: Int = LaunchableFilter.ALL.ordinal,
@@ -197,8 +197,8 @@ data class Schedule(
 
         fun withSpecial(with: Boolean = true): Builder {
             schedule = schedule.copy(
-                filter = if (with) MAIN_FILTER_DEFAULT
-                else MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
+                filter = if (with) MAIN_FILTER_USER or MAIN_FILTER_SPECIAL
+                else MAIN_FILTER_USER
             )
             return this
         }
