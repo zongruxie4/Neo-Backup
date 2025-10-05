@@ -20,6 +20,7 @@ package com.machiav3lli.backup.viewmodels
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
+import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.MainState
@@ -33,7 +34,6 @@ import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.applySearchAndFilter
 import com.machiav3lli.backup.utils.extensions.IconCache
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainVM(
@@ -51,8 +50,6 @@ class MainVM(
     private val blocklistRepository: BlocklistRepository,
     private val prefs: NeoPrefs,
 ) : NeoViewModel() {
-    private val ioScope = viewModelScope.plus(Dispatchers.IO)
-
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS
 
     val homeState: StateFlow<MainState>
@@ -90,8 +87,8 @@ class MainVM(
             .mapLatest { it.associateBy(Package::packageName) }
             .trace { "*** packageMap <<- ${it.size}" }
             .stateIn(
-                ioScope,
-                SharingStarted.Eagerly,
+                viewModelScope,
+                started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
                 emptyMap()
             )
 
@@ -105,7 +102,7 @@ class MainVM(
         viewModelScope.launch {
             combine(
                 packageRepository.getPackagesFlow(),
-                blocklistRepository.getBlocklistFlow(),
+                blocklistRepository.getBlocklist(),
                 homeSortFilterModelFlow,
                 searchQuery,
                 selection,
@@ -137,7 +134,7 @@ class MainVM(
         viewModelScope.launch {
             combine(
                 packageRepository.getPackagesFlow(),
-                blocklistRepository.getBlocklistFlow(),
+                blocklistRepository.getBlocklist(),
                 backupSortFilterModelFlow,
                 searchQuery,
                 selection,
@@ -161,7 +158,7 @@ class MainVM(
         viewModelScope.launch {
             combine(
                 packageRepository.getPackagesFlow(),
-                blocklistRepository.getBlocklistFlow(),
+                blocklistRepository.getBlocklist(),
                 restoreSortFilterModelFlow,
                 searchQuery,
                 selection,

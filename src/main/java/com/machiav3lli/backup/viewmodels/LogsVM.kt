@@ -23,12 +23,10 @@ import com.machiav3lli.backup.data.entity.Log
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.share
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class LogsVM : NeoViewModel() {
-
     val logsList = mutableStateListOf<Log>()
 
     fun refreshList() {
@@ -47,9 +45,9 @@ class LogsVM : NeoViewModel() {
         }
     }
 
-    private suspend fun recreateLogsList(): MutableList<Log> = withContext(Dispatchers.IO) {
+    private suspend fun recreateLogsList(): MutableList<Log> = viewModelScope.async {
         LogsHandler.readLogs()
-    }
+    }.await()
 
     fun shareLog(log: Log, asFile: Boolean = true) {
         viewModelScope.launch {
@@ -66,7 +64,7 @@ class LogsVM : NeoViewModel() {
     }
 
     private suspend fun delete(log: Log) {
-        withContext(Dispatchers.IO) {
+        viewModelScope.launch {
             log.delete()
         }
     }

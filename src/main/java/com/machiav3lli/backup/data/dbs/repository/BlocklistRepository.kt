@@ -13,7 +13,7 @@ class BlocklistRepository(
 ) {
     private val cc = Dispatchers.IO
 
-    fun getBlocklistFlow(): Flow<Set<String>> =
+    fun getBlocklist(): Flow<Set<String>> =
         db.getBlocklistDao().getAllFlow()
             .map { it.mapNotNull { item -> item.packageName }.toSet() }
             .flowOn(cc)

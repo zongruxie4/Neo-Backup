@@ -27,6 +27,7 @@ import com.machiav3lli.backup.EXTRA_NAME
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
@@ -109,7 +110,7 @@ fun calcRuntimeDiff(schedule: Schedule): Pair<Long, Long> {
     return Pair(c.timeInMillis, c.timeInMillis - now.timeInMillis)
 }
 
-val updateInterval = 1_000L
+const val updateInterval = 1_000L
 val useSeconds = updateInterval < 60_000
 
 fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
@@ -144,7 +145,7 @@ fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
     .flowOn(Dispatchers.IO)
     .stateIn(
         scope = CoroutineScope(Dispatchers.IO),
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
         initialValue = calcTimeLeft(this)
     )
 

@@ -178,7 +178,7 @@ class ScheduleWork(
             val workJobs = selectedItems.map { packageName ->
                 val oneTimeWorkRequest = AppActionWork.Request(
                     packageName = packageName,
-                    mode = schedule?.mode ?: MODE_UNSET,
+                    mode = schedule.mode ?: MODE_UNSET,
                     backupBoolean = true,
                     notificationId = notificationId,
                     batchName = batchName,

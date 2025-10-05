@@ -25,7 +25,6 @@ import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,7 +33,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ScheduleVM(
@@ -42,14 +40,13 @@ class ScheduleVM(
     appExtrasRepository: AppExtrasRepository,
     blocklistRepository: BlocklistRepository,
 ) : NeoViewModel() {
-    private val ioScope = viewModelScope.plus(Dispatchers.IO)
     private val _scheduleID = MutableStateFlow(-1L)
 
     val schedule: StateFlow<Schedule?> = scheduleRepository.getScheduleFlow(_scheduleID)
         //TODO hg42 .trace { "*** schedule <<- ${it}" }     // what can here be null? (something is null that is not declared as nullable)
         .stateIn(
-            ioScope,
-            SharingStarted.Eagerly,
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
             Schedule(0)
         )
 

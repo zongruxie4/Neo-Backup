@@ -63,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
@@ -264,7 +265,7 @@ fun AppPage(
                             context.startActivity(
                                 Intent(
                                     Intent.ACTION_VIEW,
-                                    Uri.parse("market://search?q=${pkg.packageName}")
+                                    "market://search?q=${pkg.packageName}".toUri()
                                 )
                             )
                         }
@@ -301,7 +302,7 @@ fun AppPage(
                             context.startActivity(
                                 Intent(
                                     Intent.ACTION_VIEW,
-                                    Uri.parse(exodusUrl(pkg.packageName))
+                                    exodusUrl(pkg.packageName).toUri()
                                 )
                             )
                         }
