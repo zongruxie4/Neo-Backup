@@ -42,7 +42,7 @@ ksp {
 
 android {
     namespace = "com.machiav3lli.backup"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.machiav3lli.backup"
