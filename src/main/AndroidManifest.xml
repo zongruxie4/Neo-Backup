@@ -150,13 +150,17 @@
             android:name=".manager.services.CommandReceiver"
             android:exported="true" />
 
+        <receiver android:name=".manager.services.ScheduleReceiver" />
+
         <receiver
-            android:name=".manager.services.ScheduleReceiver"
+            android:name=".manager.services.BootReceiver"
+            android:directBootAware="true"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-         </receiver>
+        </receiver>
 
         <service
             android:name=".manager.services.ScheduleService"
