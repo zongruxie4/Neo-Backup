@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -43,6 +44,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,13 +73,14 @@ import com.machiav3lli.backup.ui.compose.gridItems
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretUp
+import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 import java.io.IOException
 import java.io.InputStream
 import java.util.Scanner
 
 @Composable
-fun HelpSheet(onDismiss: () -> Unit) {
+fun HelpSheet(navigateUp: () -> Unit) {
     val context = LocalContext.current
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
@@ -86,7 +89,9 @@ fun HelpSheet(onDismiss: () -> Unit) {
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsPadding(TopAppBarDefaults.windowInsets),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ListItem(
@@ -149,9 +154,11 @@ fun HelpSheet(onDismiss: () -> Unit) {
                         }
                     },
                     trailingContent = {
-                        RoundButton(icon = Phosphor.CaretDown) {
-                            onDismiss()
-                        }
+                        RoundButton(
+                            icon = Phosphor.X,
+                            description = stringResource(id = android.R.string.cancel),
+                            onClick = navigateUp,
+                        )
                     }
                 )
 

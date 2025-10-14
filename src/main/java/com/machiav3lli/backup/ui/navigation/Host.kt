@@ -28,6 +28,7 @@ import com.machiav3lli.backup.ui.pages.SchedulesExportsPage
 import com.machiav3lli.backup.ui.pages.TerminalPage
 import com.machiav3lli.backup.ui.pages.WelcomePage
 import com.machiav3lli.backup.ui.pages.persist_beenWelcomed
+import com.machiav3lli.backup.ui.sheets.HelpSheet
 
 @Composable
 fun MainNavHost(
@@ -80,6 +81,9 @@ fun MainNavHost(
         }
         slideInComposable(NavItem.Terminal.destination) {
             TerminalPage(title = stringResource(id = NavItem.Terminal.title))
+        }
+        slideInComposable(NavItem.Info.destination) {
+            HelpSheet { navController.navigateUp() }
         }
     }
 }
