@@ -1,16 +1,12 @@
 package com.machiav3lli.backup.ui.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -39,13 +35,11 @@ fun BaseDialog(
     onDismiss: () -> Unit,
     dialogUI: @Composable () -> Unit,
 ) {
-    Dialog( // TODO broken till compose 1.8.0 update: https://developer.android.com/jetpack/androidx/releases/compose-ui#1.8.0-alpha05 workaround added
+    Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Box(modifier = Modifier.windowInsetsPadding(WindowInsets.safeContent)) {
-            dialogUI()
-        }
+        dialogUI()
     }
 }
 
