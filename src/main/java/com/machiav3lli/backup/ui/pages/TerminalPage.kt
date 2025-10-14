@@ -68,6 +68,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -506,8 +507,9 @@ fun TerminalText(
         ) {
             //val focusManager = LocalFocusManager.current
 
-            TextField(modifier = Modifier
-                .weight(1f),
+            TextField(
+                modifier = Modifier
+                    .weight(1f),
                 value = search,
                 singleLine = true,
                 //placeholder = { Text(text = "search", color = Color.Gray) },
@@ -590,6 +592,7 @@ fun TerminalText(
 fun TerminalPage(
     modifier: Modifier = Modifier,
     title: String? = null,
+    navigateUp: () -> Unit,
 ) {
     FullScreenBackground {
 
@@ -598,7 +601,16 @@ fun TerminalPage(
             containerColor = Color.Transparent,
             topBar = {
                 if (title != null)
-                    TopBar(title = title)
+                    TopBar(
+                        title = title,
+                        actions = {
+                            RoundButton(
+                                icon = Phosphor.X,
+                                description = stringResource(id = android.R.string.cancel),
+                                onClick = navigateUp,
+                            )
+                        }
+                    )
             }
         ) { paddingValues ->
 
@@ -664,9 +676,10 @@ fun Terminal(
         modifier = modifier
             .fillMaxSize()
     ) {
-        OutlinedTextField(modifier = Modifier
-            .padding(padding)
-            .fillMaxWidth(),
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxWidth(),
             //.focusRequester(shellFocusRequester),
             value = command,
             singleLine = false,
@@ -767,7 +780,7 @@ fun PreviewTerminal() {
         //.height(500.dp)
         //.width(500.dp)
     ) {
-        TerminalPage()
+        TerminalPage { }
     }
 }
 

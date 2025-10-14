@@ -29,23 +29,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.data.entity.Log
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
-import com.machiav3lli.backup.ui.compose.component.TopBar
 import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.LogRecycler
+import com.machiav3lli.backup.ui.compose.component.RoundButton
+import com.machiav3lli.backup.ui.compose.component.TopBar
+import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.LogsVM
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LogsPage(viewModel: LogsVM = koinNeoViewModel()) {
+fun LogsPage(viewModel: LogsVM = koinNeoViewModel(), navigateUp: () -> Unit) {
 
     FullScreenBackground {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TopBar(title = stringResource(id = NavItem.Logs.title))
+                TopBar(
+                    title = stringResource(id = NavItem.Logs.title),
+                    actions = {
+                        RoundButton(
+                            icon = Phosphor.X,
+                            description = stringResource(id = android.R.string.cancel),
+                            onClick = navigateUp,
+                        )
+                    }
+                )
             }
         ) { paddingValues ->
 

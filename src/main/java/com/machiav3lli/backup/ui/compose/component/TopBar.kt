@@ -60,7 +60,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.compose.blockBorderTop
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
@@ -145,7 +144,7 @@ fun TitleOrInfoLog(
         Text(
             text = title,
             style = if (showInfo) MaterialTheme.typography.labelMedium
-            else MaterialTheme.typography.headlineSmall,
+            else MaterialTheme.typography.titleLarge,
             modifier = Modifier
                 .ifThenElse(
                     boolean = showInfo,
@@ -173,8 +172,8 @@ fun TitleOrInfoLog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    modifier: Modifier = Modifier,
     title: String,
+    navigationAction: @Composable (() -> Unit) = {},
     actions: @Composable (RowScope.() -> Unit) = {},
 ) {
     val showDevTools = remember { mutableStateOf(false) }
@@ -184,13 +183,16 @@ fun TopBar(
 
     Box { // overlay TopBar and indicators
         ListItem(
-            modifier = modifier
+            modifier = Modifier
                 .windowInsetsPadding(TopAppBarDefaults.windowInsets)
                 .heightIn(min = 72.dp)
                 .fillMaxWidth(),
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent,
             ),
+            leadingContent = {
+                navigationAction()
+            },
             headlineContent = {
                 TitleOrInfoLog(
                     title = title,
@@ -452,7 +454,6 @@ fun ProgressPreview() {
             "off"
         else
             "busy",
-        modifier = Modifier.background(color = Color.LightGray)
     ) {
         Button(
             onClick = {

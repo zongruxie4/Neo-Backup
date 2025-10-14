@@ -17,15 +17,11 @@
  */
 package com.machiav3lli.backup.ui.pages
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -34,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
@@ -42,11 +37,11 @@ import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.TopBar
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.House
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.NeoNavigationSuiteScaffold
 import com.machiav3lli.backup.ui.navigation.SlidePager
-import com.machiav3lli.backup.ui.sheets.HelpSheet
 import com.topjohnwu.superuser.Shell
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -67,64 +62,50 @@ fun PrefsPage(
     val pagerState = rememberPagerState(initialPage = pageIndex, pageCount = { pages.size })
     val currentPageIndex = remember { derivedStateOf { pagerState.currentPage } }
     val currentPage by remember { derivedStateOf { pages[currentPageIndex.value] } }
-    val scaffoldState = rememberBottomSheetScaffoldState()
 
     Shell.getShell()
 
-    val onDismiss: () -> Unit = {
-        scope.launch {
-            scaffoldState.bottomSheetState.partialExpand()
-        }
-    }
-
-    BackHandler(scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-        onDismiss()
-    }
-
     FullScreenBackground {
-        BottomSheetScaffold(
-            scaffoldState = scaffoldState,
-            sheetPeekHeight = 0.dp,
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onBackground,
-            sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-            sheetContent = {
-                HelpSheet(onDismiss)
+        NeoNavigationSuiteScaffold(
+            pages = pages,
+            currentState = currentPageIndex,
+            onItemClick = { index ->
+                scope.launch {
+                    pagerState.animateScrollToPage(index)
+                }
             }
         ) {
-            NeoNavigationSuiteScaffold(
-                pages = pages,
-                currentState = currentPageIndex,
-                onItemClick = { index ->
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                }
-            ) {
-                Scaffold(
-                    containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    topBar = {
-                        TopBar(title = stringResource(id = currentPage.title)) {
+            Scaffold(
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                topBar = {
+                    TopBar(
+                        title = stringResource(id = currentPage.title),
+                        navigationAction = {
                             RoundButton(
-                                icon = Phosphor.Info,
-                                description = stringResource(id = R.string.help),
+                                icon = Phosphor.House,
+                                description = stringResource(id = R.string.home),
                             ) {
-                                scope.launch {
-                                    scaffoldState.bottomSheetState.expand()
-                                }
+                                navController.navigateUp()
                             }
                         }
-                    },
-                ) { paddingValues ->
-                    SlidePager(
-                        modifier = Modifier
-                            .padding(paddingValues)
-                            .blockBorderBottom(),
-                        pagerState = pagerState,
-                        pageItems = pages,
-                    )
-                }
+                    ) {
+                        RoundButton(
+                            icon = Phosphor.Info,
+                            description = stringResource(id = R.string.help),
+                        ) {
+                            navController.navigate(NavItem.Info.destination)
+                        }
+                    }
+                },
+            ) { paddingValues ->
+                SlidePager(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .blockBorderBottom(),
+                    pagerState = pagerState,
+                    pageItems = pages,
+                )
             }
         }
     }

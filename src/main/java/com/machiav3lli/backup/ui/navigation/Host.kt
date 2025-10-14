@@ -55,13 +55,14 @@ fun MainNavHost(
                 navController = navController
             )
         }
-        slideInComposable(route = "${NavItem.Prefs.destination}?page={page}",
-            args = listOf(
-                navArgument("page") {
-                    type = NavType.IntType
-                    defaultValue = 0
-                }
-            )
+        slideInComposable(
+            route = "${NavItem.Prefs.destination}?page={page}",
+                          args = listOf(
+                              navArgument("page") {
+                                  type = NavType.IntType
+                                  defaultValue = 0
+                              }
+                          )
         ) {
             val args = it.arguments!!
             val pi = args.getInt("page")
@@ -74,13 +75,13 @@ fun MainNavHost(
             EncryptionPage()
         }
         slideInComposable(NavItem.Exports.destination) {
-            SchedulesExportsPage()
+            SchedulesExportsPage { navController.navigateUp() }
         }
         slideInComposable(NavItem.Logs.destination) {
-            LogsPage()
+            LogsPage { navController.navigateUp() }
         }
         slideInComposable(NavItem.Terminal.destination) {
-            TerminalPage(title = stringResource(id = NavItem.Terminal.title))
+            TerminalPage(title = stringResource(id = NavItem.Terminal.title)) { navController.navigateUp() }
         }
         slideInComposable(NavItem.Info.destination) {
             HelpSheet { navController.navigateUp() }
