@@ -214,6 +214,24 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
         entries = EnabledFilter.entries.map { it.ordinal },
     )
 
+    val tagsFilterHome = StringSetPref(
+        dataStore = dataStore,
+        key = PrefKey.TAGS_FILTER_HOME,
+        defaultValue = emptySet(),
+    )
+
+    val tagsFilterBackup = StringSetPref(
+        dataStore = dataStore,
+        key = PrefKey.TAGS_FILTER_BACKUP,
+        defaultValue = emptySet(),
+    )
+
+    val tagsFilterRestore = StringSetPref(
+        dataStore = dataStore,
+        key = PrefKey.TAGS_FILTER_RESTORE,
+        defaultValue = emptySet(),
+    )
+
     fun homeSortFilterFlow(): Flow<SortFilterModel> = combine(
         sortHome.flow(),
         sortAscHome.flow(),
@@ -224,6 +242,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
         updatedFilterHome.flow(),
         latestFilterHome.flow(),
         enabledFilterHome.flow(),
+        tagsFilterHome.flow(),
     ) { args ->
         SortFilterModel(
             sort = args[0] as Int,
@@ -235,6 +254,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
             updatedFilter = args[6] as Int,
             latestFilter = args[7] as Int,
             enabledFilter = args[8] as Int,
+            tags = args[9] as Set<String>,
         )
     }.flowOn(Dispatchers.IO)
 
@@ -248,6 +268,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
         updatedFilterBackup.flow(),
         latestFilterBackup.flow(),
         enabledFilterBackup.flow(),
+        tagsFilterBackup.flow(),
     ) { args ->
         SortFilterModel(
             sort = args[0] as Int,
@@ -259,6 +280,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
             updatedFilter = args[6] as Int,
             latestFilter = args[7] as Int,
             enabledFilter = args[8] as Int,
+            tags = args[9] as Set<String>,
         )
     }.flowOn(Dispatchers.IO)
 
@@ -272,6 +294,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
         updatedFilterRestore.flow(),
         latestFilterRestore.flow(),
         enabledFilterRestore.flow(),
+        tagsFilterRestore.flow(),
     ) { args ->
         SortFilterModel(
             sort = args[0] as Int,
@@ -283,6 +306,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
             updatedFilter = args[6] as Int,
             latestFilter = args[7] as Int,
             enabledFilter = args[8] as Int,
+            tags = args[9] as Set<String>,
         )
     }.flowOn(Dispatchers.IO)
 

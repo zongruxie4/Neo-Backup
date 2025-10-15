@@ -39,6 +39,7 @@ data class SortFilterModel(
     val updatedFilter: Int = UpdatedFilter.ALL.ordinal,
     val latestFilter: Int = LatestFilter.ALL.ordinal,
     val enabledFilter: Int = EnabledFilter.ALL.ordinal,
+    val tags: Set<String> = emptySet(),
 ) : Parcelable {
     val specialFilter: SpecialFilter
         get() = SpecialFilter(

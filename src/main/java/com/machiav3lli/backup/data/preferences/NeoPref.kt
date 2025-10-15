@@ -36,6 +36,15 @@ open class PrefInt(
     onChange: (Int) -> Unit = {}
 ) : PrefDelegate<Int>(titleId, summaryId, dataStore, key, defaultValue, onChange)
 
+class StringSetPref(
+    @StringRes titleId: Int = -1,
+    @StringRes summaryId: Int = -1,
+    dataStore: DataStore<Preferences>,
+    val defaultValue: Set<String> = emptySet(),
+    val key: Preferences.Key<Set<String>>,
+    onChange: (Set<String>) -> Unit = {},
+) : PrefDelegate<Set<String>>(titleId, summaryId, dataStore, key, defaultValue, onChange)
+
 abstract class PrefDelegate<T : Any>(
     @StringRes var titleId: Int = -1,
     @StringRes var summaryId: Int = -1,

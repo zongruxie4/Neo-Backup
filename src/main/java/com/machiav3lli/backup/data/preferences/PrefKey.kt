@@ -2,6 +2,7 @@ package com.machiav3lli.backup.data.preferences
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 
 object PrefKey {
     // SortFilter.home
@@ -14,6 +15,7 @@ object PrefKey {
     val UPDATED_FILTER_HOME = intPreferencesKey("updated_filter_home")
     val LATEST_FILTER_HOME = intPreferencesKey("latest_filter_home")
     val ENABLED_FILTER_HOME = intPreferencesKey("enabled_filter_home")
+    val TAGS_FILTER_HOME = stringSetPreferencesKey("tags_filter_home")
     // SortFilter.backup
     val SORT_ASC_BACKUP = booleanPreferencesKey("sortAsc_backup")
     val SORT_BACKUP = intPreferencesKey("sort_backup")
@@ -24,6 +26,7 @@ object PrefKey {
     val UPDATED_FILTER_BACKUP = intPreferencesKey("updated_filter_backup")
     val LATEST_FILTER_BACKUP = intPreferencesKey("latest_filter_backup")
     val ENABLED_FILTER_BACKUP = intPreferencesKey("enabled_filter_backup")
+    val TAGS_FILTER_BACKUP = stringSetPreferencesKey("tags_filter_backup")
     // SortFilter.restore
     val SORT_ASC_RESTORE = booleanPreferencesKey("sortAsc_restore")
     val SORT_RESTORE = intPreferencesKey("sort_restore")
@@ -34,4 +37,5 @@ object PrefKey {
     val UPDATED_FILTER_RESTORE = intPreferencesKey("updated_filter_restore")
     val LATEST_FILTER_RESTORE = intPreferencesKey("latest_filter_restore")
     val ENABLED_FILTER_RESTORE = intPreferencesKey("enabled_filter_restore")
+    val TAGS_FILTER_RESTORE = stringSetPreferencesKey("tags_filter_restore")
 }
