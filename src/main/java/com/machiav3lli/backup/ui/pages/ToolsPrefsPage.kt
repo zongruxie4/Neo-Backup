@@ -437,6 +437,7 @@ private fun Context.onClickSaveAppsList(
     showDialog: (() -> Unit, () -> Unit) -> Unit
 ): Boolean {
     val packageList = viewModel.packageMap.value.values
+    val tagsMap = viewModel.tagsMap.value
     if (packageList.isNotEmpty()) {
         showDialog(
             {
@@ -449,7 +450,7 @@ private fun Context.onClickSaveAppsList(
             },
             {
                 writeAppsListFile( // TODO communicate that the filter from home page is used
-                    packageList.applyFilter(viewModel.homeState.value.sortFilter)
+                    packageList.applyFilter(viewModel.homeState.value.sortFilter, tagsMap)
                         .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     true
                 )

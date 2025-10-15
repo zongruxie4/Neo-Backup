@@ -7,5 +7,5 @@ data class MainState(
     val blocklist: Set<String> = emptySet(),
     val searchQuery: String = "",
     val sortFilter: SortFilterModel = SortFilterModel(),
-    val selection: Set<String> = emptySet()
+    val selection: Set<String> = emptySet(),
 )

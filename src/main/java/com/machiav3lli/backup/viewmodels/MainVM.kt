@@ -21,6 +21,8 @@ import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL
 import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
+import com.machiav3lli.backup.data.dbs.entity.AppExtras
+import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.MainState
@@ -31,7 +33,8 @@ import com.machiav3lli.backup.data.preferences.traceFlows
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.pages.pref_newAndUpdatedNotification
 import com.machiav3lli.backup.utils.TraceUtils.trace
-import com.machiav3lli.backup.utils.applySearchAndFilter
+import com.machiav3lli.backup.utils.applyFilter
+import com.machiav3lli.backup.utils.applySearch
 import com.machiav3lli.backup.utils.extensions.IconCache
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +51,7 @@ import kotlinx.coroutines.launch
 class MainVM(
     private val packageRepository: PackageRepository,
     private val blocklistRepository: BlocklistRepository,
+    appExtrasRepository: AppExtrasRepository,
     private val prefs: NeoPrefs,
 ) : NeoViewModel() {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS
@@ -92,6 +96,38 @@ class MainVM(
                 emptyMap()
             )
 
+    private val notBlockedPackages = combine(
+        packageRepository.getPackagesFlow(),
+        blocklistRepository.getBlocklist(),
+    ) { packages, blocklist ->
+        packages.filterNot { it.packageName in blocklist }
+    }
+
+    private val extras = appExtrasRepository.getAllFlow()
+        .mapLatest { it.associateBy { extra -> extra.packageName } }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptyMap()
+        )
+
+    val tagsMap = extras
+        .mapLatest { it.mapValues { extras -> extras.value.customTags } }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptyMap()
+        )
+
+    val allTags = tagsMap
+        .mapLatest { it.values.flatten().toSet() }
+        .trace { "*** all tags <<- ${it.size}" }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptySet()
+        )
+
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS end
 
     init {
@@ -104,14 +140,23 @@ class MainVM(
                 packageRepository.getPackagesFlow(),
                 blocklistRepository.getBlocklist(),
                 homeSortFilterModelFlow,
+                extras,
                 searchQuery,
                 selection,
-            ) { packages, blocklist, sortFilter, search, selection ->
+            ) { args ->
+                val packages: List<Package> = args[0] as List<Package>
+                val blocklist: Set<String> = args[1] as Set<String>
+                val sortFilter: SortFilterModel = args[2] as SortFilterModel
+                val extras: Map<String, AppExtras> = args[3] as Map<String, AppExtras>
+                val search: String = args[4] as String
+                val selection: Set<String> = args[5] as Set<String>
+
                 val (filteredPackages, updatedPackages) = packages
                     .filterNot { it.packageName in blocklist }
                     .let {
                         Pair(
-                            it.applySearchAndFilter(search, emptyMap(), sortFilter),
+                            it.applySearch(search, extras)
+                                .applyFilter(sortFilter, extras.mapValues { it.value.customTags }),
                             it.filter { item ->
                                 item.isUpdated || (pref_newAndUpdatedNotification.value && item.isNew)
                             }
@@ -125,7 +170,7 @@ class MainVM(
                     blocklist = blocklist,
                     searchQuery = search,
                     sortFilter = sortFilter,
-                    selection = selection
+                    selection = selection,
                 )
             }.collect { newState ->
                 homeState.update { newState }
@@ -136,12 +181,21 @@ class MainVM(
                 packageRepository.getPackagesFlow(),
                 blocklistRepository.getBlocklist(),
                 backupSortFilterModelFlow,
+                extras,
                 searchQuery,
                 selection,
-            ) { packages, blocklist, sortFilter, search, selection ->
+            ) { args ->
+                val packages: List<Package> = args[0] as List<Package>
+                val blocklist: Set<String> = args[1] as Set<String>
+                val sortFilter: SortFilterModel = args[2] as SortFilterModel
+                val extras: Map<String, AppExtras> = args[3] as Map<String, AppExtras>
+                val search: String = args[4] as String
+                val selection: Set<String> = args[5] as Set<String>
+
                 val filteredPackages = packages
                     .filterNot { it.packageName in blocklist }
-                    .applySearchAndFilter(search, emptyMap(), sortFilter)
+                    .applySearch(search, extras)
+                    .applyFilter(sortFilter, extras.mapValues { it.value.customTags })
 
                 MainState(
                     packages = packages,
@@ -149,7 +203,7 @@ class MainVM(
                     blocklist = blocklist,
                     searchQuery = search,
                     sortFilter = sortFilter,
-                    selection = selection
+                    selection = selection,
                 )
             }.collect { newState ->
                 backupState.update { newState }
@@ -160,12 +214,21 @@ class MainVM(
                 packageRepository.getPackagesFlow(),
                 blocklistRepository.getBlocklist(),
                 restoreSortFilterModelFlow,
+                extras,
                 searchQuery,
                 selection,
-            ) { packages, blocklist, sortFilter, search, selection ->
+            ) { args ->
+                val packages: List<Package> = args[0] as List<Package>
+                val blocklist: Set<String> = args[1] as Set<String>
+                val sortFilter: SortFilterModel = args[2] as SortFilterModel
+                val extras: Map<String, AppExtras> = args[3] as Map<String, AppExtras>
+                val search: String = args[4] as String
+                val selection: Set<String> = args[5] as Set<String>
+
                 val filteredPackages = packages
                     .filterNot { it.packageName in blocklist }
-                    .applySearchAndFilter(search, emptyMap(), sortFilter)
+                    .applySearch(search, extras)
+                    .applyFilter(sortFilter, extras.mapValues { it.value.customTags })
 
                 MainState(
                     packages = packages,
@@ -173,7 +236,7 @@ class MainVM(
                     blocklist = blocklist,
                     searchQuery = search,
                     sortFilter = sortFilter,
-                    selection = selection
+                    selection = selection,
                 )
             }.collect { newState ->
                 restoreState.update { newState }
@@ -198,6 +261,7 @@ class MainVM(
                     prefs.updatedFilterBackup.set(value.updatedFilter)
                     prefs.latestFilterBackup.set(value.latestFilter)
                     prefs.enabledFilterBackup.set(value.enabledFilter)
+                    prefs.tagsFilterBackup.set(value.tags)
                 }
 
                 NavItem.Restore -> {
@@ -210,6 +274,7 @@ class MainVM(
                     prefs.updatedFilterRestore.set(value.updatedFilter)
                     prefs.latestFilterRestore.set(value.latestFilter)
                     prefs.enabledFilterRestore.set(value.enabledFilter)
+                    prefs.tagsFilterRestore.set(value.tags)
                 }
 
                 else -> {
@@ -222,6 +287,7 @@ class MainVM(
                     prefs.updatedFilterHome.set(value.updatedFilter)
                     prefs.latestFilterHome.set(value.latestFilter)
                     prefs.enabledFilterHome.set(value.enabledFilter)
+                    prefs.tagsFilterHome.set(value.tags)
                 }
             }
         }

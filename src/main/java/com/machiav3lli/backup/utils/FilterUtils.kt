@@ -93,27 +93,26 @@ fun filterPackages(
 
 //---------------------------------------- filters for activity
 
-fun Collection<Package>.applySearchAndFilter(
+fun Collection<Package>.applySearch(
     query: String,
     extras: Map<String, AppExtras>,
-    filter: SortFilterModel,
-): List<Package> {
-    return filter { item ->
-        query.isEmpty() || (
-                (extras[item.packageName]?.customTags ?: emptySet()).plus(
-                    listOfNotNull(
-                        item.packageName,
-                        item.packageLabel,
-                        extras[item.packageName]?.note
-                    )
+): List<Package> = filter { item ->
+    query.isEmpty() || (
+            (extras[item.packageName]?.customTags ?: emptySet()).plus(
+                listOfNotNull(
+                    item.packageName,
+                    item.packageLabel,
+                    extras[item.packageName]?.note
                 )
-                    .any { it.contains(query, ignoreCase = true) }
-                )
-    }
-        .applyFilter(filter)
+            )
+                .any { it.contains(query, ignoreCase = true) }
+            )
 }
 
-fun Collection<Package>.applyFilter(filter: SortFilterModel): List<Package> {
+fun Collection<Package>.applyFilter(
+    filter: SortFilterModel,
+    tagsMap: Map<String, Set<String>>,
+): List<Package> {
     val predicate: (Package) -> Boolean = {
         (if (filter.mainFilter and MAIN_FILTER_SYSTEM == MAIN_FILTER_SYSTEM) it.isSystem && !it.isSpecial else false)
                 || (if (filter.mainFilter and MAIN_FILTER_USER == MAIN_FILTER_USER) !it.isSystem else false)
@@ -123,6 +122,7 @@ fun Collection<Package>.applyFilter(filter: SortFilterModel): List<Package> {
         .applyBackupFilter(filter.backupFilter)
         .applySpecialFilter(filter.specialFilter)
         .applySort(filter.sort, filter.sortAsc)
+        .applyTagsFilter(filter.tags, tagsMap)
 }
 
 private fun Collection<Package>.applyBackupFilter(backupFilter: Int): List<Package> {
@@ -267,6 +267,13 @@ private fun List<Package>.applySort(sort: Int, sortAsc: Boolean): List<Package> 
             )
         }
     }
+
+fun List<Package>.applyTagsFilter(
+    tags: Set<String>,
+    tagsMap: Map<String, Set<String>>
+): List<Package> = filter {
+    tags.isEmpty() || (tagsMap[it.packageName] ?: emptySet()).any { tag -> tag in tags }
+}
 
 fun filterToString(context: Context, filter: Int): String = possibleMainFilters
     .filter { it and filter == it }

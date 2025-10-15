@@ -106,6 +106,8 @@ fun SortFilterSheet(
         )
     }
     val stateModel by state.collectAsState()
+    val tagsMap by viewModel.tagsMap.collectAsState()
+    val allTags by viewModel.allTags.collectAsState()
     var model by rememberSaveable(stateModel.sortFilter) {
         mutableStateOf(state.value.sortFilter)
     }
@@ -113,7 +115,7 @@ fun SortFilterSheet(
     val stats = getStats(
         stateModel.packages
             .filterNot { it.packageName in stateModel.blocklist }
-            .applyFilter(model)
+            .applyFilter(model, tagsMap)
     )  //TODO hg42 use central function for all the filtering
 
     Scaffold(
@@ -349,6 +351,19 @@ fun SortFilterSheet(
                         selectedFlag = model.enabledFilter
                     ) { flag ->
                         model = model.copy(enabledFilter = flag)
+                    }
+                }
+            }
+            if (allTags.isNotEmpty()) item {
+                ExpandableBlock(
+                    heading = stringResource(id = R.string.filters_tags),
+                    preExpanded = model.tags.isNotEmpty(),
+                ) {
+                    MultiSelectableChipGroup(
+                        list = allTags.toSet(),
+                        selected = model.tags,
+                    ) { tags ->
+                        model = model.copy(tags = tags.intersect(allTags))
                     }
                 }
             }
