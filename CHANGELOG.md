@@ -1,6 +1,21 @@
 CHANGELOG
 =========
 
+8.3.14 (17.10.2025) +5 Commits, +10 Translations
+------------
+
+### Function
+
+- Fix: Running ScheduleReceiver on reboot
+- Update: Make HelpSheet a page
+- TargetSDK 36
+
+### UI & UX
+
+- Add: Tags' filter
+- Fix: Moving dialogs on launch
+- Update: Add top bar actions to sub-pages
+
 8.3.13 (05.10.2025) +40 Commits, +40 Translations
 ------------
 
