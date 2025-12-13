@@ -158,6 +158,7 @@ dependencies {
     implementation(libs.semver)
     implementation(libs.libsu.core)
     implementation(libs.libsu.io)
+    implementation(libs.documentfile)
 
     // UI
     implementation(libs.material)

@@ -11,6 +11,7 @@ compose-accompanist = "0.37.3"
 compose-markdown = "0.5.7"
 coroutines = "1.10.2"
 datastore = "1.2.0"
+documentfile = "1.1.0"
 immutables = "0.4.0"
 junit-jupiter = "6.0.1"
 kaml = "0.104.0"
@@ -59,6 +60,7 @@ koin-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.
 
 libsu-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsu" }
 libsu-io = { module = "com.github.topjohnwu.libsu:io", version.ref = "libsu" }
+documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
 security-crypto = { module = "androidx.security:security-crypto-ktx", version.ref = "security" }
