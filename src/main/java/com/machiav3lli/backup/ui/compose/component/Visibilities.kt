@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.expandVertically
@@ -13,16 +14,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun StatefulAnimatedVisibility(
@@ -89,16 +87,12 @@ fun ExpandingFadingVisibility(
         else FloatingActionButtonDefaults.containerColor,
         label = "bgColor"
     )
-    Column(
+
+    Surface(
         modifier = Modifier
-            .shadow(
-                elevation = 6.dp,
-                MaterialTheme.shapes.large
-            )
-            .background(
-                bgColor,
-                MaterialTheme.shapes.large
-            )
+            .animateContentSize(),
+        shape = MaterialTheme.shapes.large,
+        color = bgColor,
     ) {
         StatefulAnimatedVisibility(
             currentState = expanded,
