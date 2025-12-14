@@ -14,6 +14,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,6 +31,7 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.LinkPref
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.Pref
+import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.handler.showNotification
@@ -76,6 +79,9 @@ fun ToolsPrefsPage(
     val dialogProps: MutableState<Triple<DialogMode, Any?, Any?>> = remember {
         mutableStateOf(Triple(DialogMode.NONE, null, null))
     }
+    val mainState by viewModel.homeState.collectAsState()
+    val tagsMap by viewModel.tagsMap.collectAsState()
+    val packageMap by viewModel.packageMap.collectAsState()
 
     val prefs = Pref.prefGroups["tool"] ?: listOf()
 
@@ -104,7 +110,7 @@ fun ToolsPrefsPage(
                             ) {
                                 when (pref) {
                                     pref_batchDelete           -> context.onClickUninstalledBackupsDelete(
-                                        viewModel,
+                                        packageMap.values,
                                         snackbarHostState,
                                         coroutineScope
                                     ) { message, action ->
@@ -139,7 +145,7 @@ fun ToolsPrefsPage(
                                     }
 
                                     pref_enforceBackupsLimit   -> context.onClickEnforceBackupsLimit(
-                                        viewModel,
+                                        packageMap.values,
                                         snackbarHostState,
                                         coroutineScope
                                     ) { message, action ->
@@ -159,7 +165,9 @@ fun ToolsPrefsPage(
                                     pref_schedulesExportImport -> neoActivity.moveTo(NavItem.Exports.destination)
 
                                     pref_saveAppsList          -> context.onClickSaveAppsList(
-                                        viewModel,
+                                        packageMap.values,
+                                        tagsMap,
+                                        mainState.sortFilter,
                                         snackbarHostState,
                                         coroutineScope
                                     ) { primaryAction, secondaryAction ->
@@ -242,14 +250,13 @@ val pref_batchDelete = LinkPref(
 )
 
 private fun Context.onClickUninstalledBackupsDelete(
-    viewModel: MainVM,
+    packageList: Collection<Package>,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
     showDialog: (String, () -> Unit) -> Unit,
 ): Boolean {
     val deleteList = ArrayList<Package>()
     val message = StringBuilder()
-    val packageList = viewModel.packageMap.value.values
     if (packageList.isNotEmpty()) {
         packageList.forEach { appInfo ->
             if (!appInfo.isInstalled) {
@@ -317,14 +324,15 @@ val pref_enforceBackupsLimit = LinkPref(
 )
 
 private fun Context.onClickEnforceBackupsLimit(
-    viewModel: MainVM,
+    packageList: Collection<Package>,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
     showDialog: (String, () -> Unit) -> Unit,
 ): Boolean {
     // TODO consider locked backups for the list
-    val packagesForHousekeeping = viewModel.packageMap.value.values
-        .filter { pref_numBackupRevisions.value > 0 && it.numberOfBackups > pref_numBackupRevisions.value }
+    val packagesForHousekeeping = packageList.filter {
+        pref_numBackupRevisions.value > 0 && it.numberOfBackups > pref_numBackupRevisions.value
+    }
     if (packagesForHousekeeping.isNotEmpty()) {
         showDialog(
             getString(
@@ -431,13 +439,13 @@ val pref_saveAppsList = LinkPref(
 
 
 private fun Context.onClickSaveAppsList(
-    viewModel: MainVM,
+    packageList: Collection<Package>,
+    tagsMap: Map<String, Set<String>>,
+    sortFilterModel: SortFilterModel,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
     showDialog: (() -> Unit, () -> Unit) -> Unit
 ): Boolean {
-    val packageList = viewModel.packageMap.value.values
-    val tagsMap = viewModel.tagsMap.value
     if (packageList.isNotEmpty()) {
         showDialog(
             {
@@ -450,7 +458,7 @@ private fun Context.onClickSaveAppsList(
             },
             {
                 writeAppsListFile( // TODO communicate that the filter from home page is used
-                    packageList.applyFilter(viewModel.homeState.value.sortFilter, tagsMap)
+                    packageList.applyFilter(sortFilterModel, tagsMap)
                         .map { "${it.packageLabel}: ${it.packageName} @ ${it.versionName}" },
                     true
                 )
