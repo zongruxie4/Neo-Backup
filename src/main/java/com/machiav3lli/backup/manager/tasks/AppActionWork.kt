@@ -44,7 +44,6 @@ import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler.Companion.getVar
 import com.machiav3lli.backup.manager.handler.WorkHandler.Companion.setVar
-import com.machiav3lli.backup.manager.handler.getSpecial
 import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.manager.services.CommandReceiver
 import com.machiav3lli.backup.ui.activities.NeoActivity
@@ -54,6 +53,7 @@ import com.machiav3lli.backup.ui.pages.pref_useExpedited
 import com.machiav3lli.backup.ui.pages.pref_useForegroundInJob
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.extensions.Android
+import com.machiav3lli.backup.utils.getSpecial
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext

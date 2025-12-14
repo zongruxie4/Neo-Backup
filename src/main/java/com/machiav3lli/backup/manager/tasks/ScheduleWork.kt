@@ -39,7 +39,6 @@ import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
 import com.machiav3lli.backup.data.preferences.traceSchedule
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler
-import com.machiav3lli.backup.manager.handler.getInstalledPackageList
 import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.manager.services.CommandReceiver
 import com.machiav3lli.backup.ui.activities.NeoActivity
@@ -54,6 +53,7 @@ import com.machiav3lli.backup.utils.calcRuntimeDiff
 import com.machiav3lli.backup.utils.extensions.Android
 import com.machiav3lli.backup.utils.extensions.takeUntilSignal
 import com.machiav3lli.backup.utils.filterPackages
+import com.machiav3lli.backup.utils.getInstalledPackageList
 import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

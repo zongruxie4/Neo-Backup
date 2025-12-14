@@ -28,7 +28,6 @@ import com.machiav3lli.backup.data.preferences.traceBackups
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.ShellCommands
 import com.machiav3lli.backup.manager.handler.findBackups
-import com.machiav3lli.backup.manager.handler.getPackageStorageStats
 import com.machiav3lli.backup.ui.pages.pref_flatStructure
 import com.machiav3lli.backup.ui.pages.pref_ignoreLockedInHousekeeping
 import com.machiav3lli.backup.ui.pages.pref_paranoidBackupLists
@@ -37,6 +36,7 @@ import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.getAndroidFolder
 import com.machiav3lli.backup.utils.TraceUtils
+import com.machiav3lli.backup.utils.getPackageStorageStats
 import timber.log.Timber
 import java.io.File
 

@@ -22,7 +22,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import com.machiav3lli.backup.FIELD_IS_SYSTEM
 import com.machiav3lli.backup.FIELD_PACKAGE_NAME
-import com.machiav3lli.backup.manager.handler.grantedPermissions
+import com.machiav3lli.backup.utils.extensions.grantedPermissions
 
 @Entity(
     indices = [

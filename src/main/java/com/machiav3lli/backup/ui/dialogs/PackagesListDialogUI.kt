@@ -28,7 +28,7 @@ import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
-import com.machiav3lli.backup.manager.handler.getPackageInfoList
+import com.machiav3lli.backup.utils.getPackageInfoList
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 
 @Composable

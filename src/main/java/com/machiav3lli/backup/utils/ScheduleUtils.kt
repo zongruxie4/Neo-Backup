@@ -32,7 +32,6 @@ import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
 import com.machiav3lli.backup.data.preferences.traceSchedule
-import com.machiav3lli.backup.manager.handler.getInstalledPackageList
 import com.machiav3lli.backup.manager.services.ScheduleReceiver
 import com.machiav3lli.backup.manager.services.ScheduleService
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
