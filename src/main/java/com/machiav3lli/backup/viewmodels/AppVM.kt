@@ -24,6 +24,7 @@ import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.entity.AppExtras
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
+import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
@@ -46,6 +47,7 @@ import kotlinx.coroutines.launch
 class AppVM(
     private val appExtrasRepository: AppExtrasRepository,
     private val packageRepository: PackageRepository,
+    private val blocklistRepository: BlocklistRepository,
 ) : NeoViewModel() {
     private val packageName: MutableStateFlow<String> = MutableStateFlow("")
 
@@ -156,6 +158,12 @@ class AppVM(
     fun rewriteBackup(backup: Backup, changedBackup: Backup) {
         viewModelScope.launch {
             packageRepository.rewriteBackup(pkg.value, backup, changedBackup)
+        }
+    }
+
+    fun addToBlocklist(packageName: String) {
+        viewModelScope.launch {
+            blocklistRepository.addToGlobalBlocklist(packageName)
         }
     }
 }

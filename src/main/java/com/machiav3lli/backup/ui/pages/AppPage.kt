@@ -111,14 +111,12 @@ import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.utils.infoChips
 import com.machiav3lli.backup.viewmodels.AppVM
-import com.machiav3lli.backup.viewmodels.MainVM
 import timber.log.Timber
 
 @Composable
 fun AppPage(
     packageName: String,
     viewModel: AppVM = koinNeoViewModel(),
-    mainVM: MainVM = koinNeoViewModel(),
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -590,7 +588,7 @@ fun AppPage(
                                 onDismiss = { openDialog.value = false },
                                 primaryText = stringResource(id = R.string.dialogYes),
                                 primaryAction = {
-                                    mainVM.addToBlocklist(
+                                    viewModel.addToBlocklist(
                                         pkg.packageName
                                     )
                                 }
