@@ -90,11 +90,12 @@ import com.machiav3lli.backup.utils.isBiometricLockEnabled
 import com.machiav3lli.backup.utils.isDarkTheme
 import com.machiav3lli.backup.utils.isDeviceLockEnabled
 import com.machiav3lli.backup.utils.isEncryptionEnabled
+import com.machiav3lli.backup.viewmodels.ActivityVM
 import com.machiav3lli.backup.viewmodels.AppVM
 import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.ExportsVM
+import com.machiav3lli.backup.viewmodels.HomeVM
 import com.machiav3lli.backup.viewmodels.LogsVM
-import com.machiav3lli.backup.viewmodels.MainVM
 import com.machiav3lli.backup.viewmodels.RestoreBatchVM
 import com.machiav3lli.backup.viewmodels.ScheduleVM
 import com.machiav3lli.backup.viewmodels.SchedulesVM
@@ -125,7 +126,7 @@ class NeoActivity : BaseActivity() {
     private lateinit var openDialog: MutableState<Boolean>
     private lateinit var dialogKey: MutableState<DialogKey?>
 
-    private val viewModel: MainVM by viewModel()
+    private val viewModel: ActivityVM by viewModel()
 
     object LockNavigationState {
         var intendedDestination: String? = null
@@ -226,7 +227,7 @@ class NeoActivity : BaseActivity() {
                 openDialog = remember { mutableStateOf(false) }
                 dialogKey = remember { mutableStateOf(null) }
                 val openBlocklist = remember { mutableStateOf(false) }
-                val mainState by viewModel.homeState.collectAsState()
+                val blocklist by viewModel.blockList.collectAsState()
 
                 LaunchedEffect(viewModel) {
                     navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -265,7 +266,7 @@ class NeoActivity : BaseActivity() {
                         if (openBlocklist.value)
                             BaseDialog(onDismiss = { openBlocklist.value = false }) {
                                 GlobalBlockListDialogUI(
-                                    currentBlocklist = mainState.blocklist,
+                                    currentBlocklist = blocklist,
                                     openDialogCustom = openBlocklist,
                                 ) { newSet ->
                                     viewModel.updateBlocklist(newSet)
@@ -678,7 +679,10 @@ val viewModelsModule = module {
     singleOf(::ScheduleRepository)
     singleOf(::AppExtrasRepository)
     singleOf(::ExportsRepository)
-    viewModelOf(::MainVM)
+    viewModelOf(::ActivityVM)
+    viewModelOf(::HomeVM)
+    viewModelOf(::BackupBatchVM)
+    viewModelOf(::RestoreBatchVM)
     viewModelOf(::BackupBatchVM)
     viewModelOf(::RestoreBatchVM)
     viewModelOf(::SchedulesVM)

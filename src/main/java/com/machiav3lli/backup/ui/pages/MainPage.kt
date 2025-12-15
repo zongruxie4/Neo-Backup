@@ -53,14 +53,14 @@ import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.NeoNavigationSuiteScaffold
 import com.machiav3lli.backup.ui.navigation.SlidePager
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
-import com.machiav3lli.backup.viewmodels.MainVM
+import com.machiav3lli.backup.viewmodels.HomeVM
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @Composable
 fun MainPage(
     navController: NavHostController,
-    viewModel: MainVM = koinNeoViewModel(),
+    viewModel: HomeVM = koinNeoViewModel(),
 ) {
     val main = LocalActivity.current as NeoActivity
     val scope = rememberCoroutineScope()
@@ -78,7 +78,7 @@ fun MainPage(
         main.finishAffinity()
     }
 
-    val mainState by viewModel.homeState.collectAsState()
+    val mainState by viewModel.state.collectAsState()
 
     FullScreenBackground {
         NeoNavigationSuiteScaffold(

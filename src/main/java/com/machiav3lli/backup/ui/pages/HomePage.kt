@@ -86,19 +86,18 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
-import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.sheets.SortFilterSheet
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.utils.extensions.IconCache
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
-import com.machiav3lli.backup.viewmodels.MainVM
+import com.machiav3lli.backup.viewmodels.HomeVM
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // TODO remove Scaffold
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun HomePage(
-    viewModel: MainVM = koinNeoViewModel(),
+    viewModel: HomeVM = koinNeoViewModel(),
 ) {
     // TODO include tags in search
     val mActivity = LocalActivity.current as NeoActivity
@@ -106,7 +105,7 @@ fun HomePage(
     val scaffoldState = rememberBottomSheetScaffoldState()
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
-    val mainState by viewModel.homeState.collectAsState()
+    val mainState by viewModel.state.collectAsState()
     val updaterVisible = mainState.updatedPackages.isNotEmpty()
     var updaterExpanded by remember { mutableStateOf(false) }
     var menuPackage by remember { mutableStateOf<Package?>(null) }
@@ -169,7 +168,7 @@ fun HomePage(
                         // which is bad when they contain live content
                         if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
                             SortFilterSheet(
-                                sourcePage = NavItem.Home,
+                                viewModel = viewModel,
                                 onDismiss = {
                                     scope.launch {
                                         scaffoldState.bottomSheetState.partialExpand()

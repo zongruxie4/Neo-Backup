@@ -18,12 +18,13 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import com.machiav3lli.backup.utils.extensions.NeoViewModel
+import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
+import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 
-open class BatchVM : NeoViewModel() {
+open class BatchVM(
+    blocklistRepository: BlocklistRepository,
+    appExtrasRepository: AppExtrasRepository
+) : MainVM(blocklistRepository, appExtrasRepository) {
     val apkBackupCheckedList = SnapshotStateMap<String, Int>()
     val dataBackupCheckedList = SnapshotStateMap<String, Int>()
 }
-
-class BackupBatchVM : BatchVM()
-class RestoreBatchVM : BatchVM()

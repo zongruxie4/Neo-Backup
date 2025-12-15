@@ -55,7 +55,7 @@ import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
-import com.machiav3lli.backup.viewmodels.MainVM
+import com.machiav3lli.backup.viewmodels.HomeVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -69,7 +69,7 @@ import java.time.LocalDateTime
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ToolsPrefsPage(
-    viewModel: MainVM = koinNeoViewModel(),
+    viewModel: HomeVM = koinNeoViewModel(),
 ) {
     val context = LocalContext.current
     val neoActivity = LocalActivity.current as NeoActivity
@@ -79,7 +79,7 @@ fun ToolsPrefsPage(
     val dialogProps: MutableState<Triple<DialogMode, Any?, Any?>> = remember {
         mutableStateOf(Triple(DialogMode.NONE, null, null))
     }
-    val mainState by viewModel.homeState.collectAsState()
+    val mainState by viewModel.state.collectAsState()
     val tagsMap by viewModel.tagsMap.collectAsState()
     val packageMap by viewModel.packageMap.collectAsState()
 

@@ -80,7 +80,7 @@ import com.machiav3lli.backup.utils.TraceUtils.logNanoTiming
 import com.machiav3lli.backup.utils.TraceUtils.nanoTiming
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.utils.getFormattedDate
-import com.machiav3lli.backup.viewmodels.MainVM
+import com.machiav3lli.backup.viewmodels.HomeVM
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
@@ -233,7 +233,7 @@ fun TextInputMenuItem(
 @Composable
 fun Selections(
     action: MenuAction,
-    viewModel: MainVM = koinNeoViewModel(),
+    viewModel: HomeVM = koinNeoViewModel(),
     selection: Set<String> = emptySet(),
     onAction: (Set<String>) -> Unit = {},
 ) {
@@ -367,7 +367,7 @@ fun Selections(
             onClick = {
                 when (action) {
                     MenuAction.GET -> {
-                        val newSelection = viewModel.homeState.value.blocklist
+                        val newSelection = viewModel.state.value.blocklist
                         onAction(newSelection)
                     }
 

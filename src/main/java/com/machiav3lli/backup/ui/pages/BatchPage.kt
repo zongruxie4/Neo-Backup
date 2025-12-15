@@ -69,26 +69,21 @@ import com.machiav3lli.backup.ui.compose.theme.ColorData
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
-import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.sheets.BatchPrefsSheet
 import com.machiav3lli.backup.ui.sheets.SortFilterSheet
 import com.machiav3lli.backup.utils.altModeToMode
-import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.BatchVM
-import com.machiav3lli.backup.viewmodels.MainVM
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BatchPage(
     viewModel: BatchVM,
-    mainVM: MainVM = koinNeoViewModel(),
     backupBoolean: Boolean
 ) {
     val main = LocalActivity.current as NeoActivity
     val scope = rememberCoroutineScope()
-    val mainState by if (backupBoolean) mainVM.backupState.collectAsState()
-    else mainVM.restoreState.collectAsState()
+    val state by viewModel.state.collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val openBatchDialog = remember { mutableStateOf(false) }
     val openBlocklist = rememberSaveable { mutableStateOf(false) }
@@ -97,7 +92,7 @@ fun BatchPage(
     val filterPredicate = { item: Package ->
         if (backupBoolean) item.isInstalled else item.hasBackups
     }
-    val workList = mainState.filteredPackages.filter(filterPredicate)
+    val workList = state.filteredPackages.filter(filterPredicate)
 
     val allApkChecked by remember(workList, viewModel.apkBackupCheckedList) {
         derivedStateOf {
@@ -132,8 +127,7 @@ fun BatchPage(
             if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
                 if (prefsNotFilter.value) BatchPrefsSheet(backupBoolean)
                 else SortFilterSheet(
-                    sourcePage = if (backupBoolean) NavItem.Backup
-                    else NavItem.Restore,
+                    viewModel = viewModel,
                     onDismiss = {
                         scope.launch {
                             scaffoldState.bottomSheetState.partialExpand()
@@ -295,10 +289,10 @@ fun BatchPage(
 
         if (openBlocklist.value) BaseDialog(onDismiss = { openBlocklist.value = false }) {
             GlobalBlockListDialogUI(
-                currentBlocklist = mainState.blocklist,
+                currentBlocklist = state.blocklist,
                 openDialogCustom = openBlocklist,
             ) { newSet ->
-                mainVM.updateBlocklist(newSet)
+                viewModel.updateBlocklist(newSet)
             }
         }
         if (openBatchDialog.value) BaseDialog(onDismiss = { openBatchDialog.value = false }) {
@@ -308,7 +302,7 @@ fun BatchPage(
 
             BatchActionDialogUI(
                 backupBoolean = backupBoolean,
-                selectedPackageInfos = mainState.filteredPackages
+                selectedPackageInfos = state.filteredPackages
                     .filter { it.packageName in selectedPackageNames }
                     .map(Package::packageInfo),
                 selectedApk = selectedApk,

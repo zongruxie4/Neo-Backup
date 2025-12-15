@@ -36,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -81,40 +80,28 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Check
 import com.machiav3lli.backup.ui.compose.icons.phosphor.SortAscending
 import com.machiav3lli.backup.ui.compose.icons.phosphor.SortDescending
-import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.updatedFilterChipItems
 import com.machiav3lli.backup.utils.applyFilter
-import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.utils.getStats
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.viewmodels.MainVM
 
 @Composable
 fun SortFilterSheet(
-    sourcePage: NavItem,
-    viewModel: MainVM = koinNeoViewModel(),
+    viewModel: MainVM,
     onDismiss: () -> Unit,
 ) {
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
-    val state by remember(sourcePage) {
-        mutableStateOf(
-            when (sourcePage) {
-                NavItem.Backup -> viewModel.backupState
-                NavItem.Restore -> viewModel.restoreState
-                else -> viewModel.homeState // NavItem.Home
-            }
-        )
-    }
-    val stateModel by state.collectAsState()
+    val state by viewModel.state.collectAsState()
     val tagsMap by viewModel.tagsMap.collectAsState()
     val allTags by viewModel.allTags.collectAsState()
-    var model by rememberSaveable(stateModel.sortFilter) {
-        mutableStateOf(state.value.sortFilter)
+    var model by rememberSaveable(state.sortFilter) {
+        mutableStateOf(state.sortFilter)
     }
 
     val stats = getStats(
-        stateModel.packages
-            .filterNot { it.packageName in stateModel.blocklist }
+        state.packages
+            .filterNot { it.packageName in state.blocklist }
             .applyFilter(model, tagsMap)
     )  //TODO hg42 use central function for all the filtering
 
@@ -212,7 +199,7 @@ fun SortFilterSheet(
                         fullWidth = true,
                         positive = false,
                         onClick = {
-                            viewModel.setSortFilter(SortFilterModel(), sourcePage)
+                            viewModel.setSortFilter(SortFilterModel())
                             onDismiss()
                         }
                     )
@@ -223,7 +210,7 @@ fun SortFilterSheet(
                         fullWidth = true,
                         positive = true,
                         onClick = {
-                            viewModel.setSortFilter(model, sourcePage)
+                            viewModel.setSortFilter(model)
                             onDismiss()
                         }
                     )
