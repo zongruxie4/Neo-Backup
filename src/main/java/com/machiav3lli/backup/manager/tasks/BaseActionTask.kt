@@ -19,66 +19,65 @@ package com.machiav3lli.backup.manager.tasks
 
 import android.content.Context
 import android.content.DialogInterface
+import androidx.lifecycle.lifecycleScope
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.data.entity.ActionResult
+import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper.ActionType
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logErrors
 import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.manager.handler.showNotification
-import com.machiav3lli.backup.data.entity.ActionResult
-import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.utils.showActionResult
 import java.lang.ref.WeakReference
-import java.util.concurrent.CountDownLatch
 
 abstract class BaseActionTask(
     val app: Package, oAndBackupX: NeoActivity, val shellHandler: ShellHandler,
     val mode: Int, private val actionType: ActionType, val setInfoBar: (String) -> Unit,
-) : CoroutinesAsyncTask<Void?, Void?, ActionResult>() {
+) : CoroutinesAsyncTask<Void?, Void?, ActionResult>(oAndBackupX.lifecycleScope) {
     val neoActivityReference: WeakReference<NeoActivity> = WeakReference(oAndBackupX)
-    private var signal: CountDownLatch? = null
     protected var result: ActionResult? = null
     protected var notificationId = -1
 
+    protected inline fun <T> withActivity(block: (NeoActivity) -> T): T? {
+        return neoActivityReference.get()?.takeIf { !it.isFinishing }?.let(block)
+    }
+
     override fun onProgressUpdate(vararg values: Void?) {
-        val mainActivityX = neoActivityReference.get()
-        if (mainActivityX != null && !mainActivityX.isFinishing) {
-            val message = getProgressMessage(mainActivityX, actionType)
-            mainActivityX.runOnUiThread {
-                mainActivityX.showSnackBar("${app.packageLabel}: $message")
-                setInfoBar("${app.packageLabel}: $message")
-            }
+        withActivity { activity ->
+            val progressMessage = getProgressMessage(activity, actionType)
+            val fullMessage = "${app.packageLabel}: $progressMessage"
+
+            activity.showSnackBar(fullMessage)
+            setInfoBar(fullMessage)
+
             showNotification(
-                mainActivityX, NeoActivity::class.java,
-                notificationId, app.packageLabel, message, true
+                activity, NeoActivity::class.java,
+                notificationId, app.packageLabel, progressMessage, true
             )
         }
     }
 
     override fun onPostExecute(result: ActionResult?) {
-        val mainActivityX = neoActivityReference.get()
-        if (mainActivityX != null && !mainActivityX.isFinishing) {
-            val message = getPostExecuteMessage(mainActivityX, actionType, result)
+        withActivity { activity ->
+            val message = getPostExecuteMessage(activity, actionType, result)
             showNotification(
-                mainActivityX, NeoActivity::class.java,
+                activity, NeoActivity::class.java,
                 notificationId, app.packageLabel, message, true
             )
-            mainActivityX.showActionResult(this.result!!) { _: DialogInterface?, _: Int ->
+            activity.showActionResult(this.result!!) { _: DialogInterface?, _: Int ->
                 logErrors(
-                    LogsHandler.handleErrorMessages(mainActivityX, result?.message)
+                    LogsHandler.handleErrorMessages(activity, result?.message)
                         ?: ""
                 )
             }
             if (result?.succeeded != true)
                 NeoApp.lastErrorPackage = app.packageName
-            mainActivityX.updatePackage(app.packageName)
-            mainActivityX.dismissSnackBar()
+            activity.updatePackage(app.packageName)
+            activity.dismissSnackBar()
             setInfoBar("")
-        }
-        if (signal != null) {
-            signal!!.countDown()
         }
     }
 

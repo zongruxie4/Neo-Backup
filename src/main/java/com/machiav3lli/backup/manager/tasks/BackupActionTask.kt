@@ -33,21 +33,18 @@ class BackupActionTask(
     appInfo, oAndBackupX, shellHandler, backupMode,
     BackupRestoreHelper.ActionType.BACKUP, setInfoBar,
 ) {
+    override fun onPreExecute() {
+        super.onPreExecute()
+        notificationId = SystemUtils.now.toInt()
+    }
 
     override fun doInBackground(vararg params: Void?): ActionResult? {
-
-        val mainActivityX = neoActivityReference.get()
-        if (mainActivityX == null || mainActivityX.isFinishing) {
-            return ActionResult(app, null, "", false)
-        }
+        val mainActivityX = neoActivityReference.get()?.takeIf { !it.isFinishing }
+            ?: return ActionResult(app, null, "", false)
 
         val time = measureTimeMillis {
-
-            notificationId = SystemUtils.now.toInt()
             publishProgress()
-
             result = BackupRestoreHelper.backup(mainActivityX, null, shellHandler, app, mode)
-
         }
         NeoApp.addInfoLogText(
             "backup: ${app.packageName}: ${(time / 1000 + 0.5).toInt()} sec"

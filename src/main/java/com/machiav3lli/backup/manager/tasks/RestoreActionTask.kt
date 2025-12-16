@@ -17,12 +17,12 @@
  */
 package com.machiav3lli.backup.manager.tasks
 
-import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.entity.ActionResult
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.ShellHandler
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.utils.SystemUtils
 
 class RestoreActionTask(
@@ -32,13 +32,15 @@ class RestoreActionTask(
     appInfo, oAndBackupX, shellHandler, restoreMode,
     BackupRestoreHelper.ActionType.RESTORE, setInfoBar
 ) {
+    override fun onPreExecute() {
+        super.onPreExecute()
+        notificationId = SystemUtils.now.toInt()
+    }
 
     override fun doInBackground(vararg params: Void?): ActionResult? {
-        val mainActivityX = neoActivityReference.get()
-        if (mainActivityX == null || mainActivityX.isFinishing) {
-            return ActionResult(app, backup, "", false)
-        }
-        notificationId = SystemUtils.now.toInt()
+        val mainActivityX = neoActivityReference.get()?.takeIf { !it.isFinishing }
+            ?: return ActionResult(app, null, "", false)
+
         publishProgress()
         result = BackupRestoreHelper.restore(
             mainActivityX, null, shellHandler,

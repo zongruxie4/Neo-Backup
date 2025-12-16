@@ -17,16 +17,22 @@
  */
 package com.machiav3lli.backup.manager.tasks
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /* adapted from with small changes to fit our usage:
  * https://github.com/ladrahul25/CoroutineAsyncTask/blob/master/app/src/main/java/com/example/background/CoroutinesAsyncTask.kt
  */
-abstract class CoroutinesAsyncTask<Params, Progress, Result> {
+@OptIn(ExperimentalAtomicApi::class)
+abstract class CoroutinesAsyncTask<Params, Progress, Result>(
+    private val scope: CoroutineScope
+) {
 
     enum class Status {
         PENDING,
@@ -34,54 +40,83 @@ abstract class CoroutinesAsyncTask<Params, Progress, Result> {
         FINISHED
     }
 
-    var status: Status = Status.PENDING
+    private val statusRef = AtomicReference(Status.PENDING)
+    var status: Status
+        get() = statusRef.load()
+        private set(value) {
+            statusRef.store(value)
+        }
+
+    private var job: Job? = null
+
+    @Volatile
+    private var isCancelled = false
+
     abstract fun doInBackground(vararg params: Params?): Result?
     open fun onProgressUpdate(vararg values: Progress?) {}
     open fun onPostExecute(result: Result?) {}
     open fun onPreExecute() {}
     open fun onCancelled(result: Result?) {}
-    private var isCancelled = false
 
     fun execute(vararg params: Params) {
-        when (status) {
-            Status.RUNNING  -> throw IllegalStateException("Cannot execute task:${this.javaClass.name} the task is already running.")
-            Status.FINISHED -> throw IllegalStateException("Cannot execute task: ${this.javaClass.name}"
-                    + " the task has already been executed (a task can be executed only once)")
-            Status.PENDING  -> status = Status.RUNNING
+        val currentStatus = status
+        statusRef.compareAndSet(Status.PENDING, Status.RUNNING)
+        when (currentStatus) {
+            Status.RUNNING  -> throw IllegalStateException(
+                "Cannot execute task: ${this.javaClass.name} - task is already running"
+            )
+
+            Status.FINISHED -> throw IllegalStateException(
+                "Cannot execute task: ${this.javaClass.name} - task has already been executed"
+            )
+
+            Status.PENDING  -> {} // Successfully transitioned to RUNNING
         }
 
-        // it can be used to setup UI - it should have access to Main Thread
-        GlobalScope.launch(Dispatchers.Main) {
-            onPreExecute()
-        }
+        job = scope.launch(Dispatchers.Main.immediate) {
+            try {
+                onPreExecute()
 
-        // doInBackground works on background thread(default)
-        GlobalScope.launch(Dispatchers.Default) {
-            val result = doInBackground(*params)
-            status = Status.FINISHED
-            withContext(Dispatchers.Main) {
-                // onPostExecute works on main thread to show output
-                Timber.d("after do in back ${status.name}--$isCancelled")
+                val result = withContext(Dispatchers.Default) {
+                    doInBackground(*params)
+                }
+
+                statusRef.store(Status.FINISHED)
+
                 if (!isCancelled) {
                     onPostExecute(result)
+                } else {
+                    onCancelled(result)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Task execution failed: ${this@CoroutinesAsyncTask.javaClass.name}")
+                statusRef.store(Status.FINISHED)
+                if (!isCancelled) {
+                    onPostExecute(null)
                 }
             }
         }
     }
 
-    fun cancel(mayInterruptIfRunning: Boolean) {
+    fun cancel(mayInterruptIfRunning: Boolean = true) {
+        if (isCancelled) return
+
         isCancelled = true
-        status = Status.FINISHED
-        GlobalScope.launch(Dispatchers.Main) {
-            // onPostExecute works on main thread to show output
-            Timber.d("after cancel ${status.name}--$isCancelled")
-            onPostExecute(null)
+        statusRef.store(Status.FINISHED)
+
+        if (mayInterruptIfRunning) {
+            job?.cancel()
+        }
+
+        scope.launch(Dispatchers.Main.immediate) {
+            onCancelled(null)
         }
     }
 
     fun publishProgress(vararg progress: Progress) {
-        //need to update main thread
-        GlobalScope.launch(Dispatchers.Main) {
+        if (isCancelled) return
+
+        scope.launch(Dispatchers.Main.immediate) {
             if (!isCancelled) {
                 onProgressUpdate(*progress)
             }
