@@ -36,9 +36,7 @@ open class MainVM(
     private val blocklistRepository: BlocklistRepository,
     appExtrasRepository: AppExtrasRepository,
 ) : NeoViewModel() {
-    protected val _state = MutableStateFlow(MainState())
-    val state: StateFlow<MainState>
-        get() = _state
+    open val state: StateFlow<MainState> = MutableStateFlow(MainState())
 
     protected val extras = appExtrasRepository.getAllFlow()
         .mapLatest { it.associateBy { extra -> extra.packageName } }

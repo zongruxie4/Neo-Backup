@@ -18,6 +18,7 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.viewModelScope
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
@@ -33,12 +34,14 @@ import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.applySearch
 import com.machiav3lli.backup.utils.extensions.IconCache
 import com.machiav3lli.backup.utils.extensions.combine
+import com.machiav3lli.backup.utils.toPackageList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -56,10 +59,16 @@ class HomeVM(
     private val selection = MutableStateFlow(emptySet<String>())
     private val homeSortFilterModelFlow = prefs.homeSortFilterFlow()
 
+    val pkgsFlow: Flow<List<Package>> = combine(
+        packageRepository.getAppInfosFlow(),
+        packageRepository.getBackupsListFlow(),
+    ) { appInfos, bkps -> appInfos.toPackageList(NeoApp.context) }
+        .distinctUntilChanged()
+
     val packageMap =
         //========================================================================================== packageList
         combine(
-            packageRepository.getPackagesFlow(),
+            pkgsFlow,
             packageRepository.getBackupsFlow()
         ) { pkgs, backups ->
 
@@ -83,47 +92,47 @@ class HomeVM(
             )
 
     private val notBlockedPackages = combine(
-        packageRepository.getPackagesFlow(),
+        pkgsFlow,
         blocklistRepository.getBlocklist(),
     ) { packages, blocklist ->
         packages.filterNot { it.packageName in blocklist }
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS end
 
-    init {
-        combine(
-            packageRepository.getPackagesFlow(),
-            blocklistRepository.getBlocklist(),
-            homeSortFilterModelFlow,
-            extras,
-            searchQuery,
-            selection,
-        ) { packages, blocklist, sortFilter, extras, search, selection ->
-            val (filteredPackages, updatedPackages) = packages
-                .filterNot { it.packageName in blocklist }
-                .let {
-                    Pair(
-                        it.applySearch(search, extras)
-                            .applyFilter(sortFilter, extras.mapValues { it.value.customTags }),
-                        it.filter { item ->
-                            item.isUpdated || (pref_newAndUpdatedNotification.value && item.isNew)
-                        }
-                    )
-                }
+    override val state: StateFlow<MainState> = combine(
+        pkgsFlow,
+        blocklistRepository.getBlocklist(),
+        homeSortFilterModelFlow,
+        extras,
+        searchQuery,
+        selection,
+    ) { packages, blocklist, sortFilter, extras, search, selection ->
+        val (filteredPackages, updatedPackages) = packages
+            .filterNot { it.packageName in blocklist }
+            .let {
+                Pair(
+                    it.applySearch(search, extras)
+                        .applyFilter(sortFilter, extras.mapValues { it.value.customTags }),
+                    it.filter { item ->
+                        item.isUpdated || (pref_newAndUpdatedNotification.value && item.isNew)
+                    }
+                )
+            }
 
-            MainState(
-                packages = packages,
-                filteredPackages = filteredPackages,
-                updatedPackages = updatedPackages,
-                blocklist = blocklist,
-                searchQuery = search,
-                sortFilter = sortFilter,
-                selection = selection,
-            )
-        }.map { newState ->
-            _state.update { newState }
-        }.launchIn(viewModelScope)
-    }
+        MainState(
+            packages = packages,
+            filteredPackages = filteredPackages,
+            updatedPackages = updatedPackages,
+            blocklist = blocklist,
+            searchQuery = search,
+            sortFilter = sortFilter,
+            selection = selection,
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+        MainState()
+    )
 
     fun setSearchQuery(value: String) {
         viewModelScope.launch { searchQuery.update { value } }

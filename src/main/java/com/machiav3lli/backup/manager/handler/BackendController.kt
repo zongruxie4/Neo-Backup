@@ -573,8 +573,8 @@ fun Context.findBackups(
             installedNames =
                 installedPackages.map { it.packageName } + specialInfos.map { it.packageName }
 
-            if (pref_earlyEmptyBackups.value)
-                NeoApp.emptyBackupsForAllPackages(installedNames)
+                if (pref_earlyEmptyBackups.value)
+                    packagesRepo.deleteBackupsOf(installedNames)
 
             clearThreadStats()
         }
@@ -633,7 +633,7 @@ fun Context.findBackups(
 
             traceBackupsScan { "*** --------------------> findBackups: packages: ${backupsMap.keys.size} backups: ${backupsMap.values.flatten().size}" }
 
-            NeoApp.setBackups(backupsMap)
+                packagesRepo.replaceAllBackups(backupsMap.values.flatten())
 
             // preset installed packages that don't have backups with empty backups lists
             //NeoApp.emptyBackupsForMissingPackages(installedNames)
@@ -749,7 +749,7 @@ suspend fun Context.updateAppTables() {
             beginNanoTimer("dbUpdate")
 
             packagesRepo.apply {
-                replaceBackups(*backupsMap.values.flatten().toTypedArray())
+                replaceAllBackups(backupsMap.values.flatten())
                 replaceAppInfos(*appInfoList.toTypedArray())
             }
         } catch (e: Throwable) {

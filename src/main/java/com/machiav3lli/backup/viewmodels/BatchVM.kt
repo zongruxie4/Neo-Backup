@@ -18,13 +18,26 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
+import com.machiav3lli.backup.data.dbs.repository.PackageRepository
+import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.utils.toPackageList
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 open class BatchVM(
+    packageRepository: PackageRepository,
     blocklistRepository: BlocklistRepository,
     appExtrasRepository: AppExtrasRepository
 ) : MainVM(blocklistRepository, appExtrasRepository) {
     val apkBackupCheckedList = SnapshotStateMap<String, Int>()
     val dataBackupCheckedList = SnapshotStateMap<String, Int>()
+
+    val pkgsFlow: Flow<List<Package>> = kotlinx.coroutines.flow.combine(
+        packageRepository.getAppInfosFlow(),
+        packageRepository.getBackupsListFlow(),
+    ) { appInfos, bkps -> appInfos.toPackageList(NeoApp.context) }
+        .distinctUntilChanged()
 }

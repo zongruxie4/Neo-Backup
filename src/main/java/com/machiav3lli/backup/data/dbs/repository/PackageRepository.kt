@@ -2,68 +2,42 @@ package com.machiav3lli.backup.data.dbs.repository
 
 import android.app.Application
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.data.dbs.DB
+import com.machiav3lli.backup.data.dbs.dao.AppInfoDao
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
 import com.machiav3lli.backup.data.dbs.entity.Backup
+import com.machiav3lli.backup.data.entity.BackupsCache
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.ShellCommands
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import com.machiav3lli.backup.utils.toPackageList
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.util.concurrent.ConcurrentHashMap
 
+@OptIn(FlowPreview::class)
 class PackageRepository(
-    private val db: DB,
+    private val dao: AppInfoDao,
     private val appContext: Application,
+    private val backupsCache: BackupsCache,
 ) {
-    private val cc = Dispatchers.IO
-    private val jcc = Dispatchers.IO + SupervisorJob()
-    private val theBackupsMap = ConcurrentHashMap<String, List<Backup>>()
-    private val mutex = Mutex()
-
     fun getBackupsFlow(): Flow<Map<String, List<Backup>>> =
-        flow {
-            emit(theBackupsMap)
-            delay(1000)
-        }.distinctUntilChanged()
-            .flowOn(cc)
+        backupsCache.observeBackupsMap()
 
-    fun getBackupsListFlow(): Flow<List<Backup>> = flow {
-        emit(theBackupsMap.values.flatten())
-        delay(1000)
-    }.distinctUntilChanged()
-        .flowOn(cc)
+    fun getBackupsMap(): Map<String, List<Backup>> =
+        backupsCache.getBackupsMap()
 
-    fun getPackagesFlow(): Flow<List<Package>> = combine(
-        db.getAppInfoDao().getAllFlow(),
-        getBackupsListFlow(),
-    ) { appInfos, bkps -> appInfos.toPackageList(appContext) }
-        .flowOn(cc)
+    fun getBackupsListFlow(): Flow<List<Backup>> =
+        backupsCache.observeBackupsList()
+
+    fun getBackupsList(): List<Backup> =
+        backupsCache.getBackupsList()
 
     fun getBackupsFlow(packageName: String): Flow<List<Backup>> =
-        flow {
-            emit(theBackupsMap[packageName] ?: emptyList())
-            delay(1000)
-        }.distinctUntilChanged()
-            .flowOn(cc)
+        backupsCache.observeBackups(packageName)
 
-    fun getBackups(packageName: String): List<Backup> = theBackupsMap[packageName] ?: emptyList()
+    fun getBackups(packageName: String): List<Backup> =
+        backupsCache.getBackups(packageName)
 
-    fun getBackupsMap(): Map<String, List<Backup>> = theBackupsMap.toMap()
-
-    fun getBackupsList(): List<Backup> = theBackupsMap.values.flatten()
+    fun getAppInfosFlow() = dao.getAllFlow()
 
     suspend fun updatePackage(packageName: String) {
         Package.invalidateCacheForPackage(packageName)
@@ -74,54 +48,39 @@ class PackageRepository(
         }
         if (new != null && !new.isSpecial) {
             new.refreshFromPackageManager(appContext)
-            db.getAppInfoDao().update(new.packageInfo as AppInfo)
+            dao.update(new.packageInfo as AppInfo)
         }
     }
 
     suspend fun upsertAppInfo(vararg appInfos: AppInfo) =
-        db.getAppInfoDao().upsert(*appInfos)
+        dao.upsert(*appInfos)
 
     suspend fun replaceAppInfos(vararg appInfos: AppInfo) =
-        db.getAppInfoDao().updateList(*appInfos)
+        dao.updateList(*appInfos)
 
-    fun updateBackups(packageName: String, backups: List<Backup>) = runBlocking(jcc) {
-        mutex.withLock {
-            theBackupsMap.put(packageName, backups)
-        }
+    suspend fun updatePackageBackups(packageName: String, backups: List<Backup>) =
+        backupsCache.updateBackups(packageName, backups)
+
+    suspend fun replaceAllBackups(backups: List<Backup>) =
+        backupsCache.replaceAll(backups)
+
+    suspend fun emptyBackupsTable() =
+        backupsCache.clear()
+
+    suspend fun deleteBackupsOf(packageNames: List<String>) =
+        backupsCache.removeAll(packageNames)
+
+    fun rewriteBackup(pkg: Package?, backup: Backup, changedBackup: Backup) {
+        pkg?.rewriteBackup(backup, changedBackup)
     }
 
-    fun replaceBackups(vararg backups: Backup) = runBlocking(jcc) {
-        mutex.withLock {
-            theBackupsMap.clear()
-            theBackupsMap.putAll(backups.groupBy { it.packageName })
-        }
-    }
-
-    suspend fun rewriteBackup(pkg: Package?, backup: Backup, changedBackup: Backup) {
-        withContext(jcc) {
-            pkg?.rewriteBackup(backup, changedBackup)
-        }
-    }
-
-    fun emptyBackupsTable() = runBlocking(jcc) {
-        mutex.withLock {
-            theBackupsMap.clear()
-        }
-    }
-
-    suspend fun deleteAppInfoOf(packageName: String) = db.getAppInfoDao().deleteAllOf(packageName)
-
-    fun deleteBackupsOf(packageName: String) = runBlocking(jcc) {
-        mutex.withLock {
-            theBackupsMap.remove(packageName)
-        }
-    }
+    suspend fun deleteAppInfoOf(packageName: String) = dao.deleteAllOf(packageName)
 
     suspend fun deleteBackup(pkg: Package?, backup: Backup, onDismiss: () -> Unit) =
         pkg?.let { pkg ->
             pkg.deleteBackup(backup)
             if (!pkg.isInstalled && pkg.backupList.isEmpty() && backup.packageLabel != "? INVALID") {
-                db.getAppInfoDao().deleteAllOf(pkg.packageName)
+                dao.deleteAllOf(pkg.packageName)
                 onDismiss()
             }
         }
@@ -130,7 +89,7 @@ class PackageRepository(
         pkg?.let { pkg ->
             pkg.deleteAllBackups()
             if (!pkg.isInstalled && pkg.backupList.isEmpty()) {
-                db.getAppInfoDao().deleteAllOf(pkg.packageName)
+                dao.deleteAllOf(pkg.packageName)
                 onDismiss()
             }
         }
@@ -156,7 +115,7 @@ class PackageRepository(
                     mPackage.dataPath, mPackage.isSystem
                 )
                 if (mPackage.backupList.isEmpty()) {
-                    db.getAppInfoDao().deleteAllOf(mPackage.packageName)
+                    dao.deleteAllOf(mPackage.packageName)
                     onDismiss()
                 }
                 showNotification(appContext.getString(R.string.uninstallSuccess))
