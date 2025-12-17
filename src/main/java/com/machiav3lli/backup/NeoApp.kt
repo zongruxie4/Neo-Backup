@@ -84,6 +84,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
@@ -125,6 +126,12 @@ class NeoApp : Application(), KoinStartup {
 
     override fun onCreate() {
         if (Android.minSDK(Build.VERSION_CODES.S)) {
+            /*StrictMode.setThreadPolicy(
+                StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .build()
+            )*/
             StrictMode.setVmPolicy(
                 StrictMode.VmPolicy.Builder()
                     .detectUnsafeIntentLaunch()
@@ -676,15 +683,11 @@ class NeoApp : Application(), KoinStartup {
 
         //------------------------------------------------------------------------------------------ backups
 
-        fun setBackups(backupsMap: Map<String, List<Backup>>) {
-            get<PackageRepository>(PackageRepository::class.java).apply {
-                replaceBackups(*backupsMap.values.flatten().toTypedArray())
-            }
-        }
-
         fun putBackups(packageName: String, backups: List<Backup>) {
-            get<PackageRepository>(PackageRepository::class.java).apply {
-                updateBackups(packageName, backups)
+            runBlocking(Dispatchers.IO) {
+                get<PackageRepository>(PackageRepository::class.java).apply {
+                    updatePackageBackups(packageName, backups)
+                }
             }
         }
 
@@ -692,14 +695,6 @@ class NeoApp : Application(), KoinStartup {
             get<PackageRepository>(PackageRepository::class.java).apply {
                 return if (startup) emptyList()
                 else getBackups(packageName)
-            }
-        }
-
-        fun emptyBackupsForAllPackages(packageNames: List<String>) {
-            get<PackageRepository>(PackageRepository::class.java).apply {
-                packageNames.forEach { packageName ->
-                    deleteBackupsOf(packageName)
-                }
             }
         }
     }

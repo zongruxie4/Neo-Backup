@@ -58,7 +58,6 @@ import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.HomeVM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.BufferedOutputStream
@@ -378,12 +377,7 @@ private fun Context.onClickCopySelf(
     coroutineScope: CoroutineScope,
 ): Boolean {
     try {
-        // A global CoroutineScope not bound to any job.
-        // Global scope is used to launch top-level coroutines which are
-        // operating on the whole application lifetime and are not cancelled prematurely.
-        // Active coroutines launched in GlobalScope do not keep the process alive.
-        // They are like daemon threads.
-        GlobalScope.launch(Dispatchers.IO) {  // TODO hg42 "they are like demon threads" -> use something like MainScope instead?
+        CoroutineScope(Dispatchers.Default).launch {
             if (BackupRestoreHelper.copySelfApk(
                     this@onClickCopySelf,
                     NeoApp.shellHandler!!

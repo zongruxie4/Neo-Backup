@@ -48,7 +48,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.get
@@ -141,7 +140,6 @@ fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
         delay(updateInterval)
     }
 }
-    .flowOn(Dispatchers.IO)
     .stateIn(
         scope = CoroutineScope(Dispatchers.IO),
         started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),

@@ -60,8 +60,8 @@ import com.machiav3lli.backup.ui.pages.pref_restoreMediaData
 import com.machiav3lli.backup.ui.pages.pref_restoreObbData
 import com.machiav3lli.backup.ui.pages.pref_shadowRootFile
 import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 import java.util.Locale
@@ -164,7 +164,7 @@ fun setBackupDir(uri: Uri): String {
         if (fullUri.scheme == "file" || fullUri.scheme == null)
             if (!pref_shadowRootFile.value) // prevent recursion
                 pref_shadowRootFile.value = true
-        MainScope().launch(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch {
             invalidateBackupLocation()
         }
     }

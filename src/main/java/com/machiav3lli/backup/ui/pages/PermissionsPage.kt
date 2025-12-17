@@ -76,9 +76,6 @@ import com.machiav3lli.backup.utils.requireSMSMMSPermission
 import com.machiav3lli.backup.utils.requireStorageLocation
 import com.machiav3lli.backup.utils.setBackupDir
 import com.machiav3lli.backup.utils.specialBackupsEnabled
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import timber.log.Timber
 
@@ -87,7 +84,6 @@ import timber.log.Timber
 fun PermissionsPage(powerManager: PowerManager = koinInject()) {
     val context = LocalContext.current
     val mainActivity = LocalActivity.current as NeoActivity
-    val mScope = CoroutineScope(Dispatchers.Main)
     val openDialog = remember { mutableStateOf(false) }
     val dialogProp: MutableState<DialogMode> = remember {
         mutableStateOf(DialogMode.NONE)
@@ -223,9 +219,8 @@ fun PermissionsPage(powerManager: PowerManager = koinInject()) {
                     }
                 }
 
-                if (permissionsList.isEmpty()) mScope.launch {
+                if (permissionsList.isEmpty())
                     mainActivity.moveTo(NavItem.Main.destination)
-                }
             }
         }
 

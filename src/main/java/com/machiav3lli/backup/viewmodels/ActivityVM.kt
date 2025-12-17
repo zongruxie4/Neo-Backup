@@ -7,6 +7,7 @@ import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.preferences.NeoPrefs
+import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -43,6 +44,12 @@ class ActivityVM(
     fun updatePackage(packageName: String) {
         viewModelScope.launch {
             packageRepository.updatePackage(packageName)
+        }
+    }
+
+    fun refreshBackups() {
+        viewModelScope.launch {
+            invalidateBackupLocation()
         }
     }
 }

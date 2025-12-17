@@ -256,7 +256,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
             enabledFilter = args[8] as Int,
             tags = args[9] as Set<String>,
         )
-    }.flowOn(Dispatchers.IO)
+    }
 
     fun backupSortFilterFlow(): Flow<SortFilterModel> = combine(
         sortBackup.flow(),
@@ -282,7 +282,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
             enabledFilter = args[8] as Int,
             tags = args[9] as Set<String>,
         )
-    }.flowOn(Dispatchers.IO)
+    }
 
     fun restoreSortFilterFlow(): Flow<SortFilterModel> = combine(
         sortRestore.flow(),
@@ -308,7 +308,7 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
             enabledFilter = args[8] as Int,
             tags = args[9] as Set<String>,
         )
-    }.flowOn(Dispatchers.IO)
+    }
 
     companion object {
         val prefsModule = module {

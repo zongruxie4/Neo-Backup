@@ -24,13 +24,13 @@ import android.content.pm.PackageManager
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.Package
-import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.data.preferences.pref_autoLogUnInstallBroadcast
+import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.ui.pages.supportLog
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -38,30 +38,30 @@ import org.koin.core.component.inject
 class PackageUnInstalledReceiver : BroadcastReceiver(), KoinComponent {
     private val packageRepository: PackageRepository by inject()
 
+    private val receiveJob = Job()
+
     override fun onReceive(context: Context, intent: Intent) {
         try {
             val packageName =
                 intent.data?.let { if (it.scheme == "package") it.schemeSpecificPart else null }
             if (packageName != null) {
-                Package.invalidateSystemCacheForPackage(packageName)
-                when (intent.action.orEmpty()) {
-                    Intent.ACTION_PACKAGE_ADDED,
-                    Intent.ACTION_PACKAGE_REPLACED,
-                        -> {
-                        context.packageManager.getPackageInfo(
-                            packageName,
-                            PackageManager.GET_PERMISSIONS
-                        )?.let { packageInfo ->
-                            val appInfo = AppInfo(context, packageInfo)
-                            GlobalScope.launch(Dispatchers.IO) {
+                runBlocking(Dispatchers.IO + receiveJob) {
+                    Package.invalidateSystemCacheForPackage(packageName)
+                    when (intent.action.orEmpty()) {
+                        Intent.ACTION_PACKAGE_ADDED,
+                        Intent.ACTION_PACKAGE_REPLACED,
+                            -> {
+                            context.packageManager.getPackageInfo(
+                                packageName,
+                                PackageManager.GET_PERMISSIONS
+                            )?.let { packageInfo ->
+                                val appInfo = AppInfo(context, packageInfo)
                                 packageRepository.upsertAppInfo(appInfo)
                             }
                         }
-                    }
 
-                    Intent.ACTION_PACKAGE_REMOVED,
-                        -> {
-                        GlobalScope.launch(Dispatchers.IO) {
+                        Intent.ACTION_PACKAGE_REMOVED,
+                            -> {
                             val backups = packageRepository.getBackups(packageName)
                             if (backups.isEmpty())
                                 packageRepository.deleteAppInfoOf(packageName)
@@ -71,10 +71,8 @@ class PackageUnInstalledReceiver : BroadcastReceiver(), KoinComponent {
                             }
                         }
                     }
-                }
 
-                if (pref_autoLogUnInstallBroadcast.value) {
-                    GlobalScope.launch(Dispatchers.IO) {
+                    if (pref_autoLogUnInstallBroadcast.value) {
                         delay(60_0000)
                         supportLog("PackageUnInstalledReceiver")
                     }

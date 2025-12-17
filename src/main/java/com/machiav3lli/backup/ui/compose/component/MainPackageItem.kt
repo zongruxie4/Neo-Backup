@@ -81,6 +81,7 @@ import com.machiav3lli.backup.utils.TraceUtils.nanoTiming
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.utils.getFormattedDate
 import com.machiav3lli.backup.viewmodels.HomeVM
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
@@ -465,7 +466,7 @@ fun launchPackagesAction(
     action: String,
     todo: suspend () -> Unit,
 ) {
-    menuScope.launch(menuPool) {
+    CoroutineScope(menuPool).launch {
         val name = "menu.$action"
         try {
             NeoApp.beginBusy(name)

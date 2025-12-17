@@ -80,7 +80,6 @@ import com.machiav3lli.backup.ui.pages.SplashPage
 import com.machiav3lli.backup.ui.pages.persist_beenWelcomed
 import com.machiav3lli.backup.ui.pages.persist_skippedEncryptionCounter
 import com.machiav3lli.backup.ui.pages.pref_appTheme
-import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
@@ -402,9 +401,7 @@ class NeoActivity : BaseActivity() {
     }
 
     fun refreshPackagesAndBackups() {
-        MainScope().launch(Dispatchers.IO) {
-            invalidateBackupLocation()
-        }
+        viewModel.refreshBackups()
     }
 
     fun showSnackBar(message: String) { // TODO reimplement this?
@@ -645,7 +642,8 @@ class NeoActivity : BaseActivity() {
     }
 
     private fun createBiometricPrompt(): BiometricPrompt {
-        return BiometricPrompt(this,
+        return BiometricPrompt(
+            this,
             ContextCompat.getMainExecutor(this),
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
