@@ -48,6 +48,11 @@ import com.machiav3lli.backup.viewmodels.ExportsVM
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SchedulesExportsPage(viewModel: ExportsVM = koinNeoViewModel(), navigateUp: () -> Unit) {
+    val exports by viewModel.exportsList.collectAsState()
+
+    SideEffect {
+        viewModel.refreshList()
+    }
 
     FullScreenBackground {
         Scaffold(
@@ -75,30 +80,17 @@ fun SchedulesExportsPage(viewModel: ExportsVM = koinNeoViewModel(), navigateUp: 
                 )
             }
         ) { paddingValues ->
-
-            SchedulesExports(viewModel, modifier = Modifier.padding(paddingValues))
+            InnerBackground(modifier = Modifier.fillMaxSize()) {
+                ExportedScheduleRecycler(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .blockBorderBottom()
+                        .fillMaxSize(),
+                    productsList = exports,
+                    onImport = { viewModel.importSchedule(it) },
+                    onDelete = { viewModel.deleteExport(it) }
+                )
+            }
         }
-    }
-}
-
-@Composable
-fun SchedulesExports(viewModel: ExportsVM, modifier: Modifier = Modifier) {
-
-    val exports by viewModel.exportsList.collectAsState()
-
-    SideEffect {
-        viewModel.refreshList()
-    }
-
-    InnerBackground(modifier = Modifier.fillMaxSize()) {
-
-        ExportedScheduleRecycler(
-            modifier = modifier
-                .blockBorderBottom()
-                .fillMaxSize(),
-            productsList = exports,
-            onImport = { viewModel.importSchedule(it) },
-            onDelete = { viewModel.deleteExport(it) }
-        )
     }
 }

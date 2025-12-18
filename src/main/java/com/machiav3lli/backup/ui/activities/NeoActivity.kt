@@ -659,8 +659,6 @@ val viewModelsModule = module {
     viewModelOf(::HomeVM)
     viewModelOf(::BackupBatchVM)
     viewModelOf(::RestoreBatchVM)
-    viewModelOf(::BackupBatchVM)
-    viewModelOf(::RestoreBatchVM)
     viewModelOf(::SchedulesVM)
     viewModelOf(::ScheduleVM)
     viewModelOf(::AppVM)

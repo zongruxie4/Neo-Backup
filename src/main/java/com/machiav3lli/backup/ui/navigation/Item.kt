@@ -12,15 +12,11 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.CalendarX
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Detective
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Flask
-import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.compose.icons.phosphor.House
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Infinity
-import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Key
-import com.machiav3lli.backup.ui.compose.icons.phosphor.Lock
 import com.machiav3lli.backup.ui.compose.icons.phosphor.SlidersHorizontal
 import com.machiav3lli.backup.ui.compose.icons.phosphor.UserGear
-import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Wrench
 import com.machiav3lli.backup.ui.pages.AdvancedPrefsPage
 import com.machiav3lli.backup.ui.pages.BatchPage
@@ -40,16 +36,6 @@ sealed class NavItem(
     val destination: String,
     val content: @Composable () -> Unit = {}
 ) {
-
-    data object Welcome :
-        NavItem(R.string.welcome_to_oabx, Phosphor.House, "intro_welcome")
-
-    data object Permissions :
-        NavItem(R.string.permission_not_granted, Phosphor.Warning, "intro_permissions")
-
-    data object Lock :
-        NavItem(R.string.prefs_devicelock, Phosphor.Lock, "intro_lock")
-
     data object Home :
         NavItem(
             R.string.home,
@@ -77,12 +63,6 @@ sealed class NavItem(
         NavItem(R.string.sched_title, Phosphor.CalendarX, "scheduler", {
             SchedulerPage()
         })
-
-    data object Main :
-        NavItem(R.string.main, Phosphor.House, "main")
-
-    data object Prefs :
-        NavItem(R.string.prefs_title, Phosphor.GearSix, "settings")
 
     data object UserPrefs :
         NavItem(R.string.prefs_user_short, Phosphor.UserGear, "prefs_user", {
@@ -112,9 +92,6 @@ sealed class NavItem(
     data object Terminal :
         NavItem(R.string.prefs_tools_terminal, Phosphor.Bug, "prefs_tools/terminal")
 
-    data object Info :
-        NavItem(R.string.app_info, Phosphor.Info, "prefs_tools/info")
-
     data object Exports : NavItem(
         R.string.prefs_schedulesexportimport,
         Phosphor.CalendarX,
@@ -130,15 +107,24 @@ sealed class NavItem(
 
 @Serializable
 sealed class NavRoute : NavKey {
-    @Serializable data object Lock : NavRoute()
-    @Serializable data object Welcome : NavRoute()
-    @Serializable data object Permissions : NavRoute()
-    @Serializable data object Main : NavRoute()
-    @Serializable data object Terminal : NavRoute()
-    @Serializable data object Encryption : NavRoute()
-    @Serializable data object Exports : NavRoute()
-    @Serializable data object Logs : NavRoute()
-    @Serializable data object Info : NavRoute()
+    @Serializable
+    data object Lock : NavRoute()
+    @Serializable
+    data object Welcome : NavRoute()
+    @Serializable
+    data object Permissions : NavRoute()
+    @Serializable
+    data object Main : NavRoute()
+    @Serializable
+    data object Terminal : NavRoute()
+    @Serializable
+    data object Encryption : NavRoute()
+    @Serializable
+    data object Exports : NavRoute()
+    @Serializable
+    data object Logs : NavRoute()
+    @Serializable
+    data object Info : NavRoute()
 
     @Serializable
     data class Prefs(val page: Int = 0) : NavRoute()

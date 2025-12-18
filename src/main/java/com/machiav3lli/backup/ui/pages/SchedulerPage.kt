@@ -143,10 +143,10 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
                     -> ActionsDialogUI(
                     titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
                     messageText = context.getStartScheduleMessage(
-                        schedule,
-                        state.blocklist,
-                        state.tagsMap,
-                        state.tagsList,
+                        schedule = schedule,
+                        globalBlockList = state.blocklist,
+                        tagsMap = state.tagsMap,
+                        allTags = state.tagsList,
                     ),
                     onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialogOK),
