@@ -18,3 +18,12 @@ data class SchedulerState(
     val tagsMap: Map<String, Set<String>> = emptyMap(),
     val tagsList: Set<String> = emptySet(),
 )
+
+data class ScheduleState(
+    val schedule: Schedule? = null,
+    val blockList: Set<String> = emptySet(),
+    val customList: Set<String> = emptySet(),
+    val globalBlockList: Set<String> = emptySet(),
+    val tagsMap: Map<String, Set<String>> = emptyMap(),
+    val tagsList: Set<String> = emptySet(),
+)

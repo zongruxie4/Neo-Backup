@@ -23,12 +23,17 @@ import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
+import com.machiav3lli.backup.data.entity.ScheduleState
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -42,41 +47,38 @@ class ScheduleVM(
 ) : NeoViewModel() {
     private val _scheduleID = MutableStateFlow(-1L)
 
-    val schedule: StateFlow<Schedule?> = scheduleRepository.getScheduleFlow(_scheduleID)
-        //TODO hg42 .trace { "*** schedule <<- ${it}" }     // what can here be null? (something is null that is not declared as nullable)
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
-            Schedule(0)
-        )
+    private val schedule: Flow<Schedule?> = _scheduleID
+        .flatMapLatest { scheduleRepository.getScheduleFlow(it) }
+        .distinctUntilChanged()
 
-    val customList = scheduleRepository.getCustomListFlow(_scheduleID)
-    val blockList = scheduleRepository.getBlockListFlow(_scheduleID)
+    private val customList = scheduleRepository.getCustomListFlow(_scheduleID)
+    private val blockList = scheduleRepository.getBlockListFlow(_scheduleID)
+    private val globalBlockList = blocklistRepository.getGlobalBlocklist()
 
-    val globalBlockList = blocklistRepository.getGlobalBlocklist()
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
-            emptySet()
-        )
-
-    val tagsMap = appExtrasRepository.getAllFlow()
+    private val tagsMap = appExtrasRepository.getAllFlow()
         .mapLatest { it.associate { extra -> extra.packageName to extra.customTags } }
         .trace { "*** tagsMap <<- ${it.size}" }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
-            emptyMap()
-        )
 
-    val allTags = tagsMap
-        .mapLatest { it.values.flatten().toSet() }
-        .trace { "*** tags <<- ${it.size}" }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
-            emptySet()
+    val state: StateFlow<ScheduleState> = combine(
+        schedule,
+        blockList,
+        customList,
+        globalBlockList,
+        tagsMap,
+    ) { schedule, blocklist, customlist, globalBlocklist, tagsMap ->
+        ScheduleState(
+            schedule = schedule,
+            blockList = blocklist,
+            customList = customlist,
+            globalBlockList = globalBlocklist,
+            tagsMap = tagsMap,
+            tagsList = tagsMap.values.flatten().toSet(),
         )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+        ScheduleState()
+    )
 
     fun setSchedule(value: Long) {
         viewModelScope.launch { _scheduleID.update { value } }

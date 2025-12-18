@@ -108,18 +108,13 @@ fun SchedulePage(
     val dialogProps: MutableState<Pair<DialogMode, Schedule>> = remember {
         mutableStateOf(Pair(DialogMode.NONE, Schedule()))
     }
-    val schedule by viewModel.schedule.collectAsState(null)
-    val customList by viewModel.customList.collectAsState(emptySet())
-    val blockList by viewModel.blockList.collectAsState(emptySet())
-    val globalBlockList by viewModel.globalBlockList.collectAsState()
-    val tagsMap by viewModel.tagsMap.collectAsState()
-    val allTags by viewModel.allTags.collectAsState()
+    val state by viewModel.state.collectAsState()
 
     LaunchedEffect(scheduleId) {
         viewModel.setSchedule(scheduleId)
     }
 
-    schedule?.let { schedule ->
+    state.schedule?.let { schedule ->
         val times by schedule.timeLeft().collectAsStateWithLifecycle()
 
         fun refresh(
@@ -207,9 +202,9 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.CheckCircle,
                             description = stringResource(id = R.string.customListTitle),
-                            contentColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
+                            contentColor = if (state.customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.tertiaryContainer,
-                            containerColor = if (customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
+                            containerColor = if (state.customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
                             else MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.CUSTOMLIST, schedule)
@@ -219,9 +214,9 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.Prohibit,
                             description = stringResource(id = R.string.sched_blocklist),
-                            contentColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
+                            contentColor = if (state.blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.tertiaryContainer,
-                            containerColor = if (blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
+                            containerColor = if (state.blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
                             else MaterialTheme.colorScheme.onTertiaryContainer,
                         ) {
                             dialogProps.value = Pair(DialogMode.BLOCKLIST, schedule)
@@ -330,13 +325,13 @@ fun SchedulePage(
                         }
                     }
                 }
-                if (allTags.isNotEmpty()) item {
+                if (state.tagsList.isNotEmpty()) item {
                     ExpandableBlock(
                         heading = stringResource(id = R.string.filters_tags),
                         preExpanded = schedule.tagsList.isNotEmpty(),
                     ) {
                         MultiSelectableChipGroup(
-                            list = allTags.toSet(),
+                            list = state.tagsList,
                             selected = schedule.tagsList,
                         ) { tags ->
                             refresh(
@@ -477,10 +472,10 @@ fun SchedulePage(
                         -> ActionsDialogUI(
                         titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
                         messageText = context.getStartScheduleMessage(
-                            schedule,
-                            globalBlockList,
-                            tagsMap,
-                            allTags
+                            schedule = schedule,
+                            globalBlockList = state.globalBlockList,
+                            tagsMap = state.tagsMap,
+                            allTags = state.tagsList,
                         ),
                         onDismiss = { openDialog.value = false },
                         primaryText = stringResource(R.string.dialogOK),

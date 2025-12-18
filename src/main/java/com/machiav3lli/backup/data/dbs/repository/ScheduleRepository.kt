@@ -22,9 +22,7 @@ class ScheduleRepository(
 
     suspend fun getAll() = dao.getAll()
 
-    fun getScheduleFlow(id: Flow<Long>) = id.flatMapLatest {
-        dao.getByIdFlow(it)
-    }
+    fun getScheduleFlow(id: Long) = dao.getByIdFlow(id)
 
     suspend fun getSchedule(id: Long) = dao.getById(id)
 
