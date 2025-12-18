@@ -43,6 +43,7 @@ class ScheduleRepository(
             Schedule.Builder() // Set id to 0 to make the database generate a new id
                 .withId(0)
                 .withSpecial(withSpecial)
+                .randomName()
                 .build()
         )
     }

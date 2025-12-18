@@ -42,6 +42,7 @@ import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.canonicalName
+import com.machiav3lli.backup.utils.randomScheduleName
 import kotlinx.serialization.Serializable
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -192,6 +193,11 @@ data class Schedule(
 
         fun withId(id: Int): Builder {
             schedule = schedule.copy(id = id.toLong())
+            return this
+        }
+
+        fun randomName(): Builder {
+            schedule = schedule.copy(name = randomScheduleName())
             return this
         }
 

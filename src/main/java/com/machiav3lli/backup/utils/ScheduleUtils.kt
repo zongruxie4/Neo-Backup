@@ -261,6 +261,30 @@ fun cancelScheduleAlarm(context: Context, scheduleId: Long, scheduleName: String
     }
 }
 
+private val scheduleAdjectives = setOf(
+    "Fast", "Modern", "Jumpy", "Smart", "Agile",
+    "Dynamic", "Swift", "Calm", "Daily", "Weekly",
+    "Flexible", "Reliable", "Steady", "Balanced", "Rapid",
+    "Focused", "Lean", "Quiet", "Reactive", "Active",
+    "Robust", "Simple", "Clean", "Neat", "Turbo",
+    "Express", "Hybrid", "Adaptive", "Fresh", "Bright",
+    "Sharp", "Prime", "Bold", "Smooth", "Compact",
+    "Instant", "Light", "Quick", "Efficient", "Clever",
+    "Stealth", "Ultra", "Core", "Gravity", "Nova",
+    "Pulse", "Spark", "Turbocharged", "Elegant", "Crisp",
+    "Zippy", "Bouncy", "Funky", "Groovy", "Sneaky",
+    "Spicy", "Goofy", "Rocket", "Ninja", "Hyper",
+    "Whiz", "Lucky", "Cheeky", "Quirky", "Cosmic",
+    "Loopy", "Epic", "Magic", "Sparkly", "Wild",
+    "Crazy", "Silly", "Snappy", "Zesty", "Jammy",
+    "Spooky", "Chunky", "Noisy", "Zoomy", "Zigzag",
+    "Breezy", "Fizzing", "Popping", "Blazing", "Glitchy",
+    "Party", "Chaotic", "Frenzy", "Rocketship", "Pixel",
+    "Disco", "Mischief", "Banana", "Madcap", "Outrageous"
+)
+
+fun randomScheduleName(): String = "${scheduleAdjectives.random()} Schedule"
+
 private const val ALARM_REQUEST_CODE_PREFIX = 8000
 fun Context.createPendingIntent(scheduleId: Long, scheduleName: String): PendingIntent {
     val alarmIntent = Intent(this, ScheduleReceiver::class.java).apply {
