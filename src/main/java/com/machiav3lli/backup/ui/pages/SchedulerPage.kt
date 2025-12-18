@@ -70,10 +70,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
         mutableStateOf(Pair(DialogMode.NONE, Schedule()))
     }
 
-    val schedules by viewModel.schedules.collectAsState(emptyList())
-    val globalBlockList by viewModel.globalBlockList.collectAsState()
-    val tagsMap by viewModel.tagsMap.collectAsState()
-    val allTags by viewModel.allTags.collectAsState()
+    val state by viewModel.state.collectAsState()
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val scheduleSheetId = remember { mutableLongStateOf(-1L) }
 
@@ -99,7 +96,7 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
                 ) { _ ->
                     ScheduleRecycler(
                         modifier = Modifier.fillMaxSize(),
-                        productsList = schedules,
+                        productsList = state.schedules,
                         onClick = { item ->
                             scope.launch {
                                 paneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, item.id)
@@ -147,9 +144,9 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
                     titleText = "${schedule.name}: ${stringResource(R.string.sched_activateButton)}?",
                     messageText = context.getStartScheduleMessage(
                         schedule,
-                        globalBlockList,
-                        tagsMap,
-                        allTags,
+                        state.blocklist,
+                        state.tagsMap,
+                        state.tagsList,
                     ),
                     onDismiss = { openDialog.value = false },
                     primaryText = stringResource(R.string.dialogOK),
