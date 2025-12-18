@@ -53,7 +53,7 @@ import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.EnumPrefDialogUI
 import com.machiav3lli.backup.ui.dialogs.ListPrefDialogUI
 import com.machiav3lli.backup.ui.dialogs.StringPrefDialogUI
-import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.NavRoute
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -139,7 +139,7 @@ val pref_encryption = LaunchPref(
     titleId = R.string.prefs_encryption,
     summaryId = R.string.prefs_encryption_summary,
     icon = Phosphor.Key,
-    onClick = { NeoApp.main?.moveTo(NavItem.Encryption.destination) }
+    onClick = { NeoApp.main?.moveTo(NavRoute.Encryption) }
 )
 
 val pref_encryption_mode = EnumPref(

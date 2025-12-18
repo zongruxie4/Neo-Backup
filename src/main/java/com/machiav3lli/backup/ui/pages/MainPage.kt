@@ -25,6 +25,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -35,14 +36,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
+import androidx.compose.ui.text.input.TextFieldValue
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.manager.handler.findBackups
+import com.machiav3lli.backup.manager.handler.updateAppTables
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.component.MainTopBar
 import com.machiav3lli.backup.ui.compose.component.RefreshButton
 import com.machiav3lli.backup.ui.compose.component.RoundButton
+import com.machiav3lli.backup.ui.compose.component.devToolsSearch
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
@@ -50,19 +55,22 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.NavRoute
 import com.machiav3lli.backup.ui.navigation.NeoNavigationSuiteScaffold
 import com.machiav3lli.backup.ui.navigation.SlidePager
+import com.machiav3lli.backup.utils.TraceUtils.traceBold
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.HomeVM
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun MainPage(
-    navController: NavHostController,
+    navigator: (NavRoute) -> Unit,
     viewModel: HomeVM = koinNeoViewModel(),
 ) {
-    val main = LocalActivity.current as NeoActivity
+    val activity = LocalActivity.current as NeoActivity
     val scope = rememberCoroutineScope()
     val pages = persistentListOf(
         NavItem.Home,
@@ -73,12 +81,28 @@ fun MainPage(
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val currentPageIndex = remember { derivedStateOf { pagerState.currentPage } }
     val currentPage by remember { derivedStateOf { pages[currentPageIndex.value] } }
+    val mainState by viewModel.state.collectAsState()
 
     BackHandler {
-        main.finishAffinity()
+        activity.finishAffinity()
     }
 
-    val mainState by viewModel.state.collectAsState()
+    LaunchedEffect(viewModel) {
+        if (activity.freshStart) {
+            activity.freshStart = false
+            traceBold { "******************** freshStart && Main ********************" }
+            scope.launch(Dispatchers.IO) {
+                runCatching { activity.findBackups() }
+                NeoApp.startup = false // ensure backups no more reported as empty
+                runCatching { activity.updateAppTables() }
+            }
+
+            devToolsSearch.value =
+                TextFieldValue("")   //TODO hg42 hide implementation details
+
+            activity.runOnUiThread { activity.showEncryptionDialog() }
+        }
+    }
 
     FullScreenBackground {
         NeoNavigationSuiteScaffold(
@@ -119,7 +143,7 @@ fun MainPage(
                                 RoundButton(
                                     description = stringResource(id = R.string.prefs_title),
                                     icon = Phosphor.GearSix
-                                ) { navController.navigate(NavItem.Prefs.destination) }
+                                ) { navigator(NavRoute.Prefs()) }
                             }
 
                             else                          -> {
@@ -128,11 +152,11 @@ fun MainPage(
                                     description = stringResource(id = R.string.search),
                                     onClick = { searchExpanded.value = true }
                                 )
-                                RefreshButton { main.refreshPackagesAndBackups() }
+                                RefreshButton { activity.refreshPackagesAndBackups() }
                                 RoundButton(
                                     description = stringResource(id = R.string.prefs_title),
                                     icon = Phosphor.GearSix
-                                ) { navController.navigate(NavItem.Prefs.destination) }
+                                ) { navigator(NavRoute.Prefs()) }
                             }
                         }
                     }

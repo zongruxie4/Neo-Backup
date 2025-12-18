@@ -30,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
@@ -40,6 +39,7 @@ import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.House
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.NavRoute
 import com.machiav3lli.backup.ui.navigation.NeoNavigationSuiteScaffold
 import com.machiav3lli.backup.ui.navigation.SlidePager
 import com.topjohnwu.superuser.Shell
@@ -49,7 +49,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrefsPage(
-    navController: NavHostController,
+    navigateUp: () -> Unit,
+    navigator: (NavRoute) -> Unit,
     pageIndex: Int = 0,
 ) {
     val scope = rememberCoroutineScope()
@@ -86,7 +87,7 @@ fun PrefsPage(
                                 icon = Phosphor.House,
                                 description = stringResource(id = R.string.home),
                             ) {
-                                navController.navigateUp()
+                                navigateUp()
                             }
                         }
                     ) {
@@ -94,7 +95,7 @@ fun PrefsPage(
                             icon = Phosphor.Info,
                             description = stringResource(id = R.string.help),
                         ) {
-                            navController.navigate(NavItem.Info.destination)
+                            navigator(NavRoute.Info)
                         }
                     }
                 },

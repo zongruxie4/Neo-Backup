@@ -62,7 +62,7 @@ import com.machiav3lli.backup.ui.compose.component.PermissionItem
 import com.machiav3lli.backup.ui.compose.component.TopBar
 import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
-import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.NavRoute
 import com.machiav3lli.backup.utils.SystemUtils.packageName
 import com.machiav3lli.backup.utils.checkBatteryOptimization
 import com.machiav3lli.backup.utils.checkUsageStatsPermission
@@ -220,7 +220,7 @@ fun PermissionsPage(powerManager: PowerManager = koinInject()) {
                 }
 
                 if (permissionsList.isEmpty())
-                    mainActivity.moveTo(NavItem.Main.destination)
+                    mainActivity.moveTo(NavRoute.Main)
             }
         }
 

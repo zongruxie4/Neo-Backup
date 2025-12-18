@@ -26,22 +26,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -61,20 +61,17 @@ import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler
-import com.machiav3lli.backup.manager.handler.findBackups
-import com.machiav3lli.backup.manager.handler.updateAppTables
 import com.machiav3lli.backup.manager.tasks.AppActionWork
 import com.machiav3lli.backup.ui.compose.ObservedEffect
 import com.machiav3lli.backup.ui.compose.component.DevTools
-import com.machiav3lli.backup.ui.compose.component.devToolsSearch
 import com.machiav3lli.backup.ui.compose.theme.AppTheme
 import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.DialogKey
 import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
-import com.machiav3lli.backup.ui.navigation.MainNavHost
-import com.machiav3lli.backup.ui.navigation.NavItem
-import com.machiav3lli.backup.ui.navigation.safeNavigate
+import com.machiav3lli.backup.ui.navigation.AppNavDisplay
+import com.machiav3lli.backup.ui.navigation.NavRoute
+import com.machiav3lli.backup.ui.navigation.navigateUnique
 import com.machiav3lli.backup.ui.pages.RootMissing
 import com.machiav3lli.backup.ui.pages.SplashPage
 import com.machiav3lli.backup.ui.pages.persist_beenWelcomed
@@ -82,7 +79,6 @@ import com.machiav3lli.backup.ui.pages.persist_skippedEncryptionCounter
 import com.machiav3lli.backup.ui.pages.pref_appTheme
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.classAndId
-import com.machiav3lli.backup.utils.TraceUtils.traceBold
 import com.machiav3lli.backup.utils.allPermissionsGranted
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.utils.isBiometricLockAvailable
@@ -100,9 +96,7 @@ import com.machiav3lli.backup.viewmodels.RestoreBatchVM
 import com.machiav3lli.backup.viewmodels.ScheduleVM
 import com.machiav3lli.backup.viewmodels.SchedulesVM
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -121,7 +115,8 @@ fun Rescue() {
 class NeoActivity : BaseActivity() {
 
     private val mScope: CoroutineScope = MainScope()
-    lateinit var navController: NavHostController
+    private lateinit var navStack: NavBackStack<NavRoute>
+    var freshStart: Boolean = true
 
     private lateinit var openDialog: MutableState<Boolean>
     private lateinit var dialogKey: MutableState<DialogKey?>
@@ -129,7 +124,7 @@ class NeoActivity : BaseActivity() {
     private val viewModel: ActivityVM by viewModel()
 
     object LockNavigationState {
-        var intendedDestination: String? = null
+        var intendedDestination: NavRoute? = null
     }
 
     private val lockNavigationState = LockNavigationState
@@ -140,7 +135,7 @@ class NeoActivity : BaseActivity() {
         val mainChanged = (this != NeoApp.mainSaved.get())
         NeoApp.main = this
 
-        var freshStart = (savedInstanceState == null)   //TODO use some lifecycle method?
+        freshStart = (savedInstanceState == null)   //TODO use some lifecycle method?
 
         Timber.w(
             listOfNotNull(
@@ -190,7 +185,7 @@ class NeoActivity : BaseActivity() {
             AppTheme {
                 SplashPage()
             }
-            navController = rememberNavController()
+            navStack = rememberNavBackStack(NavRoute.Permissions) as NavBackStack<NavRoute>
         }
 
         if (doIntent(intent, "beforeContent"))
@@ -207,7 +202,7 @@ class NeoActivity : BaseActivity() {
 
         setContent {
 
-            navController = rememberNavController()
+            navStack = rememberNavBackStack(NavRoute.Permissions) as NavBackStack<NavRoute>
 
             DisposableEffect(pref_appTheme.value) {
                 enableEdgeToEdge(
@@ -229,27 +224,6 @@ class NeoActivity : BaseActivity() {
                 val openBlocklist = remember { mutableStateOf(false) }
                 val blocklist by viewModel.blockList.collectAsState()
 
-                LaunchedEffect(viewModel) {
-                    navController.addOnDestinationChangedListener { _, destination, _ ->
-                        if (destination.route == NavItem.Main.destination && freshStart) {
-                            freshStart = false
-                            traceBold { "******************** freshStart && Main ********************" }
-                            mScope.launch(Dispatchers.IO) {
-                                runCatching { findBackups() }
-                                NeoApp.startup = false // ensure backups no more reported as empty
-                                runCatching { updateAppTables() }
-                                //TODO hg42 val time = OABX.endBusy(OABX.startupMsg)
-                                //TODO hg42 addInfoLogText("startup: ${"%.3f".format(time / 1E9)} sec")
-                            }
-
-                            devToolsSearch.value =
-                                TextFieldValue("")   //TODO hg42 hide implementation details
-
-                            runOnUiThread { showEncryptionDialog() }
-                        }
-                    }
-                }
-
                 Scaffold(
                     containerColor = MaterialTheme.colorScheme.background,
                     contentColor = MaterialTheme.colorScheme.onBackground,
@@ -259,8 +233,9 @@ class NeoActivity : BaseActivity() {
                     }
 
                     Box {
-                        MainNavHost(
-                            navController = navController,
+                        AppNavDisplay(
+                            backStack = navStack,
+                            modifier = Modifier.imePadding(),
                         )
 
                         if (openBlocklist.value)
@@ -286,7 +261,7 @@ class NeoActivity : BaseActivity() {
                                     primaryText = stringResource(id = R.string.dialog_approve),
                                     primaryAction = {
                                         openDialog.value = false
-                                        moveTo("${NavItem.Prefs.destination}?page=1")
+                                        moveTo(NavRoute.Prefs(1))
                                     }
                                 )
                             }
@@ -368,7 +343,8 @@ class NeoActivity : BaseActivity() {
                     "android.intent.action.MAIN" -> {
                         if (data == null)
                             return false
-                        moveTo(data.toString())
+                        //moveTo(data.toString())
+                        Timber.w("Received a newIntent with command:$command and didn't handle it!")
                     }
 
                     else                         -> {
@@ -381,7 +357,7 @@ class NeoActivity : BaseActivity() {
         return false
     }
 
-    private fun showEncryptionDialog() {
+    fun showEncryptionDialog() {
         val dontShowAgain = isEncryptionEnabled()
         if (dontShowAgain) return
         val dontShowCounter = persist_skippedEncryptionCounter.value
@@ -421,10 +397,11 @@ class NeoActivity : BaseActivity() {
         }
     }
 
-    fun moveTo(destination: String) {
+    // TODO track and reduce usage
+    fun moveTo(destination: NavRoute) {
         try {
-            persist_beenWelcomed.value = destination != NavItem.Welcome.destination
-            if (!isOnLockScreen()) navController.navigate(destination)
+            persist_beenWelcomed.value = destination != NavRoute.Welcome
+            if (!isOnLockScreen()) navStack.navigateUnique(destination)
         } catch (e: IllegalArgumentException) {
             Timber.e("cannot navigate to '$destination'")
         } catch (e: Throwable) {
@@ -599,30 +576,29 @@ class NeoActivity : BaseActivity() {
     fun resumeMain() {
         when {
             !persist_beenWelcomed.value
-                 -> if (!navController.currentDestination?.route?.equals(NavItem.Welcome.destination)!!) {
-                navController.clearBackStack<NavItem.Welcome>()
-                navController.safeNavigate(NavItem.Welcome.destination)
+                 -> if (navStack.lastOrNull() != NavRoute.Welcome) {
+                navStack.clear()
+                navStack.navigateUnique(NavRoute.Welcome)
             }
 
-            allPermissionsGranted && this::navController.isInitialized
+            allPermissionsGranted && this::navStack.isInitialized
                  -> launchMain()
 
-            else -> navController.safeNavigate(NavItem.Permissions.destination)
+            else -> navStack.navigateUnique(NavRoute.Permissions)
         }
     }
 
     private fun launchMain() {
         when {
             shouldShowLock()   -> {
-                val currentDestination =
-                    navController.currentDestination?.route ?: NavItem.Main.destination
+                val currentDestination = navStack.lastOrNull() ?: NavRoute.Main
                 if (!isOnLockScreen()) lockNavigationState.intendedDestination = currentDestination
-                navController.safeNavigate(NavItem.Lock.destination)
+                navStack.navigateUnique(NavRoute.Lock)
                 launchBiometricPrompt()
             }
 
             isOnSystemScreen() -> {
-                navController.safeNavigate(NavItem.Main.destination)
+                navStack.navigateUnique(NavRoute.Main)
             }
         }
     }
@@ -655,18 +631,18 @@ class NeoActivity : BaseActivity() {
 
     private fun shouldShowLock() = isBiometricLockAvailable() && isDeviceLockEnabled()
 
-    private fun isOnSystemScreen() = navController.currentDestination?.route in listOf(
-        NavItem.Welcome.destination,
-        NavItem.Permissions.destination,
-        NavItem.Lock.destination,
+    private fun isOnSystemScreen() = navStack.lastOrNull() in listOf(
+        NavRoute.Welcome,
+        NavRoute.Permissions,
+        NavRoute.Lock,
     )
 
     private fun isOnLockScreen() =
-        navController.currentDestination?.route == NavItem.Lock.destination
+        navStack.lastOrNull() == NavRoute.Lock
 
     private fun navigateToStoredDestination() {
         lockNavigationState.intendedDestination?.let { destination ->
-            navController.safeNavigate(destination)
+            navStack.navigateUnique(destination)
             lockNavigationState.intendedDestination = null
         }
     }

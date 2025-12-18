@@ -61,7 +61,7 @@ import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.LinkChip
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowRight
-import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.NavRoute
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -168,7 +168,7 @@ fun WelcomePage() {
                     icon = Phosphor.ArrowRight,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 ) {
-                    main.moveTo(NavItem.Permissions.destination)
+                    main.moveTo(NavRoute.Permissions)
                 }
             }
         }

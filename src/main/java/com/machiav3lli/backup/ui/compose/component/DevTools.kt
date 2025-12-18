@@ -1118,7 +1118,7 @@ fun DevTools(
                     ) {
                         expanded.value = false
                         try {
-                            if (activity.navController != null)
+                            if (activity != null)
                             ;
                         } catch (e: Throwable) {
                             activity.restartApp()

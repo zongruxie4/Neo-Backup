@@ -50,7 +50,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
 import com.machiav3lli.backup.ui.compose.show
 import com.machiav3lli.backup.ui.dialogs.ActionsDialogUI
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
-import com.machiav3lli.backup.ui.navigation.NavItem
+import com.machiav3lli.backup.ui.navigation.NavRoute
 import com.machiav3lli.backup.utils.BACKUP_DATE_TIME_FORMATTER
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.applyFilter
@@ -161,7 +161,7 @@ fun ToolsPrefsPage(
                                         coroutineScope
                                     )
 
-                                    pref_schedulesExportImport -> neoActivity.moveTo(NavItem.Exports.destination)
+                                    pref_schedulesExportImport -> neoActivity.moveTo(NavRoute.Exports)
 
                                     pref_saveAppsList          -> context.onClickSaveAppsList(
                                         packageMap.values,
@@ -178,9 +178,9 @@ fun ToolsPrefsPage(
                                         openDialog.value = true
                                     }
 
-                                    pref_logViewer             -> neoActivity.moveTo(NavItem.Logs.destination)
+                                    pref_logViewer             -> neoActivity.moveTo(NavRoute.Logs)
 
-                                    pref_terminal              -> neoActivity.moveTo(NavItem.Terminal.destination)
+                                    pref_terminal              -> neoActivity.moveTo(NavRoute.Terminal)
                                 }
                             }
                             if (index < size - 1) Spacer(modifier = Modifier.height(4.dp))
