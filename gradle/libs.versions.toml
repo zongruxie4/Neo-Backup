@@ -23,6 +23,7 @@ libsu = "6.0.0"
 lifecycle = "2.10.0"
 material = "1.13.0"
 navigation = "2.9.6"
+navigation3 = "1.0.0"
 # TODO migrate to 2.0.X when ready https://pgpainless.readthedocs.io/en/latest/pgpainless-core/migration_2.0.html
 pgpainless = "1.7.7"
 preference = "1.2.1"
@@ -96,6 +97,8 @@ compose-adaptive-layout = { module = "androidx.compose.material3.adaptive:adapti
 compose-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation" }
 compose-animation = { module = "androidx.compose.animation:animation" }
 compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
+compose-navigation3 = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+compose-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "compose-accompanist" }
 compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "compose-markdown" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }

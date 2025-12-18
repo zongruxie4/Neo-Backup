@@ -178,6 +178,8 @@ dependencies {
     implementation(libs.compose.adaptive.navigation)
     implementation(libs.compose.animation)
     implementation(libs.compose.navigation)
+    implementation(libs.compose.navigation3)
+    implementation(libs.compose.navigation3.ui)
     implementation(libs.coil.compose)
     implementation(libs.accompanist.permissions)
 
