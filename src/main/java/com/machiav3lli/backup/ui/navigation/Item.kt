@@ -2,6 +2,7 @@ package com.machiav3lli.backup.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation3.runtime.NavKey
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -31,6 +32,7 @@ import com.machiav3lli.backup.ui.pages.UserPrefsPage
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.RestoreBatchVM
+import kotlinx.serialization.Serializable
 
 sealed class NavItem(
     val title: Int,
@@ -124,4 +126,20 @@ sealed class NavItem(
         Phosphor.Bug,
         "prefs_tools/logs"
     )
+}
+
+@Serializable
+sealed class NavRoute : NavKey {
+    @Serializable data object Lock : NavRoute()
+    @Serializable data object Welcome : NavRoute()
+    @Serializable data object Permissions : NavRoute()
+    @Serializable data object Main : NavRoute()
+    @Serializable data object Terminal : NavRoute()
+    @Serializable data object Encryption : NavRoute()
+    @Serializable data object Exports : NavRoute()
+    @Serializable data object Logs : NavRoute()
+    @Serializable data object Info : NavRoute()
+
+    @Serializable
+    data class Prefs(val page: Int = 0) : NavRoute()
 }
