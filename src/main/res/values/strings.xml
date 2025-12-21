@@ -486,4 +486,6 @@
     </plurals>
     <string name="packagesToBackup">Number of packages to backup: %d</string>
     <string name="addBlocklistDialogMessage">Add the app to the global blocklist?</string>
+    <string name="stats_app_size">Apps Size</string>
+    <string name="stats_data_size">Data Size</string>
 </resources>

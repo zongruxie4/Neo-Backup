@@ -27,6 +27,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -47,8 +50,6 @@ import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.BACKUP_FILTER_DEFAULT
-import com.machiav3lli.backup.CHIP_SIZE_APP
-import com.machiav3lli.backup.CHIP_SIZE_DATA
 import com.machiav3lli.backup.EnabledFilter
 import com.machiav3lli.backup.InstalledFilter
 import com.machiav3lli.backup.LatestFilter
@@ -57,7 +58,6 @@ import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.data.entity.ChipItem
-import com.machiav3lli.backup.data.entity.InfoChipItem
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.installedFilterChipItems
@@ -67,14 +67,13 @@ import com.machiav3lli.backup.mainBackupModeChipItems
 import com.machiav3lli.backup.mainFilterChipItems
 import com.machiav3lli.backup.sortChipItems
 import com.machiav3lli.backup.ui.compose.component.ActionButton
+import com.machiav3lli.backup.ui.compose.component.ChipsSwitch
 import com.machiav3lli.backup.ui.compose.component.DoubleVerticalText
 import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
-import com.machiav3lli.backup.ui.compose.component.InfoChipsBlock
 import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
+import com.machiav3lli.backup.ui.compose.component.OutlinedActionButton
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
-import com.machiav3lli.backup.ui.compose.component.ChipsSwitch
-import com.machiav3lli.backup.ui.compose.component.OutlinedActionButton
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUUpLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
@@ -119,54 +118,53 @@ fun SortFilterSheet(
                         containerColor = Color.Transparent,
                     ),
                     headlineContent = {
-                        Column {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                        LazyVerticalGrid(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            columns = GridCells.Fixed(6),
+                        ) {
+                            item(key = R.string.stats_apps, span = { GridItemSpan(2) }) {
                                 DoubleVerticalText(
                                     upperText = stats.nApps.toString(),
                                     bottomText = stringResource(id = R.string.stats_apps),
                                     modifier = Modifier.weight(1f)
                                 )
+                            }
+                            item(key = R.string.stats_backups, span = { GridItemSpan(2) }) {
                                 DoubleVerticalText(
                                     upperText = stats.nBackups.toString(),
                                     bottomText = stringResource(id = R.string.stats_backups),
                                     modifier = Modifier.weight(1f)
                                 )
+                            }
+                            item(key = R.string.stats_updated, span = { GridItemSpan(2) }) {
                                 DoubleVerticalText(
                                     upperText = stats.nUpdated.toString(),
                                     bottomText = stringResource(id = R.string.stats_updated),
                                     modifier = Modifier.weight(1f)
                                 )
                             }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                InfoChipsBlock(
-                                    list = listOf(
-                                        InfoChipItem(
-                                            flag = CHIP_SIZE_APP,
-                                            text = stringResource(id = R.string.app_size) + " " + Formatter.formatFileSize(
-                                                LocalContext.current,
-                                                stats.szApps ?: 0
-                                            ),
-                                        ),
-                                        InfoChipItem(
-                                            flag = CHIP_SIZE_DATA,
-                                            text = stringResource(id = R.string.data_size) + " " + Formatter.formatFileSize(
-                                                LocalContext.current,
-                                                stats.szData ?: 0
-                                            ),
-                                        ),
-                                    )
+                            item(key = R.string.stats_app_size, span = { GridItemSpan(3) }) {
+                                DoubleVerticalText(
+                                    upperText = Formatter.formatFileSize(
+                                        LocalContext.current,
+                                        stats.szApps ?: 0
+                                    ),
+                                    bottomText = stringResource(id = R.string.stats_app_size),
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            item(key = R.string.stats_data_size, span = { GridItemSpan(3) }) {
+                                DoubleVerticalText(
+                                    upperText = Formatter.formatFileSize(
+                                        LocalContext.current,
+                                        stats.szData ?: 0
+                                    ),
+                                    bottomText = stringResource(id = R.string.stats_data_size),
+                                    modifier = Modifier.weight(1f)
                                 )
                             }
                         }
@@ -177,8 +175,7 @@ fun SortFilterSheet(
                         }
                     }
                 )
-                HorizontalDivider(thickness = 1.dp)
-
+                HorizontalDivider(thickness = 2.dp)
             }
         },
         bottomBar = {
