@@ -76,7 +76,7 @@ fun SelectionChip(
     item: ChipItem,
     isSelected: Boolean,
     colors: SelectableChipColors = FilterChipDefaults.filterChipColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
         labelColor = MaterialTheme.colorScheme.onSurface,
         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -112,7 +112,7 @@ fun SelectionChip(
     label: String,
     isSelected: Boolean,
     colors: SelectableChipColors = FilterChipDefaults.filterChipColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
         labelColor = MaterialTheme.colorScheme.onSurface,
         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -350,7 +350,7 @@ fun LinkChip(
 }
 
 @Composable
-fun SwitchChip(
+fun ChipsSwitch(
     firstTextId: Int,
     firstIcon: ImageVector,
     secondTextId: Int,
@@ -358,51 +358,34 @@ fun SwitchChip(
     firstSelected: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    val colors = SegmentedButtonDefaults.colors(
-        inactiveContainerColor = Color.Transparent,
-        activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
-        inactiveContentColor = MaterialTheme.colorScheme.onSurface,
-        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        activeBorderColor = Color.Transparent,
-        inactiveBorderColor = Color.Transparent,
-    )
-    var firstSelected by remember { mutableStateOf(firstSelected) }
+    val (firstSelected, selectFirst) = remember { mutableStateOf(firstSelected) }
 
     SingleChoiceSegmentedButtonRow(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.shapes.medium)
-            .padding(horizontal = 6.dp)
             .fillMaxWidth(),
+        space = 24.dp,
     ) {
-        SegmentedButton(
-            modifier = Modifier.weight(1f),
-            selected = firstSelected,
-            shape = MaterialTheme.shapes.small,
-            colors = colors,
-            icon = {
-                ButtonIcon(firstIcon, firstTextId)
-            },
+        SegmentedTabButton(
+            text = stringResource(id = firstTextId),
+            icon = firstIcon,
+            selected = { firstSelected },
+            index = 0,
+            count = 2,
             onClick = {
                 onCheckedChange(true)
-                firstSelected = true
+                selectFirst(true)
             }
-        ) {
-            Text(text = stringResource(id = firstTextId))
-        }
-        SegmentedButton(
-            modifier = Modifier.weight(1f),
-            selected = !firstSelected,
-            shape = MaterialTheme.shapes.small,
-            colors = colors,
-            icon = {
-                ButtonIcon(secondIcon, secondTextId)
-            },
+        )
+        SegmentedTabButton(
+            text = stringResource(id = secondTextId),
+            icon = secondIcon,
+            selected = { !firstSelected },
+            index = 1,
+            count = 2,
             onClick = {
                 onCheckedChange(false)
-                firstSelected = false
+                selectFirst(false)
             }
-        ) {
-            Text(text = stringResource(id = secondTextId))
-        }
+        )
     }
 }

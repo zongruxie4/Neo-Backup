@@ -73,7 +73,7 @@ import com.machiav3lli.backup.ui.compose.component.InfoChipsBlock
 import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
-import com.machiav3lli.backup.ui.compose.component.SwitchChip
+import com.machiav3lli.backup.ui.compose.component.ChipsSwitch
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUUpLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
@@ -237,7 +237,7 @@ fun SortFilterSheet(
                     ) { flag ->
                         model = model.copy(sort = flag)
                     }
-                    SwitchChip(
+                    ChipsSwitch(
                         firstTextId = R.string.sortAsc,
                         firstIcon = Phosphor.SortAscending,
                         secondTextId = R.string.sortDesc,
