@@ -74,6 +74,7 @@ import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.ChipsSwitch
+import com.machiav3lli.backup.ui.compose.component.OutlinedActionButton
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUUpLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
@@ -185,18 +186,18 @@ fun SortFilterSheet(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
             ) {
-                HorizontalDivider(thickness = 1.dp)
+                HorizontalDivider(thickness = 2.dp)
                 Row(
                     modifier = Modifier
-                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .padding(12.dp)
                         .navigationBarsPadding(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ActionButton(
+                    OutlinedActionButton(
                         text = stringResource(id = R.string.resetFilter),
                         icon = Phosphor.ArrowUUpLeft,
                         modifier = Modifier.weight(1f),
-                        fullWidth = true,
                         positive = false,
                         onClick = {
                             viewModel.setSortFilter(SortFilterModel())
@@ -207,7 +208,6 @@ fun SortFilterSheet(
                         text = stringResource(id = R.string.applyFilter),
                         icon = Phosphor.Check,
                         modifier = Modifier.weight(1f),
-                        fullWidth = true,
                         positive = true,
                         onClick = {
                             viewModel.setSortFilter(model)

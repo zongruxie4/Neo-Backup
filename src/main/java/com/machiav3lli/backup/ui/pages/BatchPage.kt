@@ -278,7 +278,6 @@ fun BatchPage(
                     else Phosphor.ClockCounterClockwise,
                     modifier = Modifier.weight(1f),
                     positive = true,
-                    fullWidth = true,
                 ) {
                     if (viewModel.apkBackupCheckedList.filterValues { it != -1 }.isNotEmpty()
                         || viewModel.dataBackupCheckedList.filterValues { it != -1 }.isNotEmpty()

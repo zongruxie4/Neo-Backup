@@ -84,8 +84,8 @@ fun EncryptionPage(pgpManager: PGPHandler = koinInject()) {
                         ActionButton(
                             text = stringResource(R.string.create_pgp_key),
                             icon = Phosphor.Key,
+                            modifier = Modifier.weight(1f),
                             positive = true,
-                            fullWidth = true,
                         ) {
                             openCreateDialog.value = true
                             openDialog.value = true

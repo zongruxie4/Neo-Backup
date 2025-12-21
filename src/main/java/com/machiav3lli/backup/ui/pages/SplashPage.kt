@@ -120,8 +120,7 @@ fun RootMissing(activity: Activity? = null) {
             ActionButton(
                 text = stringResource(id = R.string.dialogOK),
                 icon = Phosphor.Warning,
-                fullWidth = true,
-                modifier = Modifier
+                modifier = Modifier.weight(1f),
             ) {
                 activity?.finishAffinity()
                 exitProcess(0)
@@ -130,8 +129,7 @@ fun RootMissing(activity: Activity? = null) {
             ActionButton(
                 text = stringResource(id = R.string.prefs_title),
                 icon = Phosphor.GearSix,
-                fullWidth = true,
-                modifier = Modifier
+                modifier = Modifier.weight(1f),
             ) {
                 showDevTools.value = true
             }
@@ -139,8 +137,7 @@ fun RootMissing(activity: Activity? = null) {
             ActionButton(
                 text = "Retry",
                 icon = Phosphor.ArrowsClockwise,
-                fullWidth = true,
-                modifier = Modifier
+                modifier = Modifier.weight(1f),
             ) {
                 context.restartApp()
             }

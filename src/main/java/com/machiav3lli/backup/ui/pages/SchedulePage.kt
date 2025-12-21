@@ -71,6 +71,7 @@ import com.machiav3lli.backup.ui.compose.component.CardButton
 import com.machiav3lli.backup.ui.compose.component.CheckChip
 import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
 import com.machiav3lli.backup.ui.compose.component.MultiSelectableChipGroup
+import com.machiav3lli.backup.ui.compose.component.OutlinedActionButton
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.SelectableChipGroup
 import com.machiav3lli.backup.ui.compose.component.TextEditBlock
@@ -372,7 +373,7 @@ fun SchedulePage(
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                         maxLines = 2
                     ) {
-                        if (schedule.enabled) Text(text = "⏳ ${times.second}") // TODO replace by resource icons
+                        if (schedule.enabled) Text(text = "⏳ ${times.second}")
                         Text(text = "🕒 ${times.first}")
                     }
                 }
@@ -381,11 +382,10 @@ fun SchedulePage(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    ActionButton(
+                    OutlinedActionButton(
                         text = stringResource(id = R.string.delete),
                         icon = Phosphor.TrashSimple,
                         positive = false,
-                        fullWidth = false
                     ) {
                         dialogProps.value = Pair(DialogMode.DELETE, schedule)
                         openDialog.value = true
@@ -393,7 +393,7 @@ fun SchedulePage(
                     ActionButton(
                         text = stringResource(id = R.string.sched_activateButton),
                         icon = Phosphor.Play,
-                        fullWidth = true,
+                        modifier = Modifier.weight(1f),
                         onClick = {
                             dialogProps.value = Pair(DialogMode.SCHEDULE_RUN, schedule)
                             openDialog.value = true

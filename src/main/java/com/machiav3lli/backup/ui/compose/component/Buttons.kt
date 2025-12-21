@@ -6,13 +6,15 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -24,6 +26,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -61,8 +64,8 @@ fun ActionButton(
     text: String,
     modifier: Modifier = Modifier,
     positive: Boolean = true,
-    fullWidth: Boolean = false,
     icon: ImageVector? = null,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     FilledTonalButton(
@@ -77,15 +80,50 @@ fun ActionButton(
                 else     -> MaterialTheme.colorScheme.tertiaryContainer
             }
         ),
+        enabled = enabled,
         onClick = onClick,
     ) {
         if (icon != null) Icon(imageVector = icon, contentDescription = text)
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
-            modifier = when {
-                fullWidth -> Modifier.weight(1f)
-                icon != null -> Modifier.padding(start = 8.dp)
-                else -> Modifier
+            text = text,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleSmall,
+        )
+    }
+}
+
+@Composable
+fun OutlinedActionButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    // TODO add neutral using ENUM
+    positive: Boolean = true,
+    icon: ImageVector? = null,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    OutlinedButton(
+        modifier = modifier,
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = when {
+                positive -> MaterialTheme.colorScheme.primary
+                else     -> MaterialTheme.colorScheme.tertiary
             },
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = when {
+                positive -> MaterialTheme.colorScheme.primary
+                else     -> MaterialTheme.colorScheme.tertiary
+            },
+        ),
+        enabled = enabled,
+        onClick = onClick,
+    ) {
+        if (icon != null) Icon(imageVector = icon, contentDescription = text)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
             text = text,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleSmall,

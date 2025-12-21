@@ -238,7 +238,6 @@ fun HomePage(
                                                             text = stringResource(id = R.string.backup_all_updated),
                                                             icon = Phosphor.ArchiveTray,
                                                             modifier = Modifier.weight(1f),
-                                                            fullWidth = true,
                                                             positive = true,
                                                         ) {
                                                             openBatchDialog.value = true
