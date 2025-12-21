@@ -28,7 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
-import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDown
+import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretDownUp
+import com.machiav3lli.backup.ui.compose.icons.phosphor.CaretUpDown
 
 @Composable
 fun ExpandableBlock(
@@ -40,7 +41,7 @@ fun ExpandableBlock(
 ) {
     var expanded by rememberSaveable { mutableStateOf(preExpanded) }
     val surfaceColor by animateColorAsState(
-        targetValue = if (expanded) MaterialTheme.colorScheme.surfaceContainerHighest
+        targetValue = if (expanded) MaterialTheme.colorScheme.surfaceContainerHigh
         else Color.Transparent,
         label = "surfaceColor"
     )
@@ -58,7 +59,7 @@ fun ExpandableBlock(
         color = surfaceColor
     ) {
         Column(modifier = modifier) {
-            ExpandableBlockHeader(heading, icon)
+            ExpandableBlockHeader(heading, icon, expanded)
             AnimatedVisibility(visible = expanded) {
                 Column(
                     Modifier.padding(
@@ -78,6 +79,7 @@ fun ExpandableBlock(
 fun ExpandableBlockHeader(
     heading: String? = null,
     icon: ImageVector? = null,
+    expanded: Boolean = false,
     withIcon: Boolean = true,
 ) {
     var spacerHeight = 0
@@ -100,11 +102,12 @@ fun ExpandableBlockHeader(
             Text(
                 modifier = Modifier.weight(1f),
                 text = heading,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
             )
             if (withIcon) Icon(
                 modifier = Modifier.size(24.dp),
-                imageVector = Phosphor.CaretDown,
+                imageVector = if (expanded) Phosphor.CaretDownUp
+                else Phosphor.CaretUpDown,
                 contentDescription = heading
             )
         }
