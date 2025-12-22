@@ -10,4 +10,5 @@ local.properties
 src/main/jniLibs/
 release/
 neo/
+debug/
 *.salive
