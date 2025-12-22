@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,18 +31,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.machiav3lli.backup.HELP_FAQ
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.DevTools
+import com.machiav3lli.backup.ui.compose.component.OutlinedActionButton
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.icons.phosphor.LockOpen
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
+import com.machiav3lli.backup.utils.launchView
 import com.machiav3lli.backup.utils.restartApp
 import kotlin.system.exitProcess
 
@@ -88,11 +93,12 @@ fun RootMissing(activity: Activity? = null) {
     Scaffold(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.systemBarsPadding()
     ) {
         val showDevTools = remember { mutableStateOf(false) }
 
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(50.dp)
@@ -104,43 +110,46 @@ fun RootMissing(activity: Activity? = null) {
                 color = Color.Red,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = stringResource(R.string.root_is_mandatory),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = stringResource(R.string.see_faq),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.fillMaxWidth()
-            )
             Spacer(modifier = Modifier.weight(1f))
             ActionButton(
                 text = stringResource(id = R.string.dialogOK),
                 icon = Phosphor.Warning,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(1f),
+                positive = false,
             ) {
                 activity?.finishAffinity()
                 exitProcess(0)
             }
-            Spacer(modifier = Modifier.weight(1f))
-            ActionButton(
+            OutlinedActionButton(
+                text = stringResource(id = R.string.see_faq),
+                icon = Phosphor.Info,
+                positive = true,
+                modifier = Modifier.fillMaxWidth(1f),
+            ) {
+                context.launchView(HELP_FAQ)
+            }
+            OutlinedActionButton(
                 text = stringResource(id = R.string.prefs_title),
                 icon = Phosphor.GearSix,
-                modifier = Modifier.weight(1f),
+                positive = true,
+                modifier = Modifier.fillMaxWidth(1f),
             ) {
                 showDevTools.value = true
             }
-            Spacer(modifier = Modifier.weight(1f))
             ActionButton(
                 text = "Retry",
                 icon = Phosphor.ArrowsClockwise,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(1f),
             ) {
                 context.restartApp()
             }
+            Spacer(modifier = Modifier.weight(1f))
             if (showDevTools.value) {
                 BaseDialog(onDismiss = { showDevTools.value = false }) {
                     DevTools(
@@ -150,7 +159,6 @@ fun RootMissing(activity: Activity? = null) {
                     )
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
