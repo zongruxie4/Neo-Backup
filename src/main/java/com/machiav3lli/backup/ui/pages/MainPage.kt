@@ -60,7 +60,9 @@ import com.machiav3lli.backup.ui.navigation.NeoNavigationSuiteScaffold
 import com.machiav3lli.backup.ui.navigation.SlidePager
 import com.machiav3lli.backup.utils.TraceUtils.traceBold
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
+import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.HomeVM
+import com.machiav3lli.backup.viewmodels.RestoreBatchVM
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -68,7 +70,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainPage(
     navigator: (NavRoute) -> Unit,
-    viewModel: HomeVM = koinNeoViewModel(),
+    homeVM: HomeVM = koinNeoViewModel(),
+    backupVM: BackupBatchVM = koinNeoViewModel(),
+    restoreVM: RestoreBatchVM = koinNeoViewModel(),
 ) {
     val activity = LocalActivity.current as NeoActivity
     val scope = rememberCoroutineScope()
@@ -81,13 +85,13 @@ fun MainPage(
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val currentPageIndex = remember { derivedStateOf { pagerState.currentPage } }
     val currentPage by remember { derivedStateOf { pages[currentPageIndex.value] } }
-    val mainState by viewModel.state.collectAsState()
+    val mainState by homeVM.state.collectAsState()
 
     BackHandler {
         activity.finishAffinity()
     }
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(homeVM) {
         if (activity.freshStart) {
             activity.freshStart = false
             traceBold { "******************** freshStart && Main ********************" }
@@ -128,10 +132,14 @@ fun MainPage(
                         expanded = searchExpanded,
                         query = mainState.searchQuery,
                         onQueryChanged = { newQuery ->
-                            viewModel.setSearchQuery(newQuery)
+                            homeVM.setSearchQuery(newQuery)
+                            backupVM.setSearchQuery(newQuery)
+                            restoreVM.setSearchQuery(newQuery)
                         },
                         onClose = {
-                            viewModel.setSearchQuery("")
+                            homeVM.setSearchQuery("")
+                            backupVM.setSearchQuery("")
+                            restoreVM.setSearchQuery("")
                         }
                     ) {
                         when (currentPage.destination) {
@@ -177,7 +185,7 @@ fun MainPage(
                     currentBlocklist = mainState.blocklist,
                     openDialogCustom = openBlocklist,
                 ) { newSet ->
-                    viewModel.updateBlocklist(newSet)
+                    homeVM.updateBlocklist(newSet)
                 }
             }
         }
