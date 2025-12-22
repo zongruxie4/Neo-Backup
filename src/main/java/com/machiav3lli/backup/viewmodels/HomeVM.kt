@@ -29,12 +29,9 @@ import com.machiav3lli.backup.data.entity.MainState
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.data.preferences.NeoPrefs
-import com.machiav3lli.backup.data.preferences.traceFlows
 import com.machiav3lli.backup.ui.pages.pref_newAndUpdatedNotification
-import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.applySearch
-import com.machiav3lli.backup.utils.extensions.IconCache
 import com.machiav3lli.backup.utils.extensions.combine
 import com.machiav3lli.backup.utils.toPackageList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,14 +41,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeVM(
-    private val packageRepository: PackageRepository,
+    packageRepository: PackageRepository,
     blocklistRepository: BlocklistRepository,
     appExtrasRepository: AppExtrasRepository,
     private val scheduleRepository: ScheduleRepository,
@@ -74,40 +70,6 @@ class HomeVM(
         packageRepository.getBackupsListFlow(),
     ) { appInfos, bkps -> appInfos.toPackageList(NeoApp.context) }
         .distinctUntilChanged()
-
-    val packageMap =
-        //========================================================================================== packageList
-        combine(
-            pkgsFlow,
-            packageRepository.getBackupsFlow()
-        ) { pkgs, backups ->
-
-            traceFlows {
-                "******************** packages-db: ${pkgs.size} backups-db: ${
-                    backups.map { it.value.size }.sum()
-                }"
-            }
-
-            IconCache.dropAllButUsed(pkgs.drop(0))
-
-            traceFlows { "***** packages ->> ${pkgs.size}" }
-            pkgs
-        }
-            .mapLatest { it.associateBy(Package::packageName) }
-            .trace { "*** packageMap <<- ${it.size}" }
-            .stateIn(
-                viewModelScope,
-                started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
-                emptyMap()
-            )
-
-    private val notBlockedPackages = combine(
-        pkgsFlow,
-        blocklistRepository.getBlocklist(),
-    ) { packages, blocklist ->
-        packages.filterNot { it.packageName in blocklist }
-    }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS end
 
     override val state: StateFlow<MainState> = combine(
         pkgsFlow,
@@ -143,6 +105,7 @@ class HomeVM(
         SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
         MainState()
     )
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS end
 
     fun setSearchQuery(value: String) {
         viewModelScope.launch { searchQuery.update { value } }

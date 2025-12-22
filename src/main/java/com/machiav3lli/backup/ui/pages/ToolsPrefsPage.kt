@@ -80,7 +80,6 @@ fun ToolsPrefsPage(
     }
     val mainState by viewModel.state.collectAsState()
     val tagsMap by viewModel.tagsMap.collectAsState()
-    val packageMap by viewModel.packageMap.collectAsState()
 
     val prefs = Pref.prefGroups["tool"] ?: listOf()
 
@@ -109,7 +108,7 @@ fun ToolsPrefsPage(
                             ) {
                                 when (pref) {
                                     pref_batchDelete           -> context.onClickUninstalledBackupsDelete(
-                                        packageMap.values,
+                                        mainState.packages,
                                         snackbarHostState,
                                         coroutineScope
                                     ) { message, action ->
@@ -144,7 +143,7 @@ fun ToolsPrefsPage(
                                     }
 
                                     pref_enforceBackupsLimit   -> context.onClickEnforceBackupsLimit(
-                                        packageMap.values,
+                                        mainState.packages,
                                         snackbarHostState,
                                         coroutineScope
                                     ) { message, action ->
@@ -164,7 +163,7 @@ fun ToolsPrefsPage(
                                     pref_schedulesExportImport -> neoActivity.moveTo(NavRoute.Exports)
 
                                     pref_saveAppsList          -> context.onClickSaveAppsList(
-                                        packageMap.values,
+                                        mainState.packages,
                                         tagsMap,
                                         mainState.sortFilter,
                                         snackbarHostState,

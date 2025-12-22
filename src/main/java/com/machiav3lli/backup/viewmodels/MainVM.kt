@@ -25,6 +25,7 @@ import com.machiav3lli.backup.data.entity.MainState
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 open class MainVM(
     private val blocklistRepository: BlocklistRepository,
     appExtrasRepository: AppExtrasRepository,
