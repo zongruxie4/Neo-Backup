@@ -56,6 +56,7 @@ import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.ExportsRepository
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
+import com.machiav3lli.backup.data.dbs.repository.SelectionsRepository
 import com.machiav3lli.backup.data.entity.BackupsCache
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.unexpectedException
@@ -655,6 +656,7 @@ val viewModelsModule = module {
     singleOf(::ScheduleRepository)
     singleOf(::AppExtrasRepository)
     singleOf(::ExportsRepository)
+    single { SelectionsRepository(NeoApp.backupRoot) }
     viewModelOf(::ActivityVM)
     viewModelOf(::HomeVM)
     viewModelOf(::BackupBatchVM)
