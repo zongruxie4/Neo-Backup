@@ -18,12 +18,23 @@
 package com.machiav3lli.backup.utils
 
 import android.content.Context
+import com.machiav3lli.backup.MODE_APK
+import com.machiav3lli.backup.MODE_DATA
+import com.machiav3lli.backup.MODE_DATA_DE
+import com.machiav3lli.backup.MODE_DATA_EXT
+import com.machiav3lli.backup.MODE_DATA_MEDIA
+import com.machiav3lli.backup.MODE_DATA_OBB
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.data.entity.RootFile
+import com.machiav3lli.backup.manager.actions.BackupAppAction
 import com.machiav3lli.backup.manager.handler.LogsHandler
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.quote
+import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.runAsRoot
 import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.handler.updateAppTables
+import timber.log.Timber
 import java.io.File
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
@@ -92,5 +103,81 @@ object FileUtils {
         constructor() : super()
         constructor(message: String?) : super(message)
         constructor(message: String?, cause: Throwable?) : super(message, cause)
+    }
+
+    @Throws(BackupAppAction.BackupFailedException::class)
+    fun checkAvailableStorage(context: Context, app: Package, backupMode: Int) {
+        val storageStatsCheck =
+            context.getSystemService(Context.STORAGE_STATS_SERVICE) as? android.app.usage.StorageStatsManager
+                ?: throw BackupAppAction.BackupFailedException(
+                    "Cannot access storage stats service",
+                    null
+                )
+
+        val storageManagerCheck =
+            context.getSystemService(Context.STORAGE_SERVICE) as? android.os.storage.StorageManager
+                ?: throw BackupAppAction.BackupFailedException(
+                    "Cannot access storage manager",
+                    null
+                )
+
+        try {
+            val backupDir = app.getAppBackupBaseDir(create = false)
+                ?: throw BackupAppAction.BackupFailedException(
+                    "Cannot determine backup location",
+                    null
+                )
+
+            var estimatedSize = 0L
+
+            if ((backupMode and MODE_APK) != 0) {
+                estimatedSize += app.apkPath.let { RootFile(it).length() }
+                estimatedSize += app.apkSplits.sumOf { RootFile(it).length() }
+            }
+            if ((backupMode and MODE_DATA) != 0)
+                estimatedSize += estimateDirectorySize(app.dataPath)
+            if ((backupMode and MODE_DATA_DE) != 0)
+                estimatedSize += estimateDirectorySize(app.devicesProtectedDataPath)
+            if ((backupMode and MODE_DATA_EXT) != 0)
+                estimatedSize += estimateDirectorySize(app.getExternalDataPath())
+            if ((backupMode and MODE_DATA_OBB) != 0)
+                estimatedSize += estimateDirectorySize(app.getObbFilesPath())
+            if ((backupMode and MODE_DATA_MEDIA) != 0)
+                estimatedSize += estimateDirectorySize(app.getMediaFilesPath())
+
+            estimatedSize = (estimatedSize * 1.2).toLong() // 20% safety buffer
+
+            val availableBytes = backupDir.freeSpace
+
+            if (availableBytes < estimatedSize) {
+                val requiredMB = estimatedSize / (1024 * 1024)
+                val availableMB = availableBytes / (1024 * 1024)
+                throw BackupAppAction.BackupFailedException(
+                    "Insufficient storage space. Required: ${requiredMB}MB, Available: ${availableMB}MB",
+                    null
+                )
+            }
+
+            Timber.i("Storage check passed. Estimated: ${estimatedSize / (1024 * 1024)}MB, Available: ${availableBytes / (1024 * 1024)}MB")
+        } catch (e: BackupAppAction.BackupFailedException) {
+            throw e
+        } catch (e: Throwable) {
+            // don't fail on other Exceptions
+            Timber.w("Storage check failed with error: ${e.message}")
+        }
+    }
+
+    private fun estimateDirectorySize(path: String): Long {
+        return try {
+            val result = runAsRoot("du -sb ${quote(path)} 2>/dev/null | cut -f1")
+            if (result.isSuccess) {
+                result.out.firstOrNull()?.toLongOrNull() ?: 0L
+            } else {
+                0L
+            }
+        } catch (e: Exception) {
+            Timber.w("Could not estimate size of $path: ${e.message}")
+            0L
+        }
     }
 }

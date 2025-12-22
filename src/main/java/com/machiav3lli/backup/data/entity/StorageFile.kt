@@ -3,6 +3,8 @@ package com.machiav3lli.backup.data.entity
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import android.os.storage.StorageManager
+import android.os.storage.StorageManager.UUID_DEFAULT
 import android.provider.DocumentsContract
 import androidx.core.content.FileProvider
 import androidx.core.database.getLongOrNull
@@ -403,6 +405,33 @@ open class StorageFile {
                 else
                     (documentInfo?.size ?: 0)
                 )
+
+    val freeSpace: Long
+        get() = file?.usableSpace ?: run {
+            // NO access to RootFile
+            try {
+                _uri?.let { uri ->
+                    val storageManager =
+                        context.getSystemService(Context.STORAGE_SERVICE) as? StorageManager
+                            ?: return@run 0L
+
+                    // get current storage UUID; Fallback to internal storage
+                    val uuid = storageManager.getStorageVolume(File(uri.path ?: ""))
+                        ?.uuid?.let { java.util.UUID.fromString(it) }
+                        ?: UUID_DEFAULT
+
+                    val storageStatsManager =
+                        context.getSystemService(Context.STORAGE_STATS_SERVICE) as? android.app.usage.StorageStatsManager
+
+                    storageStatsManager?.getFreeBytes(uuid)
+                        ?: android.os.StatFs(uri.path ?: "/").availableBytes
+                } ?: 0L
+            } catch (e: Throwable) {
+                logException(e, "freeSpace", backTrace = false)
+                // 1GB as safe Fallback
+                1024L * 1024L * 1024L
+            }
+        }
 
     fun inputStream(): InputStream? {
         return file?.inputStream() ?: uri?.let { uri ->
