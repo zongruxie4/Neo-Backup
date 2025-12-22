@@ -368,12 +368,12 @@ enum class DamagedOp {
     CLEANUP,
 }
 
-const val HELP_CHANGELOG = "https://github.com/NeoApplications/Neo-Backup/blob/master/CHANGELOG.md"
+const val HELP_CHANGELOG = "https://codeberg.org/NeoApplications/Neo-Backup/src/branch/main/CHANGELOG.md"
 const val HELP_TELEGRAM = "https://t.me/neo_backup"
 const val HELP_MATRIX = "https://matrix.to/#/#neo-backup:matrix.org"
-const val HELP_LICENSE = "https://github.com/NeoApplications/Neo-Backup/blob/master/LICENSE.md"
-const val HELP_ISSUES = "https://github.com/NeoApplications/Neo-Backup/blob/master/ISSUES.md"
-const val HELP_FAQ = "https://github.com/NeoApplications/Neo-Backup/blob/master/FAQ.md"
+const val HELP_LICENSE = "https://codeberg.org/NeoApplications/Neo-Backup/src/branch/main/LICENSE.md"
+const val HELP_ISSUES = "https://github.com/NeoApplications/Neo-Backup/issues"
+const val HELP_FAQ = "https://codeberg.org/NeoApplications/Neo-Backup/src/branch/main/FAQ.md"
 
 val linksList =
     listOf(Link.Changelog, Link.Telegram, Link.Matrix, Link.FAQ, Link.Issues, Link.License)
