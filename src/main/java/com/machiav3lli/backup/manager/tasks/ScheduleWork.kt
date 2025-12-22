@@ -30,13 +30,13 @@ import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
-import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
-import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
-import com.machiav3lli.backup.data.dbs.repository.PackageRepository
-import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.data.preferences.pref_autoLogAfterSchedule
 import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
 import com.machiav3lli.backup.data.preferences.traceSchedule
+import com.machiav3lli.backup.data.repository.AppExtrasRepository
+import com.machiav3lli.backup.data.repository.BlocklistRepository
+import com.machiav3lli.backup.data.repository.PackageRepository
+import com.machiav3lli.backup.data.repository.ScheduleRepository
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.manager.handler.showNotification

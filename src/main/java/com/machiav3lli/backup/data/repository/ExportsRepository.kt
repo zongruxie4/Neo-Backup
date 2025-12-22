@@ -1,4 +1,4 @@
-package com.machiav3lli.backup.data.dbs.repository
+package com.machiav3lli.backup.data.repository
 
 import android.app.Application
 import com.machiav3lli.backup.R

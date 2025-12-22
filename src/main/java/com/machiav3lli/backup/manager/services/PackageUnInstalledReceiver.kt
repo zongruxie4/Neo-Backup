@@ -22,9 +22,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
-import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.pref_autoLogUnInstallBroadcast
+import com.machiav3lli.backup.data.repository.PackageRepository
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.ui.pages.supportLog
 import kotlinx.coroutines.Dispatchers

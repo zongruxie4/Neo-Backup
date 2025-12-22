@@ -19,10 +19,10 @@ package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
-import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
-import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.entity.MainState
 import com.machiav3lli.backup.data.entity.SortFilterModel
+import com.machiav3lli.backup.data.repository.AppExtrasRepository
+import com.machiav3lli.backup.data.repository.BlocklistRepository
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -1,4 +1,4 @@
-package com.machiav3lli.backup.data.dbs.repository
+package com.machiav3lli.backup.data.repository
 
 import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.data.dbs.dao.BlocklistDao

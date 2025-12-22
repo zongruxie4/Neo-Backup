@@ -44,10 +44,10 @@ import com.machiav3lli.backup.MenuAction
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.batchModes
 import com.machiav3lli.backup.data.dbs.entity.Schedule
-import com.machiav3lli.backup.data.dbs.repository.SelectionsRepository
 import com.machiav3lli.backup.data.entity.IntPref
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.traceContextMenu
+import com.machiav3lli.backup.data.repository.SelectionsRepository
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.unexpectedException
 import com.machiav3lli.backup.manager.handler.ShellCommands

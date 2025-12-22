@@ -1,4 +1,4 @@
-package com.machiav3lli.backup.data.dbs.repository
+package com.machiav3lli.backup.data.repository
 
 import com.machiav3lli.backup.SELECTIONS_FOLDER_NAME
 import com.machiav3lli.backup.data.entity.StorageFile

@@ -11,8 +11,8 @@ import com.machiav3lli.backup.ACTION_RUN_SCHEDULE
 import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.data.preferences.traceSchedule
+import com.machiav3lli.backup.data.repository.ScheduleRepository
 import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import com.machiav3lli.backup.utils.SystemUtils

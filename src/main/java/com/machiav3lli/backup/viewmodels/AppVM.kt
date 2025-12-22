@@ -23,10 +23,10 @@ import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.entity.AppExtras
 import com.machiav3lli.backup.data.dbs.entity.Backup
-import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
-import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
-import com.machiav3lli.backup.data.dbs.repository.PackageRepository
 import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.data.repository.AppExtrasRepository
+import com.machiav3lli.backup.data.repository.BlocklistRepository
+import com.machiav3lli.backup.data.repository.PackageRepository
 import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.manager.handler.showNotification
