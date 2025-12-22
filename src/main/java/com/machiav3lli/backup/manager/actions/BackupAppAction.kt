@@ -53,6 +53,7 @@ import com.machiav3lli.backup.ui.pages.pref_fakeBackupSeconds
 import com.machiav3lli.backup.utils.CIPHER_ALGORITHM
 import com.machiav3lli.backup.utils.CryptoSetupException
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
+import com.machiav3lli.backup.utils.FileUtils.checkAvailableStorage
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.TraceUtils.canonicalName
@@ -134,6 +135,13 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 // Usually, this should never happen, but just in case...
                 return handleException(BackupFailedException(STORAGE_LOCATION_INACCESSIBLE, e))
             }
+
+            try {
+                checkAvailableStorage(context, app, backupMode)
+            } catch (e: BackupFailedException) {
+                return handleException(e)
+            }
+
             val backupBuilder = try {
                 BackupBuilder(app.packageInfo, appBackupBaseDir)
             } catch (e: Throwable) {
