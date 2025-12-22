@@ -56,7 +56,7 @@ fun AppNavDisplay(
             )
         }
         slideInEntry<NavRoute.Encryption> {
-            EncryptionPage()
+            EncryptionPage { backStack.removeLastOrNull() }
         }
         slideInEntry<NavRoute.Exports> {
             SchedulesExportsPage { backStack.removeLastOrNull() }

@@ -230,7 +230,7 @@ fun PermissionsPage(powerManager: PowerManager = koinInject()) {
 
     Scaffold(
         topBar = {
-            TopBar(title = stringResource(id = R.string.app_name)) {}
+            TopBar(title = stringResource(id = R.string.app_name))
         },
     ) { paddingValues ->
         LazyColumn(

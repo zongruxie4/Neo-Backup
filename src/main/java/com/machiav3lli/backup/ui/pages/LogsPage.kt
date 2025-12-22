@@ -35,7 +35,7 @@ import com.machiav3lli.backup.ui.compose.component.LogRecycler
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.TopBar
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
-import com.machiav3lli.backup.ui.compose.icons.phosphor.X
+import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.LogsVM
@@ -50,9 +50,9 @@ fun LogsPage(viewModel: LogsVM = koinNeoViewModel(), navigateUp: () -> Unit) {
             topBar = {
                 TopBar(
                     title = stringResource(id = NavItem.Logs.title),
-                    actions = {
+                    navigationAction = {
                         RoundButton(
-                            icon = Phosphor.X,
+                            icon = Phosphor.GearSix,
                             description = stringResource(id = android.R.string.cancel),
                             onClick = navigateUp,
                         )

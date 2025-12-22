@@ -105,6 +105,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowDown
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUDownLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUp
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Equals
+import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Play
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ShareNetwork
@@ -603,9 +604,9 @@ fun TerminalPage(
                 if (title != null)
                     TopBar(
                         title = title,
-                        actions = {
+                        navigationAction = {
                             RoundButton(
-                                icon = Phosphor.X,
+                                icon = Phosphor.GearSix,
                                 description = stringResource(id = android.R.string.cancel),
                                 onClick = navigateUp,
                             )

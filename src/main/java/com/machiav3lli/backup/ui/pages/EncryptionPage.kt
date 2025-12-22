@@ -26,8 +26,10 @@ import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.ExpandableBlock
 import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
+import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.TopBar
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Key
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.EnumPrefDialogUI
@@ -40,7 +42,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
-fun EncryptionPage(pgpManager: PGPHandler = koinInject()) {
+fun EncryptionPage(pgpManager: PGPHandler = koinInject(), navigateUp: () -> Unit) {
     val scope = rememberCoroutineScope()
     val prefs = Pref.prefGroups["encryption"]?.toPersistentList() ?: persistentListOf()
 
@@ -63,7 +65,16 @@ fun EncryptionPage(pgpManager: PGPHandler = koinInject()) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TopBar(title = stringResource(id = NavItem.Encryption.title))
+                TopBar(
+                    title = stringResource(id = NavItem.Encryption.title),
+                    navigationAction = {
+                        RoundButton(
+                            icon = Phosphor.GearSix,
+                            description = stringResource(id = android.R.string.cancel),
+                            onClick = navigateUp,
+                        )
+                    }
+                )
             }
         ) { paddingValues ->
             LazyColumn(
