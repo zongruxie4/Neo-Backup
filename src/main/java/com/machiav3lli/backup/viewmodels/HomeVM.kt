@@ -20,9 +20,11 @@ package com.machiav3lli.backup.viewmodels
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
+import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.dbs.repository.BlocklistRepository
 import com.machiav3lli.backup.data.dbs.repository.PackageRepository
+import com.machiav3lli.backup.data.dbs.repository.ScheduleRepository
 import com.machiav3lli.backup.data.entity.MainState
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.SortFilterModel
@@ -52,12 +54,20 @@ class HomeVM(
     private val packageRepository: PackageRepository,
     blocklistRepository: BlocklistRepository,
     appExtrasRepository: AppExtrasRepository,
+    private val scheduleRepository: ScheduleRepository,
     private val prefs: NeoPrefs,
 ) : MainVM(blocklistRepository, appExtrasRepository) {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS
     private val searchQuery = MutableStateFlow("")
     private val selection = MutableStateFlow(emptySet<String>())
     private val homeSortFilterModelFlow = prefs.homeSortFilterFlow()
+
+    val schedules = scheduleRepository.getAllFlow()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
+            emptyList()
+        )
 
     val pkgsFlow: Flow<List<Package>> = combine(
         packageRepository.getAppInfosFlow(),
@@ -162,6 +172,12 @@ class HomeVM(
                     current + packageName
                 }
             }
+        }
+    }
+
+    fun updateSchedule(schedule: Schedule) {
+        viewModelScope.launch {
+            scheduleRepository.updateSchedule(schedule, false)
         }
     }
 }

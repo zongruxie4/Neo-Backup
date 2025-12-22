@@ -106,6 +106,7 @@ fun HomePage(
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val mainState by viewModel.state.collectAsState()
+    val schedules by viewModel.schedules.collectAsState()
     val updaterVisible = mainState.updatedPackages.isNotEmpty()
     var updaterExpanded by remember { mutableStateOf(false) }
     var menuPackage by remember { mutableStateOf<Package?>(null) }
@@ -345,7 +346,11 @@ fun HomePage(
                                     packageItem = menuPackage,
                                     productsList = mainState.filteredPackages,
                                     selection = mainState.selection,
+                                    blocklist = mainState.blocklist,
+                                    schedules = schedules,
                                     toggleSelection = viewModel::toggleSelection,
+                                    onUpdateBlocklist = viewModel::updateBlocklist,
+                                    onUpdateSchedule = viewModel::updateSchedule,
                                     openSheet = { item ->
                                         scope.launch {
                                             paneNavigator.navigateTo(
