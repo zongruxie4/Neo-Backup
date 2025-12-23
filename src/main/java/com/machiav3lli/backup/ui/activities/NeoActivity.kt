@@ -644,6 +644,7 @@ class NeoActivity : BaseActivity() {
     private fun navigateToStoredDestination() {
         lockNavigationState.intendedDestination?.let { destination ->
             navStack.navigateUnique(destination)
+            navStack.remove(NavRoute.Lock)
             lockNavigationState.intendedDestination = null
         }
     }
