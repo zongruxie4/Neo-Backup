@@ -754,7 +754,7 @@ fun Terminal(
                     else
                         "no error command"
             }
-            SimpleButton("findBackups") { context.findBackups(forceTrace = true) }
+            SimpleButton("findBackups") { scope.launch { context.findBackups(forceTrace = true) } }
         }
         Box(
             modifier = Modifier

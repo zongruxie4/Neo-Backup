@@ -79,13 +79,13 @@ object SystemUtils {
         items: List<T>,
         scope: CoroutineScope = MainScope(),
         pool: CoroutineDispatcher = Dispatchers.IO,
-        todo: (item: T) -> Unit
+        todo: suspend (item: T) -> Unit
     ) {
         val list = items.toList()
         when (1) {
 
             // best,  8 threads, may hang with recursion
-            0 -> list.stream().parallel().forEach { todo(it) }
+            //0 -> list.stream().parallel().forEach { todo(it) }
 
             // slow,  7 threads with IO, most used once, one used 900 times
             0 -> runBlocking { list.asFlow().onEach { todo(it) }.flowOn(pool).collect {} }

@@ -18,11 +18,11 @@
 package com.machiav3lli.backup.manager.tasks
 
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.ui.activities.NeoActivity
-import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
-import com.machiav3lli.backup.manager.handler.ShellHandler
 import com.machiav3lli.backup.data.entity.ActionResult
 import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
+import com.machiav3lli.backup.manager.handler.ShellHandler
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.utils.SystemUtils
 import kotlin.system.measureTimeMillis
 
@@ -38,7 +38,7 @@ class BackupActionTask(
         notificationId = SystemUtils.now.toInt()
     }
 
-    override fun doInBackground(vararg params: Void?): ActionResult? {
+    override suspend fun doInBackground(vararg params: Void?): ActionResult? {
         val mainActivityX = neoActivityReference.get()?.takeIf { !it.isFinishing }
             ?: return ActionResult(app, null, "", false)
 

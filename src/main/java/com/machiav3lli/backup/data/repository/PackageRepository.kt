@@ -70,7 +70,7 @@ class PackageRepository(
     suspend fun deleteBackupsOf(packageNames: List<String>) =
         backupsCache.removeAll(packageNames)
 
-    fun rewriteBackup(pkg: Package?, backup: Backup, changedBackup: Backup) {
+    suspend fun rewriteBackup(pkg: Package?, backup: Backup, changedBackup: Backup) {
         pkg?.rewriteBackup(backup, changedBackup)
     }
 

@@ -37,7 +37,7 @@ class RestoreActionTask(
         notificationId = SystemUtils.now.toInt()
     }
 
-    override fun doInBackground(vararg params: Void?): ActionResult? {
+    override suspend fun doInBackground(vararg params: Void?): ActionResult? {
         val mainActivityX = neoActivityReference.get()?.takeIf { !it.isFinishing }
             ?: return ActionResult(app, null, "", false)
 

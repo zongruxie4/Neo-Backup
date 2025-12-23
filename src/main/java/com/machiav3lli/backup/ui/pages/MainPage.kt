@@ -64,7 +64,6 @@ import com.machiav3lli.backup.viewmodels.BackupBatchVM
 import com.machiav3lli.backup.viewmodels.HomeVM
 import com.machiav3lli.backup.viewmodels.RestoreBatchVM
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -92,19 +91,19 @@ fun MainPage(
     }
 
     LaunchedEffect(homeVM) {
-        if (activity.freshStart) {
-            activity.freshStart = false
-            traceBold { "******************** freshStart && Main ********************" }
-            scope.launch(Dispatchers.IO) {
+        launch {
+            if (activity.freshStart) {
+                activity.freshStart = false
+                traceBold { "******************** freshStart && Main ********************" }
                 runCatching { activity.findBackups() }
                 NeoApp.startup = false // ensure backups no more reported as empty
                 runCatching { activity.updateAppTables() }
+
+                devToolsSearch.value =
+                    TextFieldValue("")   //TODO hg42 hide implementation details
+
+                activity.runOnUiThread { activity.showEncryptionDialog() }
             }
-
-            devToolsSearch.value =
-                TextFieldValue("")   //TODO hg42 hide implementation details
-
-            activity.runOnUiThread { activity.showEncryptionDialog() }
         }
     }
 

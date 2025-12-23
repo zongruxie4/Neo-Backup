@@ -74,7 +74,7 @@ object FileUtils {
     // hg42 but should probably check an empty backups map instead or additionally?
     // hg42 the name does not reflect all cases
     // TODO revamp & cleanup reads of backups
-    fun ensureBackups() {
+    suspend fun ensureBackups() {
         runCatching {
             if (NeoApp.backupRoot == null) // never null because of its getter
                 NeoApp.context.findBackups()

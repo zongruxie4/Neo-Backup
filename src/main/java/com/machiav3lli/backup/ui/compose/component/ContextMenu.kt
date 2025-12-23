@@ -496,7 +496,7 @@ suspend fun forEachPackage(
     toggleSelection: (String) -> Unit,
     select: Boolean? = true,
     parallel: Boolean = true,
-    todo: (p: Package) -> Unit = {},
+    todo: suspend (p: Package) -> Unit = {},
 ) {
     if (parallel) {
         runParallel(packages, scope = menuScope, pool = menuPool) {
@@ -532,7 +532,7 @@ fun launchEachPackage(
     toggleSelection: (String) -> Unit,
     select: Boolean? = true,
     parallel: Boolean = true,
-    todo: (p: Package) -> Unit = {},
+    todo: suspend (p: Package) -> Unit = {},
 ) {
     launchPackagesAction(action) {
         forEachPackage(

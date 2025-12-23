@@ -22,20 +22,20 @@ import android.content.pm.PackageManager
 import com.machiav3lli.backup.MODE_APK
 import com.machiav3lli.backup.MODE_DATA
 import com.machiav3lli.backup.NeoApp
-import com.machiav3lli.backup.manager.actions.BackupAppAction
-import com.machiav3lli.backup.manager.actions.BackupSpecialAction
-import com.machiav3lli.backup.manager.actions.RestoreAppAction
-import com.machiav3lli.backup.manager.actions.RestoreSpecialAction
-import com.machiav3lli.backup.manager.actions.RestoreSystemAppAction
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.entity.ActionResult
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.RootFile
 import com.machiav3lli.backup.data.entity.StorageFile.Companion.invalidateCache
+import com.machiav3lli.backup.manager.actions.BackupAppAction
+import com.machiav3lli.backup.manager.actions.BackupSpecialAction
+import com.machiav3lli.backup.manager.actions.RestoreAppAction
+import com.machiav3lli.backup.manager.actions.RestoreSpecialAction
+import com.machiav3lli.backup.manager.actions.RestoreSystemAppAction
 import com.machiav3lli.backup.manager.handler.ShellHandler.ShellCommandFailedException
+import com.machiav3lli.backup.manager.tasks.AppActionWork
 import com.machiav3lli.backup.ui.pages.pref_numBackupRevisions
 import com.machiav3lli.backup.ui.pages.pref_paranoidHousekeeping
-import com.machiav3lli.backup.manager.tasks.AppActionWork
 import com.machiav3lli.backup.utils.FileUtils.BackupLocationInAccessibleException
 import com.machiav3lli.backup.utils.StorageLocationNotConfiguredException
 import com.machiav3lli.backup.utils.SystemUtils
@@ -47,7 +47,7 @@ import java.io.IOException
 
 object BackupRestoreHelper {
 
-    fun backup(
+    suspend fun backup(
         context: Context,
         work: AppActionWork?,
         shell: ShellHandler,
@@ -87,7 +87,7 @@ object BackupRestoreHelper {
         return result
     }
 
-    fun restore(
+    suspend fun restore(
         context: Context, work: AppActionWork?, shellHandler: ShellHandler, appInfo: Package,
         mode: Int, backup: Backup
     ): ActionResult {
@@ -152,7 +152,7 @@ object BackupRestoreHelper {
         return true
     }
 
-    fun housekeepingPackageBackups(app: Package) {
+    suspend fun housekeepingPackageBackups(app: Package) {
 
         if (pref_paranoidHousekeeping.value)
             app.refreshBackupList()

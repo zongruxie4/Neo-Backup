@@ -266,7 +266,9 @@ private fun Context.onClickUninstalledBackupsDelete(
     if (packageList.isNotEmpty()) {
         if (deleteList.isNotEmpty()) {
             showDialog(message.toString().trim { it <= ' ' }) {
-                deleteBackups(deleteList)
+                coroutineScope.launch(Dispatchers.IO) {
+                    deleteBackups(deleteList)
+                }
             }
         } else {
             snackbarHostState.show(
@@ -283,7 +285,7 @@ private fun Context.onClickUninstalledBackupsDelete(
     return true
 }
 
-private fun Context.deleteBackups(deleteList: List<Package>) {
+private suspend fun Context.deleteBackups(deleteList: List<Package>) {
     val notificationId = SystemUtils.now.toInt()
     deleteList.forEachIndexed { i, ai ->
         showNotification(

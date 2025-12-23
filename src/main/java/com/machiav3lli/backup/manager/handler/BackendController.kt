@@ -53,13 +53,10 @@ import com.machiav3lli.backup.utils.TraceUtils.endNanoTimer
 import com.machiav3lli.backup.utils.TraceUtils.formatBackups
 import com.machiav3lli.backup.utils.TraceUtils.logNanoTiming
 import com.machiav3lli.backup.utils.getInstalledPackageInfosWithPermissions
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.java.KoinJavaComponent.get
@@ -72,6 +69,7 @@ val regexBackupInstance = Regex(BACKUP_INSTANCE_REGEX_PATTERN)
 val regexPackageFolder = Regex(BACKUP_PACKAGE_FOLDER_REGEX_PATTERN)
 val regexSpecialFolder = Regex(BACKUP_SPECIAL_FOLDER_REGEX_PATTERN)
 val regexSpecialFile = Regex(BACKUP_SPECIAL_FILE_REGEX_PATTERN)
+private const val SCANS_BATCH_SIZE = 50
 
 val maxThreads = AtomicInteger(0)
 val usedThreadsByName = mutableMapOf<String, AtomicInteger>()
@@ -124,6 +122,9 @@ suspend fun scanBackups(
 ) {
     val files = ConcurrentLinkedDeque<StorageFile>()
     val suspicious = AtomicInteger(0)
+
+    // cache for directory listings
+    val directoryCache = ConcurrentHashMap<String, List<StorageFile>>()
 
     if (level == 0 && packageName.isEmpty() && traceTiming.pref.value) {
         checkThreadStats()
@@ -268,15 +269,24 @@ suspend fun scanBackups(
         }
     }
 
+    fun getDirectoryListing(file: StorageFile): List<StorageFile> {
+        val path = file.path ?: return emptyList()
+
+        return directoryCache.getOrPut(path) {
+            beginNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}listFiles")
+            val result = file.listFiles()
+            endNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}listFiles")
+            result
+        }
+    }
+
     suspend fun handleDirectory(
         file: StorageFile,
         collector: FlowCollector<StorageFile>? = null,
     ): Boolean {
         NeoApp.hitBusy()
 
-        beginNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}listFiles")
-        var list = file.listFiles()
-        endNanoTimer("scanBackups.${if (packageName.isEmpty()) "" else "package."}listFiles")
+        var list = getDirectoryListing(file)
 
         if (list.isEmpty())
             return false
@@ -291,7 +301,7 @@ suspend fun scanBackups(
             if (damagedOp == DamagedOp.RENAME || damagedOp == DamagedOp.CLEANUP || pref_lookForEmptyBackups.value) {
                 list.filter { it.name in propDirs }.forEach { dir ->
                     runCatching {   // in case it's not a directory etc.
-                        if (dir.listFiles().isEmpty())
+                        if (getDirectoryListing(dir).isEmpty())
                             handleEmptyBackup(dir = dir)
                     }
                 }
@@ -512,24 +522,25 @@ suspend fun scanBackups(
     while (files.isNotEmpty()) {
         if (packageName.isEmpty())
             traceBackupsScanPackage { "queue filled with ${files.size}" }
-        runBlocking { // joins jobs, so launched jobs that queue files are finished, before checking the queue
-            var count = 0
-            val filesFlow = flow {
-                while (files.isNotEmpty()) {
-                    val file = files.remove()
-                    count++
-                    total++
-                    emit(file)
-                }
-                if (packageName.isEmpty())
-                    traceBackupsScanPackage { "queue empty after $count" }
-            }
-            filesFlow.collect {
+
+        // reduce context switching by processing in batches
+        val batch = mutableListOf<StorageFile>()
+        repeat(minOf(SCANS_BATCH_SIZE, files.size)) {
+            files.poll()?.let { batch.add(it) }
+        }
+
+        coroutineScope {
+            batch.forEach { file ->
                 launch(scanPool) {
-                    processFile(it)
+                    processFile(file)
                 }
             }
         }
+
+        total += batch.size
+
+        if (packageName.isEmpty())
+            traceBackupsScanPackage { "queue processed batch of ${batch.size}" }
     }
 
     if (packageName.isEmpty()) {
@@ -547,137 +558,130 @@ suspend fun scanBackups(
                 }: ${suspicious.get()}"
             )
     }
+    directoryCache.clear()
 }
 
-fun Context.findBackups(
+suspend fun Context.findBackups(
     packageName: String = "",
     damagedOp: DamagedOp? = null,
     forceTrace: Boolean = false,
 ): Map<String, List<Backup>> {
-    val result = CompletableDeferred<Map<String, List<Backup>>>()
+    val packagesRepo = get<PackageRepository>(PackageRepository::class.java)
 
-    CoroutineScope(Dispatchers.IO).launch {
-        val packagesRepo = get<PackageRepository>(PackageRepository::class.java)
+    val backupsMap = ConcurrentHashMap<String, MutableList<Backup>>()
 
-        val backupsMap = ConcurrentHashMap<String, MutableList<Backup>>()
+    var installedNames: List<String>
 
-        var installedNames: List<String> = emptyList()
+    try {
+        if (packageName.isEmpty()) {
 
-        try {
-            if (packageName.isEmpty()) {
+            NeoApp.beginBusy("findBackups")
 
-                NeoApp.beginBusy("findBackups")
+            // preset installed packages with empty backups lists
+            // this prevents scanning them again when a package needs it's backups later
+            // doing it here also avoids setting all packages to empty lists when findbackups fails
+            // so there is a chance that scanning for backups of a single package will work later
 
-                // preset installed packages with empty backups lists
-                // this prevents scanning them again when a package needs it's backups later
-                // doing it here also avoids setting all packages to empty lists when findbackups fails
-                // so there is a chance that scanning for backups of a single package will work later
+            //val installedPackages = getInstalledPackageList()   // would scan for backups
+            // so do the same without creating a Package for each
+            val installedPackages = packageManager.getInstalledPackageInfosWithPermissions()
+            val specialInfos =
+                SpecialInfo.getSpecialInfos(this@findBackups)  //TODO hg42 these probably scan for backups
+            installedNames =
+                installedPackages.map { it.packageName } + specialInfos.map { it.packageName }
 
-                //val installedPackages = getInstalledPackageList()   // would scan for backups
-                // so do the same without creating a Package for each
-                val installedPackages = packageManager.getInstalledPackageInfosWithPermissions()
-                val specialInfos =
-                    SpecialInfo.getSpecialInfos(this@findBackups)  //TODO hg42 these probably scan for backups
-                installedNames =
-                    installedPackages.map { it.packageName } + specialInfos.map { it.packageName }
+            if (pref_earlyEmptyBackups.value)
+                packagesRepo.deleteBackupsOf(installedNames)
 
-                if (pref_earlyEmptyBackups.value)
-                    packagesRepo.deleteBackupsOf(installedNames)
+            clearThreadStats()
+        }
 
-                clearThreadStats()
-            }
+        invalidateBackupCacheForPackage(packageName)
 
-            invalidateBackupCacheForPackage(packageName)
+        val backupRoot = NeoApp.backupRoot
 
-            val backupRoot = async {
-                NeoApp.backupRoot
-            }.await()
+        //val count = AtomicInteger(0)
 
-            //val count = AtomicInteger(0)
+        when (1) {
+            1 -> {
+                runBlocking {
 
-            when (1) {
-                1 -> {
-                    runBlocking {
-
-                        //------------------------------------------------------------------------------ scan
-                        backupRoot?.let {
-                            scanBackups(
-                                directory = it,
-                                packageName = packageName,
-                                backupRoot = it,
-                                damagedOp = damagedOp,
-                                forceTrace = forceTrace,
-                                onValidBackup = { props ->
-                                    //count.getAndIncrement()
-                                    Backup.createFrom(props)
+                    //------------------------------------------------------------------------------ scan
+                    backupRoot?.let {
+                        scanBackups(
+                            directory = it,
+                            packageName = packageName,
+                            backupRoot = it,
+                            damagedOp = damagedOp,
+                            forceTrace = forceTrace,
+                            onValidBackup = { props ->
+                                //count.getAndIncrement()
+                                Backup.createFrom(props)
+                                    ?.let { backup ->
+                                        //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
+                                        backupsMap.getOrPut(backup.packageName) { mutableListOf() }
+                                            .add(backup)
+                                    }
+                            },
+                            onInvalidBackup = { dir: StorageFile, props: StorageFile?, packageName: String?, why: String? ->
+                                //count.getAndIncrement()
+                                if (pref_createInvalidBackups.value) {
+                                    Backup.createInvalidFrom(dir, props, packageName, why)
                                         ?.let { backup ->
                                             //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
                                             backupsMap.getOrPut(backup.packageName) { mutableListOf() }
                                                 .add(backup)
                                         }
-                                },
-                                onInvalidBackup = { dir: StorageFile, props: StorageFile?, packageName: String?, why: String? ->
-                                    //count.getAndIncrement()
-                                    if (pref_createInvalidBackups.value) {
-                                        Backup.createInvalidFrom(dir, props, packageName, why)
-                                            ?.let { backup ->
-                                                //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
-                                                backupsMap.getOrPut(backup.packageName) { mutableListOf() }
-                                                    .add(backup)
-                                            }
-                                    }
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
-                }
-            }
-
-            //traceDebug { "-----------------------------------------> backups: $count" }
-
-            if (packageName.isEmpty()) {
-
-                traceBackupsScan { "*** --------------------> findBackups: packages: ${backupsMap.keys.size} backups: ${backupsMap.values.flatten().size}" }
-
-                packagesRepo.replaceAllBackups(backupsMap.values.flatten())
-
-                // preset installed packages that don't have backups with empty backups lists
-                //NeoApp.emptyBackupsForMissingPackages(installedNames)
-
-            } else {
-                if (NeoApp.startup)
-                    traceBackupsScan {
-                        "<$packageName> single scan (DURING STARTUP!!!) ${
-                            formatBackups(
-                                backupsMap[packageName] ?: listOf()
-                            )
-                        }"
-                    }
-                else
-                    traceBackupsScan { "<$packageName> single scan ${formatBackups(backupsMap[packageName] ?: listOf())}" }
-            }
-
-        } catch (e: Throwable) {
-            logException(e, backTrace = true)
-        } finally {
-            if (packageName.isEmpty()) {
-
-                val time = NeoApp.endBusy("findBackups")
-                NeoApp.addInfoLogText("findBackups: ${"%.3f".format(time / 1E9)} sec")
-
-                if (traceTiming.pref.value) {
-                    logNanoTiming("scanBackups.", "scanBackups")
-                    traceTiming { "threads max: ${maxThreads.get()}" }
-                    val threads =
-                        synchronized(usedThreadsByName) { usedThreadsByName }.toMap()
-                    traceTiming { "threads used: (${threads.size})${threads.values}" }
                 }
             }
         }
-        result.complete(backupsMap)
-    }
 
-    return runBlocking { result.await() }
+        //traceDebug { "-----------------------------------------> backups: $count" }
+
+        if (packageName.isEmpty()) {
+
+            traceBackupsScan { "*** --------------------> findBackups: packages: ${backupsMap.keys.size} backups: ${backupsMap.values.flatten().size}" }
+
+            packagesRepo.replaceAllBackups(backupsMap.values.flatten())
+
+            // preset installed packages that don't have backups with empty backups lists
+            //NeoApp.emptyBackupsForMissingPackages(installedNames)
+
+        } else {
+            if (NeoApp.startup)
+                traceBackupsScan {
+                    "<$packageName> single scan (DURING STARTUP!!!) ${
+                        formatBackups(
+                            backupsMap[packageName] ?: listOf()
+                        )
+                    }"
+                }
+            else
+                traceBackupsScan { "<$packageName> single scan ${formatBackups(backupsMap[packageName] ?: listOf())}" }
+        }
+
+    } catch (e: Throwable) {
+        logException(e, backTrace = true)
+    } finally {
+        if (packageName.isEmpty()) {
+
+            val time = NeoApp.endBusy("findBackups")
+            NeoApp.addInfoLogText("findBackups: ${"%.3f".format(time / 1E9)} sec")
+
+            if (traceTiming.pref.value) {
+                logNanoTiming("scanBackups.", "scanBackups")
+                traceTiming { "threads max: ${maxThreads.get()}" }
+                val threads =
+                    synchronized(usedThreadsByName) { usedThreadsByName }.toMap()
+                traceTiming { "threads used: (${threads.size})${threads.values}" }
+            }
+        }
+    }
+    return backupsMap
 }
 
 suspend fun Context.updateAppTables() {
