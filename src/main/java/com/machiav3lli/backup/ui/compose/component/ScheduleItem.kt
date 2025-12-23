@@ -30,6 +30,7 @@ import com.machiav3lli.backup.utils.timeLeft
 @Composable
 fun ScheduleItem(
     schedule: Schedule,
+    modifier: Modifier = Modifier,
     onClick: (Schedule) -> Unit = {},
     onRun: (Schedule) -> Unit = { _: Schedule -> },
     onCheckChanged: (Schedule, Boolean) -> Unit = { _: Schedule, _: Boolean -> },
@@ -38,7 +39,7 @@ fun ScheduleItem(
     val times by schedule.timeLeft().collectAsStateWithLifecycle()
 
     ListItem(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .clickable { onClick(schedule) },

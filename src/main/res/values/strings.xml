@@ -488,4 +488,6 @@
     <string name="addBlocklistDialogMessage">Add the app to the global blocklist?</string>
     <string name="stats_app_size">Apps Size</string>
     <string name="stats_data_size">Data Size</string>
+    <string name="enabled_schedules">Enabled schedules</string>
+    <string name="disabled_schedules">Disabled schedules</string>
 </resources>

@@ -13,7 +13,8 @@ data class MainState(
 )
 
 data class SchedulerState(
-    val schedules: List<Schedule> = emptyList(),
+    val enabledSchedules: List<Schedule> = emptyList(),
+    val disabledSchedules: List<Schedule> = emptyList(),
     val blocklist: Set<String> = emptySet(),
     val tagsMap: Map<String, Set<String>> = emptyMap(),
     val tagsList: Set<String> = emptySet(),

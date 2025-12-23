@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.imageLoader
 import com.machiav3lli.backup.R
@@ -134,17 +136,73 @@ fun BatchPackageRecycler(
 @Composable
 fun ScheduleRecycler(
     modifier: Modifier = Modifier,
-    productsList: List<Schedule>?,
+    enabledSchedules: List<Schedule>,
+    disabledSchedules: List<Schedule>,
     onClick: (Schedule) -> Unit = {},
     onRun: (Schedule) -> Unit = {},
     onCheckChanged: (Schedule, Boolean) -> Unit = { _: Schedule, _: Boolean -> },
 ) {
     InnerBackground(modifier) {
-        VerticalItemList(
-            list = productsList
+        val state = rememberLazyListState()
+
+        LazyColumn(
+            state = state,
+            modifier = modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Absolute.spacedBy(4.dp),
+            contentPadding = PaddingValues(vertical = 8.dp),
         ) {
-            ScheduleItem(it, onClick, onRun, onCheckChanged)
+            item(key = R.string.enabled_schedules) {
+                PrefsGroupHeading(heading = stringResource(id = R.string.enabled_schedules))
+            }
+            if (enabledSchedules.isEmpty()) item(key = R.string.empty_filtered_list + 9000) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = stringResource(id = R.string.empty_filtered_list)
+                )
+            }
+            items(
+                items = enabledSchedules,
+                key = { it.id },
+            ) {
+                ScheduleItem(
+                    schedule = it,
+                    modifier = Modifier.animateItem(),
+                    onClick = onClick,
+                    onRun = onRun,
+                    onCheckChanged = onCheckChanged,
+                )
+            }
+            item(key = R.string.disabled_schedules) {
+                PrefsGroupHeading(heading = stringResource(id = R.string.disabled_schedules))
+            }
+            if (disabledSchedules.isEmpty()) item(key = R.string.empty_filtered_list + 8000) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = stringResource(id = R.string.empty_filtered_list)
+                )
+            }
+            items(
+                items = disabledSchedules,
+                key = { it.id },
+            ) {
+                ScheduleItem(
+                    schedule = it,
+                    modifier = Modifier.animateItem(),
+                    onClick = onClick,
+                    onRun = onRun,
+                    onCheckChanged = onCheckChanged,
+                )
+            }
+            item {
+                Spacer(
+                    modifier = Modifier.size(64.dp)
+                )
+            }
         }
+
     }
 }
 

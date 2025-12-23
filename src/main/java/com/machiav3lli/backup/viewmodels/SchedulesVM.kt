@@ -53,8 +53,11 @@ class SchedulesVM(
         globalBlockList,
         tagsMap,
     ) { scheds, blocklist, tagsMap ->
+        val (enabled, disabled) = scheds.partition { it.enabled }
+
         SchedulerState(
-            schedules = scheds,
+            enabledSchedules = enabled,
+            disabledSchedules = disabled,
             blocklist = blocklist,
             tagsMap = tagsMap,
             tagsList = tagsMap.values.flatten().toSet(),

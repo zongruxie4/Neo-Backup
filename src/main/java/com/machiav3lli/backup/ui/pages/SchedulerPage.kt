@@ -95,8 +95,8 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
                     }
                 ) { _ ->
                     ScheduleRecycler(
-                        modifier = Modifier.fillMaxSize(),
-                        productsList = state.schedules,
+                        enabledSchedules = state.enabledSchedules,
+                        disabledSchedules = state.disabledSchedules,
                         onClick = { item ->
                             scope.launch {
                                 paneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, item.id)
