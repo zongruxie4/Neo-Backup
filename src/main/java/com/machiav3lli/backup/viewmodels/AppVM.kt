@@ -82,7 +82,7 @@ class AppVM(
     )
 
     val snackbarText: StateFlow<String>
-        private field = MutableStateFlow("")
+        field = MutableStateFlow("")
 
     private var notificationId: Int = SystemUtils.now.toInt()
     val dismissNow = mutableStateOf(false)

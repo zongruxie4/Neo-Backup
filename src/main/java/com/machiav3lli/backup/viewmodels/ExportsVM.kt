@@ -32,7 +32,7 @@ class ExportsVM(
 ) : NeoViewModel() {
 
     val exportsList: StateFlow<List<Pair<Schedule, StorageFile>>>
-        private field = MutableStateFlow<List<Pair<Schedule, StorageFile>>>(mutableListOf())
+        field = MutableStateFlow<List<Pair<Schedule, StorageFile>>>(mutableListOf())
 
     fun refreshList() {
         viewModelScope.launch {

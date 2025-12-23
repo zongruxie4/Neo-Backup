@@ -235,7 +235,8 @@ tasks.withType<KotlinCompile>().configureEach {
             "-Xjvm-default=all-compatibility",
             //"-Xuse-fir-lt=false",   // Scripts are not yet supported with K2 in LightTree mode
             //"-Xallow-any-scripts-in-source-roots",
-            "-XXLanguage:+ExplicitBackingFields",
+            "-XXLanguage:+ExplicitBackingFields", // TODO to be removed when AS updates its K-compiler
+            "-Xexplicit-backing-fields",
         )
 
         if (project.findProperty("enableComposeCompilerReports") == "true") {
