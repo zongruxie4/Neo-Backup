@@ -155,7 +155,7 @@ fun SchedulePage(
                     }
                 )
                 HorizontalDivider(
-                    thickness = 1.dp,
+                    thickness = 2.dp,
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
@@ -344,7 +344,7 @@ fun SchedulePage(
                 }
             }
             HorizontalDivider(
-                thickness = 1.dp,
+                thickness = 2.dp,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
             Column(

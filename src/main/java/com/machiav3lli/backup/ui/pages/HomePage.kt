@@ -210,7 +210,7 @@ fun HomePage(
                                 }
                             }
                             HorizontalDivider(
-                                thickness = 1.dp,
+                                thickness = 2.dp,
                                 modifier = Modifier.padding(horizontal = 8.dp),
                             )
                         }
