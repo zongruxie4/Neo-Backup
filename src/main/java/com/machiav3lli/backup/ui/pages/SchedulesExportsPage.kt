@@ -34,8 +34,6 @@ import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.component.ExportedScheduleRecycler
-import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.TopBar
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -54,43 +52,39 @@ fun SchedulesExportsPage(viewModel: ExportsVM = koinNeoViewModel(), navigateUp: 
         viewModel.refreshList()
     }
 
-    FullScreenBackground {
-        Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
-            contentColor = MaterialTheme.colorScheme.onBackground,
-            floatingActionButton = {
-                ExtendedFloatingActionButton(onClick = viewModel::exportSchedules) {
-                    Icon(
-                        imageVector = Phosphor.CalendarPlus,
-                        contentDescription = stringResource(id = R.string.dialog_export_schedules)
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        floatingActionButton = {
+            ExtendedFloatingActionButton(onClick = viewModel::exportSchedules) {
+                Icon(
+                    imageVector = Phosphor.CalendarPlus,
+                    contentDescription = stringResource(id = R.string.dialog_export_schedules)
+                )
+                Text(text = stringResource(id = R.string.dialog_export_schedules))
+            }
+        },
+        topBar = {
+            TopBar(
+                title = stringResource(id = NavItem.Exports.title),
+                navigationAction = {
+                    RoundButton(
+                        icon = Phosphor.GearSix,
+                        description = stringResource(id = android.R.string.cancel),
+                        onClick = navigateUp,
                     )
-                    Text(text = stringResource(id = R.string.dialog_export_schedules))
                 }
-            },
-            topBar = {
-                TopBar(
-                    title = stringResource(id = NavItem.Exports.title),
-                    navigationAction = {
-                        RoundButton(
-                            icon = Phosphor.GearSix,
-                            description = stringResource(id = android.R.string.cancel),
-                            onClick = navigateUp,
-                        )
-                    }
-                )
-            }
-        ) { paddingValues ->
-            InnerBackground(modifier = Modifier.fillMaxSize()) {
-                ExportedScheduleRecycler(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .blockBorderBottom()
-                        .fillMaxSize(),
-                    productsList = exports,
-                    onImport = { viewModel.importSchedule(it) },
-                    onDelete = { viewModel.deleteExport(it) }
-                )
-            }
+            )
         }
+    ) { paddingValues ->
+        ExportedScheduleRecycler(
+            modifier = Modifier
+                .padding(paddingValues)
+                .blockBorderBottom()
+                .fillMaxSize(),
+            productsList = exports,
+            onImport = { viewModel.importSchedule(it) },
+            onDelete = { viewModel.deleteExport(it) }
+        )
     }
 }

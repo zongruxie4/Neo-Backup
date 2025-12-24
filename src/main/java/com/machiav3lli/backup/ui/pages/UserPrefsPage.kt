@@ -33,7 +33,6 @@ import com.machiav3lli.backup.data.entity.StringEditPref
 import com.machiav3lli.backup.data.entity.StringPref
 import com.machiav3lli.backup.secondaryColorItems
 import com.machiav3lli.backup.themeItems
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.ui.compose.component.StringEditPreference
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -103,19 +102,15 @@ fun UserPrefsPage() {
             }
         }
 
-    InnerBackground(
-        modifier = Modifier.fillMaxSize()
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                PrefsGroup(prefs = prefs) { pref ->
-                    dialogsPref = pref
-                    openDialog.value = true
-                }
+        item {
+            PrefsGroup(prefs = prefs) { pref ->
+                dialogsPref = pref
+                openDialog.value = true
             }
         }
     }

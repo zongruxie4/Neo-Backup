@@ -1074,100 +1074,97 @@ fun DevTools(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        InnerBackground {
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Row(modifier = Modifier
+                //.wrapContentSize()
+                .padding(8.dp, 4.dp, 8.dp, 0.dp)
+                .combinedClickable(
+                    onClick = { expanded.value = false },
+                    onLongClick = { tab = "" }
+                )
             ) {
-                Row(modifier = Modifier
-                    //.wrapContentSize()
-                    .padding(8.dp, 4.dp, 8.dp, 0.dp)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentHeight()
+                        .background(Color.Transparent)
+                ) {
+                    TitleOrInfoLog(
+                        title = "DevTools",
+                        showInfo = showInfo,
+                        tempShowInfo = tempShowInfo,
+                        modifier = Modifier
+                            .wrapContentHeight()
+                            .combinedClickable(
+                                onClick = {
+                                    NeoApp.showInfoLog = NeoApp.showInfoLog.not()
+                                    if (NeoApp.showInfoLog.not())
+                                        tempShowInfo.value = false
+                                },
+                                onLongClick = {
+                                }
+                            )
+                    )
+                }
+                //Text(text = tab, modifier = Modifier)
+                RefreshButton(hideIfNotBusy = true)
+                SimpleButton(
+                    "          close          "
+                ) {
+                    expanded.value = false
+                    try {
+                        if (activity != null)
+                        ;
+                    } catch (e: Throwable) {
+                        activity.restartApp()
+                    }
+                }
+            }
+
+            @Composable
+            fun TabButton(name: String) {
+                SimpleButton(
+                    text = name,
+                    important = (tab == name),
+                ) {
+                    if (tab != name)
+                        tab = name
+                    else {
+                        tab = ""
+                        MainScope().launch {
+                            yield()
+                            tab = name
+                        }
+                    }
+                }
+            }
+
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 8.dp,
+                        top = 0.dp,
+                        end = 8.dp,
+                        bottom = 4.dp
+                    )
                     .combinedClickable(
                         onClick = { expanded.value = false },
                         onLongClick = { tab = "" }
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .wrapContentHeight()
-                            .background(Color.Transparent)
-                    ) {
-                        TitleOrInfoLog(
-                            title = "DevTools",
-                            showInfo = showInfo,
-                            tempShowInfo = tempShowInfo,
-                            modifier = Modifier
-                                .wrapContentHeight()
-                                .combinedClickable(
-                                    onClick = {
-                                        NeoApp.showInfoLog = NeoApp.showInfoLog.not()
-                                        if (NeoApp.showInfoLog.not())
-                                            tempShowInfo.value = false
-                                    },
-                                    onLongClick = {
-                                    }
-                                )
-                        )
-                    }
-                    //Text(text = tab, modifier = Modifier)
-                    RefreshButton(hideIfNotBusy = true)
-                    SimpleButton(
-                        "          close          "
-                    ) {
-                        expanded.value = false
-                        try {
-                            if (activity != null)
-                            ;
-                        } catch (e: Throwable) {
-                            activity.restartApp()
-                        }
-                    }
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                devToolsTabs.forEach {
+                    TabButton(it.first)
                 }
+            }
 
-                @Composable
-                fun TabButton(name: String) {
-                    SimpleButton(
-                        text = name,
-                        important = (tab == name),
-                    ) {
-                        if (tab != name)
-                            tab = name
-                        else {
-                            tab = ""
-                            MainScope().launch {
-                                yield()
-                                tab = name
-                            }
-                        }
-                    }
-                }
-
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 8.dp,
-                            top = 0.dp,
-                            end = 8.dp,
-                            bottom = 4.dp
-                        )
-                        .combinedClickable(
-                            onClick = { expanded.value = false },
-                            onLongClick = { tab = "" }
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    devToolsTabs.forEach {
-                        TabButton(it.first)
-                    }
-                }
-
-                devToolsTabs.find { it.first == tab }?.let {
-                    it.second()
-                }
+            devToolsTabs.find { it.first == tab }?.let {
+                it.second()
             }
         }
     }

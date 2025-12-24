@@ -41,7 +41,6 @@ import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.isLikeRoot
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.suCommand
 import com.machiav3lli.backup.manager.handler.ShellHandler.Companion.validateSuCommand
 import com.machiav3lli.backup.ui.compose.component.BasePreference
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.PrefsExpandableGroupHeader
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.ui.compose.component.PrefsGroupCollapsed
@@ -94,41 +93,37 @@ fun AdvancedPrefsPage() {
 
     val prefs = Pref.prefGroups["adv"]?.toPersistentList() ?: persistentListOf()
 
-    InnerBackground(
-        modifier = Modifier.fillMaxSize()
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                PrefsGroup(prefs = prefs) { pref ->
-                    // TODO do things
-                }
+        item {
+            PrefsGroup(prefs = prefs) { pref ->
+                // TODO do things
             }
-            item {
-                PrefsExpandableGroupHeader(
-                    titleId = R.string.prefs_dev_settings,
-                    summaryId = R.string.prefs_dev_settings_summary,
-                    icon = Phosphor.Warning
-                ) {
-                    expand(!expanded)
-                }
+        }
+        item {
+            PrefsExpandableGroupHeader(
+                titleId = R.string.prefs_dev_settings,
+                summaryId = R.string.prefs_dev_settings_summary,
+                icon = Phosphor.Warning
+            ) {
+                expand(!expanded)
             }
-            item {
-                //Box {  // hg42: use Box as workaround for weird animation behavior  //TODO hg42 seems to be fixed now? //TODO wech
-                AnimatedVisibility(
-                    visible = expanded,
-                    //enter = EnterTransition.None,
-                    //exit = ExitTransition.None
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    DevPrefGroups()
-                }
-                //}
+        }
+        item {
+            //Box {  // hg42: use Box as workaround for weird animation behavior  //TODO hg42 seems to be fixed now? //TODO wech
+            AnimatedVisibility(
+                visible = expanded,
+                //enter = EnterTransition.None,
+                //exit = ExitTransition.None
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                DevPrefGroups()
             }
+            //}
         }
     }
 }

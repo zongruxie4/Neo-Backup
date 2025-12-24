@@ -36,7 +36,6 @@ import com.machiav3lli.backup.manager.handler.BackupRestoreHelper
 import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.ui.activities.NeoActivity
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.LaunchPreference
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -87,103 +86,99 @@ fun ToolsPrefsPage(
         containerColor = Color.Transparent,
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        InnerBackground(
-            modifier = Modifier.fillMaxSize()
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    val size = prefs.size
+            item {
+                val size = prefs.size
 
-                    PrefsGroup {
-                        prefs.forEachIndexed { index, pref ->
-                            LaunchPreference(
-                                pref = pref,
-                                index = index,
-                                groupSize = size,
-                            ) {
-                                when (pref) {
-                                    pref_batchDelete           -> context.onClickUninstalledBackupsDelete(
-                                        mainState.packages,
-                                        snackbarHostState,
-                                        coroutineScope
-                                    ) { message, action ->
-                                        dialogProps.value =
-                                            Triple(
-                                                DialogMode.TOOL_DELETE_BACKUP_UNINSTALLED,
-                                                message,
-                                                action
-                                            )
-                                        openDialog.value = true
-                                    }
-
-                                    pref_cleanupBackupDir      -> {
-                                        dialogProps.value = Triple(
-                                            DialogMode.TOOL_CLEANUP_BACKUP_DIR,
-                                            {
-                                                coroutineScope.launch(Dispatchers.IO) {
-                                                    NeoApp.beginBusy("cleanupBackupDir")
-                                                    NeoApp.context.findBackups(damagedOp = DamagedOp.CLEANUP)
-                                                    NeoApp.endBusy("cleanupBackupDir")
-                                                }
-                                            },
-                                            {
-                                                coroutineScope.launch(Dispatchers.IO) {
-                                                    NeoApp.beginBusy("renameDamagedToERROR")
-                                                    NeoApp.context.findBackups(damagedOp = DamagedOp.RENAME)
-                                                    NeoApp.endBusy("renameDamagedToERROR")
-                                                }
-                                            }
-                                        )
-                                        openDialog.value = true
-                                    }
-
-                                    pref_enforceBackupsLimit   -> context.onClickEnforceBackupsLimit(
-                                        mainState.packages,
-                                        snackbarHostState,
-                                        coroutineScope
-                                    ) { message, action ->
-                                        dialogProps.value = Triple(
-                                            DialogMode.ENFORCE_LIMIT,
+                PrefsGroup {
+                    prefs.forEachIndexed { index, pref ->
+                        LaunchPreference(
+                            pref = pref,
+                            index = index,
+                            groupSize = size,
+                        ) {
+                            when (pref) {
+                                pref_batchDelete           -> context.onClickUninstalledBackupsDelete(
+                                    mainState.packages,
+                                    snackbarHostState,
+                                    coroutineScope
+                                ) { message, action ->
+                                    dialogProps.value =
+                                        Triple(
+                                            DialogMode.TOOL_DELETE_BACKUP_UNINSTALLED,
                                             message,
                                             action
                                         )
-                                        openDialog.value = true
-                                    }
-
-                                    pref_copySelfApk           -> context.onClickCopySelf(
-                                        snackbarHostState,
-                                        coroutineScope
-                                    )
-
-                                    pref_schedulesExportImport -> neoActivity.moveTo(NavRoute.Exports)
-
-                                    pref_saveAppsList          -> context.onClickSaveAppsList(
-                                        mainState.packages,
-                                        tagsMap,
-                                        mainState.sortFilter,
-                                        snackbarHostState,
-                                        coroutineScope
-                                    ) { primaryAction, secondaryAction ->
-                                        dialogProps.value = Triple(
-                                            DialogMode.TOOL_SAVE_APPS_LIST,
-                                            primaryAction,
-                                            secondaryAction
-                                        )
-                                        openDialog.value = true
-                                    }
-
-                                    pref_logViewer             -> neoActivity.moveTo(NavRoute.Logs)
-
-                                    pref_terminal              -> neoActivity.moveTo(NavRoute.Terminal)
+                                    openDialog.value = true
                                 }
+
+                                pref_cleanupBackupDir      -> {
+                                    dialogProps.value = Triple(
+                                        DialogMode.TOOL_CLEANUP_BACKUP_DIR,
+                                        {
+                                            coroutineScope.launch(Dispatchers.IO) {
+                                                NeoApp.beginBusy("cleanupBackupDir")
+                                                NeoApp.context.findBackups(damagedOp = DamagedOp.CLEANUP)
+                                                NeoApp.endBusy("cleanupBackupDir")
+                                            }
+                                        },
+                                        {
+                                            coroutineScope.launch(Dispatchers.IO) {
+                                                NeoApp.beginBusy("renameDamagedToERROR")
+                                                NeoApp.context.findBackups(damagedOp = DamagedOp.RENAME)
+                                                NeoApp.endBusy("renameDamagedToERROR")
+                                            }
+                                        }
+                                    )
+                                    openDialog.value = true
+                                }
+
+                                pref_enforceBackupsLimit   -> context.onClickEnforceBackupsLimit(
+                                    mainState.packages,
+                                    snackbarHostState,
+                                    coroutineScope
+                                ) { message, action ->
+                                    dialogProps.value = Triple(
+                                        DialogMode.ENFORCE_LIMIT,
+                                        message,
+                                        action
+                                    )
+                                    openDialog.value = true
+                                }
+
+                                pref_copySelfApk           -> context.onClickCopySelf(
+                                    snackbarHostState,
+                                    coroutineScope
+                                )
+
+                                pref_schedulesExportImport -> neoActivity.moveTo(NavRoute.Exports)
+
+                                pref_saveAppsList          -> context.onClickSaveAppsList(
+                                    mainState.packages,
+                                    tagsMap,
+                                    mainState.sortFilter,
+                                    snackbarHostState,
+                                    coroutineScope
+                                ) { primaryAction, secondaryAction ->
+                                    dialogProps.value = Triple(
+                                        DialogMode.TOOL_SAVE_APPS_LIST,
+                                        primaryAction,
+                                        secondaryAction
+                                    )
+                                    openDialog.value = true
+                                }
+
+                                pref_logViewer             -> neoActivity.moveTo(NavRoute.Logs)
+
+                                pref_terminal              -> neoActivity.moveTo(NavRoute.Terminal)
                             }
-                            if (index < size - 1) Spacer(modifier = Modifier.height(4.dp))
                         }
+                        if (index < size - 1) Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
             }

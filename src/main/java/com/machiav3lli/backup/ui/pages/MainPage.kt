@@ -43,7 +43,6 @@ import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.handler.updateAppTables
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
-import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.component.MainTopBar
 import com.machiav3lli.backup.ui.compose.component.RefreshButton
 import com.machiav3lli.backup.ui.compose.component.RoundButton
@@ -107,85 +106,83 @@ fun MainPage(
         }
     }
 
-    FullScreenBackground {
-        NeoNavigationSuiteScaffold(
-            pages = pages,
-            currentState = currentPageIndex,
-            onItemClick = { index ->
-                scope.launch {
-                    pagerState.animateScrollToPage(index)
-                }
+    NeoNavigationSuiteScaffold(
+        pages = pages,
+        currentState = currentPageIndex,
+        onItemClick = { index ->
+            scope.launch {
+                pagerState.animateScrollToPage(index)
             }
-        ) {
-            val openBlocklist = rememberSaveable { mutableStateOf(false) }
-            val searchExpanded = remember {
-                mutableStateOf(false)
-            }
+        }
+    ) {
+        val openBlocklist = rememberSaveable { mutableStateOf(false) }
+        val searchExpanded = remember {
+            mutableStateOf(false)
+        }
 
-            Scaffold(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                topBar = {
-                    MainTopBar(
-                        title = stringResource(id = currentPage.title),
-                        expanded = searchExpanded,
-                        query = mainState.searchQuery,
-                        onQueryChanged = { newQuery ->
-                            homeVM.setSearchQuery(newQuery)
-                            backupVM.setSearchQuery(newQuery)
-                            restoreVM.setSearchQuery(newQuery)
-                        },
-                        onClose = {
-                            homeVM.setSearchQuery("")
-                            backupVM.setSearchQuery("")
-                            restoreVM.setSearchQuery("")
+        Scaffold(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            topBar = {
+                MainTopBar(
+                    title = stringResource(id = currentPage.title),
+                    expanded = searchExpanded,
+                    query = mainState.searchQuery,
+                    onQueryChanged = { newQuery ->
+                        homeVM.setSearchQuery(newQuery)
+                        backupVM.setSearchQuery(newQuery)
+                        restoreVM.setSearchQuery(newQuery)
+                    },
+                    onClose = {
+                        homeVM.setSearchQuery("")
+                        backupVM.setSearchQuery("")
+                        restoreVM.setSearchQuery("")
+                    }
+                ) {
+                    when (currentPage.destination) {
+                        NavItem.Scheduler.destination -> {
+                            RoundButton(
+                                icon = Phosphor.Prohibit,
+                                description = stringResource(id = R.string.sched_blocklist)
+                            ) { openBlocklist.value = true }
+                            RoundButton(
+                                description = stringResource(id = R.string.prefs_title),
+                                icon = Phosphor.GearSix
+                            ) { navigator(NavRoute.Prefs()) }
                         }
-                    ) {
-                        when (currentPage.destination) {
-                            NavItem.Scheduler.destination -> {
-                                RoundButton(
-                                    icon = Phosphor.Prohibit,
-                                    description = stringResource(id = R.string.sched_blocklist)
-                                ) { openBlocklist.value = true }
-                                RoundButton(
-                                    description = stringResource(id = R.string.prefs_title),
-                                    icon = Phosphor.GearSix
-                                ) { navigator(NavRoute.Prefs()) }
-                            }
 
-                            else                          -> {
-                                RoundButton(
-                                    icon = Phosphor.MagnifyingGlass,
-                                    description = stringResource(id = R.string.search),
-                                    onClick = { searchExpanded.value = true }
-                                )
-                                RefreshButton { activity.refreshPackagesAndBackups() }
-                                RoundButton(
-                                    description = stringResource(id = R.string.prefs_title),
-                                    icon = Phosphor.GearSix
-                                ) { navigator(NavRoute.Prefs()) }
-                            }
+                        else                          -> {
+                            RoundButton(
+                                icon = Phosphor.MagnifyingGlass,
+                                description = stringResource(id = R.string.search),
+                                onClick = { searchExpanded.value = true }
+                            )
+                            RefreshButton { activity.refreshPackagesAndBackups() }
+                            RoundButton(
+                                description = stringResource(id = R.string.prefs_title),
+                                icon = Phosphor.GearSix
+                            ) { navigator(NavRoute.Prefs()) }
                         }
                     }
-                },
-            ) { paddingValues ->
-                SlidePager(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .blockBorderBottom()
-                        .fillMaxSize(),
-                    pagerState = pagerState,
-                    pageItems = pages,
-                )
-            }
-
-            if (openBlocklist.value) BaseDialog(onDismiss = { openBlocklist.value = false }) {
-                GlobalBlockListDialogUI(
-                    currentBlocklist = mainState.blocklist,
-                    openDialogCustom = openBlocklist,
-                ) { newSet ->
-                    homeVM.updateBlocklist(newSet)
                 }
+            },
+        ) { paddingValues ->
+            SlidePager(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .blockBorderBottom()
+                    .fillMaxSize(),
+                pagerState = pagerState,
+                pageItems = pages,
+            )
+        }
+
+        if (openBlocklist.value) BaseDialog(onDismiss = { openBlocklist.value = false }) {
+            GlobalBlockListDialogUI(
+                currentBlocklist = mainState.blocklist,
+                openDialogCustom = openBlocklist,
+            ) { newSet ->
+                homeVM.updateBlocklist(newSet)
             }
         }
     }

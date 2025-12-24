@@ -29,8 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.data.entity.Log
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
-import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.LogRecycler
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.TopBar
@@ -44,25 +42,23 @@ import com.machiav3lli.backup.viewmodels.LogsVM
 @Composable
 fun LogsPage(viewModel: LogsVM = koinNeoViewModel(), navigateUp: () -> Unit) {
 
-    FullScreenBackground {
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                TopBar(
-                    title = stringResource(id = NavItem.Logs.title),
-                    navigationAction = {
-                        RoundButton(
-                            icon = Phosphor.GearSix,
-                            description = stringResource(id = android.R.string.cancel),
-                            onClick = navigateUp,
-                        )
-                    }
-                )
-            }
-        ) { paddingValues ->
-
-            Logs(viewModel, modifier = Modifier.padding(paddingValues))
+    Scaffold(
+        containerColor = Color.Transparent,
+        topBar = {
+            TopBar(
+                title = stringResource(id = NavItem.Logs.title),
+                navigationAction = {
+                    RoundButton(
+                        icon = Phosphor.GearSix,
+                        description = stringResource(id = android.R.string.cancel),
+                        onClick = navigateUp,
+                    )
+                }
+            )
         }
+    ) { paddingValues ->
+
+        Logs(viewModel, modifier = Modifier.padding(paddingValues))
     }
 }
 
@@ -75,14 +71,12 @@ fun Logs(viewModel: LogsVM = koinNeoViewModel(), modifier: Modifier = Modifier) 
         viewModel.refreshList()
     }
 
-    InnerBackground(modifier = modifier.fillMaxSize()) {
-        LogRecycler(
-            modifier = Modifier
-                .blockBorderBottom()
-                .fillMaxSize(),
-            productsList = logs.sortedByDescending(Log::logDate),
-            onShare = { viewModel.shareLog(it, pref_shareAsFile.value) },
-            onDelete = { viewModel.deleteLog(it) }
-        )
-    }
+    LogRecycler(
+        modifier = modifier
+            .blockBorderBottom()
+            .fillMaxSize(),
+        productsList = logs.sortedByDescending(Log::logDate),
+        onShare = { viewModel.shareLog(it, pref_shareAsFile.value) },
+        onDelete = { viewModel.deleteLog(it) }
+    )
 }

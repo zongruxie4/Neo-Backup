@@ -95,7 +95,6 @@ import com.machiav3lli.backup.manager.handler.findBackups
 import com.machiav3lli.backup.manager.handler.maxThreads
 import com.machiav3lli.backup.manager.handler.usedThreadsByName
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
-import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.SimpleButton
 import com.machiav3lli.backup.ui.compose.component.SmallButton
@@ -591,32 +590,27 @@ fun TerminalText(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TerminalPage(
-    modifier: Modifier = Modifier,
     title: String? = null,
     navigateUp: () -> Unit,
 ) {
-    FullScreenBackground {
-
-        Scaffold(
-            modifier = modifier,
-            containerColor = Color.Transparent,
-            topBar = {
-                if (title != null)
-                    TopBar(
-                        title = title,
-                        navigationAction = {
-                            RoundButton(
-                                icon = Phosphor.GearSix,
-                                description = stringResource(id = android.R.string.cancel),
-                                onClick = navigateUp,
-                            )
-                        }
-                    )
-            }
-        ) { paddingValues ->
-
-            Terminal(modifier = modifier.padding(paddingValues))
+    Scaffold(
+        containerColor = Color.Transparent,
+        topBar = {
+            if (title != null)
+                TopBar(
+                    title = title,
+                    navigationAction = {
+                        RoundButton(
+                            icon = Phosphor.GearSix,
+                            description = stringResource(id = android.R.string.cancel),
+                            onClick = navigateUp,
+                        )
+                    }
+                )
         }
+    ) { paddingValues ->
+
+        Terminal(modifier = Modifier.padding(paddingValues))
     }
 }
 

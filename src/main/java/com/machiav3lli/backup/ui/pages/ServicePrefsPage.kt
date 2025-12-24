@@ -32,7 +32,6 @@ import com.machiav3lli.backup.data.entity.Pref
 import com.machiav3lli.backup.data.entity.StringPref
 import com.machiav3lli.backup.encryptionModes
 import com.machiav3lli.backup.manager.handler.PGPHandler
-import com.machiav3lli.backup.ui.compose.component.InnerBackground
 import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.ui.compose.component.StringPreference
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -65,16 +64,14 @@ fun ServicePrefsPage() {
     val openDialog = remember { mutableStateOf(false) }
     var dialogsPref by remember { mutableStateOf<Pref?>(null) }
 
-    InnerBackground(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            ServicePrefGroups { pref ->
-                dialogsPref = pref
-                openDialog.value = true
-            }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ServicePrefGroups { pref ->
+            dialogsPref = pref
+            openDialog.value = true
         }
     }
 

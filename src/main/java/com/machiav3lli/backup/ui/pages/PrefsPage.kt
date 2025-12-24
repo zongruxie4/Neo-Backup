@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
-import com.machiav3lli.backup.ui.compose.component.FullScreenBackground
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.TopBar
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -66,48 +65,46 @@ fun PrefsPage(
 
     Shell.getShell()
 
-    FullScreenBackground {
-        NeoNavigationSuiteScaffold(
-            pages = pages,
-            currentState = currentPageIndex,
-            onItemClick = { index ->
-                scope.launch {
-                    pagerState.animateScrollToPage(index)
-                }
+    NeoNavigationSuiteScaffold(
+        pages = pages,
+        currentState = currentPageIndex,
+        onItemClick = { index ->
+            scope.launch {
+                pagerState.animateScrollToPage(index)
             }
-        ) {
-            Scaffold(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                topBar = {
-                    TopBar(
-                        title = stringResource(id = currentPage.title),
-                        navigationAction = {
-                            RoundButton(
-                                icon = Phosphor.House,
-                                description = stringResource(id = R.string.home),
-                            ) {
-                                navigateUp()
-                            }
-                        }
-                    ) {
+        }
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            topBar = {
+                TopBar(
+                    title = stringResource(id = currentPage.title),
+                    navigationAction = {
                         RoundButton(
-                            icon = Phosphor.Info,
-                            description = stringResource(id = R.string.help),
+                            icon = Phosphor.House,
+                            description = stringResource(id = R.string.home),
                         ) {
-                            navigator(NavRoute.Info)
+                            navigateUp()
                         }
                     }
-                },
-            ) { paddingValues ->
-                SlidePager(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .blockBorderBottom(),
-                    pagerState = pagerState,
-                    pageItems = pages,
-                )
-            }
+                ) {
+                    RoundButton(
+                        icon = Phosphor.Info,
+                        description = stringResource(id = R.string.help),
+                    ) {
+                        navigator(NavRoute.Info)
+                    }
+                }
+            },
+        ) { paddingValues ->
+            SlidePager(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .blockBorderBottom(),
+                pagerState = pagerState,
+                pageItems = pages,
+            )
         }
     }
 }

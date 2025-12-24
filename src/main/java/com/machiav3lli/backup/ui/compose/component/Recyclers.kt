@@ -50,19 +50,18 @@ fun HomePackageRecycler(
 ) {
     val imageLoader = LocalContext.current.imageLoader
 
-    InnerBackground(modifier) {
-        VerticalItemList(
-            list = productsList,
-            itemKey = { it.packageName }
-        ) {
-            MainPackageItem(
-                it,
-                selection.contains(it.packageName),
-                imageLoader,
-                onLongClick,
-                onClick
-            )
-        }
+    VerticalItemList(
+        modifier = modifier,
+        list = productsList,
+        itemKey = { it.packageName }
+    ) {
+        MainPackageItem(
+            it,
+            selection.contains(it.packageName),
+            imageLoader,
+            onLongClick,
+            onClick
+        )
     }
 }
 
@@ -96,40 +95,39 @@ fun BatchPackageRecycler(
     onBackupDataClick: (String, Boolean, Int) -> Unit = { _: String, _: Boolean, _: Int -> },
     onClick: (Package, Boolean, Boolean) -> Unit = { _: Package, _: Boolean, _: Boolean -> },
 ) {
-    InnerBackground(modifier) {
-        VerticalItemList(
-            list = productsList,
-            itemKey = { it.packageName }
-        ) {
-            val apkBackupChecked = remember(apkBackupCheckedList[it.packageName]) {
-                mutableStateOf(apkBackupCheckedList[it.packageName])
-            }
-            val dataBackupChecked = remember(dataBackupCheckedList[it.packageName]) {
-                mutableStateOf(dataBackupCheckedList[it.packageName])
-            }
-
-            if (restore && pref_singularBackupRestore.value) RestorePackageItem(
-                it,
-                apkBackupChecked,
-                dataBackupChecked,
-                onClick,
-                onBackupApkClick,
-                onBackupDataClick,
-            )
-            else BatchPackageItem(
-                it,
-                restore,
-                apkBackupChecked.value == 0,
-                dataBackupChecked.value == 0,
-                onClick,
-                onApkClick = { p, b ->
-                    onBackupApkClick(p.packageName, b, 0)
-                },
-                onDataClick = { p, b ->
-                    onBackupDataClick(p.packageName, b, 0)
-                }
-            )
+    VerticalItemList(
+        modifier = modifier,
+        list = productsList,
+        itemKey = { it.packageName }
+    ) {
+        val apkBackupChecked = remember(apkBackupCheckedList[it.packageName]) {
+            mutableStateOf(apkBackupCheckedList[it.packageName])
         }
+        val dataBackupChecked = remember(dataBackupCheckedList[it.packageName]) {
+            mutableStateOf(dataBackupCheckedList[it.packageName])
+        }
+
+        if (restore && pref_singularBackupRestore.value) RestorePackageItem(
+            it,
+            apkBackupChecked,
+            dataBackupChecked,
+            onClick,
+            onBackupApkClick,
+            onBackupDataClick,
+        )
+        else BatchPackageItem(
+            it,
+            restore,
+            apkBackupChecked.value == 0,
+            dataBackupChecked.value == 0,
+            onClick,
+            onApkClick = { p, b ->
+                onBackupApkClick(p.packageName, b, 0)
+            },
+            onDataClick = { p, b ->
+                onBackupDataClick(p.packageName, b, 0)
+            }
+        )
     }
 }
 
@@ -142,67 +140,64 @@ fun ScheduleRecycler(
     onRun: (Schedule) -> Unit = {},
     onCheckChanged: (Schedule, Boolean) -> Unit = { _: Schedule, _: Boolean -> },
 ) {
-    InnerBackground(modifier) {
-        val state = rememberLazyListState()
+    val state = rememberLazyListState()
 
-        LazyColumn(
-            state = state,
-            modifier = modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Absolute.spacedBy(4.dp),
-            contentPadding = PaddingValues(vertical = 8.dp),
-        ) {
-            item(key = R.string.enabled_schedules) {
-                PrefsGroupHeading(heading = stringResource(id = R.string.enabled_schedules))
-            }
-            if (enabledSchedules.isEmpty()) item(key = R.string.empty_filtered_list + 9000) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = stringResource(id = R.string.empty_filtered_list)
-                )
-            }
-            items(
-                items = enabledSchedules,
-                key = { it.id },
-            ) {
-                ScheduleItem(
-                    schedule = it,
-                    modifier = Modifier.animateItem(),
-                    onClick = onClick,
-                    onRun = onRun,
-                    onCheckChanged = onCheckChanged,
-                )
-            }
-            item(key = R.string.disabled_schedules) {
-                PrefsGroupHeading(heading = stringResource(id = R.string.disabled_schedules))
-            }
-            if (disabledSchedules.isEmpty()) item(key = R.string.empty_filtered_list + 8000) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = stringResource(id = R.string.empty_filtered_list)
-                )
-            }
-            items(
-                items = disabledSchedules,
-                key = { it.id },
-            ) {
-                ScheduleItem(
-                    schedule = it,
-                    modifier = Modifier.animateItem(),
-                    onClick = onClick,
-                    onRun = onRun,
-                    onCheckChanged = onCheckChanged,
-                )
-            }
-            item {
-                Spacer(
-                    modifier = Modifier.size(64.dp)
-                )
-            }
+    LazyColumn(
+        state = state,
+        modifier = modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Absolute.spacedBy(4.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item(key = R.string.enabled_schedules) {
+            PrefsGroupHeading(heading = stringResource(id = R.string.enabled_schedules))
         }
-
+        if (enabledSchedules.isEmpty()) item(key = R.string.empty_filtered_list + 9000) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.empty_filtered_list)
+            )
+        }
+        items(
+            items = enabledSchedules,
+            key = { it.id },
+        ) {
+            ScheduleItem(
+                schedule = it,
+                modifier = Modifier.animateItem(),
+                onClick = onClick,
+                onRun = onRun,
+                onCheckChanged = onCheckChanged,
+            )
+        }
+        item(key = R.string.disabled_schedules) {
+            PrefsGroupHeading(heading = stringResource(id = R.string.disabled_schedules))
+        }
+        if (disabledSchedules.isEmpty()) item(key = R.string.empty_filtered_list + 8000) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.empty_filtered_list)
+            )
+        }
+        items(
+            items = disabledSchedules,
+            key = { it.id },
+        ) {
+            ScheduleItem(
+                schedule = it,
+                modifier = Modifier.animateItem(),
+                onClick = onClick,
+                onRun = onRun,
+                onCheckChanged = onCheckChanged,
+            )
+        }
+        item {
+            Spacer(
+                modifier = Modifier.size(64.dp)
+            )
+        }
     }
 }
 
@@ -213,12 +208,11 @@ fun ExportedScheduleRecycler(
     onImport: (Schedule) -> Unit = {},
     onDelete: (StorageFile) -> Unit = {},
 ) {
-    InnerBackground(modifier) {
-        VerticalItemList(
-            list = productsList
-        ) {
-            ExportedScheduleItem(it.first, onImport) { onDelete(it.second) }
-        }
+    VerticalItemList(
+        modifier = modifier,
+        list = productsList
+    ) {
+        ExportedScheduleItem(it.first, onImport) { onDelete(it.second) }
     }
 }
 
@@ -229,12 +223,11 @@ fun LogRecycler(
     onShare: (Log) -> Unit = {},
     onDelete: (Log) -> Unit = {},
 ) {
-    InnerBackground(modifier) {
-        VerticalItemList(
-            list = productsList
-        ) {
-            LogItem(it, onShare, onDelete)
-        }
+    VerticalItemList(
+        modifier = modifier,
+        list = productsList
+    ) {
+        LogItem(it, onShare, onDelete)
     }
 }
 
@@ -368,7 +361,7 @@ fun <T : Any> VerticalItemList(
 
                 LazyColumn(
                     state = state,
-                    modifier = modifier
+                    modifier = Modifier
                         .testTag("VerticalItemList.Column"),
                     verticalArrangement = Arrangement.Absolute.spacedBy(4.dp),
                     contentPadding = PaddingValues(vertical = 8.dp),
