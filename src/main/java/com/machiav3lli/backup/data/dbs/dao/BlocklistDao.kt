@@ -34,11 +34,20 @@ interface BlocklistDao : BaseDao<Blocklist> {
     @Query("SELECT * FROM blocklist ORDER BY blocklistId ASC")
     fun getAllFlow(): Flow<List<Blocklist>>
 
+    @Query("SELECT packageName FROM blocklist ORDER BY blocklistId ASC")
+    fun getBlocklistedPackagesFlow(): Flow<List<String>>
+
     @Query("SELECT * FROM blocklist WHERE blocklistId = $PACKAGES_LIST_GLOBAL_ID ORDER BY packageName ASC")
     suspend fun getGlobal(): List<Blocklist>
 
+    @Query("SELECT packageName FROM blocklist WHERE blocklistId = $PACKAGES_LIST_GLOBAL_ID ORDER BY packageName ASC")
+    suspend fun getGlobalBlocklistedPackages(): List<String>
+
     @Query("SELECT * FROM blocklist WHERE blocklistId = $PACKAGES_LIST_GLOBAL_ID ORDER BY packageName ASC")
     fun getGlobalFlow(): Flow<List<Blocklist>>
+
+    @Query("SELECT packageName FROM blocklist WHERE blocklistId = $PACKAGES_LIST_GLOBAL_ID ORDER BY packageName ASC")
+    fun getGlobalBlocklistedPackagesFlow(): Flow<List<String>>
 
     @Query("SELECT packageName FROM blocklist WHERE blocklistId = :blocklistId")
     suspend fun getBlocklistedPackages(blocklistId: Long): List<String>

@@ -3,22 +3,22 @@ package com.machiav3lli.backup.data.repository
 import com.machiav3lli.backup.PACKAGES_LIST_GLOBAL_ID
 import com.machiav3lli.backup.data.dbs.dao.BlocklistDao
 import com.machiav3lli.backup.data.dbs.entity.Blocklist
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class BlocklistRepository(
     private val dao: BlocklistDao
 ) {
     fun getBlocklist(): Flow<Set<String>> =
-        dao.getAllFlow()
-            .map { it.mapNotNull { item -> item.packageName }.toSet() }
+        dao.getBlocklistedPackagesFlow().mapLatest { it.toSet() }
 
     fun getGlobalBlocklist(): Flow<Set<String>> =
-        dao.getGlobalFlow()
-            .map { it.mapNotNull { item -> item.packageName }.toSet() }
+        dao.getGlobalBlocklistedPackagesFlow().mapLatest { it.toSet() }
 
     suspend fun loadGlobalBlocklistOf() =
-        dao.getBlocklistedPackages(PACKAGES_LIST_GLOBAL_ID)
+        dao.getGlobalBlocklistedPackages()
 
     suspend fun addToGlobalBlocklist(packageName: String) {
         dao.insert(
