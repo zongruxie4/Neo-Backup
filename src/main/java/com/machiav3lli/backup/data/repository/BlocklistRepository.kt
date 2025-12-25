@@ -22,24 +22,24 @@ class BlocklistRepository(
 
     suspend fun addToGlobalBlocklist(packageName: String) {
         dao.insert(
-            Blocklist.Builder()
-                .withId(0)
-                .withBlocklistId(PACKAGES_LIST_GLOBAL_ID)
-                .withPackageName(packageName)
-                .build()
+            Blocklist(
+                id = 0,
+                packageName = packageName,
+                blocklistId = PACKAGES_LIST_GLOBAL_ID
+            )
         )
     }
 
     suspend fun updateGlobalBlocklist(packages: Set<String>) {
         dao.deleteById(PACKAGES_LIST_GLOBAL_ID)
-        packages.forEach { packageName ->
-            dao.insert(
-                Blocklist.Builder()
-                    .withId(0)
-                    .withBlocklistId(PACKAGES_LIST_GLOBAL_ID)
-                    .withPackageName(packageName)
-                    .build()
-            )
-        }
+        dao.insert(
+            *packages.map { packageName ->
+                Blocklist(
+                    id = 0,
+                    packageName = packageName,
+                    blocklistId = PACKAGES_LIST_GLOBAL_ID
+                )
+            }.toTypedArray()
+        )
     }
 }
