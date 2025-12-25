@@ -767,7 +767,17 @@ class ShellHandler {
         private val checkRootScript
             get() = InternalShellScriptPlugin.findScript("checkroot").toString()
 
-        fun checkRootEquivalent() = runAsRoot("sh '$checkRootScript'", throwFail = false).isSuccess
+        fun checkRootEquivalent(): Boolean {
+            val result = runAsRoot("sh '$checkRootScript'", throwFail = false)
+            if (!result.isSuccess) {
+                Timber.w(
+                    "checkroot failed with code ${result.code}:\n" +
+                            "stdout: ${result.out.joinToString("\n")}\n" +
+                            "stderr: ${result.err.joinToString("\n")}"
+                )
+            }
+            return result.isSuccess
+        }
 
         private var checkedCommand: String = ""
 
@@ -794,14 +804,14 @@ class ShellHandler {
                     return true
                 }
                 Timber.w(
-                    "ShellInit failed: ${
+                    "ShellInit failed with code ${result.code}: ${
                         if (result.out.isNotEmpty())
-                            "\n${result.out.joinToString("\n") { "> $it" }}"
+                            "\nstdout:\n${result.out.joinToString("\n") { "> $it" }}"
                         else
                             ""
                     }${
                         if (result.err.isNotEmpty())
-                            "\n${result.err.joinToString("\n") { "? $it" }}"
+                            "\nstderr:\n${result.err.joinToString("\n") { "! $it" }}"
                         else
                             ""
                     }"
@@ -851,6 +861,7 @@ class ShellHandler {
                 if (tryGainAccessCommand()) {
                     return true
                 }
+                Timber.w("validateSuCommand failed for: $command")
             } catch (e: Throwable) {
                 logException(e, what = "suCommand: $suCommand")
             }
