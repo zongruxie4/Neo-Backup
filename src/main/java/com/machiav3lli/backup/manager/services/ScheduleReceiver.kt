@@ -22,13 +22,43 @@ import android.content.Context
 import android.content.Intent
 import com.machiav3lli.backup.EXTRA_NAME
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
+import com.machiav3lli.backup.NeoApp
+import com.machiav3lli.backup.data.preferences.traceSchedule
+import com.machiav3lli.backup.manager.tasks.ScheduleWork
+import com.machiav3lli.backup.ui.pages.pref_fakeScheduleDups
+import com.machiav3lli.backup.utils.scheduleAlarmsOnce
+import com.machiav3lli.backup.utils.scheduleNextAlarm
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ScheduleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        val serviceIntent = Intent(context, ScheduleService::class.java).apply {
-            putExtra(EXTRA_SCHEDULE_ID, intent?.getLongExtra(EXTRA_SCHEDULE_ID, -1))
-            putExtra(EXTRA_NAME, intent?.getStringExtra(EXTRA_NAME) ?: "")
+        if (context == null) return
+
+        val scheduleId = intent?.getLongExtra(EXTRA_SCHEDULE_ID, -1) ?: -1
+        val scheduleName = intent?.getStringExtra(EXTRA_NAME) ?: ""
+
+        if (scheduleId < 0) return
+
+        NeoApp.wakelock(true)
+        traceSchedule { "[$scheduleId] ScheduleReceiver triggered for '$scheduleName'" }
+
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                repeat(1 + pref_fakeScheduleDups.value) { count ->
+                    scheduleNextAlarm(context, scheduleId, rescheduleBoolean = true)
+                    ScheduleWork.enqueueScheduled(scheduleId, scheduleName)
+                    traceSchedule {
+                        "[$scheduleId] starting task for schedule${if (count > 0) " (dup $count)" else ""}"
+                    }
+                }
+                scheduleAlarmsOnce(context)
+            } finally {
+                NeoApp.wakelock(false)
+                pendingResult.finish()
+            }
         }
-        context?.startService(serviceIntent)
     }
 }

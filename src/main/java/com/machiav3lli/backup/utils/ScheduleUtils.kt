@@ -33,7 +33,6 @@ import com.machiav3lli.backup.data.preferences.pref_autoLogSuspicious
 import com.machiav3lli.backup.data.preferences.traceSchedule
 import com.machiav3lli.backup.data.repository.ScheduleRepository
 import com.machiav3lli.backup.manager.services.ScheduleReceiver
-import com.machiav3lli.backup.manager.services.ScheduleService
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import com.machiav3lli.backup.ui.pages.onErrorInfo
 import com.machiav3lli.backup.ui.pages.pref_fakeScheduleMin
@@ -303,21 +302,24 @@ fun Context.createPendingIntent(scheduleId: Long, scheduleName: String): Pending
 
 var alarmsHaveBeenScheduled = false
 
-// TODO clean up fully
-fun scheduleAlarmsOnce(context: Context) { // TODO replace with ScheduleWorker.scheduleAll()
-
-    // schedule alarms only once
-    // whichever event comes first:
-    //   any activity started
-    //   after all current schedules are queued
-    //   the app is terminated (too early)
-    //   on a timeout
-
+// TODO long-term: replace with ScheduleWorker.scheduleAll()
+fun scheduleAlarmsOnce(context: Context) {
     if (alarmsHaveBeenScheduled)
         return
     alarmsHaveBeenScheduled = true
     CoroutineScope(Dispatchers.IO).launch {
-        ScheduleService.scheduleAll(context)
+        scheduleAll(context)
+    }
+}
+
+private suspend fun scheduleAll(context: Context) = coroutineScope {
+    val scheduleRepo = get<ScheduleRepository>(ScheduleRepository::class.java)
+
+    scheduleRepo.getAll().forEach { schedule ->
+        when {
+            !schedule.enabled -> cancelScheduleAlarm(context, schedule.id, schedule.name)
+            else              -> scheduleNextAlarm(context, schedule.id, false)
+        }
     }
 }
 
