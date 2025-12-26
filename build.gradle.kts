@@ -122,6 +122,11 @@ android {
     }
 }
 
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_reports")
+    metricsDestination = layout.buildDirectory.dir("compose_metrics")
+}
+
 dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.ksp)
