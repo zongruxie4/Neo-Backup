@@ -11,6 +11,8 @@ import com.machiav3lli.backup.data.repository.PackageRepository
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.applySearch
 import com.machiav3lli.backup.utils.extensions.combine
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,12 +46,12 @@ class BackupBatchVM(
             .applyFilter(sortFilter, extras.mapValues { it.value.customTags })
 
         MainState(
-            packages = packages,
-            filteredPackages = filteredPackages,
-            blocklist = blocklist,
+            packages = packages.toPersistentList(),
+            filteredPackages = filteredPackages.toPersistentList(),
+            blocklist = blocklist.toPersistentSet(),
             searchQuery = search,
             sortFilter = sortFilter,
-            selection = selection,
+            selection = selection.toPersistentSet(),
         )
     }.stateIn(
         viewModelScope,

@@ -26,6 +26,8 @@ import com.machiav3lli.backup.data.repository.BlocklistRepository
 import com.machiav3lli.backup.data.repository.ScheduleRepository
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
+import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,11 +70,11 @@ class ScheduleVM(
     ) { schedule, blocklist, customlist, globalBlocklist, tagsMap ->
         ScheduleState(
             schedule = schedule,
-            blockList = blocklist,
-            customList = customlist,
-            globalBlockList = globalBlocklist,
-            tagsMap = tagsMap,
-            tagsList = tagsMap.values.flatten().toSet(),
+            blockList = blocklist.toPersistentSet(),
+            customList = customlist.toPersistentSet(),
+            globalBlockList = globalBlocklist.toPersistentSet(),
+            tagsMap = tagsMap.toPersistentMap(),
+            tagsList = tagsMap.values.flatten().toPersistentSet(),
         )
     }.stateIn(
         viewModelScope,

@@ -34,6 +34,8 @@ import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.applySearch
 import com.machiav3lli.backup.utils.extensions.combine
 import com.machiav3lli.backup.utils.toPackageList
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,13 +94,13 @@ class HomeVM(
             }
 
         MainState(
-            packages = packages,
-            filteredPackages = filteredPackages,
-            updatedPackages = updatedPackages,
-            blocklist = blocklist,
+            packages = packages.toPersistentList(),
+            filteredPackages = filteredPackages.toPersistentList(),
+            updatedPackages = updatedPackages.toPersistentList(),
+            blocklist = blocklist.toPersistentSet(),
             searchQuery = search,
             sortFilter = sortFilter,
-            selection = selection,
+            selection = selection.toPersistentSet(),
         )
     }.stateIn(
         viewModelScope,

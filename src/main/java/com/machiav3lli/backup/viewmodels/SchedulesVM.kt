@@ -26,6 +26,9 @@ import com.machiav3lli.backup.data.repository.BlocklistRepository
 import com.machiav3lli.backup.data.repository.ScheduleRepository
 import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -56,11 +59,11 @@ class SchedulesVM(
         val (enabled, disabled) = scheds.partition { it.enabled }
 
         SchedulerState(
-            enabledSchedules = enabled,
-            disabledSchedules = disabled,
-            blocklist = blocklist,
-            tagsMap = tagsMap,
-            tagsList = tagsMap.values.flatten().toSet(),
+            enabledSchedules = enabled.toPersistentList(),
+            disabledSchedules = disabled.toPersistentList(),
+            blocklist = blocklist.toPersistentSet(),
+            tagsMap = tagsMap.toPersistentMap(),
+            tagsList = tagsMap.values.flatten().toPersistentSet(),
         )
     }.stateIn(
         viewModelScope,
