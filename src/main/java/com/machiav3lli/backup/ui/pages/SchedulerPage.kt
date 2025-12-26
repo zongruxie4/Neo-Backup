@@ -46,6 +46,7 @@ import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
+import com.machiav3lli.backup.data.preferences.traceCompose
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import com.machiav3lli.backup.ui.compose.component.ScheduleRecycler
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -73,6 +74,14 @@ fun SchedulerPage(viewModel: SchedulesVM = koinNeoViewModel()) {
     val state by viewModel.state.collectAsState()
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val scheduleSheetId = remember { mutableLongStateOf(-1L) }
+
+    traceCompose {
+        "SchedulerPage schedules=${
+            state.enabledSchedules.size + state.disabledSchedules.size
+        } blocklist=${
+            state.blocklist.size
+        } language=${pref_languages.value}"
+    }
 
     NavigableListDetailPaneScaffold(
         navigator = paneNavigator,

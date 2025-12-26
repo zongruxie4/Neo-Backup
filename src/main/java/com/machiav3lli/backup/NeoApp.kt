@@ -679,6 +679,7 @@ class NeoApp : Application(), KoinStartup {
 
         //------------------------------------------------------------------------------------------ runningSchedules
 
+        // TODO remove after checking (unique workers shouldn't have duplicates anyway)
         val runningSchedules = mutableMapOf<Long, Boolean>()
 
         //------------------------------------------------------------------------------------------ backups

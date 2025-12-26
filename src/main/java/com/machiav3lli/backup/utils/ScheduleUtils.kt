@@ -23,6 +23,8 @@ import android.content.Context
 import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Build
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import com.machiav3lli.backup.EXTRA_NAME
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.NeoApp
@@ -133,6 +135,7 @@ fun calcTimeLeft(schedule: Schedule): Pair<String, String> {
     return Pair(absTime, relTime)
 }
 
+@Composable
 fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
     while (true) {
         if (this@timeLeft.enabled) emit(calcTimeLeft(this@timeLeft))
@@ -140,7 +143,7 @@ fun Schedule.timeLeft(): StateFlow<Pair<String, String>> = flow {
     }
 }
     .stateIn(
-        scope = CoroutineScope(Dispatchers.IO),
+        scope = rememberCoroutineScope(),
         started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
         initialValue = calcTimeLeft(this)
     )
@@ -285,7 +288,7 @@ private val scheduleAdjectives = setOf(
 fun randomScheduleName(): String = "${scheduleAdjectives.random()} Schedule"
 
 private const val ALARM_REQUEST_CODE_PREFIX = 8000
-fun Context.createPendingIntent(scheduleId: Long, scheduleName: String): PendingIntent {
+private fun Context.createPendingIntent(scheduleId: Long, scheduleName: String): PendingIntent {
     val alarmIntent = Intent(this, ScheduleReceiver::class.java).apply {
         action = "schedule"
         putExtra(EXTRA_SCHEDULE_ID, scheduleId)

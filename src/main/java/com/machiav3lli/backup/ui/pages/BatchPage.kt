@@ -50,6 +50,7 @@ import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.Package
+import com.machiav3lli.backup.data.preferences.traceCompose
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.ActionChip
@@ -107,6 +108,16 @@ fun BatchPage(
                 .filter { backupBoolean || it.latestBackup?.hasData == true }
                 .size
         }
+    }
+
+    traceCompose {
+        "${if (backupBoolean) "BackupPage" else "RestorePage"} filtered=${
+            state.filteredPackages.size
+        } updated=${
+            state.updatedPackages.size
+        } selection=${
+            state.selection.size
+        } language=${pref_languages.value}"
     }
 
     BackHandler(scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {

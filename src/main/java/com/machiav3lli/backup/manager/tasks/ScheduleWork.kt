@@ -127,6 +127,11 @@ class ScheduleWork(
                 return@withContext Result.failure()
             }
 
+            if (isStopped) {
+                traceSchedule { "[$scheduleId] Work cancelled before processing" }
+                return@withContext Result.failure()
+            }
+
             runningSchedules[scheduleId] = false
 
             repeat(1 + pref_fakeScheduleDups.value) {
@@ -143,6 +148,7 @@ class ScheduleWork(
             Result.success()
         } catch (e: Exception) {
             Timber.e(e)
+            runningSchedules.remove(scheduleId)
             Result.failure()
         } finally {
             runningSchedules.remove(scheduleId)
