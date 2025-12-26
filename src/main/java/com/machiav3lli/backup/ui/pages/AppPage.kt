@@ -50,6 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import coil.imageLoader
 import com.machiav3lli.backup.DialogMode
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
@@ -121,6 +123,7 @@ fun AppPage(
 ) {
     val context = LocalContext.current
     val mActivity = LocalActivity.current as NeoActivity
+    val imageLoader = LocalContext.current.imageLoader
     val openDialog = remember { mutableStateOf(false) }
     val dialogProps: MutableState<Pair<DialogMode, Any>> = remember {
         mutableStateOf(Pair(DialogMode.NONE, Schedule()))
@@ -140,6 +143,9 @@ fun AppPage(
     }
 
     thePackage?.let { pkg ->
+        val iconVals by derivedStateOf {
+            Triple(pkg.iconData, pkg.isSpecial, pkg.isSystem)
+        }
 
         traceCompose {
             "AppPage ${pkg.packageName} ${
@@ -149,12 +155,6 @@ fun AppPage(
             }"
         }
 
-        val imageData by remember(pkg) {
-            mutableStateOf(
-                if (pkg.isSpecial) pkg.packageInfo.icon
-                else "android.resource://${pkg.packageName}/${pkg.packageInfo.icon}"
-            )
-        }
         if (dismissNow) {
             viewModel.dismissNow.value = false
             onDismiss()
@@ -178,7 +178,12 @@ fun AppPage(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        PackageIcon(item = pkg, imageData = imageData)
+                        PackageIcon(
+                            imageData = iconVals.first,
+                            isSpecial = iconVals.second,
+                            isSystem = iconVals.third,
+                            imageLoader = imageLoader,
+                        )
 
                         Column(
                             modifier = Modifier

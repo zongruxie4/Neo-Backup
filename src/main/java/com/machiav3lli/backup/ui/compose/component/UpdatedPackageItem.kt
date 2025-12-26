@@ -10,28 +10,27 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.Coil.imageLoader
+import coil.ImageLoader
 import com.machiav3lli.backup.data.entity.Package
 
 @Composable
 fun UpdatedPackageItem(
     item: Package,
+    imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
     onClick: (Package) -> Unit = {},
 ) {
-    val imageData by remember(item) {
-        mutableStateOf(
-            if (item.isSpecial) item.packageInfo.icon
-            else "android.resource://${item.packageName}/${item.packageInfo.icon}"
-        )
+    val iconVals by derivedStateOf {
+        Triple(item.iconData, item.isSpecial, item.isSystem)
     }
 
     Card(
@@ -50,7 +49,12 @@ fun UpdatedPackageItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            PackageIcon(item = item, imageData = imageData)
+            PackageIcon(
+                imageData = iconVals.first,
+                isSpecial = iconVals.second,
+                isSystem = iconVals.third,
+                imageLoader = imageLoader,
+            )
 
             Text(
                 text = item.packageLabel,

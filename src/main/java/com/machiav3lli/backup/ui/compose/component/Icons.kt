@@ -98,8 +98,9 @@ fun ButtonIcon(
 @Composable
 fun PackageIcon(
     modifier: Modifier = Modifier,
-    item: Package?,
     imageData: Any,
+    isSpecial: Boolean = false,
+    isSystem: Boolean = false,
     imageLoader: ImageLoader = LocalContext.current.imageLoader,
 ) {
     //beginNanoTimer("pkgIcon.rCAIP")
@@ -110,7 +111,7 @@ fun PackageIcon(
         painter = cachedAsyncImagePainter(
             model = imageData,
             imageLoader = imageLoader,
-            altPainter = placeholderIconPainter(item, imageLoader)
+            altPainter = placeholderIconPainter(isSpecial, isSystem, imageLoader)
         ),
         contentDescription = null,
         contentScale = ContentScale.Crop
@@ -158,13 +159,14 @@ fun cachedAsyncImagePainter(
 
 @Composable
 fun placeholderIconPainter(
-    item: Package?,
+    isSpecial: Boolean = false,
+    isSystem: Boolean = false,
     imageLoader: ImageLoader = LocalContext.current.imageLoader,
-) = cachedAsyncImagePainter(
+) = rememberAsyncImagePainter(
     when {
-        item?.isSpecial == true -> R.drawable.ic_placeholder_special
-        item?.isSystem == true  -> R.drawable.ic_placeholder_system
-        else                    -> R.drawable.ic_placeholder_user
+        isSpecial -> R.drawable.ic_placeholder_special
+        isSystem  -> R.drawable.ic_placeholder_system
+        else      -> R.drawable.ic_placeholder_user
     },
     imageLoader = imageLoader,
 )

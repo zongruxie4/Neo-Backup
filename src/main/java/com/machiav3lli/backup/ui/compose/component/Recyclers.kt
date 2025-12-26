@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
 import coil.imageLoader
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
@@ -43,13 +44,12 @@ import com.machiav3lli.backup.ui.pages.pref_singularBackupRestore
 @Composable
 fun HomePackageRecycler(
     modifier: Modifier = Modifier,
-    productsList: List<Package>,
-    selection: Set<String>,
+    productsList: PersistentList<Package>,
+    selected: (String) -> Boolean,
+    imageLoader: ImageLoader = LocalContext.current.imageLoader,
     onLongClick: (Package) -> Unit = {},
     onClick: (Package) -> Unit = {},
 ) {
-    val imageLoader = LocalContext.current.imageLoader
-
     VerticalItemList(
         modifier = modifier,
         list = productsList,
@@ -69,6 +69,7 @@ fun HomePackageRecycler(
 fun UpdatedPackageRecycler(
     modifier: Modifier = Modifier,
     productsList: List<Package>?,
+    imageLoader: ImageLoader = LocalContext.current.imageLoader,
     onClick: (Package) -> Unit = {},
 ) {
     HorizontalItemList(
@@ -78,6 +79,7 @@ fun UpdatedPackageRecycler(
     ) {
         UpdatedPackageItem(
             it,
+            imageLoader,
             Modifier.animateItem(),
             onClick,
         )

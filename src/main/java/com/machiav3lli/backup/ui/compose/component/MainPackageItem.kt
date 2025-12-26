@@ -9,9 +9,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,7 +34,6 @@ fun MainPackageItem(
     onAction: (Package) -> Unit = {},
 ) {
     //beginBusy("item")
-    val pkg by remember(pkg) { mutableStateOf(pkg) }
     beginNanoTimer("item")
 
     //traceCompose { "<${pkg.packageName}> MainPackageItemX ${pkg.packageInfo.icon} ${imageData.hashCode()}" }
@@ -58,8 +54,9 @@ fun MainPackageItem(
         leadingContent = {
             PackageIcon(
                 modifier = Modifier.alpha(if (pkg.isSpecial && pkg.packageInfo !is SpecialInfo) 0.5f else 1f),  //TODO hg42 pkg.cannotHandle or similar
-                item = pkg,
                 imageData = pkg.iconData,
+                isSpecial = pkg.isSpecial,
+                isSystem = pkg.isSystem,
                 imageLoader = imageLoader,
             )
         },
