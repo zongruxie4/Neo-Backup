@@ -25,7 +25,6 @@ import com.machiav3lli.backup.data.repository.BlocklistRepository
 import com.machiav3lli.backup.data.repository.PackageRepository
 import com.machiav3lli.backup.utils.toPackageList
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 open class BatchVM(
     packageRepository: PackageRepository,
@@ -35,9 +34,8 @@ open class BatchVM(
     val apkBackupCheckedList = SnapshotStateMap<String, Int>()
     val dataBackupCheckedList = SnapshotStateMap<String, Int>()
 
-    val pkgsFlow: Flow<List<Package>> = kotlinx.coroutines.flow.combine(
+    protected val pkgsFlow: Flow<List<Package>> = kotlinx.coroutines.flow.combine(
         packageRepository.getAppInfosFlow(),
         packageRepository.getBackupsListFlow(),
     ) { appInfos, bkps -> appInfos.toPackageList(NeoApp.context) }
-        .distinctUntilChanged()
 }

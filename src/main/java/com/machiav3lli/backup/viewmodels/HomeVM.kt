@@ -42,7 +42,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -67,11 +66,10 @@ class HomeVM(
             emptyList()
         )
 
-    val pkgsFlow: Flow<List<Package>> = combine(
+    private val pkgsFlow: Flow<List<Package>> = combine(
         packageRepository.getAppInfosFlow(),
         packageRepository.getBackupsListFlow(),
     ) { appInfos, bkps -> appInfos.toPackageList(NeoApp.context) }
-        .distinctUntilChanged()
 
     override val state: StateFlow<MainState> = combine(
         pkgsFlow,

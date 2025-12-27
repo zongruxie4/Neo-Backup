@@ -30,8 +30,11 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.manager.handler.showNotification
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.blockBorderBottom
 import com.machiav3lli.backup.ui.compose.component.ExportedScheduleRecycler
 import com.machiav3lli.backup.ui.compose.component.RoundButton
@@ -46,6 +49,7 @@ import com.machiav3lli.backup.viewmodels.ExportsVM
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SchedulesExportsPage(viewModel: ExportsVM = koinNeoViewModel(), navigateUp: () -> Unit) {
+    val context = LocalContext.current
     val exports by viewModel.exportsList.collectAsState()
 
     SideEffect {
@@ -83,7 +87,14 @@ fun SchedulesExportsPage(viewModel: ExportsVM = koinNeoViewModel(), navigateUp: 
                 .blockBorderBottom()
                 .fillMaxSize(),
             productsList = exports,
-            onImport = { viewModel.importSchedule(it) },
+            onImport = {
+                viewModel.importSchedule(it) { name, id ->
+                    showNotification(
+                        context, NeoActivity::class.java, id,
+                        context.getString(R.string.sched_imported), name, false
+                    )
+                }
+            },
             onDelete = { viewModel.deleteExport(it) }
         )
     }

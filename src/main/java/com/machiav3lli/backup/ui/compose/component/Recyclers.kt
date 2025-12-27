@@ -40,6 +40,7 @@ import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.ui.pages.pref_multilineInfoChips
 import com.machiav3lli.backup.ui.pages.pref_singularBackupRestore
+import kotlinx.collections.immutable.PersistentList
 
 @Composable
 fun HomePackageRecycler(
@@ -57,7 +58,7 @@ fun HomePackageRecycler(
     ) {
         MainPackageItem(
             it,
-            selection.contains(it.packageName),
+            selected(it.packageName),
             imageLoader,
             onLongClick,
             onClick

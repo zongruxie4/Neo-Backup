@@ -195,7 +195,6 @@ dependencies {
 
     // compose testing
     // Test rules and transitive dependencies:
-    androidTestImplementation(libs.compose.ui.test)
     androidTestImplementation(libs.compose.ui.test.junit4)
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation(libs.compose.ui.test.manifest)

@@ -66,14 +66,6 @@ open class SpecialInfo : PackageInfo {
     companion object {
         private val specialInfos: MutableList<SpecialInfo> = mutableListOf()
 
-        /**
-         * Returns the list of special (virtual) packages
-         *
-         * @param context Context object
-         * @return a list of of virtual packages
-         * @throws BackupLocationInAccessibleException   when the backup location cannot be read for any reason
-         * @throws StorageLocationNotConfiguredException when the backup location is not set in the configuration
-         */
         private var threadCount: AtomicInteger = AtomicInteger(0)
         private var locked = false
 
@@ -83,6 +75,14 @@ open class SpecialInfo : PackageInfo {
             }
         }
 
+        /**
+         * Returns the list of special (virtual) packages
+         *
+         * @param context Context object
+         * @return a list of of virtual packages
+         * @throws BackupLocationInAccessibleException   when the backup location cannot be read for any reason
+         * @throws StorageLocationNotConfiguredException when the backup location is not set in the configuration
+         */
         @Throws(
             BackupLocationInAccessibleException::class,
             StorageLocationNotConfiguredException::class

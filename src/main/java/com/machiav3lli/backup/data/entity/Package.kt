@@ -20,6 +20,7 @@ package com.machiav3lli.backup.data.entity
 import android.app.usage.StorageStats
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.compose.runtime.Immutable
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
 import com.machiav3lli.backup.data.dbs.entity.Backup
@@ -41,6 +42,7 @@ import timber.log.Timber
 import java.io.File
 
 // TODO consider separating package & backupsList to allow granular compose updates
+@Immutable
 data class Package private constructor(val packageName: String) {
     lateinit var packageInfo: com.machiav3lli.backup.data.dbs.entity.PackageInfo
     var storageStats: StorageStats? = null

@@ -56,9 +56,9 @@ class ExportsVM(
         }
     }
 
-    fun importSchedule(export: Schedule) {
+    fun importSchedule(export: Schedule, onFinish: (String, Int) -> Unit) {
         viewModelScope.launch {
-            exportsRepository.import(export)
+            exportsRepository.import(export, onFinish)
         }
     }
 }

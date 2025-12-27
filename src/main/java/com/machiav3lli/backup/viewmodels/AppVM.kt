@@ -54,16 +54,15 @@ class AppVM(
 ) : NeoViewModel() {
     private val packageName: MutableStateFlow<String> = MutableStateFlow("")
 
-    val pkgsFlow: Flow<List<Package>> = combine(
+    private val pkgsFlow: Flow<List<Package>> = combine(
         packageRepository.getAppInfosFlow(),
         packageRepository.getBackupsListFlow(),
     ) { appInfos, bkps -> appInfos.toPackageList(NeoApp.context) }
-        .distinctUntilChanged()
 
     val pkg = combine(
         packageName,
         pkgsFlow,
-        packageRepository.getBackupsFlow(),
+        packageRepository.getBackupsListFlow(),
     ) { name, pkgs, bkups ->
         pkgs.find { it.packageName == name }
     }

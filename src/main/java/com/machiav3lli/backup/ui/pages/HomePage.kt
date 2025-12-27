@@ -135,6 +135,30 @@ fun HomePage(
         }
     }
 
+    val onPackageClick: (Package) -> Unit = { item ->
+        if (mainState.filteredPackages.none {
+            it.packageName in mainState.selection
+        }) {
+            scope.launch {
+                paneNavigator.navigateTo(
+                    ListDetailPaneScaffoldRole.Detail,
+                    item.packageName
+                )
+            }
+        } else {
+            viewModel.toggleSelection(item.packageName)
+        }
+    }
+
+    val onPackageLongClick: (Package) -> Unit = { item ->
+        if (mainState.selection.contains(item.packageName)) {
+            menuPackage = item
+            menuExpanded.value = true
+        } else {
+            viewModel.toggleSelection(item.packageName)
+        }
+    }
+
     // prefetch icons
     if (mainState.filteredPackages.size > IconCache.size) {    // includes empty cache and empty filteredList
         //beginNanoTimer("prefetchIcons")
@@ -308,31 +332,9 @@ fun HomePage(
                         HomePackageRecycler(
                             modifier = Modifier.fillMaxSize(),
                             productsList = mainState.filteredPackages,
-                            selection = mainState.selection,
-                            onLongClick = { item ->
-                                if (mainState.selection.contains(item.packageName)) {
-                                    menuPackage = item
-                                    menuExpanded.value = true
-                                } else {
-                                    viewModel.toggleSelection(item.packageName)
-                                }
-                            },
-                            onClick = { item ->
-                                if (mainState.filteredPackages.none {
-                                        mainState.selection.contains(
-                                            it.packageName
-                                        )
-                                    }) {
-                                    scope.launch {
-                                        paneNavigator.navigateTo(
-                                            ListDetailPaneScaffoldRole.Detail,
-                                            item.packageName
-                                        )
-                                    }
-                                } else {
-                                    viewModel.toggleSelection(item.packageName)
-                                }
-                            },
+                            selected = { mainState.selection.contains(it) },
+                            onLongClick = onPackageLongClick,
+                            onClick = onPackageClick,
                         )
 
                         if (menuExpanded.value) {
