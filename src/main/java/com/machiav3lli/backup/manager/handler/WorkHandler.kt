@@ -19,6 +19,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.machiav3lli.backup.NOTIFICATION_CHANNEL_ACTIONWORK
 import com.machiav3lli.backup.NOTIFICATION_CHANNEL_HANDLER
+import com.machiav3lli.backup.NOTIFICATION_CHANNEL_REFRESH
 import com.machiav3lli.backup.NOTIFICATION_CHANNEL_SCHEDULE
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
@@ -75,6 +76,13 @@ class WorkHandler(
             NotificationManager.IMPORTANCE_HIGH
         )
             .apply { enableVibration(true) }
+            .let(notificationManager::createNotificationChannel)
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_REFRESH,
+            context.getString(R.string.refresh),
+            NotificationManager.IMPORTANCE_LOW
+        )
+            .apply { setShowBadge(false) }
             .let(notificationManager::createNotificationChannel)
     }
 

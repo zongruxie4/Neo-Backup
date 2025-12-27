@@ -493,4 +493,14 @@
     <string name="notification_app_action">App actions</string>
     <string name="notification_schedules">Schedules</string>
     <string name="notification_handler">Notifications\' handler</string>
+    <string name="refresh_work_title">Refreshing backups\' list</string>
+    <string name="refresh_init">Initiating refresh</string>
+    <string name="invalidating_all">Clearing caches…</string>
+    <string name="invalidating_package">Clearing cache for %s…</string>
+    <string name="scanning_dirs">Scanning backup directory…</string>
+    <string name="updating_db">Updating app database…</string>
+    <string name="refresh_completed">Refresh completed</string>
+    <string name="refresh_failed">Refresh failed</string>
+    <string name="backupdir_inaccessible">Backup location is not accessible</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>

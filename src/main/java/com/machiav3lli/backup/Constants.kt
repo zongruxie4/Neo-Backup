@@ -34,6 +34,7 @@ const val STATEFLOW_SUBSCRIBE_BUFFER = 60_000L // 1 minute buffer
 const val NOTIFICATION_CHANNEL_ACTIONWORK = "AppActionWork"
 const val NOTIFICATION_CHANNEL_HANDLER = "NotificationHandler"
 const val NOTIFICATION_CHANNEL_SCHEDULE = "ScheduleWork"
+const val NOTIFICATION_CHANNEL_REFRESH = "RefreshBackups"
 
 const val ADMIN_PREFIX = "!-"
 
