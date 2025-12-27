@@ -57,7 +57,6 @@ import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
-import com.machiav3lli.backup.data.entity.ChipItem
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.installedFilterChipItems
@@ -65,6 +64,7 @@ import com.machiav3lli.backup.latestFilterChipItems
 import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainBackupModeChipItems
 import com.machiav3lli.backup.mainFilterChipItems
+import com.machiav3lli.backup.mainFilterChipItemsSansSpecial
 import com.machiav3lli.backup.sortChipItems
 import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.ChipsSwitch
@@ -85,6 +85,7 @@ import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.getStats
 import com.machiav3lli.backup.utils.specialBackupsEnabled
 import com.machiav3lli.backup.viewmodels.MainVM
+import kotlinx.collections.immutable.toPersistentSet
 
 @Composable
 fun SortFilterSheet(
@@ -253,7 +254,7 @@ fun SortFilterSheet(
                 ) {
                     MultiSelectableChipGroup(
                         list = if (specialBackupsEnabled) mainFilterChipItems
-                        else mainFilterChipItems.minus(ChipItem.Special),
+                        else mainFilterChipItemsSansSpecial,
                         selectedFlags = model.mainFilter
                     ) { flags, _ ->
                         model = model.copy(mainFilter = flags)
@@ -344,7 +345,7 @@ fun SortFilterSheet(
                     preExpanded = model.tags.isNotEmpty(),
                 ) {
                     MultiSelectableChipGroup(
-                        list = allTags.toSet(),
+                        list = allTags.toPersistentSet(),
                         selected = model.tags,
                     ) { tags ->
                         model = model.copy(tags = tags.intersect(allTags))

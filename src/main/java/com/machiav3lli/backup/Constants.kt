@@ -27,6 +27,8 @@ import com.machiav3lli.backup.data.entity.ChipItem
 import com.machiav3lli.backup.data.entity.Legend
 import com.machiav3lli.backup.data.entity.Link
 import com.machiav3lli.backup.utils.extensions.Android
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 
 const val PREFS_SHARED_PRIVATE = "com.machiav3lli.backup"
 const val STATEFLOW_SUBSCRIBE_BUFFER = 60_000L // 1 minute buffer
@@ -266,7 +268,7 @@ val batchModesSequence =
 val MODE_ALL = batchModesSequence.reduce { a, b -> a.or(b) }
 val BACKUP_FILTER_DEFAULT = MODE_ALL or MODE_NONE
 
-val scheduleBackupModeChipItems = listOf(
+val scheduleBackupModeChipItems = persistentListOf(
     ChipItem.Apk,
     ChipItem.Data,
     ChipItem.DeData,
@@ -275,12 +277,19 @@ val scheduleBackupModeChipItems = listOf(
     ChipItem.MediaData
 )
 
-val mainBackupModeChipItems: List<ChipItem> =
-    listOf(ChipItem.None).plus(scheduleBackupModeChipItems)
+val mainBackupModeChipItems: PersistentList<ChipItem> = persistentListOf(
+    ChipItem.None,
+    ChipItem.Apk,
+    ChipItem.Data,
+    ChipItem.DeData,
+    ChipItem.ExtData,
+    ChipItem.ObbData,
+    ChipItem.MediaData
+)
 
 enum class Sort { LABEL, PACKAGENAME, APP_SIZE, DATA_SIZE, APPDATA_SIZE, BACKUP_SIZE, BACKUP_DATE }
 
-val sortChipItems = listOf(
+val sortChipItems = persistentListOf(
     ChipItem.Label,
     ChipItem.PackageName,
     ChipItem.AppSize,
@@ -298,11 +307,12 @@ const val MAIN_FILTER_DEFAULT = MAIN_FILTER_SYSTEM or MAIN_FILTER_USER or MAIN_F
 const val MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL = MAIN_FILTER_SYSTEM or MAIN_FILTER_USER
 val possibleMainFilters = listOf(MAIN_FILTER_SYSTEM, MAIN_FILTER_USER, MAIN_FILTER_SPECIAL)
 
-val mainFilterChipItems = listOf(ChipItem.System, ChipItem.User, ChipItem.Special)
+val mainFilterChipItems = persistentListOf(ChipItem.System, ChipItem.User, ChipItem.Special)
+val mainFilterChipItemsSansSpecial = persistentListOf(ChipItem.System, ChipItem.User)
 
 enum class LaunchableFilter { ALL, LAUNCHABLE, NOT }
 
-val launchableFilterChipItems = listOf(
+val launchableFilterChipItems = persistentListOf(
     ChipItem.All,
     ChipItem.Launchable,
     ChipItem.NotLaunchable,
@@ -310,7 +320,7 @@ val launchableFilterChipItems = listOf(
 
 enum class InstalledFilter { ALL, INSTALLED, NOT }
 
-val installedFilterChipItems = listOf(
+val installedFilterChipItems = persistentListOf(
     ChipItem.All,
     ChipItem.Installed,
     ChipItem.NotInstalled,
@@ -318,7 +328,7 @@ val installedFilterChipItems = listOf(
 
 enum class UpdatedFilter { ALL, UPDATED, NEW, NOT }
 
-val updatedFilterChipItems = listOf(
+val updatedFilterChipItems = persistentListOf(
     ChipItem.All,
     ChipItem.UpdatedApps,
     ChipItem.NewApps,
@@ -327,7 +337,7 @@ val updatedFilterChipItems = listOf(
 
 enum class LatestFilter { ALL, OLD, NEW }
 
-val latestFilterChipItems = listOf(
+val latestFilterChipItems = persistentListOf(
     ChipItem.All,
     ChipItem.OldBackups,
     ChipItem.NewBackups,
@@ -335,7 +345,7 @@ val latestFilterChipItems = listOf(
 
 enum class EnabledFilter { ALL, ENABLED, DISABLED }
 
-val enabledFilterChipItems = listOf(
+val enabledFilterChipItems = persistentListOf(
     ChipItem.All,
     ChipItem.Enabled,
     ChipItem.Disabled,
@@ -373,10 +383,12 @@ enum class DamagedOp {
     CLEANUP,
 }
 
-const val HELP_CHANGELOG = "https://codeberg.org/NeoApplications/Neo-Backup/src/branch/main/CHANGELOG.md"
+const val HELP_CHANGELOG =
+    "https://codeberg.org/NeoApplications/Neo-Backup/src/branch/main/CHANGELOG.md"
 const val HELP_TELEGRAM = "https://t.me/neo_backup"
 const val HELP_MATRIX = "https://matrix.to/#/#neo-backup:matrix.org"
-const val HELP_LICENSE = "https://codeberg.org/NeoApplications/Neo-Backup/src/branch/main/LICENSE.md"
+const val HELP_LICENSE =
+    "https://codeberg.org/NeoApplications/Neo-Backup/src/branch/main/LICENSE.md"
 const val HELP_ISSUES = "https://github.com/NeoApplications/Neo-Backup/issues"
 const val HELP_FAQ = "https://codeberg.org/NeoApplications/Neo-Backup/src/branch/main/FAQ.md"
 

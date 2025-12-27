@@ -37,6 +37,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.GearSix
 import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.viewmodels.LogsVM
+import kotlinx.collections.immutable.toPersistentList
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -75,7 +76,7 @@ fun Logs(viewModel: LogsVM = koinNeoViewModel(), modifier: Modifier = Modifier) 
         modifier = modifier
             .blockBorderBottom()
             .fillMaxSize(),
-        productsList = logs.sortedByDescending(Log::logDate),
+        productsList = logs.sortedByDescending(Log::logDate).toPersistentList(),
         onShare = { viewModel.shareLog(it, pref_shareAsFile.value) },
         onDelete = { viewModel.deleteLog(it) }
     )

@@ -90,21 +90,16 @@ fun BatchPage(
     val openBlocklist = rememberSaveable { mutableStateOf(false) }
     val prefsNotFilter = remember { mutableStateOf(false) }
 
-    val filterPredicate = { item: Package ->
-        if (backupBoolean) item.isInstalled else item.hasBackups
-    }
-    val workList = state.filteredPackages.filter(filterPredicate)
-
-    val allApkChecked by remember(workList, viewModel.apkBackupCheckedList) {
+    val allApkChecked by remember(state.filteredPackages, viewModel.apkBackupCheckedList) {
         derivedStateOf {
-            viewModel.apkBackupCheckedList.filterValues { it != -1 }.size == workList
+            viewModel.apkBackupCheckedList.filterValues { it != -1 }.size == state.filteredPackages
                 .filter { !it.isSpecial && (backupBoolean || it.latestBackup?.hasApk == true) }
                 .size
         }
     }
-    val allDataChecked by remember(workList, viewModel.dataBackupCheckedList) {
+    val allDataChecked by remember(state.filteredPackages, viewModel.dataBackupCheckedList) {
         derivedStateOf {
-            viewModel.dataBackupCheckedList.filterValues { it != -1 }.size == workList
+            viewModel.dataBackupCheckedList.filterValues { it != -1 }.size == state.filteredPackages
                 .filter { backupBoolean || it.latestBackup?.hasData == true }
                 .size
         }
@@ -194,7 +189,7 @@ fun BatchPage(
                 modifier = Modifier
                     .weight(1f, true)
                     .fillMaxSize(),
-                productsList = workList,
+                productsList = state.filteredPackages,
                 restore = !backupBoolean,
                 apkBackupCheckedList = viewModel.apkBackupCheckedList,
                 dataBackupCheckedList = viewModel.dataBackupCheckedList,
@@ -237,14 +232,14 @@ fun BatchPage(
                 ) {
                     val checkBoolean = !allApkChecked
                     when {
-                        checkBoolean -> workList
+                        checkBoolean -> state.filteredPackages
                             .filter { (backupBoolean && !it.isSpecial) || it.latestBackup?.hasApk == true }
                             .map(Package::packageName)
                             .forEach {
                                 viewModel.apkBackupCheckedList[it] = 0
                             }
 
-                        else         -> workList
+                        else         -> state.filteredPackages
                             .filter { backupBoolean || it.latestBackup?.hasApk == true }
                             .map(Package::packageName)
                             .forEach {
@@ -262,14 +257,14 @@ fun BatchPage(
                 ) {
                     val checkBoolean = !allDataChecked
                     when {
-                        checkBoolean -> workList
+                        checkBoolean -> state.filteredPackages
                             .filter { backupBoolean || it.latestBackup?.hasData == true }
                             .map(Package::packageName)
                             .forEach {
                                 viewModel.dataBackupCheckedList[it] = 0
                             }
 
-                        else         -> workList
+                        else         -> state.filteredPackages
                             .filter { backupBoolean || it.latestBackup?.hasData == true }
                             .map(Package::packageName)
                             .forEach {

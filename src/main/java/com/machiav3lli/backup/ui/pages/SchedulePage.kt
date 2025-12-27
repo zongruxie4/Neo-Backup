@@ -58,12 +58,12 @@ import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.data.dbs.entity.Schedule
-import com.machiav3lli.backup.data.entity.ChipItem
 import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.latestFilterChipItems
 import com.machiav3lli.backup.launchableFilterChipItems
 import com.machiav3lli.backup.mainFilterChipItems
+import com.machiav3lli.backup.mainFilterChipItemsSansSpecial
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import com.machiav3lli.backup.scheduleBackupModeChipItems
 import com.machiav3lli.backup.ui.compose.component.ActionButton
@@ -249,10 +249,8 @@ fun SchedulePage(
                         else MAIN_FILTER_DEFAULT_WITHOUT_SPECIAL,
                     ) {
                         MultiSelectableChipGroup(
-                            list = if (specialBackupsEnabled)
-                                mainFilterChipItems
-                            else
-                                mainFilterChipItems.minus(ChipItem.Special),
+                            list = if (specialBackupsEnabled) mainFilterChipItems
+                            else mainFilterChipItemsSansSpecial,
                             selectedFlags = schedule.filter
                         ) { flags, flag ->
                             refresh(

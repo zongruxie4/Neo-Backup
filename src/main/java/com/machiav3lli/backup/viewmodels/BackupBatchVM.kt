@@ -41,7 +41,7 @@ class BackupBatchVM(
         selection,
     ) { packages, blocklist, sortFilter, extras, search, selection ->
         val filteredPackages = packages
-            .filterNot { it.packageName in blocklist }
+            .filter { it.packageName !in blocklist && it.isInstalled }
             .applySearch(search, extras)
             .applyFilter(sortFilter, extras.mapValues { it.value.customTags })
 

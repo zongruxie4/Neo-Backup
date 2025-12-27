@@ -41,6 +41,7 @@ import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.ui.pages.pref_multilineInfoChips
 import com.machiav3lli.backup.ui.pages.pref_singularBackupRestore
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentSet
 
 @Composable
 fun HomePackageRecycler(
@@ -69,7 +70,7 @@ fun HomePackageRecycler(
 @Composable
 fun UpdatedPackageRecycler(
     modifier: Modifier = Modifier,
-    productsList: List<Package>?,
+    productsList: PersistentList<Package>?,
     imageLoader: ImageLoader = LocalContext.current.imageLoader,
     onClick: (Package) -> Unit = {},
 ) {
@@ -90,7 +91,7 @@ fun UpdatedPackageRecycler(
 @Composable
 fun BatchPackageRecycler(
     modifier: Modifier = Modifier,
-    productsList: List<Package>?,
+    productsList: PersistentList<Package>?,
     restore: Boolean = false,
     apkBackupCheckedList: SnapshotStateMap<String, Int>,
     dataBackupCheckedList: SnapshotStateMap<String, Int>,
@@ -137,8 +138,8 @@ fun BatchPackageRecycler(
 @Composable
 fun ScheduleRecycler(
     modifier: Modifier = Modifier,
-    enabledSchedules: List<Schedule>,
-    disabledSchedules: List<Schedule>,
+    enabledSchedules: PersistentList<Schedule>,
+    disabledSchedules: PersistentList<Schedule>,
     onClick: (Schedule) -> Unit = {},
     onRun: (Schedule) -> Unit = {},
     onCheckChanged: (Schedule, Boolean) -> Unit = { _: Schedule, _: Boolean -> },
@@ -207,7 +208,7 @@ fun ScheduleRecycler(
 @Composable
 fun ExportedScheduleRecycler(
     modifier: Modifier = Modifier,
-    productsList: List<Pair<Schedule, StorageFile>>?,
+    productsList: PersistentList<Pair<Schedule, StorageFile>>?,
     onImport: (Schedule) -> Unit = {},
     onDelete: (StorageFile) -> Unit = {},
 ) {
@@ -222,7 +223,7 @@ fun ExportedScheduleRecycler(
 @Composable
 fun LogRecycler(
     modifier: Modifier = Modifier,
-    productsList: List<Log>?,
+    productsList: PersistentList<Log>,
     onShare: (Log) -> Unit = {},
     onDelete: (Log) -> Unit = {},
 ) {
@@ -268,7 +269,7 @@ fun InfoChipsBlock(
 fun SelectableChipGroup(
     //TODO hg42 move to item/Icons.kt ?
     modifier: Modifier = Modifier,
-    list: List<ChipItem>,
+    list: PersistentList<ChipItem>,
     selectedFlag: Int,
     onClick: (Int) -> Unit,
 ) {
@@ -292,7 +293,7 @@ fun SelectableChipGroup(
 fun MultiSelectableChipGroup(
     //TODO hg42 move to item/Icons.kt ?
     modifier: Modifier = Modifier,
-    list: List<ChipItem>,
+    list: PersistentList<ChipItem>,
     selectedFlags: Int,
     onClick: (Int, Int) -> Unit,
 ) {
@@ -315,7 +316,7 @@ fun MultiSelectableChipGroup(
 @Composable
 fun MultiSelectableChipGroup(
     modifier: Modifier = Modifier,
-    list: Set<String>,
+    list: PersistentSet<String>,
     selected: Set<String>,
     onClick: (Set<String>) -> Unit,
 ) {
@@ -337,7 +338,7 @@ fun MultiSelectableChipGroup(
 @Composable
 fun <T : Any> VerticalItemList(
     modifier: Modifier = Modifier,
-    list: List<T>?,
+    list: PersistentList<T>?,
     itemKey: ((T) -> Any)? = null,
     itemContent: @Composable LazyItemScope.(T) -> Unit,
 ) {
@@ -395,7 +396,7 @@ fun <T : Any> VerticalItemList(
 @Composable
 fun <T> HorizontalItemList(
     modifier: Modifier = Modifier,
-    list: List<T>?,
+    list: PersistentList<T>?,
     itemKey: ((T) -> Any)? = null,
     itemContent: @Composable LazyItemScope.(T) -> Unit,
 ) {
