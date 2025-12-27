@@ -31,6 +31,10 @@ import com.machiav3lli.backup.utils.extensions.Android
 const val PREFS_SHARED_PRIVATE = "com.machiav3lli.backup"
 const val STATEFLOW_SUBSCRIBE_BUFFER = 60_000L // 1 minute buffer
 
+const val NOTIFICATION_CHANNEL_ACTIONWORK = "AppActionWork"
+const val NOTIFICATION_CHANNEL_HANDLER = "NotificationHandler"
+const val NOTIFICATION_CHANNEL_SCHEDULE = "ScheduleWork"
+
 const val ADMIN_PREFIX = "!-"
 
 val COMPRESSION_TYPES = mapOf(

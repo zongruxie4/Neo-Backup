@@ -18,18 +18,17 @@
 package com.machiav3lli.backup.manager.handler
 
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.machiav3lli.backup.NOTIFICATION_CHANNEL_HANDLER
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.activities.BaseActivity
-import com.machiav3lli.backup.classAddress
 import com.machiav3lli.backup.utils.SystemUtils
 
+// TODO move to utils
 fun showNotification(
     context: Context?,
     parentActivity: Class<out BaseActivity?>?,
@@ -53,14 +52,8 @@ fun showNotification(
         context, 0, resultIntent,
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
-    val notificationChannel = NotificationChannel(
-        classAddress("NotificationHandler"),
-        classAddress("NotificationHandler"),
-        NotificationManager.IMPORTANCE_LOW
-    )
     val notificationManager = NotificationManagerCompat.from(context!!)
-    notificationManager.createNotificationChannel(notificationChannel)
-    val notification = NotificationCompat.Builder(context, classAddress("NotificationHandler"))
+    val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_HANDLER)
         .setGroup(SystemUtils.packageName)
         .setSortKey("9")
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)

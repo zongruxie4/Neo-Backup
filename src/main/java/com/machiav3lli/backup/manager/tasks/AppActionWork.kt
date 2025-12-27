@@ -17,10 +17,7 @@
  */
 package com.machiav3lli.backup.manager.tasks
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.job.JobService
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -36,6 +33,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.machiav3lli.backup.MODE_UNSET
+import com.machiav3lli.backup.NOTIFICATION_CHANNEL_ACTIONWORK
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.ActionResult
@@ -235,9 +233,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        createNotificationChannel()
-
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ACTIONWORK)
             .setContentTitle(
                 when {
                     backupBoolean -> context.getString(R.string.batchbackup)
@@ -265,18 +261,7 @@ class AppActionWork(val context: Context, workerParams: WorkerParameters) :
         )
     }
 
-    private fun createNotificationChannel() {
-        val notificationManager =
-            context.getSystemService(JobService.NOTIFICATION_SERVICE) as NotificationManager
-        val notificationChannel =
-            NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
-        notificationChannel.enableVibration(true)
-        notificationManager.createNotificationChannel(notificationChannel)
-    }
-
     companion object {
-        private val CHANNEL_ID = AppActionWork::class.java.name
-
         //val jobPool1 = Executors.newFixedThreadPool(
         //    if (pref_maxJobs.value > 0)
         //        pref_maxJobs.value

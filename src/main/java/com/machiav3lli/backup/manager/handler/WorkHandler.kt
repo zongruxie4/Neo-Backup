@@ -17,9 +17,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.machiav3lli.backup.NOTIFICATION_CHANNEL_ACTIONWORK
+import com.machiav3lli.backup.NOTIFICATION_CHANNEL_HANDLER
+import com.machiav3lli.backup.NOTIFICATION_CHANNEL_SCHEDULE
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.classAddress
 import com.machiav3lli.backup.manager.services.CommandReceiver
 import com.machiav3lli.backup.manager.tasks.AppActionWork
 import com.machiav3lli.backup.ui.activities.NeoActivity
@@ -36,20 +38,13 @@ class WorkHandler(
     private val manager: WorkManager,
 ) {
     private val actionReceiver = CommandReceiver()
-    private val notificationChannel: NotificationChannel
     private val notificationManager: NotificationManagerCompat
 
     init {
         context.registerReceiver(actionReceiver, IntentFilter())
 
         notificationManager = NotificationManagerCompat.from(context)
-
-        notificationChannel = NotificationChannel(
-            classAddress("NotificationHandler"),
-            classAddress("NotificationHandler"),
-            NotificationManager.IMPORTANCE_HIGH
-        )
-        notificationManager.createNotificationChannel(notificationChannel)
+        createNotificationChannels()
 
         manager.pruneWork()
 
@@ -59,6 +54,28 @@ class WorkHandler(
         ).observeForever {
             onProgress(this, it)
         }
+    }
+
+    private fun createNotificationChannels() {
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_HANDLER,
+            context.getString(R.string.notification_handler),
+            NotificationManager.IMPORTANCE_HIGH
+        )
+            .let(notificationManager::createNotificationChannel)
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_ACTIONWORK,
+            context.getString(R.string.notification_app_action),
+            NotificationManager.IMPORTANCE_HIGH
+        )
+            .let(notificationManager::createNotificationChannel)
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_SCHEDULE,
+            context.getString(R.string.notification_schedules),
+            NotificationManager.IMPORTANCE_HIGH
+        )
+            .apply { enableVibration(true) }
+            .let(notificationManager::createNotificationChannel)
     }
 
     fun release(): WorkHandler? {
@@ -449,7 +466,7 @@ class WorkHandler(
                         val notificationBuilder =
                             NotificationCompat.Builder(
                                 appContext,
-                                classAddress("NotificationHandler")
+                                NOTIFICATION_CHANNEL_HANDLER
                             )
                                 .setGroup(SystemUtils.packageName)
                                 .setSortKey("1-$batchName")

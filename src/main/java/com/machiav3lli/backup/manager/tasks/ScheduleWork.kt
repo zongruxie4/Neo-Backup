@@ -1,7 +1,6 @@
 package com.machiav3lli.backup.manager.tasks
 
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -27,6 +26,7 @@ import com.machiav3lli.backup.EXTRA_NAME
 import com.machiav3lli.backup.EXTRA_PERIODIC
 import com.machiav3lli.backup.EXTRA_SCHEDULE_ID
 import com.machiav3lli.backup.MODE_UNSET
+import com.machiav3lli.backup.NOTIFICATION_CHANNEL_SCHEDULE
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
@@ -43,7 +43,6 @@ import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.manager.services.CommandReceiver
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.pages.pref_fakeScheduleDups
-import com.machiav3lli.backup.ui.pages.pref_useForegroundInService
 import com.machiav3lli.backup.ui.pages.supportInfo
 import com.machiav3lli.backup.ui.pages.textLog
 import com.machiav3lli.backup.utils.FileUtils
@@ -351,10 +350,6 @@ class ScheduleWork(
     private fun createForegroundNotification(): Notification {
         if (notification != null) return notification!!
 
-        if (pref_useForegroundInService.value) {
-            createNotificationChannel()
-        }
-
         val contentPendingIntent = PendingIntent.getActivity(
             context,
             0,
@@ -374,7 +369,7 @@ class ScheduleWork(
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        return NotificationCompat.Builder(context, CHANNEL_ID)
+        return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_SCHEDULE)
             .setContentTitle(context.getString(R.string.sched_notificationMessage))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
@@ -391,21 +386,7 @@ class ScheduleWork(
             .also { notification = it }
     }
 
-    private fun createNotificationChannel() {
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val notificationChannel = NotificationChannel(
-            CHANNEL_ID,
-            CHANNEL_ID,
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            enableVibration(true)
-        }
-        notificationManager.createNotificationChannel(notificationChannel)
-    }
-
     companion object {
-        private val CHANNEL_ID = ScheduleWork::class.java.name
         private const val SCHEDULE_ONETIME = "schedule_one_time_"
         private const val SCHEDULE_WORK = "schedule_work_"
         private val runningSchedules = ConcurrentHashMap<Long, Boolean>()
