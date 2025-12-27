@@ -27,13 +27,13 @@ class RestoreBatchVM(
     blocklistRepository: BlocklistRepository,
     appExtrasRepository: AppExtrasRepository,
     private val prefs: NeoPrefs,
-) : BatchVM(packageRepository, blocklistRepository, appExtrasRepository) {
+) : BatchVM(blocklistRepository, appExtrasRepository) {
     private val searchQuery = MutableStateFlow("")
     private val selection = MutableStateFlow(emptySet<String>())
     private val sortFilterModelFlow = prefs.restoreSortFilterFlow()
 
     override val state: StateFlow<MainState> = combine(
-        pkgsFlow,
+        packageRepository.getPackagesFlow(),
         blocklistRepository.getBlocklist(),
         sortFilterModelFlow,
         extras,

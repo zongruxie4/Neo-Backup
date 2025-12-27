@@ -33,14 +33,11 @@ import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
-import com.machiav3lli.backup.utils.toPackageList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -54,14 +51,9 @@ class AppVM(
 ) : NeoViewModel() {
     private val packageName: MutableStateFlow<String> = MutableStateFlow("")
 
-    private val pkgsFlow: Flow<List<Package>> = combine(
-        packageRepository.getAppInfosFlow(),
-        packageRepository.getBackupsListFlow(),
-    ) { appInfos, bkps -> appInfos.toPackageList(NeoApp.context) }
-
     val pkg = combine(
         packageName,
-        pkgsFlow,
+        packageRepository.getPackagesFlow(),
         packageRepository.getBackupsListFlow(),
     ) { name, pkgs, bkups ->
         pkgs.find { it.packageName == name }

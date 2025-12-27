@@ -18,11 +18,9 @@
 package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.viewModelScope
-import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.entity.MainState
-import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.data.preferences.NeoPrefs
 import com.machiav3lli.backup.data.repository.AppExtrasRepository
@@ -33,15 +31,12 @@ import com.machiav3lli.backup.ui.pages.pref_newAndUpdatedNotification
 import com.machiav3lli.backup.utils.applyFilter
 import com.machiav3lli.backup.utils.applySearch
 import com.machiav3lli.backup.utils.extensions.combine
-import com.machiav3lli.backup.utils.toPackageList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -66,13 +61,8 @@ class HomeVM(
             emptyList()
         )
 
-    private val pkgsFlow: Flow<List<Package>> = combine(
-        packageRepository.getAppInfosFlow(),
-        packageRepository.getBackupsListFlow(),
-    ) { appInfos, bkps -> appInfos.toPackageList(NeoApp.context) }
-
     override val state: StateFlow<MainState> = combine(
-        pkgsFlow,
+        packageRepository.getPackagesFlow(),
         blocklistRepository.getBlocklist(),
         homeSortFilterModelFlow,
         extras,
