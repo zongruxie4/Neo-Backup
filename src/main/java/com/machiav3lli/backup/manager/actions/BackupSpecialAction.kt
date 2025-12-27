@@ -34,7 +34,7 @@ import java.io.File
 
 class BackupSpecialAction(context: Context, work: AppActionWork?, shell: ShellHandler) :
     BackupAppAction(context, work, shell) {
-    override suspend fun run(app: Package, backupMode: Int): ActionResult {
+    override fun run(app: Package, backupMode: Int): ActionResult {
         if (backupMode and MODE_APK == MODE_APK) {
             Timber.e("Special contents don't have APKs to backup. Ignoring")
         }

@@ -84,7 +84,7 @@ import java.io.OutputStream
 open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellHandler) :
     BaseAppAction(context, work, shell) {
 
-    open suspend fun run(app: Package, backupMode: Int): ActionResult {
+    open fun run(app: Package, backupMode: Int): ActionResult {
         var backup: Backup? = null
         var ok = false
         val fakeSeconds = pref_fakeBackupSeconds.value

@@ -58,6 +58,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.java.KoinJavaComponent.get
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
@@ -560,7 +561,7 @@ suspend fun scanBackups(
     directoryCache.clear()
 }
 
-suspend fun Context.findBackups(
+fun Context.findBackups(
     packageName: String = "",
     damagedOp: DamagedOp? = null,
     forceTrace: Boolean = false,
@@ -601,34 +602,36 @@ suspend fun Context.findBackups(
 
         //val count = AtomicInteger(0)
         //------------------------------------------------------------------------------ scan
-        backupRoot?.let {
-            scanBackups(
-                directory = it,
-                packageName = packageName,
-                backupRoot = it,
-                damagedOp = damagedOp,
-                forceTrace = forceTrace,
-                onValidBackup = { props ->
-                    //count.getAndIncrement()
-                    Backup.createFrom(props)
-                        ?.let { backup ->
-                            //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
-                            backupsMap.getOrPut(backup.packageName) { mutableListOf() }
-                                .add(backup)
-                        }
-                },
-                onInvalidBackup = { dir: StorageFile, props: StorageFile?, packageName: String?, why: String? ->
-                    //count.getAndIncrement()
-                    if (pref_createInvalidBackups.value) {
-                        Backup.createInvalidFrom(dir, props, packageName, why)
+        runBlocking {
+            backupRoot?.let {
+                scanBackups(
+                    directory = it,
+                    packageName = packageName,
+                    backupRoot = it,
+                    damagedOp = damagedOp,
+                    forceTrace = forceTrace,
+                    onValidBackup = { props ->
+                        //count.getAndIncrement()
+                        Backup.createFrom(props)
                             ?.let { backup ->
                                 //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
                                 backupsMap.getOrPut(backup.packageName) { mutableListOf() }
                                     .add(backup)
                             }
+                    },
+                    onInvalidBackup = { dir: StorageFile, props: StorageFile?, packageName: String?, why: String? ->
+                        //count.getAndIncrement()
+                        if (pref_createInvalidBackups.value) {
+                            Backup.createInvalidFrom(dir, props, packageName, why)
+                                ?.let { backup ->
+                                    //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
+                                    backupsMap.getOrPut(backup.packageName) { mutableListOf() }
+                                        .add(backup)
+                                }
+                        }
                     }
-                }
-            )
+                )
+            }
         }
         //traceDebug { "-----------------------------------------> backups: $count" }
 

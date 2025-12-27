@@ -152,12 +152,12 @@ data class Package private constructor(val packageName: String) {
         return true
     }
 
-    suspend fun getBackupsFromBackupDir(): List<Backup> {
+    fun getBackupsFromBackupDir(): List<Backup> {
         // TODO hg42 may also find glob *packageName* for now so we need to take the correct package
         return NeoApp.context.findBackups(packageName)[packageName] ?: emptyList()
     }
 
-    suspend fun refreshBackupList() {
+    fun refreshBackupList() {
         traceBackups { "<$packageName> refreshbackupList" }
         val backups = getBackupsFromBackupDir()
         setBackupList(backups)
@@ -230,7 +230,7 @@ data class Package private constructor(val packageName: String) {
         })
     }
 
-    suspend fun addNewBackup(backup: Backup) {
+    fun addNewBackup(backup: Backup) {
         traceBackups { "<${backup.packageName}> add backup ${backup.backupDate}" }
         if (pref_paranoidBackupLists.value)
             refreshBackupList()  // no more necessary, because members file/dir/tag are set by createBackup
@@ -257,13 +257,13 @@ data class Package private constructor(val packageName: String) {
             }
     }
 
-    suspend fun deleteBackup(backup: Backup) {
+    fun deleteBackup(backup: Backup) {
         _deleteBackup(backup)
         if (pref_paranoidBackupLists.value)
-            runSuspendOrLog { refreshBackupList() }                // get real state of file system
+            runOrLog { refreshBackupList() }                // get real state of file system
     }
 
-    suspend fun rewriteBackup(
+    fun rewriteBackup(
         backup: Backup,
         changedBackup: Backup,
     ) {      //TODO hg42 change to rewriteBackup(backup: Backup, applyParameters)
@@ -284,13 +284,13 @@ data class Package private constructor(val packageName: String) {
             }
         }
         if (pref_paranoidBackupLists.value)
-            runSuspendOrLog { refreshBackupList() }                // get real state of file system
+            runOrLog { refreshBackupList() }                // get real state of file system
         else {
             replaceBackupFromList(backup, changedBackup)
         }
     }
 
-    suspend fun deleteAllBackups() {
+    fun deleteAllBackups() {
         val backups = backupsNewestFirst.toMutableList()
         while (backups.isNotEmpty()) {
             backups.removeLastOrNull()?.let { backup ->
@@ -298,7 +298,7 @@ data class Package private constructor(val packageName: String) {
             }
         }
         if (pref_paranoidBackupLists.value)
-            runSuspendOrLog { refreshBackupList() }                // get real state of file system only once
+            runOrLog { refreshBackupList() }                // get real state of file system only once
     }
 
     fun deleteOldestBackups(keep: Int) {

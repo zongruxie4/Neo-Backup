@@ -84,7 +84,7 @@ import java.util.regex.Pattern
 
 open class RestoreAppAction(context: Context, work: AppActionWork?, shell: ShellHandler) :
     BaseAppAction(context, work, shell) {
-    suspend fun run(
+    fun run(
         app: Package,
         backup: Backup,
         backupMode: Int,
