@@ -33,6 +33,7 @@ import com.machiav3lli.backup.PREFS_SHARED_PRIVATE
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
+import com.machiav3lli.backup.manager.tasks.RefreshBackupsWorker
 import com.machiav3lli.backup.ui.pages.persist_salt
 import com.machiav3lli.backup.ui.pages.pref_allowDowngrade
 import com.machiav3lli.backup.ui.pages.pref_appAccentColor
@@ -59,10 +60,6 @@ import com.machiav3lli.backup.ui.pages.pref_restoreExternalData
 import com.machiav3lli.backup.ui.pages.pref_restoreMediaData
 import com.machiav3lli.backup.ui.pages.pref_restoreObbData
 import com.machiav3lli.backup.ui.pages.pref_shadowRootFile
-import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 import java.util.Locale
 
@@ -164,9 +161,7 @@ fun setBackupDir(uri: Uri): String {
         if (fullUri.scheme == "file" || fullUri.scheme == null)
             if (!pref_shadowRootFile.value) // prevent recursion
                 pref_shadowRootFile.value = true
-        CoroutineScope(Dispatchers.IO).launch {
-            invalidateBackupLocation()
-        }
+        RefreshBackupsWorker.enqueueFullRefresh()
     }
     return fullUriString
 }

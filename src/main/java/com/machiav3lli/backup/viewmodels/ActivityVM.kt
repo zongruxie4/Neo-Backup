@@ -7,7 +7,7 @@ import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.preferences.NeoPrefs
 import com.machiav3lli.backup.data.repository.BlocklistRepository
 import com.machiav3lli.backup.data.repository.PackageRepository
-import com.machiav3lli.backup.utils.FileUtils.invalidateBackupLocation
+import com.machiav3lli.backup.manager.tasks.RefreshBackupsWorker
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -48,8 +48,14 @@ class ActivityVM(
     }
 
     fun refreshBackups() {
-        viewModelScope.launch {
-            invalidateBackupLocation()
-        }
+        RefreshBackupsWorker.enqueueFullRefresh()
+    }
+
+    fun refreshPackageBackups(packageName: String) {
+        RefreshBackupsWorker.enqueueSinglePackageRefresh(packageName)
+    }
+
+    fun cancelRefresh() {
+        RefreshBackupsWorker.cancelAllRefresh()
     }
 }
