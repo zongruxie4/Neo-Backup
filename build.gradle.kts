@@ -172,6 +172,7 @@ dependencies {
     // Compose
     api(platform(libs.compose.bom))
     implementation(libs.compose.runtime)
+    implementation(libs.compose.runtime.tracing)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling)
     implementation(libs.compose.ui.tooling.preview)

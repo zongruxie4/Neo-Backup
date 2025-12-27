@@ -1,11 +1,11 @@
 [versions]
-activity = "1.12.1"
+activity = "1.12.2"
 agp = "8.13.2"
 biometric = "1.2.0-alpha05"
 coil = "2.7.0"
 commons-compress = "1.28.0"
 commons-io = "2.21.0"
-compose-bom = "2025.10.00"
+compose-bom = "2025.12.01"
 compose = "1.10.0"
 compose-accompanist = "0.37.3"
 compose-markdown = "0.5.7"
@@ -83,6 +83,7 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-runtime = { module = "androidx.compose.runtime:runtime" }
+compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing" }
 compose-ui = { module = "androidx.compose.ui:ui" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
