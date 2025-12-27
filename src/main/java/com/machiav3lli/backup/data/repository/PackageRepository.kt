@@ -9,8 +9,13 @@ import com.machiav3lli.backup.data.entity.BackupsCache
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.manager.handler.LogsHandler
 import com.machiav3lli.backup.manager.handler.ShellCommands
+import com.machiav3lli.backup.utils.toPackageList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 @OptIn(FlowPreview::class)
@@ -19,25 +24,31 @@ class PackageRepository(
     private val appContext: Application,
     private val backupsCache: BackupsCache,
 ) {
+    private val cc = Dispatchers.IO
+
     fun getBackupsFlow(): Flow<Map<String, List<Backup>>> =
-        backupsCache.observeBackupsMap()
+        backupsCache.observeBackupsMap().flowOn(cc)
+
+    fun getBackupsListFlow(): Flow<List<Backup>> =
+        backupsCache.observeBackupsList().flowOn(cc)
+
+    fun getBackupsFlow(packageName: String): Flow<List<Backup>> =
+        backupsCache.observeBackups(packageName).flowOn(cc)
 
     fun getBackupsMap(): Map<String, List<Backup>> =
         backupsCache.getBackupsMap()
 
-    fun getBackupsListFlow(): Flow<List<Backup>> =
-        backupsCache.observeBackupsList()
-
     fun getBackupsList(): List<Backup> =
         backupsCache.getBackupsList()
-
-    fun getBackupsFlow(packageName: String): Flow<List<Backup>> =
-        backupsCache.observeBackups(packageName)
 
     fun getBackups(packageName: String): List<Backup> =
         backupsCache.getBackups(packageName)
 
-    fun getAppInfosFlow() = dao.getAllFlow()
+    fun getPackagesFlow(): Flow<List<Package>> = combine(
+        dao.getAllFlow(),
+        backupsCache.observeBackupsList(),
+    ) { appInfos, bkps -> appInfos.toPackageList(appContext) }
+        .flowOn(cc)
 
     suspend fun updatePackage(packageName: String) {
         Package.invalidateCacheForPackage(packageName)
@@ -58,17 +69,21 @@ class PackageRepository(
     suspend fun replaceAppInfos(vararg appInfos: AppInfo) =
         dao.updateList(*appInfos)
 
-    suspend fun updatePackageBackups(packageName: String, backups: List<Backup>) =
+    fun updatePackageBackups(packageName: String, backups: List<Backup>) = runBlocking(cc) {
         backupsCache.updateBackups(packageName, backups)
+    }
 
-    suspend fun replaceAllBackups(backups: List<Backup>) =
+    fun replaceAllBackups(backups: List<Backup>) = runBlocking(cc) {
         backupsCache.replaceAll(backups)
+    }
 
-    suspend fun emptyBackupsTable() =
+    fun emptyBackupsTable() = runBlocking(cc) {
         backupsCache.clear()
+    }
 
-    suspend fun deleteBackupsOf(packageNames: List<String>) =
+    fun deleteBackupsOf(packageNames: List<String>) = runBlocking(cc) {
         backupsCache.removeAll(packageNames)
+    }
 
     suspend fun rewriteBackup(pkg: Package?, backup: Backup, changedBackup: Backup) {
         pkg?.rewriteBackup(backup, changedBackup)

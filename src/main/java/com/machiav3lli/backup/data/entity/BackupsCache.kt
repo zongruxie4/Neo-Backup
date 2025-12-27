@@ -1,117 +1,80 @@
 package com.machiav3lli.backup.data.entity
 
 import com.machiav3lli.backup.data.dbs.entity.Backup
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.ConcurrentHashMap
 
 class BackupsCache {
-    private val dispatcher = Dispatchers.Default
-    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
-    private val backupsMap = MutableStateFlow(mapOf<String, List<Backup>>())
+    private val backupsMap = ConcurrentHashMap<String, List<Backup>>()
+    private val mutex = Mutex()
+    private val _updateTrigger = MutableStateFlow(0L)
 
-    fun observeBackupsMap(): Flow<Map<String, List<Backup>>> = backupsMap
-        .debounce { 500L }
-        .flowOn(dispatcher)
+    fun observeBackupsMap(): Flow<Map<String, List<Backup>>> =
+        _updateTrigger.asStateFlow().map { backupsMap.toMap() }
 
     fun observeBackupsList(): Flow<List<Backup>> =
-        backupsMap.map { it.values.flatten() }
-            .flowOn(dispatcher)
+        _updateTrigger.asStateFlow().map { backupsMap.values.flatten() }
 
     fun observeBackups(packageName: String): Flow<List<Backup>> =
-        backupsMap.map { it[packageName] ?: emptyList() }
-            .flowOn(dispatcher)
+        _updateTrigger.asStateFlow().map { backupsMap[packageName] ?: emptyList() }
 
     fun getBackups(packageName: String): List<Backup> =
-        backupsMap.value[packageName] ?: emptyList()
+        backupsMap[packageName] ?: emptyList()
 
-    fun getBackupsMap(): Map<String, List<Backup>> = backupsMap.value
+    fun getBackupsMap(): Map<String, List<Backup>> = backupsMap.toMap()
 
-    fun getBackupsList(): List<Backup> = backupsMap.value.values.flatten()
+    fun getBackupsList(): List<Backup> = backupsMap.values.flatten()
 
     // SYNC SETTERS
-    suspend fun updateBackups(packageName: String, backups: List<Backup>) =
-        withContext(dispatcher) {
-            backupsMap.update {
-                it.toMutableMap().apply {
-                    put(packageName, backups)
-                }
-            }
-        }
-
-    suspend fun replaceAll(backups: List<Backup>) = withContext(dispatcher) {
-        backupsMap.update { backups.groupBy { it.packageName } }
-    }
-
-    suspend fun remove(packageName: String) = withContext(dispatcher) {
-        backupsMap.update {
-            it.toMutableMap().apply {
-                remove(packageName)
-            }
+    suspend fun updateBackups(packageName: String, backups: List<Backup>) {
+        mutex.withLock {
+            backupsMap[packageName] = backups
+            triggerUpdate()
         }
     }
 
-    suspend fun removeAll(packageNames: List<String>) = withContext(dispatcher) {
-        backupsMap.update {
-            it.toMutableMap().apply {
-                for (pn in packageNames) {
-                    remove(pn)
-                }
-            }
+    suspend fun replaceAll(backups: List<Backup>) {
+        mutex.withLock {
+            backupsMap.clear()
+            backupsMap.putAll(backups.groupBy { it.packageName })
+            triggerUpdate()
         }
     }
 
-    suspend fun clear() = withContext(dispatcher) {
-        backupsMap.update { emptyMap() }
-    }
-
-    // ASYNC SETTERS
-    fun updateBackupsAsync(packageName: String, backups: List<Backup>) = scope.launch {
-        backupsMap.update {
-            it.toMutableMap().apply {
-                put(packageName, backups)
-            }
+    suspend fun remove(packageName: String) {
+        mutex.withLock {
+            backupsMap.remove(packageName)
+            triggerUpdate()
         }
     }
 
-    fun replaceAllAsync(backups: List<Backup>) = scope.launch {
-        backupsMap.update { backups.groupBy { it.packageName } }
-    }
-
-    fun removeAsnyc(packageName: String) = scope.launch {
-        backupsMap.update {
-            it.toMutableMap().apply {
-                remove(packageName)
-            }
+    suspend fun removeAll(packageNames: List<String>) {
+        mutex.withLock {
+            packageNames.forEach { backupsMap.remove(it) }
+            triggerUpdate()
         }
     }
 
-    fun removeAllAsync(packageNames: List<String>) = scope.launch {
-        backupsMap.update {
-            it.toMutableMap().apply {
-                for (pn in packageNames) {
-                    remove(pn)
-                }
-            }
+    suspend fun clear() {
+        mutex.withLock {
+            backupsMap.clear()
+            triggerUpdate()
         }
     }
 
-    fun clearAsync() = scope.launch {
-        backupsMap.update { emptyMap() }
+    private fun triggerUpdate() {
+        _updateTrigger.value = System.currentTimeMillis()
     }
 
     // SPECIAL GETTERS
-    fun hasBackups(packageName: String): Boolean = backupsMap.value.containsKey(packageName)
+    fun hasBackups(packageName: String): Boolean = backupsMap.containsKey(packageName)
 
-    fun getBackupsCount(): Int = backupsMap.value.values.sumOf { it.size }
+    fun getBackupsCount(): Int = backupsMap.values.sumOf { it.size }
 
-    fun getPackagesWithBackups(): Set<String> = backupsMap.value.keys
+    fun getPackagesWithBackups(): Set<String> = backupsMap.keys
 }
