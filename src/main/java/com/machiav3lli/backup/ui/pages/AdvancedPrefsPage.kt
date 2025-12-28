@@ -48,6 +48,7 @@ import com.machiav3lli.backup.ui.compose.component.TextInput
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AndroidLogo
 import com.machiav3lli.backup.ui.compose.icons.phosphor.AsteriskSimple
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Clock
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ShieldStar
@@ -55,6 +56,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Warning
 import com.machiav3lli.backup.ui.compose.mix
 import com.machiav3lli.backup.utils.SystemUtils.numCores
 import com.machiav3lli.backup.utils.extensions.Android
+import com.machiav3lli.backup.utils.scheduleAlarmsOnce
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
@@ -322,12 +324,6 @@ val pref_showInfoLogBar = BooleanPref(
 val pref_useAlarmClock = BooleanPref(
     key = "dev-adv.useAlarmClock",
     summaryId = R.string.prefs_usealarmclock_summary,
-    defaultValue = false
-)
-
-val pref_useExactAlarm = BooleanPref(
-    key = "dev-adv.useExactAlarm",
-    summaryId = R.string.prefs_useexactalarm_summary,
     defaultValue = false
 )
 
@@ -649,6 +645,14 @@ val pref_allowDowngrade = BooleanPref(
     defaultValue = false
 )
 
+val pref_useExactAlarm = BooleanPref(
+    key = "adv.useExactAlarm",
+    titleId = R.string.prefs_useexactalarm_title,
+    summaryId = R.string.prefs_useexactalarm_summary,
+    icon = Phosphor.Clock,
+    defaultValue = true,
+    onChanged = { scheduleAlarmsOnce(NeoApp.context) }
+)
 
 //---------------------------------------- values that should persist for internal purposes (no UI)
 

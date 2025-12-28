@@ -192,7 +192,7 @@
     <string name="prefs_usecolumnnamesaf_summary" translatable="false">eventually disable this, if you have problems with SAF storage</string>
     <string name="prefs_cancelonstart_summary" translatable="false">cancel all remaining jobs on OAndBackupX start [needs reboot]</string>
     <string name="prefs_usealarmclock_summary" translatable="false">use the alarm clock to schedule backups, this shows an alarm icon in the notification bar [needs reboot]</string>
-    <string name="prefs_useexactalarm_summary" translatable="false">if not using useAlarmClock, then use exact alarms, otherwise use inexact alarms which may be better for battery [needs reboot]</string>
+    <string name="prefs_useexactalarm_summary">if not using useAlarmClock, then use exact alarms, otherwise use inexact alarms which may be better for battery</string>
     <string name="prefs_backuptarcmd_summary" translatable="false">use tar shell command for backup</string>
     <string name="prefs_restoretarcmd_summary" translatable="false">use tar shell command for restore</string>
     <string name="prefs_stricthardlinks_summary" translatable="false">for API tar only: unpack hard links as hard links (otherwise they become symlinks)</string>
@@ -503,4 +503,5 @@
     <string name="refresh_failed">Refresh failed</string>
     <string name="backupdir_inaccessible">Backup location is not accessible</string>
     <string name="unknown_error">Unknown error</string>
+    <string name="prefs_useexactalarm_title">Use exact alarm for schedules</string>
 </resources>
