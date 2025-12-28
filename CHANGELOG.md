@@ -1,6 +1,47 @@
 CHANGELOG
 =========
 
+8.3.15 (28.12.2025) +70 Commits, +20 Translations
+------------
+
+### Function
+
+- Add: SchedulerState and ScheduleState to respective VM and page
+- Add: Check if available storage enough for backup
+- Add: Checkroot alt-variants (for user-testing)
+- Add: Worker to refresh backups
+- Fix: Reduce checkroot false-negatives
+- Fix: Removing lock page from stack when unlocked
+- Update: Run ScheduleWork directly from ScheduleReceiver bridging ScheduleService out
+- Update: Migrate navigation management to Nav3
+- Update: Split MainVM workload into 4 VMs
+- Update: Make Blocklist entity more stable
+- Update: Improve blocklist repository flows
+- Update: Make VM-states compose-compiler-stable
+- Update: Revamp CoroutinesAsyncTask and relevant classes
+- Update: Simplify package icon composable
+- Update: Move setting to exact schedules to advanced settings
+- Update: Revamp PackageRepository abstracting BackupsCache and moving collection to VMs
+- Update: Collect flow instead of forwarding viemodel in tools
+- Update: Move secondary functions out of BackendController to BackendUtils or PackageInfo extension
+- Update: Rebase Home context menu to avoid injecting view models
+- Update: Move notification channel creation into WorkHandler
+- Update: Reduce recompositions of recyclers where possible
+- Remove: ScheduleService
+
+### UI & UX
+
+- Add: Random name for new schedules
+- Update: Revamp root missing page
+- Update: Simplify multiple UI components
+- Update: Revamp expandable block layout
+- Update: Revamp button and chip layouts
+- Update: Fix back-navigation icon on secondary pages
+- Update: Revamp sort filter sheet top bar
+- Update: Info page links to point to codeberg where needed
+- Update: Separate enabled and disabled schedule lists
+- Remove: Animated background option
+
 8.3.14 (17.10.2025) +5 Commits, +10 Translations
 ------------
 
