@@ -35,9 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.ui.pages.pref_busyFadeTime
-import com.machiav3lli.backup.ui.pages.pref_busyLaserBackground
 import com.machiav3lli.backup.ui.pages.pref_busyTurnTime
-import com.machiav3lli.backup.ui.pages.pref_fullScreenBackground
 import com.machiav3lli.backup.ui.pages.pref_versionOpacity
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.SystemUtils.applicationIssuer
@@ -208,7 +206,7 @@ fun BusyBackground(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        if (pref_busyLaserBackground.value)
+        if (false)
             BusyBackgroundAnimated(busy = isBusy, content = content)
         else
             BusyBackgroundColor(busy = isBusy, content = content)
@@ -225,7 +223,7 @@ fun FullScreenBackground(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        if (pref_fullScreenBackground.value)
+        if (false)
             BusyBackground(modifier = modifier, content = content)
         else
             content()

@@ -425,12 +425,6 @@ val pref_ignoreLockedInHousekeeping = BooleanPref(
     defaultValue = false
 )
 
-val pref_fullScreenBackground = BooleanPref(
-    key = "dev-alt.fullScreenBackground",
-    summary = "extend background (laser, version) to fullscreen",
-    defaultValue = false
-)
-
 val pref_restartAppOnLanguageChange = BooleanPref(
     key = "dev-alt.restartAppOnLanguageChange",
     summary = "create human readable yaml format for preferences",
