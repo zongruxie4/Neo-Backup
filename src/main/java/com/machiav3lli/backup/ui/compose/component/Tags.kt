@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,7 +58,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.icons.phosphor.XCircle
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagsBlock(
     modifier: Modifier = Modifier,
@@ -230,7 +229,6 @@ fun AddTagView(
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
 @Preview
 @Composable
 fun NoteTagItemPreview() {

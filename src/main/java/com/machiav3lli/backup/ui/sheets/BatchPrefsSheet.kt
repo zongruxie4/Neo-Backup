@@ -24,8 +24,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import com.machiav3lli.backup.data.entity.Pref
+import com.machiav3lli.backup.ui.compose.component.PrefsGroup
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 

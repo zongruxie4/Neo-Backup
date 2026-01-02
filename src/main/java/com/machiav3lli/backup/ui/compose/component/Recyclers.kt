@@ -2,7 +2,6 @@ package com.machiav3lli.backup.ui.compose.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -235,7 +234,6 @@ fun LogRecycler(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InfoChipsBlock(
     modifier: Modifier = Modifier,
@@ -264,7 +262,6 @@ fun InfoChipsBlock(
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SelectableChipGroup(
     //TODO hg42 move to item/Icons.kt ?
@@ -288,7 +285,6 @@ fun SelectableChipGroup(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MultiSelectableChipGroup(
     //TODO hg42 move to item/Icons.kt ?
@@ -312,7 +308,6 @@ fun MultiSelectableChipGroup(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MultiSelectableChipGroup(
     modifier: Modifier = Modifier,

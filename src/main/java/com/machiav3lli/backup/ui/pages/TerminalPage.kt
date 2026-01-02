@@ -17,7 +17,6 @@
  */
 package com.machiav3lli.backup.ui.pages
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Environment
 import android.os.Process
@@ -28,7 +27,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -586,8 +584,6 @@ fun TerminalText(
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TerminalPage(
     title: String? = null,
@@ -614,8 +610,6 @@ fun TerminalPage(
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Terminal(
     modifier: Modifier = Modifier,

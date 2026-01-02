@@ -19,7 +19,6 @@ package com.machiav3lli.backup.ui.pages
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -45,7 +44,6 @@ import com.topjohnwu.superuser.Shell
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrefsPage(
     navigateUp: () -> Unit,
