@@ -17,28 +17,22 @@
  */
 package com.machiav3lli.backup.ui.pages
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,11 +64,9 @@ import com.machiav3lli.backup.ui.compose.theme.ColorData
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
-import com.machiav3lli.backup.ui.sheets.BatchPrefsSheet
-import com.machiav3lli.backup.ui.sheets.SortFilterSheet
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.viewmodels.BatchVM
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,12 +75,9 @@ fun BatchPage(
     backupBoolean: Boolean
 ) {
     val main = LocalActivity.current as NeoActivity
-    val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsState()
-    val scaffoldState = rememberBottomSheetScaffoldState()
     val openBatchDialog = remember { mutableStateOf(false) }
     val openBlocklist = rememberSaveable { mutableStateOf(false) }
-    val prefsNotFilter = remember { mutableStateOf(false) }
 
     val allApkChecked by remember(state.filteredPackages, viewModel.apkBackupCheckedList) {
         derivedStateOf {
@@ -115,37 +104,9 @@ fun BatchPage(
         } language=${pref_languages.value}"
     }
 
-    BackHandler(scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-        scope.launch { scaffoldState.bottomSheetState.partialExpand() }
-    }
-
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = 0.dp,
-        sheetDragHandle = null,
+    Scaffold(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-        sheetShape = MaterialTheme.shapes.extraSmall,
-        sheetContent = {
-            // bottom sheets even recomposit when hidden
-            // which is bad when they contain live content
-            if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
-                if (prefsNotFilter.value) BatchPrefsSheet(backupBoolean)
-                else SortFilterSheet(
-                    viewModel = viewModel,
-                    onDismiss = {
-                        scope.launch {
-                            scaffoldState.bottomSheetState.partialExpand()
-                        }
-                    },
-                )
-            } else {
-                // inexpensive and small placeholder while hidden
-                // necessary because empty sheets are kept hidden
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        },
         topBar = {
             Column {
                 Row(
@@ -168,10 +129,10 @@ fun BatchPage(
                         positive = true,
                         fullWidth = true,
                     ) {
-                        scope.launch {
-                            prefsNotFilter.value = false
-                            scaffoldState.bottomSheetState.expand()
-                        }
+                        main.navigateSortFilterSheet(
+                            if (backupBoolean) NavItem.Backup
+                            else NavItem.Restore
+                        )
                     }
                 }
                 HorizontalDivider(
@@ -180,10 +141,11 @@ fun BatchPage(
                 )
             }
         }
-    ) {
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
         ) {
             BatchPackageRecycler(
                 modifier = Modifier
@@ -273,10 +235,7 @@ fun BatchPage(
                     }
                 }
                 RoundButton(icon = Phosphor.Nut) {
-                    scope.launch {
-                        prefsNotFilter.value = true
-                        scaffoldState.bottomSheetState.expand()
-                    }
+                    main.navigateBatchPrefsSheet(backupBoolean)
                 }
                 ActionButton(
                     text = stringResource(id = if (backupBoolean) R.string.backup else R.string.restore),

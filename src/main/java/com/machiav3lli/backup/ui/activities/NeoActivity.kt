@@ -71,6 +71,7 @@ import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.DialogKey
 import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
 import com.machiav3lli.backup.ui.navigation.AppNavDisplay
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.ui.navigation.NavRoute
 import com.machiav3lli.backup.ui.navigation.navigateUnique
 import com.machiav3lli.backup.ui.pages.RootMissing
@@ -572,6 +573,14 @@ class NeoActivity : BaseActivity() {
                 .beginWith(worksList)
                 .enqueue()
         }
+    }
+
+    internal fun navigateSortFilterSheet(page: NavItem) {
+        navStack.navigateUnique(NavRoute.SortFilter(page.destination))
+    }
+
+    internal fun navigateBatchPrefsSheet(backup: Boolean) {
+        navStack.navigateUnique(NavRoute.BatchPrefs(backup))
     }
 
     fun resumeMain() {

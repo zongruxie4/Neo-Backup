@@ -24,12 +24,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -37,14 +34,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -86,7 +81,7 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
 import com.machiav3lli.backup.ui.dialogs.BaseDialog
 import com.machiav3lli.backup.ui.dialogs.BatchActionDialogUI
 import com.machiav3lli.backup.ui.dialogs.GlobalBlockListDialogUI
-import com.machiav3lli.backup.ui.sheets.SortFilterSheet
+import com.machiav3lli.backup.ui.navigation.NavItem
 import com.machiav3lli.backup.utils.altModeToMode
 import com.machiav3lli.backup.utils.extensions.IconCache
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
@@ -102,7 +97,6 @@ fun HomePage(
     // TODO include tags in search
     val mActivity = LocalActivity.current as NeoActivity
     val scope = rememberCoroutineScope()
-    val scaffoldState = rememberBottomSheetScaffoldState()
     val paneNavigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val mainState by viewModel.state.collectAsState()
@@ -137,8 +131,8 @@ fun HomePage(
 
     val onPackageClick: (Package) -> Unit = { item ->
         if (mainState.filteredPackages.none {
-            it.packageName in mainState.selection
-        }) {
+                it.packageName in mainState.selection
+            }) {
             scope.launch {
                 paneNavigator.navigateTo(
                     ListDetailPaneScaffoldRole.Detail,
@@ -172,40 +166,13 @@ fun HomePage(
         mActivity.moveTaskToBack(true)
     }
 
-    BackHandler(scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-        scope.launch { scaffoldState.bottomSheetState.partialExpand() }
-    }
-
     NavigableListDetailPaneScaffold(
         navigator = paneNavigator,
         listPane = {
             AnimatedPane {
-                BottomSheetScaffold(
-                    scaffoldState = scaffoldState,
-                    sheetPeekHeight = 0.dp,
-                    sheetDragHandle = null,
+                Scaffold(
                     containerColor = Color.Transparent,
                     contentColor = MaterialTheme.colorScheme.onBackground,
-                    sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    sheetShape = MaterialTheme.shapes.extraSmall,
-                    sheetContent = {
-                        // bottom sheets even recomposit when hidden
-                        // which is bad when they contain live content
-                        if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
-                            SortFilterSheet(
-                                viewModel = viewModel,
-                                onDismiss = {
-                                    scope.launch {
-                                        scaffoldState.bottomSheetState.partialExpand()
-                                    }
-                                },
-                            )
-                        } else {
-                            // inexpensive and small placeholder while hidden
-                            // necessary because empty sheets are kept hidden
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    },
                     topBar = {
                         Column {
                             Row(
@@ -228,9 +195,7 @@ fun HomePage(
                                     positive = true,
                                     fullWidth = true,
                                 ) {
-                                    scope.launch {
-                                        scaffoldState.bottomSheetState.expand()
-                                    }
+                                    mActivity.navigateSortFilterSheet(NavItem.Home)
                                 }
                             }
                             HorizontalDivider(
@@ -238,131 +203,129 @@ fun HomePage(
                                 modifier = Modifier.padding(horizontal = 8.dp),
                             )
                         }
-                    }
-                ) {
-                    Scaffold(
-                        containerColor = Color.Transparent,
-                        floatingActionButton = {
-                            if (mainState.selection.isNotEmpty() || updaterVisible || menuButtonAlwaysVisible) {
-                                Row(
-                                    modifier = Modifier.padding(start = 28.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    if (updaterVisible) {
-                                        ExpandingFadingVisibility(
-                                            expanded = updaterExpanded,
-                                            expandedView = {
-                                                Column {
-                                                    Row(
-                                                        modifier = Modifier.padding(4.dp),
-                                                        horizontalArrangement = Arrangement.spacedBy(
-                                                            8.dp
-                                                        )
+                    },
+                    floatingActionButton = {
+                        if (mainState.selection.isNotEmpty() || updaterVisible || menuButtonAlwaysVisible) {
+                            Row(
+                                modifier = Modifier.padding(start = 28.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                if (updaterVisible) {
+                                    ExpandingFadingVisibility(
+                                        expanded = updaterExpanded,
+                                        expandedView = {
+                                            Column {
+                                                Row(
+                                                    modifier = Modifier.padding(4.dp),
+                                                    horizontalArrangement = Arrangement.spacedBy(
+                                                        8.dp
+                                                    )
+                                                ) {
+                                                    ActionButton(
+                                                        text = stringResource(id = R.string.backup_all_updated),
+                                                        icon = Phosphor.ArchiveTray,
+                                                        modifier = Modifier.weight(1f),
+                                                        positive = true,
                                                     ) {
-                                                        ActionButton(
-                                                            text = stringResource(id = R.string.backup_all_updated),
-                                                            icon = Phosphor.ArchiveTray,
-                                                            modifier = Modifier.weight(1f),
-                                                            positive = true,
-                                                        ) {
-                                                            openBatchDialog.value = true
-                                                        }
-                                                        FilledRoundButton(
-                                                            description = stringResource(id = R.string.dialogCancel),
-                                                            icon = Phosphor.CaretDown,
-                                                        ) {
-                                                            updaterExpanded = !updaterExpanded
+                                                        openBatchDialog.value = true
+                                                    }
+                                                    FilledRoundButton(
+                                                        description = stringResource(id = R.string.dialogCancel),
+                                                        icon = Phosphor.CaretDown,
+                                                    ) {
+                                                        updaterExpanded = !updaterExpanded
+                                                    }
+                                                }
+                                                UpdatedPackageRecycler(
+                                                    productsList = mainState.updatedPackages,
+                                                    onClick = { item ->
+                                                        scope.launch {
+                                                            paneNavigator.navigateTo(
+                                                                ListDetailPaneScaffoldRole.Detail,
+                                                                item.packageName
+                                                            )
                                                         }
                                                     }
-                                                    UpdatedPackageRecycler(
-                                                        productsList = mainState.updatedPackages,
-                                                        onClick = { item ->
-                                                            scope.launch {
-                                                                paneNavigator.navigateTo(
-                                                                    ListDetailPaneScaffoldRole.Detail,
-                                                                    item.packageName
-                                                                )
-                                                            }
-                                                        }
-                                                    )
-                                                }
-                                            },
-                                            collapsedView = {
-                                                val text = pluralStringResource(
-                                                    id = R.plurals.updated_apps,
-                                                    count = mainState.updatedPackages.size,
-                                                    mainState.updatedPackages.size
-                                                )
-                                                ExtendedFloatingActionButton(
-                                                    text = { Text(text = text) },
-                                                    icon = {
-                                                        Icon(
-                                                            imageVector = if (updaterExpanded) Phosphor.CaretDown else Phosphor.CircleWavyWarning,
-                                                            contentDescription = text
-                                                        )
-                                                    },
-                                                    elevation = FloatingActionButtonDefaults.elevation(
-                                                        0.dp
-                                                    ),
-                                                    onClick = { updaterExpanded = !updaterExpanded }
                                                 )
                                             }
-                                        )
-                                    }
-                                    if (!(updaterVisible && updaterExpanded) &&
-                                        (mainState.selection.isNotEmpty() || menuButtonAlwaysVisible)
-                                    ) {
-                                        ExtendedFloatingActionButton(
-                                            text = { Text(text = mainState.selection.size.toString()) },
-                                            icon = {
-                                                Icon(
-                                                    imageVector = Phosphor.List,
-                                                    contentDescription = stringResource(id = R.string.context_menu)
-                                                )
-                                            },
-                                            onClick = {
-                                                menuExpanded.value = true
-                                            },
-                                        )
-                                    }
+                                        },
+                                        collapsedView = {
+                                            val text = pluralStringResource(
+                                                id = R.plurals.updated_apps,
+                                                count = mainState.updatedPackages.size,
+                                                mainState.updatedPackages.size
+                                            )
+                                            ExtendedFloatingActionButton(
+                                                text = { Text(text = text) },
+                                                icon = {
+                                                    Icon(
+                                                        imageVector = if (updaterExpanded) Phosphor.CaretDown else Phosphor.CircleWavyWarning,
+                                                        contentDescription = text
+                                                    )
+                                                },
+                                                elevation = FloatingActionButtonDefaults.elevation(
+                                                    0.dp
+                                                ),
+                                                onClick = { updaterExpanded = !updaterExpanded }
+                                            )
+                                        }
+                                    )
+                                }
+                                if (!(updaterVisible && updaterExpanded) &&
+                                    (mainState.selection.isNotEmpty() || menuButtonAlwaysVisible)
+                                ) {
+                                    ExtendedFloatingActionButton(
+                                        text = { Text(text = mainState.selection.size.toString()) },
+                                        icon = {
+                                            Icon(
+                                                imageVector = Phosphor.List,
+                                                contentDescription = stringResource(id = R.string.context_menu)
+                                            )
+                                        },
+                                        onClick = {
+                                            menuExpanded.value = true
+                                        },
+                                    )
                                 }
                             }
                         }
-                    ) {
-                        HomePackageRecycler(
-                            modifier = Modifier.fillMaxSize(),
-                            productsList = mainState.filteredPackages,
-                            selected = { mainState.selection.contains(it) },
-                            onLongClick = onPackageLongClick,
-                            onClick = onPackageClick,
-                        )
+                    }
+                ) { paddingValues ->
+                    HomePackageRecycler(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        productsList = mainState.filteredPackages,
+                        selected = { mainState.selection.contains(it) },
+                        onLongClick = onPackageLongClick,
+                        onClick = onPackageClick,
+                    )
 
-                        if (menuExpanded.value) {
-                            Box(
-                                modifier = Modifier     // necessary to move the menu on the whole screen
-                                    .fillMaxSize()
-                                    .wrapContentSize(Alignment.TopStart)
-                            ) {
-                                MainPackageContextMenu(
-                                    expanded = menuExpanded,
-                                    packageItem = menuPackage,
-                                    productsList = mainState.filteredPackages,
-                                    selection = mainState.selection,
-                                    blocklist = mainState.blocklist,
-                                    schedules = schedules,
-                                    toggleSelection = viewModel::toggleSelection,
-                                    onUpdateBlocklist = viewModel::updateBlocklist,
-                                    onUpdateSchedule = viewModel::updateSchedule,
-                                    openSheet = { item ->
-                                        scope.launch {
-                                            paneNavigator.navigateTo(
-                                                ListDetailPaneScaffoldRole.Detail,
-                                                item.packageName
-                                            )
-                                        }
+                    if (menuExpanded.value) {
+                        Box(
+                            modifier = Modifier     // necessary to move the menu on the whole screen
+                                .fillMaxSize()
+                                .wrapContentSize(Alignment.TopStart)
+                        ) {
+                            MainPackageContextMenu(
+                                expanded = menuExpanded,
+                                packageItem = menuPackage,
+                                productsList = mainState.filteredPackages,
+                                selection = mainState.selection,
+                                blocklist = mainState.blocklist,
+                                schedules = schedules,
+                                toggleSelection = viewModel::toggleSelection,
+                                onUpdateBlocklist = viewModel::updateBlocklist,
+                                onUpdateSchedule = viewModel::updateSchedule,
+                                openSheet = { item ->
+                                    scope.launch {
+                                        paneNavigator.navigateTo(
+                                            ListDetailPaneScaffoldRole.Detail,
+                                            item.packageName
+                                        )
                                     }
-                                )
-                            }
+                                }
+                            )
                         }
                     }
                 }
