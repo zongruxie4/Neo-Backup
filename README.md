@@ -37,9 +37,9 @@ Neo Backup (formerly OAndBackupX) is a fork of the famous OAndBackup with the ai
 * Backups can be scheduled with no limit on the number of individual schedules and there is the possibility of creating custom lists from the list of installed apps.
 * To find more info just visit the project's [FAQ](FAQ.md).
 
-### Upcoming plans :eyes: [<img align="right" src="get_taiga.svg" alt="Follow our project on Taiga" width="24%" />](https://tree.taiga.io/project/machiav3lli-neo-backup/kanban)
+### Upcoming plans :eyes: [<img align="right" src="check_codeberg.svg" alt="Follow our project on Codeberg" width="20%" />](https://codeberg.org/NeoApplications/Neo-Backup/projects/29324)
 
-We also have a Kanban board on Taiga where you can see our future plans. Feel free to contact us if you'd like to contribute to any of the planned changes.
+We now have a roadmap board on Codeberg, where you can see our future plans, comment them and see if you'd like to contribute to any of them.
 
 ## Screenshots :framed_picture:
 
