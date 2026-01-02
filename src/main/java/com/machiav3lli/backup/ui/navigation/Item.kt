@@ -127,5 +127,11 @@ sealed class NavRoute : NavKey {
     data object Info : NavRoute()
 
     @Serializable
+    data class SortFilter(val page: String) : NavRoute()
+
+    @Serializable
+    data class BatchPrefs(val backup: Boolean) : NavRoute()
+
+    @Serializable
     data class Prefs(val page: Int = 0) : NavRoute()
 }
