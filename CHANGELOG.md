@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+8.3.16 (03.01.2026) 10 Commits,  14 Translations
+------------
+
+### Function
+
+- Add: Scene overlays and respective strategy
+- Fix: Running ScheduleReceiver on reboot (credits @Jenna-66)
+- Update: Replace BottomSheetScaffold with Nav3 bottom sheet navigation
+
 8.3.15 (28.12.2025) +70 Commits, +20 Translations
 ------------
 

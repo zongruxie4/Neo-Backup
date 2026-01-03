@@ -49,8 +49,8 @@ android {
         applicationId = "com.machiav3lli.backup"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8328
-        versionName = "8.3.15"
+        versionCode = 8329
+        versionName = "8.3.16"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
         buildConfigField("String[]", "DETECTED_LOCALES", langsListString)
