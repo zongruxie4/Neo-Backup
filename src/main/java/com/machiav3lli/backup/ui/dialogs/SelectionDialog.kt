@@ -27,8 +27,8 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.blockShadow
 import com.machiav3lli.backup.ui.compose.component.DialogNegativeButton
 import com.machiav3lli.backup.ui.compose.component.DialogPositiveButton
-import com.machiav3lli.backup.ui.compose.component.ExpandedSearchView
 import com.machiav3lli.backup.ui.compose.component.MultiSelectionListItem
+import com.machiav3lli.backup.ui.compose.component.WideSearchField
 
 @Composable
 fun <T> MultiSelectionDialogUI(
