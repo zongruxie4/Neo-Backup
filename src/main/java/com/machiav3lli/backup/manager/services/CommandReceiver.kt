@@ -17,9 +17,7 @@ import com.machiav3lli.backup.manager.handler.WorkHandler
 import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import com.machiav3lli.backup.utils.SystemUtils
 import com.machiav3lli.backup.utils.scheduleNextAlarm
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.java.KoinJavaComponent.get
@@ -33,67 +31,77 @@ class CommandReceiver : //TODO hg42 how to maintain security?
 //TODO hg42 no big prob for now: cancel, starting or changing schedule isn't very critical
     BroadcastReceiver(), KoinComponent {
     private val scheduleRepo: ScheduleRepository by inject()
-    private val receiveJob = Job()
 
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent == null) return
         val command = intent.action
         Timber.i("Command: command $command")
-        runBlocking(Dispatchers.IO + receiveJob) {
-            when (command) {
-                ACTION_CANCEL          -> {
-                    val batchName = intent.getStringExtra("name")
-                    Timber.d("################################################### command intent cancel -------------> name=$batchName")
-                    NeoApp.addInfoLogText("$command $batchName")
-                    get<WorkHandler>(WorkHandler::class.java).cancel(batchName)
-                }
 
-                ACTION_RUN_SCHEDULE    -> {
-                    intent.getStringExtra("name")?.let { name ->
-                        NeoApp.addInfoLogText("$command $name")
-                        Timber.d("################################################### command intent schedule -------------> name=$name")
-                        scheduleRepo.getSchedule(name)?.let { schedule ->
-                            ScheduleWork.enqueueImmediate(schedule)
+        val pendingResult = goAsync()
+        val appScope = (context.applicationContext as NeoApp).applicationScope
+        appScope.launch {
+            try {
+                when (command) {
+                    ACTION_CANCEL          -> {
+                        val batchName = intent.getStringExtra("name")
+                        Timber.d("################################################### command intent cancel -------------> name=$batchName")
+                        NeoApp.addInfoLogText("$command $batchName")
+                        get<WorkHandler>(WorkHandler::class.java).cancel(batchName)
+                    }
+
+                    ACTION_RUN_SCHEDULE    -> {
+                        intent.getStringExtra("name")?.let { name ->
+                            NeoApp.addInfoLogText("$command $name")
+                            Timber.d("################################################### command intent schedule -------------> name=$name")
+                            scheduleRepo.getSchedule(name)?.let { schedule ->
+                                ScheduleWork.enqueueImmediate(schedule)
+                            }
                         }
                     }
-                }
 
-                ACTION_CANCEL_SCHEDULE -> {
-                    intent.getLongExtra(EXTRA_SCHEDULE_ID, -1L).takeIf { it != -1L }?.let { id ->
-                        Timber.d("################################################### command cancel schedule -------------> id=$id")
-                        ScheduleWork.cancel(id, intent.getBooleanExtra(EXTRA_PERIODIC, false))
+                    ACTION_CANCEL_SCHEDULE -> {
+                        intent.getLongExtra(EXTRA_SCHEDULE_ID, -1L).takeIf { it != -1L }
+                            ?.let { id ->
+                                Timber.d("################################################### command cancel schedule -------------> id=$id")
+                                ScheduleWork.cancel(
+                                    id,
+                                    intent.getBooleanExtra(EXTRA_PERIODIC, false)
+                                )
+                            }
                     }
-                }
 
-                ACTION_RE_SCHEDULE     -> { // TODO reconsider when ScheduleWork is fully implemented
-                    intent.getStringExtra("name")?.let { name ->
-                        val now = SystemUtils.now
-                        val time = intent.getStringExtra("time")
-                        val setTime = time ?: SimpleDateFormat("HH:mm", Locale.getDefault())
-                            .format(now + 120)
-                        NeoApp.addInfoLogText("$command $name $time -> $setTime")
-                        Timber.d("################################################### command intent reschedule -------------> name=$name time=$time -> $setTime")
-                        scheduleRepo.getSchedule(name)?.let { schedule ->
-                            val (hour, minute) = setTime.split(":").map { it.toInt() }
-                            traceSchedule { "[${schedule.id}] command receiver -> re-schedule to hour=$hour minute=$minute" }
-                            val newSched = schedule.copy(
-                                timeHour = hour,
-                                timeMinute = minute,
-                            )
-                            scheduleRepo.update(newSched)
-                            scheduleNextAlarm(context, newSched.id, true)
+                    ACTION_RE_SCHEDULE     -> { // TODO reconsider when ScheduleWork is fully implemented
+                        intent.getStringExtra("name")?.let { name ->
+                            val now = SystemUtils.now
+                            val time = intent.getStringExtra("time")
+                            val setTime = time ?: SimpleDateFormat("HH:mm", Locale.getDefault())
+                                .format(now + 120)
+                            NeoApp.addInfoLogText("$command $name $time -> $setTime")
+                            Timber.d("################################################### command intent reschedule -------------> name=$name time=$time -> $setTime")
+                            scheduleRepo.getSchedule(name)?.let { schedule ->
+                                val (hour, minute) = setTime.split(":").map { it.toInt() }
+                                traceSchedule { "[${schedule.id}] command receiver -> re-schedule to hour=$hour minute=$minute" }
+                                val newSched = schedule.copy(
+                                    timeHour = hour,
+                                    timeMinute = minute,
+                                )
+                                scheduleRepo.update(newSched)
+                                scheduleNextAlarm(context, newSched.id, true)
+                            }
                         }
                     }
-                }
 
-                ACTION_CRASH           -> {
-                    throw Exception("this is a crash via command intent")
-                }
+                    ACTION_CRASH           -> {
+                        throw Exception("this is a crash via command intent")
+                    }
 
-                null                   -> {}
-                else                   -> {
-                    NeoApp.addInfoLogText("Command: command '$command'")
+                    null                   -> {}
+                    else                   -> {
+                        NeoApp.addInfoLogText("Command: command '$command'")
+                    }
                 }
+            } finally {
+                pendingResult.finish()
             }
         }
     }

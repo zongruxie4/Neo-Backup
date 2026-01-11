@@ -20,13 +20,23 @@ package com.machiav3lli.backup.manager.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.utils.scheduleAlarmsOnce
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 class BootReceiver : BroadcastReceiver(), KoinComponent {
     override fun onReceive(context: Context, intent: Intent) {
+        val pendingResult = goAsync()
+        val appScope = (context.applicationContext as NeoApp).applicationScope
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            Thread { scheduleAlarmsOnce(context) }.start()
+            appScope.launch {
+                try {
+                    scheduleAlarmsOnce(context)
+                } finally {
+                    pendingResult.finish()
+                }
+            }
         } else return
     }
 }

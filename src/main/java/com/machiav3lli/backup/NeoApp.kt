@@ -82,6 +82,8 @@ import com.machiav3lli.backup.utils.scheduleAlarmsOnce
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -111,6 +113,9 @@ val RESCUE_NAV get() = "rescue"
 class NeoApp : Application(), KoinStartup {
 
     val work: WorkHandler by inject()
+    val applicationScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default
+    )
 
     @KoinExperimentalAPI
     override fun onKoinStartup() = koinConfiguration {
@@ -209,6 +214,7 @@ class NeoApp : Application(), KoinStartup {
         work.release()
         refNB = WeakReference(null)
         super.onTerminate()
+        applicationScope.cancel()
     }
 
     companion object {

@@ -21,16 +21,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.pref_autoLogUnInstallBroadcast
 import com.machiav3lli.backup.data.repository.PackageRepository
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.ui.pages.supportLog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -38,14 +37,15 @@ import org.koin.core.component.inject
 class PackageUnInstalledReceiver : BroadcastReceiver(), KoinComponent {
     private val packageRepository: PackageRepository by inject()
 
-    private val receiveJob = Job()
-
     override fun onReceive(context: Context, intent: Intent) {
-        try {
-            val packageName =
-                intent.data?.let { if (it.scheme == "package") it.schemeSpecificPart else null }
-            if (packageName != null) {
-                runBlocking(Dispatchers.IO + receiveJob) {
+        val packageName =
+            intent.data?.let { if (it.scheme == "package") it.schemeSpecificPart else null }
+
+        val pendingResult = goAsync()
+        val appScope = (context.applicationContext as NeoApp).applicationScope
+        if (packageName != null) {
+            appScope.launch {
+                try {
                     Package.invalidateSystemCacheForPackage(packageName)
                     when (intent.action.orEmpty()) {
                         Intent.ACTION_PACKAGE_ADDED,
@@ -76,13 +76,15 @@ class PackageUnInstalledReceiver : BroadcastReceiver(), KoinComponent {
                         delay(60_0000)
                         supportLog("PackageUnInstalledReceiver")
                     }
+                } catch (e: Throwable) {
+                    //TODO how to communicate that error to the main app?
+                    // it currently leads to a "missing directories from PM" error,
+                    // even when only restoring the apk
+                    logException(e)
+                } finally {
+                    pendingResult.finish()
                 }
             }
-        } catch (e: Throwable) {
-            //TODO how to communicate that error to the main app?
-            // it currently leads to a "missing directories from PM" error,
-            // even when only restoring the apk
-            logException(e)
         }
     }
 }

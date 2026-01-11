@@ -19,38 +19,60 @@ package com.machiav3lli.backup.manager.services
 
 import android.Manifest
 import android.content.BroadcastReceiver
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.content.ContentValues
 import android.net.Uri
 import android.provider.ContactsContract.PhoneLookup
 import android.provider.Telephony
 import android.telephony.SmsMessage
 import androidx.core.content.PermissionChecker
-import com.machiav3lli.backup.ui.activities.NeoActivity
+import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.manager.handler.showNotification
+import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.utils.SystemUtils
+import kotlinx.coroutines.launch
 
 class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        if(context == null || intent == null || intent.action == null || intent.extras == null){
-            return
-        }
-        if (intent.action != (Telephony.Sms.Intents.SMS_DELIVER_ACTION)) {
-            return
-        }
+        if (context == null || intent == null || intent.action == null || intent.extras == null) return
+
+        if (intent.action != (Telephony.Sms.Intents.SMS_DELIVER_ACTION)) return
+
         if (
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.READ_SMS) == PermissionChecker.PERMISSION_DENIED) ||
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.SEND_SMS) == PermissionChecker.PERMISSION_DENIED) ||
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.RECEIVE_SMS) == PermissionChecker.PERMISSION_DENIED) ||
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.RECEIVE_MMS) == PermissionChecker.PERMISSION_DENIED) ||
-                (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.RECEIVE_WAP_PUSH) == PermissionChecker.PERMISSION_DENIED)
-        ) {
-            return
-        }
-        val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
-        for (message in smsMessages) {
-            putSmsToDatabase( context, message )
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.READ_SMS
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.SEND_SMS
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.RECEIVE_SMS
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.RECEIVE_MMS
+            ) == PermissionChecker.PERMISSION_DENIED) ||
+            (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.RECEIVE_WAP_PUSH
+            ) == PermissionChecker.PERMISSION_DENIED)
+        ) return
+
+        val pendingResult = goAsync()
+        val appScope = (context.applicationContext as NeoApp).applicationScope
+        appScope.launch {
+            try {
+                val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
+                for (message in smsMessages) {
+                    putSmsToDatabase(context, message)
+                }
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 
@@ -62,7 +84,11 @@ class SmsReceiver : BroadcastReceiver() {
         var sender = sms.displayOriginatingAddress ?: ""
         val threadId = Telephony.Threads.getOrCreateThreadId(context, sms.displayOriginatingAddress)
 
-        if (PermissionChecker.checkCallingOrSelfPermission(context, Manifest.permission.READ_CONTACTS) == PermissionChecker.PERMISSION_DENIED) {
+        if (PermissionChecker.checkCallingOrSelfPermission(
+                context,
+                Manifest.permission.READ_CONTACTS
+            ) == PermissionChecker.PERMISSION_DENIED
+        ) {
             val uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(sender))
             val projection = arrayOf(PhoneLookup.DISPLAY_NAME)
             try {
@@ -74,23 +100,24 @@ class SmsReceiver : BroadcastReceiver() {
                         }
                     }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
         }
 
-        values.put( Telephony.Sms.THREAD_ID, threadId)
-        values.put( Telephony.Sms.ADDRESS, sms.displayOriginatingAddress)
-        values.put( Telephony.Sms.DATE, sms.timestampMillis)
-        values.put( Telephony.Sms.READ, 0 )
-        values.put( Telephony.Sms.STATUS, sms.status)
-        values.put( Telephony.Sms.TYPE, 1 )
-        values.put( Telephony.Sms.SEEN, 0 )
-        values.put( Telephony.Sms.LOCKED, 0 )
-        values.put( Telephony.Sms.BODY, message )
-        values.put( Telephony.Sms.SUBJECT, sms.pseudoSubject)
-        contentResolver.insert( Telephony.Sms.CONTENT_URI, values )
+        values.put(Telephony.Sms.THREAD_ID, threadId)
+        values.put(Telephony.Sms.ADDRESS, sms.displayOriginatingAddress)
+        values.put(Telephony.Sms.DATE, sms.timestampMillis)
+        values.put(Telephony.Sms.READ, 0)
+        values.put(Telephony.Sms.STATUS, sms.status)
+        values.put(Telephony.Sms.TYPE, 1)
+        values.put(Telephony.Sms.SEEN, 0)
+        values.put(Telephony.Sms.LOCKED, 0)
+        values.put(Telephony.Sms.BODY, message)
+        values.put(Telephony.Sms.SUBJECT, sms.pseudoSubject)
+        contentResolver.insert(Telephony.Sms.CONTENT_URI, values)
         showNotification(
             context, NeoActivity::class.java, notificationId.toInt(),
-                sender, message, true
+            sender, message, true
         )
     }
 }

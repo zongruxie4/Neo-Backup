@@ -28,8 +28,6 @@ import com.machiav3lli.backup.manager.tasks.ScheduleWork
 import com.machiav3lli.backup.ui.pages.pref_fakeScheduleDups
 import com.machiav3lli.backup.utils.scheduleAlarmsOnce
 import com.machiav3lli.backup.utils.scheduleNextAlarm
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ScheduleReceiver : BroadcastReceiver() {
@@ -45,7 +43,8 @@ class ScheduleReceiver : BroadcastReceiver() {
         traceSchedule { "[$scheduleId] ScheduleReceiver triggered for '$scheduleName'" }
 
         val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO).launch {
+        val appScope = (context.applicationContext as NeoApp).applicationScope
+        appScope.launch {
             try {
                 repeat(1 + pref_fakeScheduleDups.value) { count ->
                     scheduleNextAlarm(context, scheduleId, rescheduleBoolean = true)
