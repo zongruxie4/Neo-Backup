@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -27,12 +26,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,18 +45,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowUUpLeft
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
 import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.ifThenElse
@@ -182,23 +176,23 @@ fun TopBar(
         !showDevTools.value && (NeoApp.showInfoLog || tempShowInfo.value) && pref_showInfoLogBar.value
 
     Box { // overlay TopBar and indicators
-        ListItem(
+        Row(
             modifier = Modifier
                 .windowInsetsPadding(TopAppBarDefaults.windowInsets)
-                .heightIn(min = 72.dp)
+                .height(72.dp)
+                .padding(horizontal = 8.dp)
                 .fillMaxWidth(),
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent,
-            ),
-            leadingContent = {
-                navigationAction()
-            },
-            headlineContent = {
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            navigationAction()
+            title.takeIf { it.isNotBlank() }?.let { title ->
                 TitleOrInfoLog(
                     title = title,
                     showInfo = showInfo,
                     tempShowInfo = tempShowInfo,
                     modifier = Modifier
+                        .weight(1f)
                         .combinedClickable(
                             onClick = {
                                 if (pref_showInfoLogBar.value) {
@@ -217,11 +211,9 @@ fun TopBar(
                         DevTools(expanded = showDevTools)
                     }
                 }
-            },
-            trailingContent = {
-                Row { actions() }
             }
-        )
+            actions()
+        }
 
         // must be second item to overlay first
         GlobalIndicators()
@@ -250,17 +242,19 @@ fun MainTopBar(
     val enterNegative = expandHorizontally(expandFrom = Alignment.Start)
     val exitNegative = shrinkHorizontally(shrinkTowards = Alignment.Start)
 
-    Box { // overlay TopBar and indicators
-        ListItem(
+    Box {
+        Row(
             modifier = modifier
                 .windowInsetsPadding(TopAppBarDefaults.windowInsets)
                 .height(72.dp)
+                .padding(horizontal = 8.dp)
                 .fillMaxWidth(),
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent,
-            ),
-            headlineContent = {
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            title.takeIf { it.isNotBlank() }?.let { title ->
                 AnimatedVisibility(
+                    modifier = Modifier.weight(1f),
                     visible = !isExpanded,
                     enter = enterNegative,
                     exit = exitNegative,
@@ -289,12 +283,17 @@ fun MainTopBar(
                     enter = enterPositive,
                     exit = exitPositive,
                 ) {
-                    ExpandedSearchView(
+                    WideSearchField(
                         query = query,
-                        modifier = modifier,
-                        onClose = onClose,
-                        onExpanded = onExpanded,
-                        onQueryChanged = onQueryChanged
+                        showCloseButton = true,
+                        onClose = {
+                            onClose()
+                            onExpanded(false)
+                        },
+                        onQueryChanged = onQueryChanged,
+                        onCleanQuery = {
+                            onQueryChanged("")
+                        }
                     )
                 }
                 if (showDevTools.value) {
@@ -302,17 +301,15 @@ fun MainTopBar(
                         DevTools(expanded = showDevTools)
                     }
                 }
-            },
-            trailingContent = {
-                AnimatedVisibility(
-                    visible = !isExpanded,
-                    enter = enterPositive,
-                    exit = exitPositive,
-                ) {
-                    Row { actions() }
-                }
             }
-        )
+            AnimatedVisibility(
+                visible = !isExpanded,
+                enter = enterPositive,
+                exit = exitPositive,
+            ) {
+                Row { actions() }
+            }
+        }
 
         // must be second item to overlay first
         GlobalIndicators()
@@ -321,95 +318,81 @@ fun MainTopBar(
 }
 
 @Composable
-fun ExpandableSearchAction(
+fun WideSearchField(
     query: String,
     modifier: Modifier = Modifier,
-    expanded: MutableState<Boolean> = mutableStateOf(false),
-    onClose: () -> Unit,
-    onQueryChanged: (String) -> Unit,
-) {
-    val (isExpanded, onExpanded) = remember { expanded }
-
-    HorizontalExpandingVisibility(
-        expanded = isExpanded,
-        expandedView = {
-            ExpandedSearchView(
-                query = query,
-                modifier = modifier,
-                onClose = onClose,
-                onExpanded = onExpanded,
-                onQueryChanged = onQueryChanged
-            )
-        },
-        collapsedView = {
-            RoundButton(
-                icon = Phosphor.MagnifyingGlass,
-                description = stringResource(id = R.string.search),
-                onClick = { onExpanded(true) }
-            )
-        }
-    )
-}
-
-@Composable
-fun ExpandedSearchView(
-    query: String,
-    modifier: Modifier = Modifier,
-    onClose: () -> Unit,
-    onExpanded: (Boolean) -> Unit = {},
+    label: String = stringResource(id = R.string.search),
+    focusOnCompose: Boolean = true,
+    showCloseButton: Boolean = false,
+    onClose: () -> Unit = {},
+    onCleanQuery: () -> Unit,
     onQueryChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val textFieldFocusRequester = remember { FocusRequester() }
-    SideEffect { textFieldFocusRequester.requestFocus() }
+    LaunchedEffect(textFieldFocusRequester) { if (focusOnCompose) textFieldFocusRequester.requestFocus() }
 
     var textFieldValue by remember {
-        mutableStateOf(TextFieldValue(query, TextRange(query.length)))
+        mutableStateOf(query)
     }
 
-    TextField(
-        value = textFieldValue,
-        onValueChange = {
-            textFieldValue = it
-            onQueryChanged(it.text)
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .focusRequester(textFieldFocusRequester),
-        singleLine = true,
-        colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
-        leadingIcon = {
-            Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = Phosphor.MagnifyingGlass,
-                contentDescription = stringResource(id = R.string.search),
-            )
-        },
-        trailingIcon = {
-            IconButton(onClick = {
-                onExpanded(false)
-                textFieldValue = TextFieldValue("")
-                onQueryChanged("")
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OutlinedTextField(
+            value = textFieldValue,
+            onValueChange = {
+                textFieldValue = it
+                onQueryChanged(it)
+            },
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(textFieldFocusRequester),
+            shape = MaterialTheme.shapes.extraLarge,
+            leadingIcon = {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    imageVector = Phosphor.MagnifyingGlass,
+                    contentDescription = stringResource(id = R.string.search),
+                )
+            },
+            trailingIcon = {
+                AnimatedVisibility(
+                    visible = textFieldValue.isNotEmpty(),
+                    enter = expandHorizontally(expandFrom = Alignment.Start),
+                    exit = shrinkHorizontally(shrinkTowards = Alignment.Start),
+                ) {
+                    IconButton(onClick = {
+                        textFieldValue = ""
+                        onCleanQuery()
+                    }) {
+                        Icon(
+                            imageVector = Phosphor.ArrowUUpLeft,
+                            contentDescription = stringResource(id = R.string.clear_text)
+                        )
+                    }
+                }
+            },
+            singleLine = true,
+            label = { Text(text = label) },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        )
+        if (showCloseButton) IconButton(
+            modifier = Modifier.padding(top = 8.dp),
+            onClick = {
+                textFieldValue = ""
+                onCleanQuery()
                 onClose()
             }) {
-                Icon(
-                    imageVector = Phosphor.X,
-                    contentDescription = stringResource(id = R.string.dialogCancel)
-                )
-            }
-        },
-        label = { Text(text = stringResource(id = R.string.searchHint)) },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-    )
+            Icon(
+                imageVector = Phosphor.X,
+                contentDescription = stringResource(id = R.string.dialogCancel)
+            )
+        }
+    }
 }
-
 
 @Preview
 @Composable

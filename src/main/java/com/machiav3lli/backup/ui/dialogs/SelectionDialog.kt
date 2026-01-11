@@ -59,13 +59,13 @@ fun <T> MultiSelectionDialogUI(
         ) {
             Text(text = titleText, style = MaterialTheme.typography.titleLarge)
             if (withSearchBar) {
-                ExpandedSearchView(
+                WideSearchField(
                     query = query.value,
-                    onClose = {
-                        query.value = ""
-                    },
                     onQueryChanged = {
                         query.value = it
+                    },
+                    onCleanQuery = {
+                        query.value = ""
                     }
                 )
             }
