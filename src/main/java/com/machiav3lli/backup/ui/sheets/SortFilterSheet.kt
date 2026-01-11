@@ -39,7 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,7 +96,8 @@ fun SortFilterSheet(
     val state by viewModel.state.collectAsState()
     val tagsMap by viewModel.tagsMap.collectAsState()
     val allTags by viewModel.allTags.collectAsState()
-    var model by rememberSaveable(state.sortFilter) {
+    // TODO fix preExtended not working as expected
+    var model by retain(state.sortFilter) {
         mutableStateOf(state.sortFilter)
     }
 

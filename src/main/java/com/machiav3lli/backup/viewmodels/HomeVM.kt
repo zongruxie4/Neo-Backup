@@ -52,7 +52,6 @@ class HomeVM(
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - FLOWS
     private val searchQuery = MutableStateFlow("")
     private val selection = MutableStateFlow(emptySet<String>())
-    private val homeSortFilterModelFlow = prefs.homeSortFilterFlow()
 
     val schedules = scheduleRepository.getAllFlow()
         .stateIn(
@@ -64,7 +63,7 @@ class HomeVM(
     override val state: StateFlow<MainState> = combine(
         packageRepository.getPackagesFlow(),
         blocklistRepository.getBlocklist(),
-        homeSortFilterModelFlow,
+        prefs.homeSortFilterFlow(),
         extras,
         searchQuery,
         selection,

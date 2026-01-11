@@ -22,7 +22,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -140,7 +140,7 @@ fun BusyBackgroundAnimated(
                 SystemUtils.msSinceBoot % turnTime * 360f / turnTime
             //var angle by rememberSaveable { mutableStateOf(70f) }
             //var angle by rememberSaveable { mutableFloatStateOf(calcAngle()) }
-            var angle by rememberSaveable { mutableStateOf(currentAngle()) }
+            var angle by retain { mutableStateOf(currentAngle()) }
             LaunchedEffect(true) {
                 withContext(Dispatchers.IO) {
                     animate(

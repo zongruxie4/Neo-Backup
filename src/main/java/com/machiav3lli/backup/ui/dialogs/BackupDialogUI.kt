@@ -33,6 +33,8 @@ import com.machiav3lli.backup.batchModesSequence
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.utils.backupModeIfActive
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 
 @Composable
 fun BackupDialogUI(
@@ -78,8 +80,8 @@ fun BackupDialogUI(
 
     MultiSelectionDialogUI(
         titleText = appPackage.packageLabel,
-        entryMap = modePairs,
-        selectedItems = selectedMode.toList(),
+        entryMap = modePairs.toPersistentMap(),
+        selectedItems = selectedMode.toPersistentList(),
         openDialogCustom = openDialogCustom,
     ) {
         onAction(it.fold(MODE_UNSET) { acc, s -> acc xor s }) // TODO Add action type?

@@ -16,7 +16,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,19 +29,22 @@ import com.machiav3lli.backup.ui.compose.component.DialogNegativeButton
 import com.machiav3lli.backup.ui.compose.component.DialogPositiveButton
 import com.machiav3lli.backup.ui.compose.component.MultiSelectionListItem
 import com.machiav3lli.backup.ui.compose.component.WideSearchField
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.toPersistentList
 
 @Composable
 fun <T> MultiSelectionDialogUI(
     titleText: String,
-    entryMap: Map<T, String>,
-    selectedItems: List<T>,
+    entryMap: PersistentMap<T, String>,
+    selectedItems: PersistentList<T>,
     openDialogCustom: MutableState<Boolean>,
     withSearchBar: Boolean = false,
     onSave: (List<T>) -> Unit,
 ) {
     val context = LocalContext.current
     var selected by remember { mutableStateOf(selectedItems) }
-    val query = rememberSaveable { mutableStateOf("") }
+    val query = retain { mutableStateOf("") }
     val entryPairs = entryMap.toList()
 
     Card(
@@ -78,7 +81,7 @@ fun <T> MultiSelectionDialogUI(
                 items(items = entryPairs.filter {
                     it.second.contains(query.value, true)
                 }) { (key, label) ->
-                    val isSelected = rememberSaveable(selected, key) {
+                    val isSelected = retain(selected, key) {
                         mutableStateOf(selected.contains(key))
                     }
 
@@ -86,8 +89,8 @@ fun <T> MultiSelectionDialogUI(
                         text = label,
                         isChecked = isSelected.value,
                     ) {
-                        selected = if (it) selected.plus(key)
-                        else selected.minus(key)
+                        selected = (if (it) selected.plus(key)
+                        else selected.minus(key)).toPersistentList()
                     }
                 }
             }

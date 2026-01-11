@@ -77,7 +77,7 @@ fun VerticalFadingVisibility(
 )
 
 @Composable
-fun ExpandingFadingVisibility(
+fun ExpandingFadingCard(
     expanded: Boolean = false,
     expandedView: @Composable (AnimatedVisibilityScope.() -> Unit),
     collapsedView: @Composable (AnimatedVisibilityScope.() -> Unit),

@@ -32,7 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -116,7 +116,7 @@ fun MainPage(
             }
         }
     ) {
-        val openBlocklist = rememberSaveable { mutableStateOf(false) }
+        val openBlocklist = retain { mutableStateOf(false) }
         val searchExpanded = remember {
             mutableStateOf(false)
         }

@@ -32,6 +32,8 @@ import com.machiav3lli.backup.R
 import com.machiav3lli.backup.batchModesSequence
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.entity.Package
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 
 @Composable
 fun RestoreDialogUI(
@@ -78,8 +80,8 @@ fun RestoreDialogUI(
 
     MultiSelectionDialogUI(
         titleText = appPackage.packageLabel,
-        entryMap = modePairs,
-        selectedItems = possibleModes,
+        entryMap = modePairs.toPersistentMap(),
+        selectedItems = possibleModes.toPersistentList(),
         openDialogCustom = openDialogCustom,
     ) {
         onAction(it.fold(MODE_UNSET) { acc, s -> acc xor s }) // TODO Add backup & action type?

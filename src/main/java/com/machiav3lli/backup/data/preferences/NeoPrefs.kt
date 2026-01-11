@@ -16,10 +16,8 @@ import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.batchModesSequence
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.possibleMainFilters
-import kotlinx.coroutines.Dispatchers
+import com.machiav3lli.backup.utils.extensions.combine
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.module.dsl.singleOf
@@ -243,18 +241,18 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
         latestFilterHome.flow(),
         enabledFilterHome.flow(),
         tagsFilterHome.flow(),
-    ) { args ->
+    ) { sort, sortAsc, main, backup, installed, launchable, updated, latest, enabled, tags ->
         SortFilterModel(
-            sort = args[0] as Int,
-            sortAsc = args[1] as Boolean,
-            mainFilter = args[2] as Int,
-            backupFilter = args[3] as Int,
-            installedFilter = args[4] as Int,
-            launchableFilter = args[5] as Int,
-            updatedFilter = args[6] as Int,
-            latestFilter = args[7] as Int,
-            enabledFilter = args[8] as Int,
-            tags = args[9] as Set<String>,
+            sort = sort,
+            sortAsc = sortAsc,
+            mainFilter = main,
+            backupFilter = backup,
+            installedFilter = installed,
+            launchableFilter = launchable,
+            updatedFilter = updated,
+            latestFilter = latest,
+            enabledFilter = enabled,
+            tags = tags,
         )
     }
 
@@ -269,18 +267,18 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
         latestFilterBackup.flow(),
         enabledFilterBackup.flow(),
         tagsFilterBackup.flow(),
-    ) { args ->
+    ) { sort, sortAsc, main, backup, installed, launchable, updated, latest, enabled, tags ->
         SortFilterModel(
-            sort = args[0] as Int,
-            sortAsc = args[1] as Boolean,
-            mainFilter = args[2] as Int,
-            backupFilter = args[3] as Int,
-            installedFilter = args[4] as Int,
-            launchableFilter = args[5] as Int,
-            updatedFilter = args[6] as Int,
-            latestFilter = args[7] as Int,
-            enabledFilter = args[8] as Int,
-            tags = args[9] as Set<String>,
+            sort = sort,
+            sortAsc = sortAsc,
+            mainFilter = main,
+            backupFilter = backup,
+            installedFilter = installed,
+            launchableFilter = launchable,
+            updatedFilter = updated,
+            latestFilter = latest,
+            enabledFilter = enabled,
+            tags = tags,
         )
     }
 
@@ -295,18 +293,18 @@ class NeoPrefs private constructor(val context: Context) : KoinComponent {
         latestFilterRestore.flow(),
         enabledFilterRestore.flow(),
         tagsFilterRestore.flow(),
-    ) { args ->
+    ) { sort, sortAsc, main, backup, installed, launchable, updated, latest, enabled, tags ->
         SortFilterModel(
-            sort = args[0] as Int,
-            sortAsc = args[1] as Boolean,
-            mainFilter = args[2] as Int,
-            backupFilter = args[3] as Int,
-            installedFilter = args[4] as Int,
-            launchableFilter = args[5] as Int,
-            updatedFilter = args[6] as Int,
-            latestFilter = args[7] as Int,
-            enabledFilter = args[8] as Int,
-            tags = args[9] as Set<String>,
+            sort = sort,
+            sortAsc = sortAsc,
+            mainFilter = main,
+            backupFilter = backup,
+            installedFilter = installed,
+            launchableFilter = launchable,
+            updatedFilter = updated,
+            latestFilter = latest,
+            enabledFilter = enabled,
+            tags = tags,
         )
     }
 

@@ -58,7 +58,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -403,7 +403,7 @@ fun TerminalText(
 
     val hscroll = rememberScrollState()
     val listState = rememberLazyListState()
-    var wrap by rememberSaveable { mutableStateOf(false) }
+    var wrap by retain { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     var autoScroll by remember { mutableStateOf(scrollOnAdd) }
 

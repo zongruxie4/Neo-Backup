@@ -30,6 +30,8 @@ import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
 import com.machiav3lli.backup.utils.getPackageInfoList
 import com.machiav3lli.backup.utils.specialBackupsEnabled
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 
 @Composable
 fun PackagesListDialogUI(
@@ -84,8 +86,8 @@ fun PackagesListDialogUI(
 
     MultiSelectionDialogUI(
         titleText = title,
-        entryMap = packagePairs.toMap(),
-        selectedItems = selectedPackageNames.toList(),
+        entryMap = packagePairs.toMap().toPersistentMap(),
+        selectedItems = selectedPackageNames.toPersistentList(),
         withSearchBar = withSearchBar,
         openDialogCustom = openDialogCustom,
     ) {

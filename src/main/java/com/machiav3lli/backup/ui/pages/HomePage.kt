@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -46,7 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +63,7 @@ import com.machiav3lli.backup.data.preferences.traceCompose
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.ActionChip
-import com.machiav3lli.backup.ui.compose.component.ExpandingFadingVisibility
+import com.machiav3lli.backup.ui.compose.component.ExpandingFadingCard
 import com.machiav3lli.backup.ui.compose.component.FilledRoundButton
 import com.machiav3lli.backup.ui.compose.component.HomePackageRecycler
 import com.machiav3lli.backup.ui.compose.component.MainPackageContextMenu
@@ -102,10 +101,10 @@ fun HomePage(
     val updaterVisible = mainState.updatedPackages.isNotEmpty()
     var updaterExpanded by remember { mutableStateOf(false) }
     var menuPackage by remember { mutableStateOf<Package?>(null) }
-    val menuExpanded = rememberSaveable { mutableStateOf(false) }
+    val menuExpanded = retain { mutableStateOf(false) }
     val menuButtonAlwaysVisible = pref_menuButtonAlwaysVisible.value
 
-    val openBlocklist = rememberSaveable { mutableStateOf(false) }
+    val openBlocklist = retain { mutableStateOf(false) }
     val openBatchDialog = remember { mutableStateOf(false) }
     val appSheetPN: MutableState<String?> = remember { mutableStateOf(null) }
 
@@ -209,7 +208,7 @@ fun HomePage(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 if (updaterVisible) {
-                                    ExpandingFadingVisibility(
+                                    ExpandingFadingCard(
                                         expanded = updaterExpanded,
                                         expandedView = {
                                             Column {

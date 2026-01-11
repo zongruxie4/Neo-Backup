@@ -32,7 +32,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -75,7 +75,7 @@ fun BatchPage(
     val main = LocalActivity.current as NeoActivity
     val state by viewModel.state.collectAsState()
     val openBatchDialog = remember { mutableStateOf(false) }
-    val openBlocklist = rememberSaveable { mutableStateOf(false) }
+    val openBlocklist = retain { mutableStateOf(false) }
 
     val allApkChecked by remember(state.filteredPackages, viewModel.apkBackupCheckedList) {
         derivedStateOf {

@@ -20,7 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +39,7 @@ fun ExpandableBlock(
     preExpanded: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    var expanded by rememberSaveable { mutableStateOf(preExpanded) }
+    var expanded by retain { mutableStateOf(preExpanded) }
     val surfaceColor by animateColorAsState(
         targetValue = if (expanded) MaterialTheme.colorScheme.surfaceContainerHigh
         else Color.Transparent,
