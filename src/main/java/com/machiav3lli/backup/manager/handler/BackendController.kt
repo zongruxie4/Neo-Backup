@@ -565,10 +565,10 @@ fun Context.findBackups(
     packageName: String = "",
     damagedOp: DamagedOp? = null,
     forceTrace: Boolean = false,
-): Map<String, List<Backup>> {
+): Map<String, Set<Backup>> {
     val packagesRepo = get<PackageRepository>(PackageRepository::class.java)
 
-    val backupsMap = ConcurrentHashMap<String, MutableList<Backup>>()
+    val backupsMap = ConcurrentHashMap<String, MutableSet<Backup>>()
 
     var installedNames: List<String>
 
@@ -615,7 +615,7 @@ fun Context.findBackups(
                         Backup.createFrom(props)
                             ?.let { backup ->
                                 //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
-                                backupsMap.getOrPut(backup.packageName) { mutableListOf() }
+                                backupsMap.getOrPut(backup.packageName) { mutableSetOf() }
                                     .add(backup)
                             }
                     },
@@ -625,7 +625,7 @@ fun Context.findBackups(
                             Backup.createInvalidFrom(dir, props, packageName, why)
                                 ?.let { backup ->
                                     //traceDebug { "put ${backup.packageName}/${backup.backupDate}" }
-                                    backupsMap.getOrPut(backup.packageName) { mutableListOf() }
+                                    backupsMap.getOrPut(backup.packageName) { mutableSetOf() }
                                         .add(backup)
                                 }
                         }

@@ -10,28 +10,28 @@ import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
 
 class BackupsCache {
-    private val backupsMap = ConcurrentHashMap<String, List<Backup>>()
+    private val backupsMap = ConcurrentHashMap<String, Set<Backup>>()
     private val mutex = Mutex()
     private val _updateTrigger = MutableStateFlow(0L)
 
-    fun observeBackupsMap(): Flow<Map<String, List<Backup>>> =
+    fun observeBackupsMap(): Flow<Map<String, Set<Backup>>> =
         _updateTrigger.asStateFlow().map { backupsMap.toMap() }
 
     fun observeBackupsList(): Flow<List<Backup>> =
         _updateTrigger.asStateFlow().map { backupsMap.values.flatten() }
 
-    fun observeBackups(packageName: String): Flow<List<Backup>> =
-        _updateTrigger.asStateFlow().map { backupsMap[packageName] ?: emptyList() }
+    fun observeBackups(packageName: String): Flow<Set<Backup>> =
+        _updateTrigger.asStateFlow().map { backupsMap[packageName] ?: emptySet() }
 
-    fun getBackups(packageName: String): List<Backup> =
-        backupsMap[packageName] ?: emptyList()
+    fun getBackups(packageName: String): Set<Backup> =
+        backupsMap[packageName] ?: emptySet()
 
-    fun getBackupsMap(): Map<String, List<Backup>> = backupsMap.toMap()
+    fun getBackupsMap(): Map<String, Set<Backup>> = backupsMap.toMap()
 
     fun getBackupsList(): List<Backup> = backupsMap.values.flatten()
 
     // SYNC SETTERS
-    suspend fun updateBackups(packageName: String, backups: List<Backup>) {
+    suspend fun updateBackups(packageName: String, backups: Set<Backup>) {
         mutex.withLock {
             backupsMap[packageName] = backups
             triggerUpdate()
@@ -41,7 +41,11 @@ class BackupsCache {
     suspend fun replaceAll(backups: List<Backup>) {
         mutex.withLock {
             backupsMap.clear()
-            backupsMap.putAll(backups.groupBy { it.packageName })
+            backupsMap.putAll(
+                backups
+                    .groupBy { it.packageName }
+                    .mapValues { it.value.toSet() }
+            )
             triggerUpdate()
         }
     }

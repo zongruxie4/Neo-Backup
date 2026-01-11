@@ -684,7 +684,7 @@ class NeoApp : Application(), KoinStartup {
 
         //------------------------------------------------------------------------------------------ backups
 
-        fun putBackups(packageName: String, backups: List<Backup>) {
+        fun putBackups(packageName: String, backups: Set<Backup>) {
             runBlocking(Dispatchers.IO) {
                 get<PackageRepository>(PackageRepository::class.java).apply {
                     updatePackageBackups(packageName, backups)
@@ -692,9 +692,9 @@ class NeoApp : Application(), KoinStartup {
             }
         }
 
-        fun getBackups(packageName: String): List<Backup> {
+        fun getBackups(packageName: String): Set<Backup> {
             get<PackageRepository>(PackageRepository::class.java).apply {
-                return if (startup) emptyList()
+                return if (startup) emptySet()
                 else getBackups(packageName)
             }
         }

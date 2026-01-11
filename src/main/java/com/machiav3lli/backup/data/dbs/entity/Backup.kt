@@ -54,33 +54,33 @@ import java.time.LocalDateTime
 )
 @Serializable
 data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class) constructor(
-    var backupVersionCode: Int = 0,
-    var packageName: String,
-    var packageLabel: String,
+    val backupVersionCode: Int = 0,
+    val packageName: String,
+    val packageLabel: String,
     @ColumnInfo(defaultValue = "-")
-    var versionName: String? = "-",
-    var versionCode: Int = 0,
-    var profileId: Int = 0,
-    var sourceDir: String? = null,
-    var splitSourceDirs: Array<String> = arrayOf(),
-    var isSystem: Boolean = false,
+    val versionName: String? = "-",
+    val versionCode: Int = 0,
+    val profileId: Int = 0,
+    val sourceDir: String? = null,
+    val splitSourceDirs: Array<String> = arrayOf(),
+    val isSystem: Boolean = false,
     @Serializable(with = LocalDateTimeSerializer::class)
-    var backupDate: LocalDateTime,
-    var hasApk: Boolean = false,
-    var hasAppData: Boolean = false,
-    var hasDevicesProtectedData: Boolean = false,
-    var hasExternalData: Boolean = false,
-    var hasObbData: Boolean = false,
-    var hasMediaData: Boolean = false,
-    var compressionType: String? = null,
-    var cipherType: String? = null,
-    var iv: ByteArray? = byteArrayOf(),
-    var cpuArch: String?,
-    var permissions: List<String> = listOf(),
-    var size: Long = 0,
-    var note: String = "",
+    val backupDate: LocalDateTime,
+    val hasApk: Boolean = false,
+    val hasAppData: Boolean = false,
+    val hasDevicesProtectedData: Boolean = false,
+    val hasExternalData: Boolean = false,
+    val hasObbData: Boolean = false,
+    val hasMediaData: Boolean = false,
+    val compressionType: String? = null,
+    val cipherType: String? = null,
+    val iv: ByteArray? = byteArrayOf(),
+    val cpuArch: String?,
+    val permissions: List<String> = listOf(),
+    val size: Long = 0,
+    val note: String = "",
     @ColumnInfo(defaultValue = "0")
-    var persistent: Boolean = false,
+    val persistent: Boolean = false,
 ) {
     constructor(
         base: PackageInfo,
@@ -306,16 +306,13 @@ data class Backup @OptIn(kotlinx.serialization.ExperimentalSerializationApi::cla
                     fromSerialized(serialized)
                 }
 
-                backup?.run {
-                    backup.file = propertiesFile
-
-                    //TODO bug: list serialization (jsonPretty, yaml) adds a space in front of each value
-                    // found older multiline json and yaml without the bug, so it was introduced lately (by lib versions)
-                    backup.permissions = backup.permissions.map { it.trim() } //TODO workaround
+                //TODO bug: list serialization (jsonPretty, yaml) adds a space in front of each value
+                // found older multiline json and yaml without the bug, so it was introduced lately (by lib versions)
+                return backup?.copy(
+                    permissions = backup.permissions.map { it.trim() }, //TODO workaround
+                )?.apply {
+                    file = propertiesFile
                 }
-
-                return backup
-
             } catch (e: FileNotFoundException) {
                 logException(e, "Cannot open ${propertiesFile.path}", backTrace = false)
             } catch (e: IOException) {

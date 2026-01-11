@@ -26,22 +26,22 @@ class PackageRepository(
 ) {
     private val cc = Dispatchers.IO
 
-    fun getBackupsFlow(): Flow<Map<String, List<Backup>>> =
+    fun getBackupsFlow(): Flow<Map<String, Set<Backup>>> =
         backupsCache.observeBackupsMap().flowOn(cc)
 
     fun getBackupsListFlow(): Flow<List<Backup>> =
         backupsCache.observeBackupsList().flowOn(cc)
 
-    fun getBackupsFlow(packageName: String): Flow<List<Backup>> =
+    fun getBackupsFlow(packageName: String): Flow<Set<Backup>> =
         backupsCache.observeBackups(packageName).flowOn(cc)
 
-    fun getBackupsMap(): Map<String, List<Backup>> =
+    fun getBackupsMap(): Map<String, Set<Backup>> =
         backupsCache.getBackupsMap()
 
     fun getBackupsList(): List<Backup> =
         backupsCache.getBackupsList()
 
-    fun getBackups(packageName: String): List<Backup> =
+    fun getBackups(packageName: String): Set<Backup> =
         backupsCache.getBackups(packageName)
 
     fun getPackagesFlow(): Flow<List<Package>> = combine(
@@ -69,7 +69,7 @@ class PackageRepository(
     suspend fun replaceAppInfos(vararg appInfos: AppInfo) =
         dao.updateList(*appInfos)
 
-    fun updatePackageBackups(packageName: String, backups: List<Backup>) = runBlocking(cc) {
+    fun updatePackageBackups(packageName: String, backups: Set<Backup>) = runBlocking(cc) {
         backupsCache.updateBackups(packageName, backups)
     }
 

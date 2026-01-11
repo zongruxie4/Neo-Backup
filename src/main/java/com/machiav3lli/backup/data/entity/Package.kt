@@ -48,10 +48,10 @@ data class Package private constructor(val packageName: String) {
     var storageStats: StorageStats? = null
         private set
 
-    val backupList: List<Backup>
+    val backupList: Set<Backup>
         get() = NeoApp.getBackups(packageName)
 
-    fun setBackupList(backups: List<Backup>) = NeoApp.putBackups(packageName, backups)
+    fun setBackupList(backups: Set<Backup>) = NeoApp.putBackups(packageName, backups)
 
     // toPackageList
     internal constructor(
@@ -152,9 +152,9 @@ data class Package private constructor(val packageName: String) {
         return true
     }
 
-    fun getBackupsFromBackupDir(): List<Backup> {
+    fun getBackupsFromBackupDir(): Set<Backup> {
         // TODO hg42 may also find glob *packageName* for now so we need to take the correct package
-        return NeoApp.context.findBackups(packageName)[packageName] ?: emptyList()
+        return NeoApp.context.findBackups(packageName)[packageName] ?: emptySet()
     }
 
     fun refreshBackupList() {
@@ -213,7 +213,7 @@ data class Package private constructor(val packageName: String) {
         setBackupList(backupList.filterNot {
             it.packageName == backup.packageName
                     && it.backupDate == backup.backupDate
-        }.plus(newBackup))
+        }.toSet().plus(newBackup))
     }
 
     private fun removeBackupFromList(backup: Backup) {
@@ -227,7 +227,7 @@ data class Package private constructor(val packageName: String) {
         setBackupList(backupList.filterNot {
             it.packageName == backup.packageName
                     && it.backupDate == backup.backupDate
-        })
+        }.toSet())
     }
 
     fun addNewBackup(backup: Backup) {
