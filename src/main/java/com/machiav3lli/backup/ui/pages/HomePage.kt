@@ -58,6 +58,7 @@ import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.ALT_MODE_UNSET
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.traceCompose
 import com.machiav3lli.backup.ui.activities.NeoActivity
@@ -222,7 +223,7 @@ fun HomePage(
                                                         text = stringResource(id = R.string.backup_all_updated),
                                                         icon = Phosphor.ArchiveTray,
                                                         modifier = Modifier.weight(1f),
-                                                        positive = true,
+                                                        coloring = ColoringState.Positive,
                                                     ) {
                                                         openBatchDialog.value = true
                                                     }

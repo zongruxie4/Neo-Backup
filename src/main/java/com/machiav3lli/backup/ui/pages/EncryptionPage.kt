@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.data.entity.EnumPref
 import com.machiav3lli.backup.data.entity.PasswordPref
 import com.machiav3lli.backup.data.entity.Pref
@@ -99,7 +100,7 @@ fun EncryptionPage(pgpManager: PGPHandler = koinInject(), navigateUp: () -> Unit
                         text = stringResource(R.string.create_pgp_key),
                         icon = Phosphor.Key,
                         modifier = Modifier.weight(1f),
-                        positive = true,
+                        coloring = ColoringState.Positive,
                     ) {
                         openCreateDialog.value = true
                         openDialog.value = true

@@ -42,6 +42,7 @@ import com.machiav3lli.backup.ALT_MODE_APK
 import com.machiav3lli.backup.ALT_MODE_BOTH
 import com.machiav3lli.backup.ALT_MODE_DATA
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.preferences.traceCompose
 import com.machiav3lli.backup.ui.activities.NeoActivity
@@ -240,7 +241,7 @@ fun BatchPage(
                     icon = if (backupBoolean) Phosphor.ArchiveTray
                     else Phosphor.ClockCounterClockwise,
                     modifier = Modifier.weight(1f),
-                    positive = true,
+                    coloring = ColoringState.Positive,
                 ) {
                     if (viewModel.apkBackupCheckedList.filterValues { it != -1 }.isNotEmpty()
                         || viewModel.dataBackupCheckedList.filterValues { it != -1 }.isNotEmpty()

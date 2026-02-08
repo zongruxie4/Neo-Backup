@@ -30,7 +30,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -57,6 +56,7 @@ import com.machiav3lli.backup.MODE_UNSET
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
 import com.machiav3lli.backup.data.dbs.entity.Schedule
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.data.preferences.traceDebug
 import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.latestFilterChipItems
@@ -172,7 +172,7 @@ fun SchedulePage(
                         CardButton(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.Clock,
-                            //contentColor = MaterialTheme.colorScheme.onSurface,
+                            coloring = ColoringState.Neutral,
                             description = "${stringResource(id = R.string.sched_hourOfDay)} ${
                                 LocalTime.of(
                                     schedule.timeHour,
@@ -186,7 +186,7 @@ fun SchedulePage(
                         CardButton(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.ClockClockwise,
-                            //contentColor = MaterialTheme.colorScheme.onSurface,
+                            coloring = ColoringState.Neutral,
                             description = "${stringResource(id = R.string.sched_interval)} ${schedule.interval}",
                         ) {
                             dialogProps.value = Pair(DialogMode.INTERVAL_SETTER, schedule)
@@ -202,10 +202,8 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.CheckCircle,
                             description = stringResource(id = R.string.customListTitle),
-                            contentColor = if (state.customList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.tertiaryContainer,
-                            containerColor = if (state.customList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onTertiaryContainer,
+                            coloring = if (state.customList.isNotEmpty()) ColoringState.Positive
+                            else ColoringState.Negative,
                         ) {
                             dialogProps.value = Pair(DialogMode.CUSTOMLIST, schedule)
                             openDialog.value = true
@@ -214,10 +212,8 @@ fun SchedulePage(
                             modifier = Modifier.weight(0.5f),
                             icon = Phosphor.Prohibit,
                             description = stringResource(id = R.string.sched_blocklist),
-                            contentColor = if (state.blockList.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.tertiaryContainer,
-                            containerColor = if (state.blockList.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onTertiaryContainer,
+                            coloring = if (state.customList.isNotEmpty()) ColoringState.Positive
+                            else ColoringState.Negative,
                         ) {
                             dialogProps.value = Pair(DialogMode.BLOCKLIST, schedule)
                             openDialog.value = true
@@ -382,7 +378,7 @@ fun SchedulePage(
                     OutlinedActionButton(
                         text = stringResource(id = R.string.delete),
                         icon = Phosphor.TrashSimple,
-                        positive = false,
+                        coloring = ColoringState.Negative,
                     ) {
                         dialogProps.value = Pair(DialogMode.DELETE, schedule)
                         openDialog.value = true

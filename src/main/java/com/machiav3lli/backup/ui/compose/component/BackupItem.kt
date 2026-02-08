@@ -37,6 +37,7 @@ import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.entity.PackageInfo
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentProfile
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
@@ -250,7 +251,7 @@ fun BackupItem(
                             ActionButton(
                                 text = stringResource(id = R.string.restore),
                                 icon = Phosphor.ClockCounterClockwise,
-                                positive = true,
+                                coloring = ColoringState.Positive,
                                 onClick = { onRestore(item) },
                             )
                     }

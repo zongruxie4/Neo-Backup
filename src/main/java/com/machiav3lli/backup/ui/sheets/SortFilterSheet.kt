@@ -57,6 +57,7 @@ import com.machiav3lli.backup.LaunchableFilter
 import com.machiav3lli.backup.MAIN_FILTER_DEFAULT
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.UpdatedFilter
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.enabledFilterChipItems
 import com.machiav3lli.backup.installedFilterChipItems
@@ -197,7 +198,7 @@ fun SortFilterSheet(
                         text = stringResource(id = R.string.resetFilter),
                         icon = Phosphor.ArrowUUpLeft,
                         modifier = Modifier.weight(1f),
-                        positive = false,
+                        coloring = ColoringState.Negative,
                         onClick = {
                             viewModel.setSortFilter(SortFilterModel())
                             onDismiss()
@@ -207,7 +208,7 @@ fun SortFilterSheet(
                         text = stringResource(id = R.string.applyFilter),
                         icon = Phosphor.Check,
                         modifier = Modifier.weight(1f),
-                        positive = true,
+                        coloring = ColoringState.Positive,
                         onClick = {
                             viewModel.setSortFilter(model)
                             onDismiss()

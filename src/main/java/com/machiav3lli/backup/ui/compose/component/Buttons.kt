@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.ICON_SIZE_SMALL
 import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowsClockwise
 import com.machiav3lli.backup.ui.pages.pref_busyIconScale
@@ -63,7 +64,7 @@ import kotlin.math.max
 fun ActionButton(
     text: String,
     modifier: Modifier = Modifier,
-    positive: Boolean = true,
+    coloring: ColoringState = ColoringState.Positive,
     icon: ImageVector? = null,
     enabled: Boolean = true,
     onClick: () -> Unit,
@@ -71,13 +72,15 @@ fun ActionButton(
     FilledTonalButton(
         modifier = modifier,
         colors = ButtonDefaults.filledTonalButtonColors(
-            contentColor = when {
-                positive -> MaterialTheme.colorScheme.onPrimaryContainer
-                else     -> MaterialTheme.colorScheme.onTertiaryContainer
+            contentColor = when (coloring) {
+                ColoringState.Positive -> MaterialTheme.colorScheme.onPrimaryContainer
+                ColoringState.Negative -> MaterialTheme.colorScheme.onTertiaryContainer
+                else                   -> MaterialTheme.colorScheme.onSecondaryContainer
             },
-            containerColor = when {
-                positive -> MaterialTheme.colorScheme.primaryContainer
-                else     -> MaterialTheme.colorScheme.tertiaryContainer
+            containerColor = when (coloring) {
+                ColoringState.Positive -> MaterialTheme.colorScheme.primaryContainer
+                ColoringState.Negative -> MaterialTheme.colorScheme.tertiaryContainer
+                else                   -> MaterialTheme.colorScheme.secondaryContainer
             }
         ),
         enabled = enabled,
@@ -97,8 +100,7 @@ fun ActionButton(
 fun OutlinedActionButton(
     modifier: Modifier = Modifier,
     text: String,
-    // TODO add neutral using ENUM
-    positive: Boolean = true,
+    coloring: ColoringState = ColoringState.Positive,
     icon: ImageVector? = null,
     enabled: Boolean = true,
     onClick: () -> Unit,
@@ -106,16 +108,18 @@ fun OutlinedActionButton(
     OutlinedButton(
         modifier = modifier,
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = when {
-                positive -> MaterialTheme.colorScheme.primary
-                else     -> MaterialTheme.colorScheme.tertiary
+            contentColor = when (coloring) {
+                ColoringState.Positive -> MaterialTheme.colorScheme.primary
+                ColoringState.Negative -> MaterialTheme.colorScheme.tertiary
+                else                   -> MaterialTheme.colorScheme.onSurface
             },
         ),
         border = BorderStroke(
             width = 1.dp,
-            color = when {
-                positive -> MaterialTheme.colorScheme.primary
-                else     -> MaterialTheme.colorScheme.tertiary
+            color = when (coloring) {
+                ColoringState.Positive -> MaterialTheme.colorScheme.primary
+                ColoringState.Negative -> MaterialTheme.colorScheme.tertiary
+                else                   -> MaterialTheme.colorScheme.surfaceContainerHighest
             },
         ),
         enabled = enabled,
@@ -135,8 +139,7 @@ fun OutlinedActionButton(
 fun CardButton(
     modifier: Modifier = Modifier,
     icon: ImageVector,
-    contentColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
-    containerColor: Color = MaterialTheme.colorScheme.onSurface,
+    coloring: ColoringState = ColoringState.Positive,
     description: String,
     enabled: Boolean = true,
     onClick: () -> Unit,
@@ -152,9 +155,21 @@ fun CardButton(
                 enabled = enabled,
             ),
         colors = ListItemDefaults.colors(
-            leadingIconColor = contentColor,
-            headlineColor = contentColor,
-            containerColor = containerColor,
+            leadingIconColor = when (coloring) {
+                ColoringState.Positive -> MaterialTheme.colorScheme.onPrimaryContainer
+                ColoringState.Negative -> MaterialTheme.colorScheme.onTertiaryContainer
+                else                   -> MaterialTheme.colorScheme.onSurface
+            },
+            headlineColor = when (coloring) {
+                ColoringState.Positive -> MaterialTheme.colorScheme.onPrimaryContainer
+                ColoringState.Negative -> MaterialTheme.colorScheme.onTertiaryContainer
+                else                   -> MaterialTheme.colorScheme.onSurface
+            },
+            containerColor = when (coloring) {
+                ColoringState.Positive -> MaterialTheme.colorScheme.primaryContainer
+                ColoringState.Negative -> MaterialTheme.colorScheme.tertiaryContainer
+                else                   -> MaterialTheme.colorScheme.surfaceContainerHighest
+            },
         ),
         leadingContent = {
             Icon(imageVector = icon, contentDescription = description)

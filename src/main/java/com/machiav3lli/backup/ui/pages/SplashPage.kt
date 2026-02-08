@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.HELP_FAQ
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.ActionButton
 import com.machiav3lli.backup.ui.compose.component.DevTools
@@ -121,7 +122,7 @@ fun RootMissing(activity: Activity? = null) {
                 text = stringResource(id = R.string.dialogOK),
                 icon = Phosphor.Warning,
                 modifier = Modifier.fillMaxWidth(1f),
-                positive = false,
+                coloring = ColoringState.Negative,
             ) {
                 activity?.finishAffinity()
                 exitProcess(0)
@@ -129,7 +130,7 @@ fun RootMissing(activity: Activity? = null) {
             OutlinedActionButton(
                 text = stringResource(id = R.string.see_faq),
                 icon = Phosphor.Info,
-                positive = true,
+                coloring = ColoringState.Positive,
                 modifier = Modifier.fillMaxWidth(1f),
             ) {
                 context.launchView(HELP_FAQ)
@@ -137,7 +138,7 @@ fun RootMissing(activity: Activity? = null) {
             OutlinedActionButton(
                 text = stringResource(id = R.string.prefs_title),
                 icon = Phosphor.GearSix,
-                positive = true,
+                coloring = ColoringState.Positive,
                 modifier = Modifier.fillMaxWidth(1f),
             ) {
                 showDevTools.value = true

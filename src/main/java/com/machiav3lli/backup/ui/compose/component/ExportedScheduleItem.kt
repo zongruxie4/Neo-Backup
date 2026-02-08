@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
 import com.machiav3lli.backup.data.dbs.entity.Schedule
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.ui.compose.icons.Phosphor
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ClockCounterClockwise
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
@@ -98,7 +99,7 @@ fun ExportedScheduleItem(
                     ActionButton(
                         text = stringResource(id = R.string.dialog_import),
                         icon = Phosphor.ClockCounterClockwise,
-                        positive = true,
+                        coloring = ColoringState.Positive,
                         onClick = { onRestore(item) }
                     )
                 }
