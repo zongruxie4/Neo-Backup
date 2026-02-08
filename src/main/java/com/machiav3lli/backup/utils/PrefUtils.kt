@@ -31,6 +31,7 @@ import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.PREFS_LANGUAGES_SYSTEM
 import com.machiav3lli.backup.PREFS_SHARED_PRIVATE
 import com.machiav3lli.backup.R
+import com.machiav3lli.backup.config.BuildConfig
 import com.machiav3lli.backup.data.entity.StorageFile
 import com.machiav3lli.backup.manager.handler.LogsHandler.Companion.logException
 import com.machiav3lli.backup.manager.tasks.RefreshBackupsWorker
@@ -260,7 +261,7 @@ fun Context.getLocaleOfCode(localeCode: String): Locale = when {
 
 fun Context.getLanguageList() =
     mapOf(PREFS_LANGUAGES_SYSTEM to resources.getString(R.string.prefs_language_system)) +
-            com.machiav3lli.backup.BuildConfig.DETECTED_LOCALES
+            BuildConfig.DETECTED_LOCALES
                 .sorted()
                 .associateWith { translateLocale(getLocaleOfCode(it)) }
 

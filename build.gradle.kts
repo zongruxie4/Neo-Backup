@@ -15,13 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.parcelize)
@@ -30,15 +27,18 @@ plugins {
     //alias(libs.plugins.kotlin.scripting)
 }
 
-val jvmVersion = JavaVersion.VERSION_17
-
-val detectedLocales = detectLocales()
-val langsListString = "{${detectedLocales.sorted().joinToString(",") { "\"$it\"" }}}"
-
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
     arg("room.incremental", "true")
     arg("room.generateKotlin", "true")
+}
+
+kotlin {
+    jvmToolchain(17)
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
+    }
 }
 
 android {
@@ -53,18 +53,9 @@ android {
         versionName = "8.3.16"
         buildConfigField("int", "MAJOR", "8")
         buildConfigField("int", "MINOR", "3")
-        buildConfigField("String[]", "DETECTED_LOCALES", langsListString)
 
         testApplicationId = "$applicationId.tests"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    applicationVariants.all {
-        val variant = this
-        outputs.all {
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "Neo_Backup_${variant.versionName}_${variant.name}.apk"
-        }
     }
 
     buildTypes {
@@ -88,13 +79,36 @@ android {
             )
         }
     }
+
+    val generateLocales by tasks.registering(GenerateBuildConfig::class) {
+        resDir.set(project.layout.projectDirectory.dir("src/main/res"))
+        outputDir.set(project.layout.buildDirectory.dir("generated/source/locales/kotlin/main"))
+    }
+
+    androidComponents.onVariants { variant ->
+        variant.sources.java!!.addGeneratedSourceDirectory(
+            generateLocales,
+            GenerateBuildConfig::outputDir
+        )
+
+        tasks.withType<KotlinCompile> {
+            dependsOn(generateLocales)
+        }
+    }
+
+    androidComponents.onVariants { variant ->
+        variant.outputs.forEach { output ->
+            if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
+                output.outputFileName.set(
+                    "Neo_Backup_${output.versionName.get()}_${variant.buildType}.apk"
+                )
+            }
+        }
+    }
+
     buildFeatures {
         buildConfig = true
         compose = true
-    }
-    compileOptions {
-        sourceCompatibility = jvmVersion
-        targetCompatibility = jvmVersion
     }
     lint {
         checkReleaseBuilds = false
@@ -116,9 +130,6 @@ android {
                 "/META-INF/LICENSE.md",
                 "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
             )
-        }
-        kotlinExtension.sourceSets.all {
-            languageSettings.enableLanguageFeature("ExplicitBackingFields")
         }
     }
 }
@@ -207,19 +218,49 @@ dependencies {
     implementation(kotlin("script-runtime"))    // for intellisense in kts scripts
 }
 
-fun detectLocales(): Set<String> {
-    val langsList = mutableSetOf<String>()
-    fileTree("src/main/res").visit {
-        if (this.file.name == "strings.xml" && this.file.canonicalFile.readText()
-                .contains("<string")
-        ) {
-            val languageCode = this.file.parentFile?.name?.removePrefix("values-")?.let {
-                if (it == "values") "en" else it
-            }
-            languageCode?.let { langsList.add(it) }
-        }
+abstract class GenerateBuildConfig : DefaultTask() {
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:IgnoreEmptyDirectories
+    abstract val resDir: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    init {
+        group = "build"
+        description = "Generates BuildConfig.kt from auto-fetched values"
     }
-    return langsList
+
+    @TaskAction
+    fun generate() {
+        val detectedLocales = mutableSetOf<String>()
+        resDir.get().asFileTree.visit {
+            if (file.isFile && file.name == "strings.xml" && file.readText().contains("<string")) {
+                val languageCode = file.parentFile?.name?.removePrefix("values-")?.let {
+                    if (it == "values") "en" else it
+                }
+                languageCode?.let { detectedLocales.add(it) }
+            }
+        }
+
+        val outputFile =
+            outputDir.file("com/machiav3lli/backup/config/BuildConfig.kt").get().asFile
+        outputFile.parentFile.mkdirs()
+        outputFile.writeText(
+            """
+            package com.machiav3lli.backup.config
+            
+            object BuildConfig {
+                val DETECTED_LOCALES: Array<String> = arrayOf(${
+                detectedLocales.sorted().joinToString { "\"$it\"" }
+            })
+            }
+        """.trimIndent()
+        )
+
+        println("BuildConfig: Generated ${detectedLocales.size} locales to ${outputFile.absolutePath}")
+    }
 }
 
 tasks.withType<Test> {
@@ -236,15 +277,6 @@ tasks.withType<KotlinCompile>().configureEach {
         it.extension == "kts"
     })
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-        freeCompilerArgs = listOf(
-            "-Xjvm-default=all-compatibility",
-            //"-Xuse-fir-lt=false",   // Scripts are not yet supported with K2 in LightTree mode
-            //"-Xallow-any-scripts-in-source-roots",
-            "-XXLanguage:+ExplicitBackingFields", // TODO to be removed when AS updates its K-compiler
-            "-Xexplicit-backing-fields",
-        )
-
         if (project.findProperty("enableComposeCompilerReports") == "true") {
             val metricsDir =
                 "${project.layout.buildDirectory.asFile.get().absolutePath}/compose_metrics"
