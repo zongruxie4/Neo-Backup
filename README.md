@@ -43,12 +43,12 @@ We now have a roadmap board on Codeberg, where you can see our future plans, com
 
 ## Screenshots :framed_picture:
 
-<p float="left">
- <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="24%" />
- <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="24%" />
- <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="24%" />
- <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="24%" />
-</p>
+| <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/main.png" alt="" width="330" align="center"> | <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/details.png" alt="" width="330" align="center"> | <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/schedule.png" alt="" width="330" align="center"> |
+|:-------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
+
+| <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/batch.png" alt="" width="330" align="center"> | <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/filters.png" alt="" width="330" align="center"> | <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/settings.png" alt="" width="330" align="center"> |
+|:-------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
+
 
 ## Recommendation
 
