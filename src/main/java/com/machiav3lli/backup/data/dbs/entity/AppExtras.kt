@@ -17,9 +17,11 @@
  */
 package com.machiav3lli.backup.data.dbs.entity
 
+import androidx.room.DatabaseView
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.machiav3lli.backup.FIELD_CUSTOM_TAGS
 import com.machiav3lli.backup.FIELD_PACKAGE_NAME
 
 @Entity(
@@ -32,4 +34,10 @@ data class AppExtras(
     val packageName: String = "",
     val customTags: Set<String> = hashSetOf(),
     val note: String = "",
+)
+
+@DatabaseView("SELECT $FIELD_PACKAGE_NAME, $FIELD_CUSTOM_TAGS FROM appextras")
+data class ExtrasTags(
+    val packageName: String,
+    val customTags: Set<String>
 )

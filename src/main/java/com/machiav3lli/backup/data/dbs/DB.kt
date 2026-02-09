@@ -35,6 +35,7 @@ import com.machiav3lli.backup.data.dbs.entity.AppExtras
 import com.machiav3lli.backup.data.dbs.entity.AppInfo
 import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.entity.Blocklist
+import com.machiav3lli.backup.data.dbs.entity.ExtrasTags
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import com.machiav3lli.backup.data.dbs.entity.SpecialInfo
 import org.koin.android.ext.koin.androidContext
@@ -49,8 +50,11 @@ import org.koin.dsl.module
         SpecialInfo::class,
         Backup::class,
     ],
-    version = 8328,
+    version = 8330,
     exportSchema = true,
+    views = [
+        ExtrasTags::class,
+    ],
     autoMigrations = [
         AutoMigration(from = 2, to = 4),
         AutoMigration(from = 4, to = 5),
@@ -61,6 +65,7 @@ import org.koin.dsl.module
         AutoMigration(from = 9, to = 10),
         AutoMigration(from = 10, to = 11),
         AutoMigration(from = 11, to = 8328),
+        AutoMigration(from = 8328, to = 8330),
     ]
 )
 @TypeConverters(Converters::class)

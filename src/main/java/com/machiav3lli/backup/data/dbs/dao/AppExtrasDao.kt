@@ -20,6 +20,7 @@ package com.machiav3lli.backup.data.dbs.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.machiav3lli.backup.data.dbs.entity.AppExtras
+import com.machiav3lli.backup.data.dbs.entity.ExtrasTags
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -32,6 +33,9 @@ interface AppExtrasDao : BaseDao<AppExtras> {
 
     @Query("SELECT * FROM appextras ORDER BY packageName ASC")
     fun getAllFlow(): Flow<List<AppExtras>>
+
+    @Query("SELECT * FROM extrastags")
+    fun getTagsMapFlow(): Flow<List<ExtrasTags>>
 
     @Query("SELECT * FROM appextras WHERE packageName = :packageName")
     suspend fun get(packageName: String): AppExtras
