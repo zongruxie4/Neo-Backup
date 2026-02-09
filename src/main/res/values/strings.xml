@@ -504,4 +504,5 @@
     <string name="backupdir_inaccessible">Backup location is not accessible</string>
     <string name="unknown_error">Unknown error</string>
     <string name="prefs_useexactalarm_title">Use exact alarm for schedules</string>
+    <string name="dialog_ignore">Ignore</string>
 </resources>

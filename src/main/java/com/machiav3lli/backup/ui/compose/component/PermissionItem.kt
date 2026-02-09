@@ -1,8 +1,9 @@
 package com.machiav3lli.backup.ui.compose.component
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -19,20 +20,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
+import com.machiav3lli.backup.R
+import com.machiav3lli.backup.data.entity.ColoringState
 import com.machiav3lli.backup.data.entity.Permission
+import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.ArrowRight
+import com.machiav3lli.backup.ui.compose.icons.phosphor.X
+import com.machiav3lli.backup.ui.compose.theme.ColorUpdated
 
 @Composable
 fun PermissionItem(
     item: Permission,
     modifier: Modifier,
+    onIgnore: (() -> Unit)? = null,
     onClick: () -> Unit = {},
 ) {
     ListItem(
         modifier = modifier
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.large)
-            .clickable(onClick = onClick),
+            .clip(MaterialTheme.shapes.large),
         colors = ListItemDefaults.colors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
         ),
@@ -68,6 +74,28 @@ fun PermissionItem(
                         fontWeight = FontWeight.Bold,
                         color = ColorUpdated,
                         modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    if (onIgnore != null) {
+                        OutlinedActionButton(
+                            text = stringResource(id = R.string.dialog_ignore),
+                            icon = Phosphor.X,
+                            coloring = ColoringState.Negative,
+                            onClick = onIgnore
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                    ActionButton(
+                        text = stringResource(id = R.string.dialog_start),
+                        icon = Phosphor.ArrowRight,
+                        coloring = ColoringState.Positive,
+                        onClick = onClick,
                     )
                 }
             }
