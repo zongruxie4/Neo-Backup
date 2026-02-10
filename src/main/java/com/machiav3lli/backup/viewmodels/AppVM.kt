@@ -23,6 +23,8 @@ import com.machiav3lli.backup.NeoApp
 import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
 import com.machiav3lli.backup.data.dbs.entity.AppExtras
 import com.machiav3lli.backup.data.dbs.entity.Backup
+import com.machiav3lli.backup.data.dbs.entity.ExtrasTags
+import com.machiav3lli.backup.data.entity.AppState
 import com.machiav3lli.backup.data.entity.Package
 import com.machiav3lli.backup.data.repository.AppExtrasRepository
 import com.machiav3lli.backup.data.repository.BlocklistRepository
@@ -32,6 +34,7 @@ import com.machiav3lli.backup.manager.handler.ShellCommands.Companion.currentPro
 import com.machiav3lli.backup.manager.handler.showNotification
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.utils.SystemUtils
+import com.machiav3lli.backup.utils.TraceUtils.trace
 import com.machiav3lli.backup.utils.extensions.NeoViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,26 +54,33 @@ class AppVM(
 ) : NeoViewModel() {
     private val packageName: MutableStateFlow<String> = MutableStateFlow("")
 
-    val pkg = combine(
+    private val appExtras = appExtrasRepository.getFlow(packageName).mapLatest {
+        it ?: AppExtras(packageName.value ?: "")
+    }
+
+    private val allTags = appExtrasRepository.getTagsMapFlow()
+        .mapLatest { it.map(ExtrasTags::customTags).flatten().toSet() }
+        .trace { "*** allTags <<- ${it.size}" }
+
+    val appState = combine(
         packageName,
         packageRepository.getPackagesFlow(),
         packageRepository.getBackupsListFlow(),
-    ) { name, pkgs, bkups ->
-        pkgs.find { it.packageName == name }
+        appExtras,
+        allTags,
+    ) { name, pkgs, bkups, extras, tags ->
+        AppState(
+            pkg = pkgs.find { it.packageName == name },
+            backups = bkups,
+            appExtras = extras,
+            allTags = tags,
+        )
     }
         .stateIn(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
-            null
+            AppState()
         )
-
-    val appExtras = appExtrasRepository.getFlow(packageName).mapLatest {
-        it ?: AppExtras(packageName.value ?: "")
-    }.stateIn(
-        viewModelScope,
-        started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
-        AppExtras(packageName.value)
-    )
 
     val snackbarText: StateFlow<String>
         field = MutableStateFlow("")
@@ -94,7 +104,7 @@ class AppVM(
 
     fun uninstallApp() {
         viewModelScope.launch {
-            pkg.value?.let { pkg ->
+            appState.value.pkg?.let { pkg ->
                 val users = listOf(currentProfile.toString())
                 packageRepository.uninstall(
                     mPackage = pkg,
@@ -125,7 +135,7 @@ class AppVM(
 
     fun deleteBackup(backup: Backup) {              //TODO hg42 launchDeleteBackup ?
         viewModelScope.launch {
-            packageRepository.deleteBackup(pkg.value, backup) {
+            packageRepository.deleteBackup(appState.value.pkg, backup) {
                 dismissNow.value = true
             }
             updatePackage(backup.packageName)
@@ -134,7 +144,7 @@ class AppVM(
 
     fun deleteAllBackups() {
         viewModelScope.launch {
-            packageRepository.deleteAllBackups(pkg.value) {
+            packageRepository.deleteAllBackups(appState.value.pkg) {
                 dismissNow.value = true
             }
             updatePackage(packageName.value)
@@ -157,7 +167,7 @@ class AppVM(
 
     fun rewriteBackup(backup: Backup, changedBackup: Backup) {
         viewModelScope.launch {
-            packageRepository.rewriteBackup(pkg.value, backup, changedBackup)
+            packageRepository.rewriteBackup(appState.value.pkg, backup, changedBackup)
         }
     }
 

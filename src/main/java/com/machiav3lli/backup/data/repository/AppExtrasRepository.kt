@@ -12,6 +12,8 @@ class AppExtrasRepository(
 ) {
     fun getAllFlow() = dao.getAllFlow()
 
+    fun getTagsMapFlow() = dao.getTagsMapFlow()
+
     suspend fun getAll() = dao.getAll()
 
     fun getFlow(packageName: Flow<String?>) = packageName.flatMapLatest {

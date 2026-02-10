@@ -129,9 +129,8 @@ fun AppPage(
         mutableStateOf(Pair(DialogMode.NONE, Schedule()))
     }
 
-    val thePackage by viewModel.pkg.collectAsState(null)
+    val state by viewModel.appState.collectAsState()
     val snackbarText by viewModel.snackbarText.collectAsState("")
-    val appExtras by viewModel.appExtras.collectAsState()
     val dismissNow by viewModel.dismissNow
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarVisible = snackbarText.isNotEmpty()
@@ -142,7 +141,7 @@ fun AppPage(
         viewModel.setApp(packageName)
     }
 
-    thePackage?.let { pkg ->
+    state.pkg?.let { pkg ->
         val iconVals by derivedStateOf {
             Triple(pkg.iconData, pkg.isSpecial, pkg.isSystem)
         }
@@ -400,12 +399,12 @@ fun AppPage(
                     ) {
                         TitleText(textId = R.string.title_tags)
                         TagsBlock(
-                            tags = appExtras.customTags,
+                            tags = state.appExtras.customTags,
                             onRemove = {
                                 viewModel.setExtras(
                                     packageName,
-                                    appExtras.copy(
-                                        customTags = appExtras.customTags.minus(it)
+                                    state.appExtras.copy(
+                                        customTags = state.appExtras.customTags.minus(it)
                                     )
                                 )
                             },
@@ -429,7 +428,7 @@ fun AppPage(
                             shape = MaterialTheme.shapes.large,
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                             onClick = {
-                                dialogProps.value = Pair(DialogMode.NOTE, appExtras.note)
+                                dialogProps.value = Pair(DialogMode.NOTE, state.appExtras.note)
                                 openDialog.value = true
                             }
                         ) {
@@ -437,7 +436,7 @@ fun AppPage(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 12.dp, vertical = 16.dp),
-                                text = appExtras.note,
+                                text = state.appExtras.note,
                                 textAlign = TextAlign.Center,
                             )
                         }
@@ -741,7 +740,7 @@ fun AppPage(
                             ) {
                                 viewModel.setExtras(
                                     packageName,
-                                    appExtras.copy(note = it)
+                                    state.appExtras.copy(note = it)
                                 )
                             }
                         }
@@ -781,8 +780,8 @@ fun AppPage(
                             ) {
                                 viewModel.setExtras(
                                     packageName,
-                                    appExtras.copy(
-                                        customTags = appExtras.customTags.plus(it)
+                                    state.appExtras.copy(
+                                        customTags = state.appExtras.customTags.plus(it)
                                     )
                                 )
                             }

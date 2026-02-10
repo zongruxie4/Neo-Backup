@@ -1,6 +1,8 @@
 package com.machiav3lli.backup.data.entity
 
 import androidx.compose.runtime.Immutable
+import com.machiav3lli.backup.data.dbs.entity.AppExtras
+import com.machiav3lli.backup.data.dbs.entity.Backup
 import com.machiav3lli.backup.data.dbs.entity.Schedule
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
@@ -37,4 +39,12 @@ data class ScheduleState(
     val globalBlockList: PersistentSet<String> = persistentSetOf(),
     val tagsMap: PersistentMap<String, Set<String>> = persistentMapOf(),
     val tagsList: PersistentSet<String> = persistentSetOf(),
+)
+
+@Immutable
+data class AppState(
+    val pkg: Package? = null,
+    val backups: List<Backup> = emptyList(),
+    val appExtras: AppExtras = AppExtras(),
+    val allTags: Set<String> = emptySet()
 )
