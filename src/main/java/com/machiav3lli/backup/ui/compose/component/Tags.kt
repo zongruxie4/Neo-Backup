@@ -19,14 +19,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -72,17 +67,12 @@ fun TagsBlock(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             tags?.forEach { tag -> TagItem(tag = tag, onClick = onRemove) }
-            TooltipBox(
-                positionProvider =
-                    TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                tooltip = { PlainTooltip { Text(stringResource(id = R.string.add_tag)) } },
-                state = rememberTooltipState(),
-            ) {
-                FilledRoundButton(
-                    description = stringResource(id = R.string.add_tag),
-                    icon = Phosphor.PlusCircle,
-                ) { onAdd() }
-            }
+            ActionChip(
+                icon = Phosphor.PlusCircle,
+                text = stringResource(id = R.string.add_tag),
+                positive = true,
+                onClick = { onAdd() }
+            )
         }
     }
 }

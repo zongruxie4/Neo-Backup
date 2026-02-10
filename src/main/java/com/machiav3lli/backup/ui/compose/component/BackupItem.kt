@@ -3,7 +3,6 @@ package com.machiav3lli.backup.ui.compose.component
 import android.text.format.Formatter
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -12,13 +11,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -85,6 +91,7 @@ fun BackupItem_headlineContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupItem_supportingContent(
     item: Backup,
@@ -111,44 +118,48 @@ fun BackupItem_supportingContent(
                     maxLines = 1,
                 )
         }
-        Row {
-            Text(
-                text = if (item.backupVersionCode == 0)
-                    "old"
-                else
-                    "${item.backupVersionCode / 1000}.${item.backupVersionCode % 1000}",
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
-            if (item.isEncrypted) {
-                val description = "${item.cipherType}"
-                val showTooltip = remember { mutableStateOf(false) }
-                if (showTooltip.value) {
-                    Tooltip(description, showTooltip)
-                }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Badge(containerColor = MaterialTheme.colorScheme.primary) {
                 Text(
-                    text = " enc",
-                    color = Color.Red,
-                    modifier = Modifier
-                        .combinedClickable(
-                            onClick = {},
-                            onLongClick = { showTooltip.value = true }
-                        ),
+                    text = if (item.backupVersionCode == 0)
+                        "old"
+                    else
+                        "${item.backupVersionCode / 1000}.${item.backupVersionCode % 1000}",
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )
             }
+            if (item.isEncrypted) {
+                Badge(containerColor = MaterialTheme.colorScheme.tertiaryContainer) {
+                    TooltipBox(
+                        positionProvider =
+                            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                        tooltip = { PlainTooltip { Text("${item.cipherType}") } },
+                        state = rememberTooltipState(),
+                    ) {
+                        Text(
+                            text = "enc",
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
             val compressionText = if (item.isCompressed) {
                 if (item.compressionType.isNullOrEmpty())
-                    " gz"
+                    "gz"
                 else
-                    " ${item.compressionType}"
+                    "${item.compressionType}"
             } else ""
-            if (compressionText.isNotEmpty()) Text(
-                text = compressionText,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
+            if (compressionText.isNotEmpty()) Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+                Text(
+                    text = compressionText,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+            }
             val fileSizeText = if (item.backupVersionCode != 0)
                 Formatter.formatFileSize(LocalContext.current, item.size)
             else ""

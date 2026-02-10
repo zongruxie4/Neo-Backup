@@ -7,7 +7,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -35,7 +37,6 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -135,6 +136,7 @@ fun OutlinedActionButton(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardButton(
     modifier: Modifier = Modifier,
@@ -144,14 +146,11 @@ fun CardButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    val showTooltip = remember { mutableStateOf(false) }
-
     ListItem(
         modifier = modifier
             .clip(MaterialTheme.shapes.extraLarge)
-            .combinedClickable(
+            .clickable(
                 onClick = onClick,
-                onLongClick = { showTooltip.value = true },
                 enabled = enabled,
             ),
         colors = ListItemDefaults.colors(
@@ -181,10 +180,6 @@ fun CardButton(
                 maxLines = 2,
                 style = MaterialTheme.typography.titleSmall
             )
-
-            if (showTooltip.value) {
-                Tooltip(description, showTooltip)
-            }
         }
     )
 }
@@ -209,6 +204,7 @@ fun IconTextButton(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             IconButton(
                 modifier = modifier
@@ -216,6 +212,58 @@ fun IconTextButton(
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = containerColor,
                     contentColor = contentColor,
+                ),
+                shape = MaterialTheme.shapes.extraLarge,
+                enabled = enabled,
+                onClick = onClick
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = description
+                )
+            }
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = description,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OutlinedIconTextButton(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    containerColor: Color = MaterialTheme.colorScheme.onSurface,
+    description: String,
+    enabled: Boolean = true,
+    aspectRatio: Float = 2f,
+    onClick: () -> Unit,
+) {
+    TooltipBox(
+        positionProvider =
+            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(description) } },
+        state = rememberTooltipState(),
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            OutlinedIconButton(
+                modifier = modifier
+                    .aspectRatio(aspectRatio),
+                colors = IconButtonDefaults.outlinedIconButtonColors(
+                    contentColor = containerColor,
+                ),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = containerColor,
                 ),
                 shape = MaterialTheme.shapes.extraLarge,
                 enabled = enabled,

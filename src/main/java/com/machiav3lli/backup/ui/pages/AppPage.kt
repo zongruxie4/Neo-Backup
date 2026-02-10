@@ -37,9 +37,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -82,8 +85,10 @@ import com.machiav3lli.backup.manager.tasks.BackupActionTask
 import com.machiav3lli.backup.manager.tasks.RestoreActionTask
 import com.machiav3lli.backup.ui.activities.NeoActivity
 import com.machiav3lli.backup.ui.compose.component.BackupItem
+import com.machiav3lli.backup.ui.compose.component.FilledRoundButton
 import com.machiav3lli.backup.ui.compose.component.IconTextButton
 import com.machiav3lli.backup.ui.compose.component.InfoChipsBlock
+import com.machiav3lli.backup.ui.compose.component.OutlinedIconTextButton
 import com.machiav3lli.backup.ui.compose.component.PackageIcon
 import com.machiav3lli.backup.ui.compose.component.RoundButton
 import com.machiav3lli.backup.ui.compose.component.TagsBlock
@@ -98,6 +103,8 @@ import com.machiav3lli.backup.ui.compose.icons.phosphor.Hash
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Info
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Leaf
 import com.machiav3lli.backup.ui.compose.icons.phosphor.MagnifyingGlass
+import com.machiav3lli.backup.ui.compose.icons.phosphor.NotePencil
+import com.machiav3lli.backup.ui.compose.icons.phosphor.Pencil
 import com.machiav3lli.backup.ui.compose.icons.phosphor.Prohibit
 import com.machiav3lli.backup.ui.compose.icons.phosphor.ProhibitInset
 import com.machiav3lli.backup.ui.compose.icons.phosphor.TrashSimple
@@ -112,6 +119,7 @@ import com.machiav3lli.backup.ui.dialogs.StringInputDialogUI
 import com.machiav3lli.backup.utils.TraceUtils
 import com.machiav3lli.backup.utils.extensions.koinNeoViewModel
 import com.machiav3lli.backup.utils.infoChips
+import com.machiav3lli.backup.utils.launchView
 import com.machiav3lli.backup.viewmodels.AppVM
 import timber.log.Timber
 
@@ -334,11 +342,10 @@ fun AppPage(
                                 !pkg.isSpecial &&
                                 ((pkg.storageStats?.dataBytes ?: 0L) >= 0L)
                     ) {
-                        IconTextButton(
+                        OutlinedIconTextButton(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.clear_cache),
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            containerColor = MaterialTheme.colorScheme.secondary,
                         ) {
                             dialogProps.value = Pair(DialogMode.CLEAN_CACHE, pkg)
                             openDialog.value = true
@@ -347,11 +354,10 @@ fun AppPage(
                 }
                 if (pkg.isInstalled && !pkg.isSpecial) item {
                     AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
-                        IconTextButton(
+                        OutlinedIconTextButton(
                             icon = Phosphor.Warning,
                             description = stringResource(id = R.string.forceKill),
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            containerColor = MaterialTheme.colorScheme.secondary,
                         ) {
                             dialogProps.value = Pair(DialogMode.FORCE_KILL, pkg)
                             openDialog.value = true
@@ -360,13 +366,11 @@ fun AppPage(
                 }
                 if (pkg.isInstalled && !pkg.isSpecial) item {
                     AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSpecial) {
-                        IconTextButton(
+                        OutlinedIconTextButton(
                             icon = if (pkg.isDisabled) Phosphor.Leaf
                             else Phosphor.ProhibitInset,
-                            containerColor = if (pkg.isDisabled) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = if (pkg.isDisabled) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onTertiaryContainer,
+                            containerColor = if (pkg.isDisabled) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.tertiary,
                             description = stringResource(
                                 id = if (pkg.isDisabled) R.string.enablePackage
                                 else R.string.disablePackage
@@ -381,11 +385,10 @@ fun AppPage(
                 }
                 if (pkg.isInstalled && !pkg.isSystem) item {
                     AnimatedVisibility(visible = pkg.isInstalled && !pkg.isSystem) {
-                        IconTextButton(
+                        OutlinedIconTextButton(
                             icon = Phosphor.TrashSimple,
                             description = stringResource(id = R.string.uninstall),
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                            containerColor = MaterialTheme.colorScheme.tertiary,
                             onClick = {
                                 dialogProps.value = Pair(DialogMode.UNINSTALL, pkg)
                                 openDialog.value = true
@@ -419,25 +422,29 @@ fun AppPage(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        TitleText(textId = R.string.title_note)
-                        OutlinedCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.outlinedCardColors(
-                                containerColor = Color.Transparent
-                            ),
-                            shape = MaterialTheme.shapes.large,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                            onClick = {
-                                dialogProps.value = Pair(DialogMode.NOTE, state.appExtras.note)
-                                openDialog.value = true
-                            }
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 16.dp),
-                                text = state.appExtras.note,
-                                textAlign = TextAlign.Center,
+                        Card {
+                            ListItem(
+                                colors = ListItemDefaults.colors(
+                                    containerColor = Color.Transparent,
+                                ),
+                                trailingContent = {
+                                    RoundButton(
+                                        icon = Phosphor.NotePencil,
+                                        description = stringResource(R.string.edit_note),
+                                    ) {
+                                        dialogProps.value = Pair(DialogMode.NOTE, state.appExtras.note)
+                                        openDialog.value = true
+                                    }
+                                },
+                                overlineContent = {
+                                    Text(
+                                        text = stringResource(id = R.string.title_note),
+                                        maxLines = 1,
+                                    )
+                                },
+                                headlineContent = {
+                                    Text(state.appExtras.note)
+                                }
                             )
                         }
                     }
@@ -462,12 +469,11 @@ fun AppPage(
                 }
                 if (pkg.hasBackups) item {
                     AnimatedVisibility(visible = pkg.hasBackups) {
-                        IconTextButton(
+                        OutlinedIconTextButton(
                             icon = Phosphor.Broom,
                             description = stringResource(id = R.string.delete_all_backups),
                             enabled = !snackbarVisible,
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                            containerColor = MaterialTheme.colorScheme.tertiary,
                         ) {
                             dialogProps.value = Pair(DialogMode.DELETE_ALL, pkg)
                             openDialog.value = true
@@ -476,12 +482,11 @@ fun AppPage(
                 }
                 if (pkg.hasBackups) item {
                     AnimatedVisibility(visible = pkg.hasBackups) {
-                        IconTextButton(
+                        OutlinedIconTextButton(
                             icon = Phosphor.Hash,
                             description = stringResource(id = R.string.enforce_backups_limit),
                             enabled = !snackbarVisible,
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            containerColor = MaterialTheme.colorScheme.secondary,
                         ) {
                             dialogProps.value = Pair(DialogMode.ENFORCE_LIMIT, pkg)
                             openDialog.value = true
