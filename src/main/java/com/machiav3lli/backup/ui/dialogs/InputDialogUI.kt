@@ -2,9 +2,13 @@ package com.machiav3lli.backup.ui.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,16 +43,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.machiav3lli.backup.R
-import com.machiav3lli.backup.ui.compose.icons.Phosphor
-import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 import com.machiav3lli.backup.ui.compose.component.DialogNegativeButton
 import com.machiav3lli.backup.ui.compose.component.DialogPositiveButton
+import com.machiav3lli.backup.ui.compose.component.SelectionChip
+import com.machiav3lli.backup.ui.compose.icons.Phosphor
+import com.machiav3lli.backup.ui.compose.icons.phosphor.X
 
 @Composable
 fun StringInputDialogUI(
     titleText: String,
     initValue: String,
     openDialogCustom: MutableState<Boolean>,
+    suggestions: Set<String> = emptySet(),
     onSave: ((String) -> Unit) = {},
 ) {
     val context = LocalContext.current
@@ -125,6 +131,21 @@ fun StringInputDialogUI(
                         }
                     },
                 )
+                if (suggestions.isNotEmpty()) LazyRow(
+                    modifier = Modifier.height(54.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
+                    items(items = suggestions.toList(), key = { it }) { text ->
+                        SelectionChip(
+                            label = text,
+                            isSelected = text == savedValue.text,
+                            onClick = {
+                                savedValue = TextFieldValue(text)
+                            }
+                        )
+                    }
+                }
             }
 
             Row(
