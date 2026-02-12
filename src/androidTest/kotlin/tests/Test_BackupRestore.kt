@@ -75,7 +75,7 @@ class Test_BackupRestore {
         fun listContent(dir: RootFile): List<String> {
             //return runAsRoot("ls -bAlZ ${dir.quoted} | grep -v total | sort").out.joinToString("\n")
             return runAsRoot(
-                """cd ${dir.quoted} ; stat -c '%-20n %y %A %f %-15U %-15G %8s %F' .* * | grep -v '\.\$'"""
+                """cd ${dir.escapedPath} ; stat -c '%-20n %y %A %f %-15U %-15G %8s %F' .* * | grep -v '\.\$'"""
             ).out
                 .filterNotNull()
                 .map { it.replace(Regex(""":\d\d\.\d{9}\b"""), "") } // :seconds.millis
@@ -113,7 +113,7 @@ class Test_BackupRestore {
                 val file = RootFile(dir, name)
                 files = file
                 file.mkdirs()
-                fastCmd("$utilBoxQ touch -d $fileTime ${file.quoted}")
+                fastCmd("$utilBoxQ touch -d $fileTime ${file.escapedPath}")
                 checks["$name/type"] = { it.isDirectory }
                 checks["#off#$name/time"] = { compareTime(fileTime, it.lastModified()) }
                 contentCount++
@@ -124,8 +124,8 @@ class Test_BackupRestore {
                 val fileContent = "TEST"
                 val fileTime = "2000-11-22T12:34:01"
                 val file = RootFile(dir, name)
-                fastCmd("$utilBoxQ echo -n '$fileContent' >${file.quoted}")
-                fastCmd("$utilBoxQ touch -d $fileTime ${file.quoted}")
+                fastCmd("$utilBoxQ echo -n '$fileContent' >${file.escapedPath}")
+                fastCmd("$utilBoxQ touch -d $fileTime ${file.escapedPath}")
                 checks["$name/type"] = { it.isFile }
                 checks["$name/content"] = { it.readText() == fileContent }
                 checks["$name/time"] = { compareTime(fileTime, it.lastModified()) }
@@ -138,9 +138,9 @@ class Test_BackupRestore {
                 val fileTime = "2000-11-22T12:34:02"
                 val fileOwner = "system:system"
                 val file = RootFile(dir, name)
-                fastCmd("$utilBoxQ echo -n '$fileContent' >${file.quoted}")
-                fastCmd("$utilBoxQ chown $fileOwner ${file.quoted}")
-                fastCmd("$utilBoxQ touch -d $fileTime ${file.quoted}")
+                fastCmd("$utilBoxQ echo -n '$fileContent' >${file.escapedPath}")
+                fastCmd("$utilBoxQ chown $fileOwner ${file.escapedPath}")
+                fastCmd("$utilBoxQ touch -d $fileTime ${file.escapedPath}")
                 checks["$name/type"] = { it.isFile }
                 checks["$name/content"] = { it.readText() == fileContent }
                 checks["$name/time"] = { compareTime(fileTime, it.lastModified()) }
@@ -151,8 +151,8 @@ class Test_BackupRestore {
                 val name = "fifo"
                 val file = RootFile(dir, name)
                 val fileTime = "2000-11-22T12:34:03"
-                fastCmd("$utilBoxQ mkfifo ${file.quoted}")
-                fastCmd("$utilBoxQ touch -d $fileTime ${file.quoted}")
+                fastCmd("$utilBoxQ mkfifo ${file.escapedPath}")
+                fastCmd("$utilBoxQ touch -d $fileTime ${file.escapedPath}")
                 checks["#off#$name/time"] = { compareTime(fileTime, it.lastModified()) }
                 contentCount++
             }
@@ -160,7 +160,7 @@ class Test_BackupRestore {
             run {
                 val name = "socket"
                 val file = RootFile(dir, name)
-                fastCmd("$utilBoxQ rm ${file.quoted} ; ($utilBoxQ nc -U -q 1 -W 1 -l -s ${file.quoted} & exit) ")
+                fastCmd("$utilBoxQ rm ${file.escapedPath} ; ($utilBoxQ nc -U -q 1 -W 1 -l -s ${file.escapedPath} & exit) ")
                 checks["#off#$name/notexist"] = { !it.exists() }
                 contentCount++
             }
@@ -168,7 +168,7 @@ class Test_BackupRestore {
             run {
                 val name = "link_sym_dir_rel"
                 val file = RootFile(dir, name)
-                fastCmd("cd ${dir.quoted} && $utilBoxQ ln -s ${files.name} ${file.name}")
+                fastCmd("cd ${dir.escapedPath} && $utilBoxQ ln -s ${files.name} ${file.name}")
                 checks["$name/type"] = { it.isSymlink() }
                 contentCount++
             }
@@ -176,7 +176,7 @@ class Test_BackupRestore {
             run {
                 val name = "link_sym_dir_abs"
                 val file = RootFile(dir, name)
-                fastCmd("$utilBoxQ ln -s ${files.absolutePath} ${file.quoted}")
+                fastCmd("$utilBoxQ ln -s ${files.absolutePath} ${file.escapedPath}")
                 checks["$name/type"] = { it.isSymlink() }
                 contentCount++
             }
@@ -185,7 +185,7 @@ class Test_BackupRestore {
                 run {
                     val name = "..dir"
                     val file = RootFile(dir, name)
-                    fastCmd("$utilBoxQ mkdir -p ${file.quoted}")
+                    fastCmd("$utilBoxQ mkdir -p ${file.escapedPath}")
                     checks["$name/type"] = { it.isDirectory }
                     contentCount++
                 }
@@ -315,7 +315,7 @@ class Test_BackupRestore {
                 )
         }
         Timber.w("#################### RES ${archive.path}")
-        runAsRoot("ls -bAlZ ${restoreDir.quoted} | grep -v total | sort")
+        runAsRoot("ls -bAlZ ${restoreDir.escapedPath} | grep -v total | sort")
         checkContent(restoreDir)
     }
 
