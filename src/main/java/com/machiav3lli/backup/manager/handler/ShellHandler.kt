@@ -311,12 +311,86 @@ class ShellHandler {
         // use -dlZ instead of -dnZ, because -nZ was found (by Kostas!) with an error (with no space between group and context)
         // apparently uid/gid is less tested than names
         var shellResult: Shell.Result? = null
-        val command = "$utilBoxQ ls -bdAlZ ${quote(filepath)}"
+        val commandWithContext = "$utilBoxQ ls -bdAlZ ${quote(filepath)}"
         try {
-            shellResult = runAsRoot(command)
-            return shellResult.out[0].split(" ", limit = 6).slice(2..4).toTypedArray()
+            shellResult = runAsRoot(commandWithContext)
+            if (shellResult.out.isEmpty()) throw UnexpectedCommandResult(
+                "'$commandWithContext' returned no output for '$filepath'",
+                shellResult,
+            )
+
+            val validLines = shellResult.out.filter {
+                it.isNotEmpty() && !it.startsWith("total")
+            }
+            if (validLines.isEmpty()) throw UnexpectedCommandResult(
+                "'$commandWithContext' returned no valid output for '$filepath'",
+                shellResult,
+            )
+
+            // Expected format: drwxrwx--x 5 owner group context filepath
+            // Indices:         0         1 2     3     4       5+
+            val parts = validLines[0].split(Regex("""\s+"""))
+            if (parts.size < 5) {
+                Timber.w(
+                    "Unexpected ls -bdAlZ output format for '$filepath': ${validLines[0]}"
+                )
+                throw Exception("Insufficient fields in ls output")
+            }
+
+            return parts.slice(2..4).toTypedArray()
         } catch (e: Throwable) {
-            throw UnexpectedCommandResult("'$command' failed", shellResult)
+            Timber.w(
+                "Failed to get owner/group/context with ls -bdAlZ for '$filepath', trying fallback: ${e.message}"
+            )
+
+            // Fallback 1: without SELinux context (ls -bdAl)
+            try {
+                val commandSansContext = "$utilBoxQ ls -bdAl ${quote(filepath)}"
+                shellResult = runAsRoot(commandSansContext)
+
+                val validLines = shellResult.out.filter {
+                    it.isNotEmpty() && !it.startsWith("total")
+                }
+
+                if (validLines.isEmpty()) {
+                    throw Exception("No valid output from ls -bdAl")
+                }
+
+                val parts = validLines[0].split(Regex("""\s+"""))
+
+                if (parts.size < 4) {
+                    throw Exception("Insufficient fields in ls -bdAl output")
+                }
+
+                // Return with empty context since -Z didn't work
+                Timber.i("Using fallback without SELinux context for '$filepath'")
+                return arrayOf(parts[2], parts[3], "")
+
+            } catch (e2: Throwable) {
+                Timber.w("Fallback ls -bdAl also failed for '$filepath': ${e2.message}")
+            }
+
+            // Fallback 2: with stat command
+            try {
+                val statCommand = "$utilBoxQ stat -c '%u %g %C' ${quote(filepath)}"
+                shellResult = runAsRoot(statCommand)
+
+                if (shellResult.out.isNotEmpty()) {
+                    val parts = shellResult.out[0].split(" ", limit = 3)
+                    if (parts.size >= 2) {
+                        Timber.i("Using stat command fallback for '$filepath'")
+                        val context = if (parts.size >= 3) parts[2] else ""
+                        return arrayOf(parts[0], parts[1], context)
+                    }
+                }
+            } catch (e3: Throwable) {
+                Timber.w("Fallback stat command also failed for '$filepath': ${e3.message}")
+            }
+
+            throw UnexpectedCommandResult(
+                "'$commandWithContext' and all fallbacks failed for '$filepath'",
+                shellResult,
+            )
         }
     }
 
