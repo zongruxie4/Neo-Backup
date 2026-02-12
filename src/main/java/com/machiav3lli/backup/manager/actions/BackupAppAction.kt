@@ -289,10 +289,10 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 }
 
                 "zst" -> {
-                    outStream = ZstdCompressorOutputStream(
-                        outStream,
-                        compressionLevel
-                    )
+                    outStream = ZstdCompressorOutputStream.builder()
+                        .setOutputStream(outStream)
+                        .setLevel(compressionLevel)
+                        .get()
                 }
 
                 else -> throw UnsupportedOperationException("Unsupported compression algorithm: ${getCompressionType()}")

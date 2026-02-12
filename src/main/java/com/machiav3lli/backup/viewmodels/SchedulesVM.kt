@@ -47,7 +47,7 @@ class SchedulesVM(
 
     private val globalBlockList = blocklistRepository.getGlobalBlocklist()
 
-    private val tagsMap = appExtrasRepository.getAllFlow()
+    private val tagsMap = appExtrasRepository.getTagsMapFlow()
         .mapLatest { it.associate { extra -> extra.packageName to extra.customTags } }
         .trace { "*** tagsMap <<- ${it.size}" }
 

@@ -19,6 +19,7 @@ package com.machiav3lli.backup.viewmodels
 
 import androidx.lifecycle.viewModelScope
 import com.machiav3lli.backup.STATEFLOW_SUBSCRIBE_BUFFER
+import com.machiav3lli.backup.data.dbs.entity.ExtrasTags
 import com.machiav3lli.backup.data.entity.MainState
 import com.machiav3lli.backup.data.entity.SortFilterModel
 import com.machiav3lli.backup.data.repository.AppExtrasRepository
@@ -48,17 +49,17 @@ open class MainVM(
             emptyMap()
         )
 
-    val tagsMap = extras
-        .mapLatest { it.mapValues { extras -> extras.value.customTags } }
+    val tagsMap = appExtrasRepository.getTagsMapFlow()
+        .mapLatest { it.associate { Pair(it.packageName, it.customTags) } }
         .stateIn(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
             emptyMap()
         )
 
-    val allTags = tagsMap
-        .mapLatest { it.values.flatten().toSet() }
-        .trace { "*** all tags <<- ${it.size}" }
+    val allTags = appExtrasRepository.getTagsMapFlow()
+        .mapLatest { it.map(ExtrasTags::customTags).flatten().toSet() }
+        .trace { "*** allTags <<- ${it.size}" }
         .stateIn(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(STATEFLOW_SUBSCRIBE_BUFFER),
