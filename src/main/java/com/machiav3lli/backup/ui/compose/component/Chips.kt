@@ -1,5 +1,6 @@
 package com.machiav3lli.backup.ui.compose.component
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.updateTransition
@@ -171,34 +172,36 @@ fun StateChip(
     icon: ImageVector,
     text: String,
     color: Color,
-    index: Int,
-    count: Int,
     checked: Boolean,
     onClick: () -> Unit,
 ) {
     val openPopup = remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(
-        topStart = if (index == 0) MaterialTheme.shapes.extraLarge.topStart
-        else MaterialTheme.shapes.extraSmall.topStart,
-        bottomStart = if (index == 0) MaterialTheme.shapes.extraLarge.topStart
-        else MaterialTheme.shapes.extraSmall.topStart,
-        topEnd = if (index == count - 1) MaterialTheme.shapes.extraLarge.topStart
-        else MaterialTheme.shapes.extraSmall.topStart,
-        bottomEnd = if (index == count - 1) MaterialTheme.shapes.extraLarge.topStart
-        else MaterialTheme.shapes.extraSmall.topStart,
+    val cornerRadius by animateDpAsState(
+        when {
+            checked -> 4.dp
+            else    -> 28.dp
+        }, label = "chip_corner"
+    )
+    val contentColor by animateColorAsState(
+        if (checked) MaterialTheme.colorScheme.surfaceContainerLowest else color,
+        label = "contentColor"
+    )
+    val backgroundColor by animateColorAsState(
+        if (checked) color else Color.Transparent,
+        label = "backgroundColor"
     )
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minWidth = 56.dp, minHeight = 1.dp)
-            .clip(shape)
+            .defaultMinSize(minWidth = 44.dp, minHeight = 1.dp)
+            .clip(RoundedCornerShape(cornerRadius))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = { openPopup.value = true }
             ),
-        contentColor = if (checked) MaterialTheme.colorScheme.surfaceContainerLowest else color,
-        color = if (checked) color else Color.Transparent,
-        shape = shape,
+        contentColor = contentColor,
+        color = backgroundColor,
+        shape = RoundedCornerShape(cornerRadius),
         border = BorderStroke(1.dp, color),
     ) {
         Icon(

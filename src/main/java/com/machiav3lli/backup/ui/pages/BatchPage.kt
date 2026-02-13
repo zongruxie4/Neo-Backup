@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -139,6 +141,80 @@ fun BatchPage(
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButton = {
+            Card(
+                modifier = Modifier.padding(horizontal = 12.dp),
+            ) {
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    StateChip(
+                        icon = Phosphor.DiamondsFour,
+                        text = stringResource(id = R.string.all_apk),
+                        checked = allApkChecked,
+                        color = ColorAPK,
+                    ) {
+                        val checkBoolean = !allApkChecked
+                        when {
+                            checkBoolean -> state.filteredPackages
+                                .filter { (backupBoolean && !it.isSpecial) || it.latestBackup?.hasApk == true }
+                                .map(Package::packageName)
+                                .forEach {
+                                    viewModel.apkBackupCheckedList[it] = 0
+                                }
+
+                            else         -> state.filteredPackages
+                                .filter { backupBoolean || it.latestBackup?.hasApk == true }
+                                .map(Package::packageName)
+                                .forEach {
+                                    viewModel.apkBackupCheckedList[it] = -1
+                                }
+                        }
+                    }
+                    StateChip(
+                        icon = Phosphor.HardDrives,
+                        text = stringResource(id = R.string.all_data),
+                        checked = allDataChecked,
+                        color = ColorData,
+                    ) {
+                        val checkBoolean = !allDataChecked
+                        when {
+                            checkBoolean -> state.filteredPackages
+                                .filter { backupBoolean || it.latestBackup?.hasData == true }
+                                .map(Package::packageName)
+                                .forEach {
+                                    viewModel.dataBackupCheckedList[it] = 0
+                                }
+
+                            else         -> state.filteredPackages
+                                .filter { backupBoolean || it.latestBackup?.hasData == true }
+                                .map(Package::packageName)
+                                .forEach {
+                                    viewModel.dataBackupCheckedList[it] = -1
+                                }
+                        }
+                    }
+                    RoundButton(icon = Phosphor.Nut) {
+                        main.navigateBatchPrefsSheet(backupBoolean)
+                    }
+                    ActionButton(
+                        text = stringResource(id = if (backupBoolean) R.string.backup else R.string.restore),
+                        icon = if (backupBoolean) Phosphor.ArchiveTray
+                        else Phosphor.ClockCounterClockwise,
+                        modifier = Modifier.weight(1f),
+                        coloring = ColoringState.Positive,
+                    ) {
+                        if (viewModel.apkBackupCheckedList.filterValues { it != -1 }.isNotEmpty()
+                            || viewModel.dataBackupCheckedList.filterValues { it != -1 }
+                                .isNotEmpty()
+                        ) openBatchDialog.value = true
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Column(
@@ -172,80 +248,6 @@ fun BatchPage(
                 when (checkData) {
                     true -> viewModel.dataBackupCheckedList[item.packageName] = 0
                     else -> viewModel.dataBackupCheckedList[item.packageName] = -1
-                }
-            }
-            HorizontalDivider(
-                thickness = 2.dp,
-                modifier = Modifier.padding(horizontal = 8.dp),
-            )
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                StateChip(
-                    icon = Phosphor.DiamondsFour,
-                    text = stringResource(id = R.string.all_apk),
-                    checked = allApkChecked,
-                    color = ColorAPK,
-                    index = 0,
-                    count = 2,
-                ) {
-                    val checkBoolean = !allApkChecked
-                    when {
-                        checkBoolean -> state.filteredPackages
-                            .filter { (backupBoolean && !it.isSpecial) || it.latestBackup?.hasApk == true }
-                            .map(Package::packageName)
-                            .forEach {
-                                viewModel.apkBackupCheckedList[it] = 0
-                            }
-
-                        else         -> state.filteredPackages
-                            .filter { backupBoolean || it.latestBackup?.hasApk == true }
-                            .map(Package::packageName)
-                            .forEach {
-                                viewModel.apkBackupCheckedList[it] = -1
-                            }
-                    }
-                }
-                StateChip(
-                    icon = Phosphor.HardDrives,
-                    text = stringResource(id = R.string.all_data),
-                    checked = allDataChecked,
-                    color = ColorData,
-                    index = 1,
-                    count = 2,
-                ) {
-                    val checkBoolean = !allDataChecked
-                    when {
-                        checkBoolean -> state.filteredPackages
-                            .filter { backupBoolean || it.latestBackup?.hasData == true }
-                            .map(Package::packageName)
-                            .forEach {
-                                viewModel.dataBackupCheckedList[it] = 0
-                            }
-
-                        else         -> state.filteredPackages
-                            .filter { backupBoolean || it.latestBackup?.hasData == true }
-                            .map(Package::packageName)
-                            .forEach {
-                                viewModel.dataBackupCheckedList[it] = -1
-                            }
-                    }
-                }
-                RoundButton(icon = Phosphor.Nut) {
-                    main.navigateBatchPrefsSheet(backupBoolean)
-                }
-                ActionButton(
-                    text = stringResource(id = if (backupBoolean) R.string.backup else R.string.restore),
-                    icon = if (backupBoolean) Phosphor.ArchiveTray
-                    else Phosphor.ClockCounterClockwise,
-                    modifier = Modifier.weight(1f),
-                    coloring = ColoringState.Positive,
-                ) {
-                    if (viewModel.apkBackupCheckedList.filterValues { it != -1 }.isNotEmpty()
-                        || viewModel.dataBackupCheckedList.filterValues { it != -1 }.isNotEmpty()
-                    ) openBatchDialog.value = true
                 }
             }
         }
