@@ -329,6 +329,14 @@ val pref_numBackupRevisions = IntPref(
     defaultValue = 2
 )
 
+val pref_enableStorageCheck = BooleanPref(
+    key = "srv.enableStorageCheck",
+    titleId = R.string.prefs_enablestoragecheck,
+    summaryId = R.string.prefs_enablestoragecheck_summary,
+    icon = Phosphor.FloppyDisk,
+    defaultValue = true
+)
+
 val pref_compressionType = ListPref(
     key = "srv.compressionType",
     titleId = R.string.prefs_compression_type,

@@ -505,4 +505,6 @@
     <string name="unknown_error">Unknown error</string>
     <string name="prefs_useexactalarm_title">Use exact alarm for schedules</string>
     <string name="dialog_ignore">Ignore</string>
+    <string name="prefs_enablestoragecheck">Enable storage check</string>
+    <string name="prefs_enablestoragecheck_summary">Check for free available storage before starting a backup.</string>
 </resources>

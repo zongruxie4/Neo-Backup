@@ -49,6 +49,7 @@ import com.machiav3lli.backup.manager.tasks.AppActionWork
 import com.machiav3lli.backup.ui.pages.pref_backupCache
 import com.machiav3lli.backup.ui.pages.pref_backupPauseApps
 import com.machiav3lli.backup.ui.pages.pref_backupTarCmd
+import com.machiav3lli.backup.ui.pages.pref_enableStorageCheck
 import com.machiav3lli.backup.ui.pages.pref_fakeBackupSeconds
 import com.machiav3lli.backup.utils.CIPHER_ALGORITHM
 import com.machiav3lli.backup.utils.CryptoSetupException
@@ -136,7 +137,7 @@ open class BackupAppAction(context: Context, work: AppActionWork?, shell: ShellH
                 return handleException(BackupFailedException(STORAGE_LOCATION_INACCESSIBLE, e))
             }
 
-            try {
+            if (pref_enableStorageCheck.value) try {
                 checkAvailableStorage(context, app, backupMode)
             } catch (e: BackupFailedException) {
                 return handleException(e)
